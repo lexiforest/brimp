@@ -1,0 +1,10 @@
+[package]
+name = "jsc-sys"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+links = "JavaScriptCore"
+build = "build.rs"
+
+[lib]
+path = "src/lib.rs"
