@@ -21,7 +21,7 @@ curl_cffi.
 ## Features
 
 - Page rendered with DOM and JS, so you don't get the empty html placeholder.
-- `curl-impersonate` as the network stack, providing perfect Ja3/TLS fingerprints.
+- `curl-impersonate` as the network stack, providing perfect Ja3/TLS, http 2&3 fingerprints.
 - The familiar `curl_cffi` API and experience from the same maintainer.
 - Also supports CDP, drop-in replacement for heavy headless browsers.
 - Much faster than playwright with Chromium, on par with popular alternatives.
@@ -29,6 +29,26 @@ curl_cffi.
 - Pre-compiled, so you don't have to compile on your machine.
 - MIT licensed.
 
+||chromium|camoufox|cloakbrowser|lightpanda|obscura|brimp|
+|---|---|---|---|---|---|---|
+|JS & DOM|✅|✅|✅|✅|✅|✅|
+|http/3|✅|✅|✅|❌|❌|✅|
+|CDP|✅|✅|✅|☑️<sup>1</sup>|☑️<sup>1</sup>|☑️<sup>1</sup>|
+|screenshot|✅|✅|✅|❌|✅|✅|
+|requests-like|❌|❌|❌|❌|❌|✅|
+|JS engine|V8|SpiderMonkey|V8|V8|V8|JSC
+|open source|✅|✅|❌|☑️<sup>2</sup>️|✅|✅|
+|ja3 fingerprints|☑️<sup>3</sup>️|☑️<sup>3</sup>️|☑️<sup>3</sup>️|❌|✅|✅|
+|fast?|🐢|🐢|🐢|🐇|🐇|🐇|
+
+<small>
+Notes:
+<ol>
+<li>Only a common subset was implemented.</li>
+<li>Lightpanda is under the AGPL license.</li>
+<li>Fingerprints are fixed to the browser version</li>
+</ol>
+</small>
 
 For performance comparisons, see the [benchmark](#benchmark).
 
@@ -36,8 +56,14 @@ For performance comparisons, see the [benchmark](#benchmark).
 
 Release packages currently target macOS arm64:
 
+For python:
 ```sh
-python -m pip install brimp
+pip install brimp
+```
+
+For node.js:
+
+```
 npm install @brimp/brimp
 ```
 
