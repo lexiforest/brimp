@@ -1,10 +1,24 @@
-use std::{fmt, sync::Arc};
+use std::{
+    fmt,
+    sync::{Arc, OnceLock},
+};
 
 use blitz_dom::{BaseDocument, DocumentConfig, Node, QualName, local_name, ns};
 use blitz_html::{HtmlDocument, HtmlProvider};
 use blitz_traits::net::NetProvider;
 use blitz_traits::shell::{ColorScheme, Viewport};
+use parley::{
+    FontContext,
+    fontique::{Blob, Collection, CollectionOptions, GenericFamily, SourceCache},
+};
 use style_traits::ToCss;
+
+static WENQUANYI_MICRO_HEI: &[u8] = include_bytes!("../assets/fonts/wqy-microhei.ttc");
+static NOTO_COLOR_EMOJI: &[u8] = include_bytes!("../assets/fonts/noto-color-emoji.ttf");
+
+const WENQUANYI_FAMILY: &str = "WenQuanYi Micro Hei";
+const WENQUANYI_MONO_FAMILY: &str = "WenQuanYi Micro Hei Mono";
+const NOTO_COLOR_EMOJI_FAMILY: &str = "Noto Color Emoji";
 
 pub type NodeId = usize;
 
@@ -54,6 +68,7 @@ impl BrowserDocument {
             html_parser_provider: Some(Arc::new(HtmlProvider)),
             base_url: base_url.map(str::to_owned),
             net_provider,
+            font_ctx: Some(bundled_font_context()),
             ..DocumentConfig::default()
         }
     }
@@ -204,6 +219,154 @@ impl BrowserDocument {
         let css = self.inline_style_css(node_id).unwrap_or_default();
         let name = QualName::new(None, ns!(), local_name!("style"));
         self.inner.mutate().set_attribute(node_id, name, &css);
+    }
+}
+
+fn bundled_font_context() -> FontContext {
+    static FONT_CONTEXT: OnceLock<FontContext> = OnceLock::new();
+    FONT_CONTEXT.get_or_init(build_bundled_font_context).clone()
+}
+
+fn build_bundled_font_context() -> FontContext {
+    let mut context = FontContext {
+        collection: Collection::new(CollectionOptions {
+            shared: true,
+            system_fonts: false,
+        }),
+        source_cache: SourceCache::new_shared(),
+    };
+    context
+        .collection
+        .register_fonts(Blob::new(Arc::new(WENQUANYI_MICRO_HEI)), None);
+    context
+        .collection
+        .register_fonts(Blob::new(Arc::new(NOTO_COLOR_EMOJI)), None);
+
+    let proportional = context
+        .collection
+        .family_id(WENQUANYI_FAMILY)
+        .expect("bundled WenQuanYi proportional face");
+    let monospace = context
+        .collection
+        .family_id(WENQUANYI_MONO_FAMILY)
+        .expect("bundled WenQuanYi monospace face");
+    let emoji = context
+        .collection
+        .family_id(NOTO_COLOR_EMOJI_FAMILY)
+        .expect("bundled Noto Color Emoji face");
+
+    for generic in [
+        GenericFamily::Serif,
+        GenericFamily::SansSerif,
+        GenericFamily::Cursive,
+        GenericFamily::Fantasy,
+        GenericFamily::SystemUi,
+        GenericFamily::UiSerif,
+        GenericFamily::UiSansSerif,
+        GenericFamily::UiRounded,
+        GenericFamily::FangSong,
+    ] {
+        context
+            .collection
+            .set_generic_families(generic, [proportional].into_iter());
+    }
+    for generic in [GenericFamily::Monospace, GenericFamily::UiMonospace] {
+        context
+            .collection
+            .set_generic_families(generic, [monospace].into_iter());
+    }
+    context
+        .collection
+        .set_generic_families(GenericFamily::Emoji, [emoji].into_iter());
+    context
+}
+
+#[cfg(test)]
+mod font_tests {
+    use parley::fontique::{GenericFamily, QueryStatus};
+
+    use super::{
+        NOTO_COLOR_EMOJI_FAMILY, WENQUANYI_FAMILY, WENQUANYI_MONO_FAMILY,
+        build_bundled_font_context,
+    };
+
+    fn family_has_glyph(context: &mut parley::FontContext, family: &str, character: char) -> bool {
+        let mut found = false;
+        let mut query = context.collection.query(&mut context.source_cache);
+        query.set_families([family]);
+        query.matches_with(|font| {
+            if font
+                .charmap()
+                .is_some_and(|charmap| charmap.map(character).is_some())
+            {
+                found = true;
+                QueryStatus::Stop
+            } else {
+                QueryStatus::Continue
+            }
+        });
+        found
+    }
+
+    #[test]
+    fn deterministic_font_context_contains_only_bundled_families() {
+        let mut context = build_bundled_font_context();
+        let mut families: Vec<_> = context
+            .collection
+            .family_names()
+            .map(str::to_owned)
+            .collect();
+        families.sort();
+        assert_eq!(
+            families,
+            [
+                NOTO_COLOR_EMOJI_FAMILY.to_owned(),
+                WENQUANYI_FAMILY.to_owned(),
+                WENQUANYI_MONO_FAMILY.to_owned(),
+            ]
+        );
+    }
+
+    #[test]
+    fn bundled_families_cover_western_cjk_monospace_and_emoji_text() {
+        let mut context = build_bundled_font_context();
+        for character in ['A', 'é', '中', '文', 'あ', '한'] {
+            assert!(
+                family_has_glyph(&mut context, WENQUANYI_FAMILY, character),
+                "WenQuanYi proportional face must cover {character:?}"
+            );
+        }
+        assert!(family_has_glyph(&mut context, WENQUANYI_MONO_FAMILY, '界'));
+        assert!(family_has_glyph(
+            &mut context,
+            NOTO_COLOR_EMOJI_FAMILY,
+            '😀'
+        ));
+    }
+
+    #[test]
+    fn generic_families_select_the_bundled_faces() {
+        let mut context = build_bundled_font_context();
+        let family_name = |context: &mut parley::FontContext, generic| {
+            let family = context
+                .collection
+                .generic_families(generic)
+                .next()
+                .expect("configured generic family");
+            context.collection.family_name(family).map(str::to_owned)
+        };
+        assert_eq!(
+            family_name(&mut context, GenericFamily::SansSerif).as_deref(),
+            Some(WENQUANYI_FAMILY)
+        );
+        assert_eq!(
+            family_name(&mut context, GenericFamily::Monospace).as_deref(),
+            Some(WENQUANYI_MONO_FAMILY)
+        );
+        assert_eq!(
+            family_name(&mut context, GenericFamily::Emoji).as_deref(),
+            Some(NOTO_COLOR_EMOJI_FAMILY)
+        );
     }
 }
 

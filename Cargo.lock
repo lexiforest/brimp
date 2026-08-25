@@ -315,6 +315,7 @@ dependencies = [
  "blitz-traits",
  "html5ever",
  "image",
+ "parley",
  "stylo",
  "stylo_traits",
 ]
@@ -899,6 +900,7 @@ dependencies = [
  "hashbrown",
  "log",
  "peniko",
+ "png 0.18.1",
  "skrifa",
  "smallvec",
  "vello_common",
@@ -2038,6 +2040,7 @@ dependencies = [
  "anyrender_vello_cpu",
  "blitz-dom",
  "blitz-paint",
+ "glifo",
  "png 0.18.1",
 ]
 

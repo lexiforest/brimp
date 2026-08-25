@@ -9,4 +9,5 @@ anyrender = "=0.11.1"
 anyrender_vello_cpu = { version = "=0.14.0", default-features = false }
 blitz-dom = "=0.3.0-beta.1"
 blitz-paint = { version = "=0.3.0-beta.1", default-features = false }
+glifo = { version = "=0.1.1", features = ["png"] }
 png = "=0.18.1"

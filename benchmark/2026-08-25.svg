@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="548" viewBox="0 0 1200 548" role="img" aria-labelledby="title description">
+<title id="title">Browser benchmark comparison</title>
+<desc id="description">Median latency, median peak memory, and correctness by engine and process topology.</desc>
+<style>
+text { font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; fill: #172033; }
+.title { font-size: 24px; font-weight: 700; }
+.subtitle { font-size: 13px; fill: #657089; }
+.heading { font-size: 14px; font-weight: 700; }
+.label { font-size: 13px; font-weight: 600; }
+.value { font-size: 12px; font-variant-numeric: tabular-nums; }
+.axis { stroke: #cbd2df; stroke-width: 1; }
+</style>
+<rect width="100%" height="100%" rx="12" fill="#f8fafc"/>
+<text class="title" x="28" y="38">Browser benchmark comparison</text>
+<text class="subtitle" x="28" y="62">Medians include successful, content-correct measured runs across selected workloads.</text>
+<text class="heading" x="210" y="92">Latency (ms)</text>
+<text class="heading" x="690" y="92">Peak RSS (MiB)</text>
+<text class="heading" x="1080" y="92">Correct</text>
+<line class="axis" x1="210" y1="101" x2="570" y2="101"/>
+<line class="axis" x1="690" y1="101" x2="1050" y2="101"/>
+<circle cx="29" cy="111" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="116">brimp · cold</text>
+<rect x="210" y="99" width="6.72" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="223.72" y="113">49.5 ms</text>
+<rect x="690" y="99" width="6.20" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="703.20" y="113">29.8 MiB</text>
+<text class="value" x="1080" y="116" style="fill:#16803c">15/15</text>
+<rect x="16" y="127" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="143" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="148">camoufox · cold</text>
+<rect x="210" y="131" width="353.07" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="502.00" y="145">2603.4 ms</text>
+<rect x="690" y="131" width="270.20" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="967.20" y="145">1297.2 MiB</text>
+<text class="value" x="1080" y="148" style="fill:#16803c">15/15</text>
+<circle cx="29" cy="175" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="180">chrome · cold</text>
+<rect x="210" y="163" width="360.00" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="502.00" y="177">2654.5 ms</text>
+<rect x="690" y="163" width="333.82" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="982.00" y="177">1602.6 MiB</text>
+<text class="value" x="1080" y="180" style="fill:#16803c">15/15</text>
+<rect x="16" y="191" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="207" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="212">cloakbrowser · cold</text>
+<rect x="210" y="195" width="87.80" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="304.80" y="209">647.4 ms</text>
+<rect x="690" y="195" width="137.08" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="834.08" y="209">658.1 MiB</text>
+<text class="value" x="1080" y="212" style="fill:#16803c">15/15</text>
+<circle cx="29" cy="239" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="244">lightpanda · cold</text>
+<rect x="210" y="227" width="218.07" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="435.07" y="241">1608.0 ms</text>
+<rect x="690" y="227" width="5.32" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="702.32" y="241">25.5 MiB</text>
+<text class="value" x="1080" y="244" style="fill:#16803c">15/15</text>
+<rect x="16" y="255" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="271" r="5" fill="#6366f1"/>
+<text class="label" x="42" y="276">obscura · cold</text>
+<rect x="210" y="259" width="2.45" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="219.45" y="273">18.1 ms</text>
+<rect x="690" y="259" width="5.59" height="18" rx="4" fill="#6366f1" opacity="0.82"/>
+<text class="value" x="702.59" y="273">26.9 MiB</text>
+<text class="value" x="1080" y="276" style="fill:#16803c">15/15</text>
+<circle cx="29" cy="303" r="5" fill="#10b981"/>
+<text class="label" x="42" y="308">brimp · warm</text>
+<rect x="210" y="291" width="2.00" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="219.00" y="305">2.5 ms</text>
+<rect x="690" y="291" width="14.15" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="711.15" y="305">68.0 MiB</text>
+<text class="value" x="1080" y="308" style="fill:#16803c">15/15</text>
+<rect x="16" y="319" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="335" r="5" fill="#10b981"/>
+<text class="label" x="42" y="340">camoufox · warm</text>
+<rect x="210" y="323" width="77.70" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="294.70" y="337">572.9 ms</text>
+<rect x="690" y="323" width="338.92" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="982.00" y="337">1627.1 MiB</text>
+<text class="value" x="1080" y="340" style="fill:#16803c">15/15</text>
+<circle cx="29" cy="367" r="5" fill="#10b981"/>
+<text class="label" x="42" y="372">chrome · warm</text>
+<rect x="210" y="355" width="175.10" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="392.10" y="369">1291.1 ms</text>
+<rect x="690" y="355" width="360.00" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="982.00" y="369">1728.3 MiB</text>
+<text class="value" x="1080" y="372" style="fill:#16803c">15/15</text>
+<rect x="16" y="383" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="399" r="5" fill="#10b981"/>
+<text class="label" x="42" y="404">cloakbrowser · warm</text>
+<rect x="210" y="387" width="26.26" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="243.26" y="401">193.6 ms</text>
+<rect x="690" y="387" width="140.27" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="837.27" y="401">673.4 MiB</text>
+<text class="value" x="1080" y="404" style="fill:#16803c">15/15</text>
+<circle cx="29" cy="431" r="5" fill="#10b981"/>
+<text class="label" x="42" y="436">lightpanda · warm</text>
+<rect x="210" y="419" width="2.00" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="219.00" y="433">7.2 ms</text>
+<rect x="690" y="419" width="47.83" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="744.83" y="433">229.6 MiB</text>
+<text class="value" x="1080" y="436" style="fill:#16803c">15/15</text>
+<rect x="16" y="447" width="1168" height="32" rx="5" fill="#eef2f7"/>
+<circle cx="29" cy="463" r="5" fill="#10b981"/>
+<text class="label" x="42" y="468">obscura · warm</text>
+<rect x="210" y="451" width="2.00" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="219.00" y="465">14.4 ms</text>
+<rect x="690" y="451" width="47.16" height="18" rx="4" fill="#10b981" opacity="0.82"/>
+<text class="value" x="744.16" y="465">226.4 MiB</text>
+<text class="value" x="1080" y="468" style="fill:#16803c">15/15</text>
+<circle cx="28" cy="524" r="5" fill="#6366f1"/>
+<text class="subtitle" x="40" y="528">cold</text>
+<circle cx="92" cy="524" r="5" fill="#10b981"/>
+<text class="subtitle" x="104" y="528">warm</text>
+<text class="subtitle" x="870" y="528">Bar scales are independent for latency and memory.</text>
+</svg>

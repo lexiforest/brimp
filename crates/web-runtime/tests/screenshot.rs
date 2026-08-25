@@ -60,3 +60,32 @@ fn full_page_screenshot_extends_beyond_the_viewport() {
         64.0
     );
 }
+
+#[test]
+fn bundled_cjk_and_emoji_fonts_paint_visible_glyphs() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser
+        .new_page(PageOptions::builder().viewport(160, 64).build())
+        .unwrap();
+    page.set_content(
+        "<html><head><style>html,body{margin:0;background:white;color:black;font-size:32px;line-height:64px}span{display:inline-block;width:80px;height:64px}</style></head><body><span>中文</span><span>😀</span></body></html>",
+    )
+    .unwrap();
+
+    let bytes = page
+        .screenshot_png(ScreenshotOptions::new(160, 64))
+        .unwrap();
+    let (info, rgba) = decode(&bytes);
+    let non_white_pixels = |start_x: usize, end_x: usize| {
+        (0..info.height as usize)
+            .flat_map(|y| (start_x..end_x).map(move |x| (y * info.width as usize + x) * 4))
+            .filter(|offset| rgba[*offset..*offset + 3] != [255, 255, 255])
+            .count()
+    };
+
+    assert!(non_white_pixels(0, 80) > 50, "CJK glyphs were not painted");
+    assert!(
+        non_white_pixels(80, 160) > 50,
+        "emoji glyph was not painted"
+    );
+}
