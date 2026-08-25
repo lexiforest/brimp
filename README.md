@@ -36,7 +36,7 @@ curl_cffi.
 |CDP|✅|✅|✅|☑️<sup>1</sup>|☑️<sup>1</sup>|☑️<sup>1</sup>|
 |screenshot|✅|✅|✅|❌|✅|✅|
 |requests-like|❌|❌|❌|❌|❌|✅|
-|JS engine|V8|SpiderMonkey|V8|V8|V8|JSC
+|JS engine|V8|SpiderMonkey|V8|V8|V8|JSC|
 |open source|✅|✅|❌|☑️<sup>2</sup>️|✅|✅|
 |ja3 fingerprints|☑️<sup>3</sup>️|☑️<sup>3</sup>️|☑️<sup>3</sup>️|❌|✅|✅|
 |fast?|🐢|🐢|🐢|🐇|🐇|🐇|
