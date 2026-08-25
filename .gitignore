@@ -7,3 +7,4 @@ benchmark/**/.tools/
 benchmark/**/.venv/
 benchmark/**/results/
 .DS_Store
+*.so
