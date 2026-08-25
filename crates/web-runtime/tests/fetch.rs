@@ -24,7 +24,7 @@ impl ResourceLoader for FetchLoader {
         headers.insert("x-result", HeaderValue::from_static("yes"));
         Ok(ResourceResponse {
             status: StatusCode::CREATED,
-            headers,
+            headers: headers.into(),
             body: br#"{"answer":42}"#.to_vec(),
             effective_url: url,
         })

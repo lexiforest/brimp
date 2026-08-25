@@ -42,21 +42,15 @@ impl Page {
     ) -> Result<Self, JsException> {
         let js = JsRuntime::new()?;
         let browsing_context = Arc::new(BrowsingContext::default());
+        browsing_context
+            .set_request_identity(&options.persona.user_agent, &options.persona.locale)
+            .map_err(JsException::from_message)?;
         let blitz_network = Arc::new(BlitzResourceProvider::new(
             Arc::clone(&loader),
             Arc::clone(&browsing_context),
         ));
         let net_provider: Arc<dyn NetProvider> = blitz_network.clone();
-        let mut initial_document = BrowserDocument::parse_at_with_net(
-            "<!doctype html><html><head></head><body></body></html>",
-            None,
-            Some(net_provider),
-        );
-        initial_document.set_viewport(
-            options.viewport.width as u32,
-            options.viewport.height as u32,
-            options.viewport.device_pixel_ratio as f32,
-        );
+        let initial_document = BrowserDocument::empty_at_with_net(None, Some(net_provider));
         let document = Rc::new(RefCell::new(initial_document));
         let timers = Rc::new(RefCell::new(TimerQueue::default()));
         let fetches = Rc::new(RefCell::new(FetchQueue::default()));
@@ -67,6 +61,7 @@ impl Page {
             Arc::clone(&browsing_context),
             Rc::clone(&fetches),
         )?;
+        install_persona(&js, &options.persona)?;
         Ok(Self {
             bindings,
             timers,
@@ -214,12 +209,14 @@ impl Page {
                     let script_url = base_url.join(&src)?.to_string();
                     let request = self.resource_request(&script_url)?;
                     let loader = Arc::clone(&self.loader);
+                    let browsing_context = Arc::clone(&self.browsing_context);
                     pending_loads.spawn(async move {
-                        let result = loader.fetch(request).await;
+                        let result =
+                            crate::request::fetch(loader.as_ref(), &browsing_context, request)
+                                .await;
                         LoadedScript {
                             order: script.order,
                             mode,
-                            requested_url: script_url,
                             result,
                         }
                     });
@@ -286,7 +283,7 @@ impl Page {
         loaded: LoadedScript,
         deferred: &mut BTreeMap<usize, String>,
     ) -> Result<(), NavigationError> {
-        let response = self.accept_success_response(&loaded.requested_url, loaded.result?)?;
+        let response = self.accept_success_response(loaded.result?)?;
         let source = String::from_utf8(response.body)?;
         match loaded.mode {
             ScriptMode::Async => {
@@ -317,38 +314,19 @@ impl Page {
 
     async fn fetch_success(&self, url: &str) -> Result<network::ResourceResponse, NavigationError> {
         let request = self.resource_request(url)?;
-        let response = self.loader.fetch(request).await?;
-        self.accept_success_response(url, response)
+        let response =
+            crate::request::fetch(self.loader.as_ref(), &self.browsing_context, request).await?;
+        self.accept_success_response(response)
     }
 
     fn resource_request(&self, url: &str) -> Result<ResourceRequest, NavigationError> {
-        let mut request = ResourceRequest::get(url);
-        if let Some(cookies) = self.browsing_context.cookie_header(url) {
-            request.headers.insert(
-                http::header::COOKIE,
-                http::HeaderValue::from_str(&cookies)
-                    .map_err(|error| NavigationError::Cookie(error.to_string()))?,
-            );
-        }
-        Ok(request)
+        Ok(ResourceRequest::get(url))
     }
 
     fn accept_success_response(
         &self,
-        requested_url: &str,
         response: network::ResourceResponse,
     ) -> Result<network::ResourceResponse, NavigationError> {
-        let cookie_url = if response.effective_url.is_empty() {
-            requested_url
-        } else {
-            &response.effective_url
-        };
-        for header in response.headers.get_all(http::header::SET_COOKIE) {
-            if let Ok(header) = header.to_str() {
-                self.browsing_context
-                    .store_response_cookie(cookie_url, header);
-            }
-        }
         if response.status.is_success() {
             Ok(response)
         } else {
@@ -521,26 +499,24 @@ impl Page {
             };
             let requested_url = request.url.clone();
             let loader = Arc::clone(&self.loader);
+            let browsing_context = Arc::clone(&self.browsing_context);
             let sender = self.task_sender();
-            let spawn = std::thread::Builder::new()
-                .name("brimp-fetch".to_string())
-                .spawn(move || {
-                    let result = tokio::runtime::Builder::new_current_thread()
-                        .build()
+            let result = crate::request::fetch_callback(
+                loader,
+                browsing_context,
+                request,
+                Box::new(move |result| {
+                    let result = result
                         .map_err(|error| error.to_string())
-                        .and_then(|runtime| {
-                            runtime
-                                .block_on(loader.fetch(request))
-                                .map_err(|error| error.to_string())
-                        })
                         .map(|response| (requested_url, response));
                     let _ = sender.post(move |page| {
                         if let Err(error) = page.complete_fetch(id, result) {
                             page.async_error = Some(error);
                         }
                     });
-                });
-            if let Err(error) = spawn {
+                }),
+            );
+            if let Err(error) = result {
                 self.reject_fetch(id, &error.to_string())?;
             }
         }
@@ -573,14 +549,6 @@ impl Page {
             let value = http::HeaderValue::from_str(&value).map_err(|error| error.to_string())?;
             request.headers.append(name, value);
         }
-        if !request.headers.contains_key(http::header::COOKIE)
-            && let Some(cookies) = self.browsing_context.cookie_header(url.as_str())
-        {
-            request.headers.insert(
-                http::header::COOKIE,
-                http::HeaderValue::from_str(&cookies).map_err(|error| error.to_string())?,
-            );
-        }
         request.body = pending.body.map(String::into_bytes);
         Ok(request)
     }
@@ -600,12 +568,6 @@ impl Page {
                 } else {
                     response.effective_url
                 };
-                for header in response.headers.get_all(http::header::SET_COOKIE) {
-                    if let Ok(header) = header.to_str() {
-                        self.browsing_context
-                            .store_response_cookie(&effective_url, header);
-                    }
-                }
                 let headers = response
                     .headers
                     .iter()
@@ -665,7 +627,6 @@ struct Script {
 struct LoadedScript {
     order: usize,
     mode: ScriptMode,
-    requested_url: String,
     result: Result<network::ResourceResponse, NetworkError>,
 }
 
@@ -695,9 +656,10 @@ pub enum NavigationError {
     NotLoaded(LoadState),
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct PageOptions {
     viewport: Viewport,
+    persona: persona::Persona,
 }
 
 impl PageOptions {
@@ -708,9 +670,25 @@ impl PageOptions {
     pub fn viewport(&self) -> Viewport {
         self.viewport
     }
+
+    pub fn persona(&self) -> &persona::Persona {
+        &self.persona
+    }
+
+    pub(crate) fn with_persona(mut self, persona: persona::Persona) -> Self {
+        self.viewport = Viewport {
+            width: f64::from(persona.viewport.width),
+            height: f64::from(persona.viewport.height),
+            device_pixel_ratio: persona.viewport.device_pixel_ratio,
+            scroll_x: 0.0,
+            scroll_y: 0.0,
+        };
+        self.persona = persona;
+        self
+    }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct PageOptionsBuilder {
     options: PageOptions,
 }
@@ -719,15 +697,48 @@ impl PageOptionsBuilder {
     pub fn viewport(mut self, width: u32, height: u32) -> Self {
         self.options.viewport.width = f64::from(width);
         self.options.viewport.height = f64::from(height);
+        self.options.persona.viewport.width = width;
+        self.options.persona.viewport.height = height;
         self
     }
 
     pub fn device_pixel_ratio(mut self, device_pixel_ratio: f64) -> Self {
         self.options.viewport.device_pixel_ratio = device_pixel_ratio;
+        self.options.persona.viewport.device_pixel_ratio = device_pixel_ratio;
         self
     }
 
     pub fn build(self) -> PageOptions {
         self.options
     }
+}
+
+fn install_persona(runtime: &JsRuntime, persona: &persona::Persona) -> Result<(), JsException> {
+    let user_agent = serde_json::to_string(&persona.user_agent)
+        .map_err(|error| JsException::from_message(error.to_string()))?;
+    let platform = serde_json::to_string(&persona.platform)
+        .map_err(|error| JsException::from_message(error.to_string()))?;
+    let locale = serde_json::to_string(&persona.locale)
+        .map_err(|error| JsException::from_message(error.to_string()))?;
+    let languages = serde_json::to_string(&persona.languages)
+        .map_err(|error| JsException::from_message(error.to_string()))?;
+    runtime.eval(&format!(
+        r#"
+        Object.defineProperties(navigator, {{
+            userAgent: {{ value: {user_agent}, enumerable: true }},
+            platform: {{ value: {platform}, enumerable: true }},
+            language: {{ value: {locale}, enumerable: true }},
+            languages: {{ value: Object.freeze({languages}), enumerable: true }},
+        }});
+        globalThis.screen = Object.freeze({{
+            width: {}, height: {}, availWidth: {}, availHeight: {}, colorDepth: 24, pixelDepth: 24,
+        }});
+        window.screen = globalThis.screen;
+    "#,
+        persona.viewport.width,
+        persona.viewport.height,
+        persona.viewport.width,
+        persona.viewport.height
+    ))?;
+    Ok(())
 }

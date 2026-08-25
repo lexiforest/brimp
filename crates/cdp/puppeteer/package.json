@@ -1,0 +1,9 @@
+{
+  "name": "brimp-cdp-puppeteer-conformance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "puppeteer-core": "24.43.1"
+  }
+}

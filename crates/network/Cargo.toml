@@ -3,13 +3,14 @@ name = "network"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+build = "build.rs"
 
 [dependencies]
 async-trait = "0.1"
-bimp-net = { path = "../../../bimp-public/crates/bimp-net" }
 http = "1"
 thiserror = "2"
 tokio = { version = "1", features = ["sync"] }
+url = "2"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["rt"] }

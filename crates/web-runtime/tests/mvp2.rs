@@ -52,7 +52,7 @@ impl ResourceLoader for MvpLoader {
         }
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body,
             effective_url: request.url,
         })

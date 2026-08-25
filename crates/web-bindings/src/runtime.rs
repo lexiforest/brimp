@@ -420,9 +420,41 @@ pub struct BindingRuntime {
 pub struct BrowsingContext {
     url: Mutex<Option<String>>,
     cookies: Mutex<cookie_store::CookieStore>,
+    request_headers: Mutex<Vec<(http::HeaderName, http::HeaderValue)>>,
 }
 
 impl BrowsingContext {
+    pub fn set_request_identity(&self, user_agent: &str, locale: &str) -> Result<(), String> {
+        let headers = vec![
+            (
+                http::header::USER_AGENT,
+                http::HeaderValue::from_str(user_agent).map_err(|error| error.to_string())?,
+            ),
+            (
+                http::header::ACCEPT_LANGUAGE,
+                http::HeaderValue::from_str(locale).map_err(|error| error.to_string())?,
+            ),
+        ];
+        *self
+            .request_headers
+            .lock()
+            .expect("request identity lock poisoned") = headers;
+        Ok(())
+    }
+
+    pub fn apply_request_identity(&self, headers: &mut network::HeaderList) {
+        for (name, value) in self
+            .request_headers
+            .lock()
+            .expect("request identity lock poisoned")
+            .iter()
+        {
+            if !headers.contains_key(name) {
+                headers.insert(name.clone(), value.clone());
+            }
+        }
+    }
+
     pub fn set_url(&self, url: impl Into<String>) {
         *self.url.lock().expect("browsing URL lock poisoned") = Some(url.into());
     }

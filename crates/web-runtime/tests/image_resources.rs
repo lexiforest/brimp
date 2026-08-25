@@ -29,7 +29,7 @@ impl ResourceLoader for ImageLoader {
         headers.insert(CONTENT_TYPE, HeaderValue::from_str(content_type).unwrap());
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body,
             effective_url: request.url,
         })

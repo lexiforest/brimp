@@ -1,124 +1,247 @@
-//! Resource loading boundary and libcurl-impersonate transport.
+//! Resource loading boundary and Brimp-owned libcurl-impersonate transport.
 
-use std::thread;
+mod config;
+mod ffi;
+mod multi;
 
 use async_trait::async_trait;
-use bimp_net::{Client, Config, RedirectPolicy};
-use http::{HeaderMap, Method, StatusCode};
+pub use config::{CurlConfig, Proxy, ProxyKind, ProxyParseError};
+use http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode};
+use multi::MultiExecutor;
+use std::ops::Index;
 use thiserror::Error;
-use tokio::sync::oneshot;
 
-/// A complete request for a browser resource.
+/// An insertion-ordered HTTP header list. Duplicate fields remain distinct.
+#[derive(Debug, Clone, Default)]
+pub struct HeaderList(Vec<(HeaderName, HeaderValue)>);
+impl HeaderList {
+    pub fn new() -> Self {
+        Self::default()
+    }
+    pub fn append(&mut self, name: impl TryInto<HeaderName>, value: HeaderValue) {
+        if let Ok(name) = name.try_into() {
+            self.0.push((name, value));
+        }
+    }
+    pub fn insert(&mut self, name: impl TryInto<HeaderName>, value: HeaderValue) {
+        if let Ok(name) = name.try_into() {
+            self.0.retain(|(candidate, _)| candidate != name);
+            self.0.push((name, value));
+        }
+    }
+    pub fn contains_key(&self, name: impl AsRef<str>) -> bool {
+        self.get(name).is_some()
+    }
+    pub fn remove(&mut self, name: impl AsRef<str>) {
+        let name = name.as_ref();
+        self.0
+            .retain(|(candidate, _)| !candidate.as_str().eq_ignore_ascii_case(name));
+    }
+    pub fn get(&self, name: impl AsRef<str>) -> Option<&HeaderValue> {
+        let name = name.as_ref();
+        self.0
+            .iter()
+            .find(|(candidate, _)| candidate.as_str().eq_ignore_ascii_case(name))
+            .map(|(_, value)| value)
+    }
+    pub fn get_all(&self, name: impl AsRef<str>) -> impl Iterator<Item = &HeaderValue> {
+        let name = name.as_ref().to_string();
+        self.0
+            .iter()
+            .filter(move |(candidate, _)| candidate.as_str().eq_ignore_ascii_case(&name))
+            .map(|(_, value)| value)
+    }
+    pub fn iter(&self) -> impl Iterator<Item = (&HeaderName, &HeaderValue)> {
+        self.0.iter().map(|(name, value)| (name, value))
+    }
+}
+impl From<HeaderMap> for HeaderList {
+    fn from(headers: HeaderMap) -> Self {
+        let mut result = Self::new();
+        let mut current_name = None;
+        for (name, value) in headers {
+            if let Some(name) = name {
+                current_name = Some(name);
+            }
+            if let Some(name) = current_name.clone() {
+                result.append(name, value);
+            }
+        }
+        result
+    }
+}
+impl Index<&str> for HeaderList {
+    type Output = HeaderValue;
+    fn index(&self, name: &str) -> &Self::Output {
+        self.get(name).expect("header not found")
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ResourceRequest {
     pub method: Method,
     pub url: String,
-    pub headers: HeaderMap,
+    pub headers: HeaderList,
     pub body: Option<Vec<u8>>,
 }
-
 impl ResourceRequest {
-    /// Creates a request with no headers or body.
     pub fn new(method: Method, url: impl Into<String>) -> Self {
         Self {
             method,
             url: url.into(),
-            headers: HeaderMap::new(),
+            headers: HeaderList::new(),
             body: None,
         }
     }
-
-    /// Creates a GET request.
     pub fn get(url: impl Into<String>) -> Self {
         Self::new(Method::GET, url)
     }
 }
-
-/// A fully collected browser resource response.
 #[derive(Debug)]
 pub struct ResourceResponse {
     pub status: StatusCode,
-    pub headers: HeaderMap,
+    pub headers: HeaderList,
     pub body: Vec<u8>,
     pub effective_url: String,
 }
 
-/// Failure returned by a resource loader.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Clone)]
 pub enum NetworkError {
     #[error("invalid resource request: {0}")]
     InvalidRequest(String),
     #[error("resource transfer failed: {0}")]
     Transport(String),
-    #[error("resource worker stopped before returning a response")]
-    WorkerStopped,
+    #[error("resource response exceeded the {limit}-byte limit")]
+    ResponseTooLarge { limit: usize },
+    #[error("resource request was cancelled")]
+    Cancelled,
+    #[error("resource loader is shutting down")]
+    Closed,
+    #[error("resource queue is full")]
+    QueueFull,
     #[error("failed to start resource worker: {0}")]
     WorkerStart(String),
 }
 
-/// The transport boundary used by navigation and all subresource loading.
+pub type ResourceCallback = Box<dyn FnOnce(Result<ResourceResponse, NetworkError>) + Send>;
+
 #[async_trait]
 pub trait ResourceLoader: Send + Sync {
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError>;
-}
 
-/// Browser-like HTTP transport backed by `libcurl-impersonate`.
-///
-/// The default Chrome impersonation profile negotiates HTTP/2 and supplies
-/// matching browser headers. Each transfer runs away from the page owner thread.
-#[derive(Debug, Clone)]
-pub struct CurlResourceLoader {
-    client: Client,
-}
-
-impl CurlResourceLoader {
-    pub fn new(config: Config) -> Self {
-        Self {
-            client: Client::new(config),
+    /// Submits without adding a caller-owned coordination thread. Custom test
+    /// loaders whose futures complete immediately can use this default.
+    fn fetch_callback(
+        &self,
+        request: ResourceRequest,
+        callback: ResourceCallback,
+    ) -> Result<(), NetworkError> {
+        use std::future::Future;
+        use std::sync::Arc;
+        use std::task::{Context, Poll, Wake, Waker};
+        struct Noop;
+        impl Wake for Noop {
+            fn wake(self: Arc<Self>) {}
+        }
+        let mut future = Box::pin(self.fetch(request));
+        let waker = Waker::from(Arc::new(Noop));
+        match Future::poll(future.as_mut(), &mut Context::from_waker(&waker)) {
+            Poll::Ready(result) => {
+                callback(result);
+                Ok(())
+            }
+            Poll::Pending => Err(NetworkError::Transport(
+                "this resource loader does not support callback submission".into(),
+            )),
         }
     }
 }
 
-impl Default for CurlResourceLoader {
-    fn default() -> Self {
-        Self::new(Config {
-            impersonation_target: "chrome136".to_string(),
-            redirect_policy: RedirectPolicy::Follow,
-            default_headers: true,
-            ..Config::default()
+/// Cloneable transport handle. Clones share exactly one curl multi executor.
+#[derive(Debug, Clone)]
+pub struct CurlResourceLoader {
+    executor: std::sync::Arc<MultiExecutor>,
+}
+impl CurlResourceLoader {
+    pub fn new(config: CurlConfig) -> Result<Self, NetworkError> {
+        Ok(Self {
+            executor: std::sync::Arc::new(MultiExecutor::new(config)?),
         })
     }
+    pub fn check_profile(config: &CurlConfig) -> Result<(), NetworkError> {
+        use std::ffi::CString;
+        ffi::global_init();
+        let handle = unsafe { ffi::curl_easy_init() };
+        if handle.is_null() {
+            return Err(NetworkError::Transport(
+                "failed to initialize curl easy handle".into(),
+            ));
+        }
+        let profile = CString::new(config.impersonation_profile.as_str())
+            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        let code = unsafe {
+            ffi::curl_easy_impersonate(handle, profile.as_ptr(), config.default_headers as i32)
+        };
+        unsafe {
+            ffi::curl_easy_cleanup(handle);
+        }
+        if code == ffi::CURLE_OK {
+            Ok(())
+        } else {
+            Err(NetworkError::Transport(format!(
+                "impersonation profile `{}` is unavailable: {}",
+                config.impersonation_profile,
+                ffi::error(code)
+            )))
+        }
+    }
 }
-
+impl Default for CurlResourceLoader {
+    fn default() -> Self {
+        Self::new(CurlConfig::default()).expect("curl executor must start")
+    }
+}
 #[async_trait]
 impl ResourceLoader for CurlResourceLoader {
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
-        let mut builder = http::Request::builder()
-            .method(request.method)
-            .uri(&request.url);
-        *builder.headers_mut().expect("request builder has headers") = request.headers;
-        let request = builder
-            .body(request.body)
-            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        self.executor.fetch(request).await
+    }
+    fn fetch_callback(
+        &self,
+        request: ResourceRequest,
+        callback: ResourceCallback,
+    ) -> Result<(), NetworkError> {
+        self.executor.fetch_callback(request, callback)
+    }
+}
 
-        let client = self.client.clone();
-        let (sender, receiver) = oneshot::channel();
-        thread::Builder::new()
-            .name("brimp-resource".to_string())
-            .spawn(move || {
-                let response = client
-                    .send_collect(request)
-                    .map(|response| ResourceResponse {
-                        status: response.status,
-                        headers: response.headers,
-                        body: response.body,
-                        effective_url: response.effective_url,
-                    })
-                    .map_err(|error| NetworkError::Transport(error.to_string()));
-                let _ = sender.send(response);
-            })
-            .map_err(|error| NetworkError::WorkerStart(error.to_string()))?;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{Duration, Instant};
 
-        receiver.await.map_err(|_| NetworkError::WorkerStopped)?
+    #[test]
+    fn many_loader_clones_share_exactly_one_executor_thread() {
+        let baseline = multi::executor_thread_count();
+        let loader = CurlResourceLoader::default();
+        wait_for_threads(baseline + 1);
+        let clones = (0..128).map(|_| loader.clone()).collect::<Vec<_>>();
+        assert!(
+            clones
+                .iter()
+                .all(|clone| std::sync::Arc::ptr_eq(&loader.executor, &clone.executor))
+        );
+        assert_eq!(multi::executor_thread_count(), baseline + 1);
+        drop(clones);
+        drop(loader);
+        wait_for_threads(baseline);
+    }
+
+    fn wait_for_threads(expected: usize) {
+        let deadline = Instant::now() + Duration::from_secs(1);
+        while multi::executor_thread_count() != expected && Instant::now() < deadline {
+            std::thread::yield_now();
+        }
+        assert_eq!(multi::executor_thread_count(), expected);
     }
 }

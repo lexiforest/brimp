@@ -53,7 +53,7 @@ impl ResourceLoader for ScriptLoader {
         headers.insert(CONTENT_TYPE, content_type.parse().unwrap());
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
         })
@@ -112,7 +112,7 @@ impl ResourceLoader for ParserLoader {
         headers.insert(CONTENT_TYPE, content_type.parse().unwrap());
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
         })

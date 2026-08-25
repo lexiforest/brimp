@@ -8,5 +8,7 @@ license.workspace = true
 blitz-dom = "=0.3.0-beta.1"
 browser-dom = { path = "../browser-dom" }
 cookie_store = "0.22.1"
+http = "1"
 jsc = { path = "../jsc" }
+network = { path = "../network" }
 url = "2"

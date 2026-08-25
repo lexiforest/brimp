@@ -6,6 +6,10 @@ pub struct JsException {
 }
 
 impl JsException {
+    pub fn from_message(message: impl Into<String>) -> Self {
+        Self::new(message)
+    }
+
     pub(crate) fn new(message: impl Into<String>) -> Self {
         Self {
             message: message.into(),

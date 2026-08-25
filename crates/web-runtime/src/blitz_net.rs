@@ -60,7 +60,7 @@ impl NetProvider for BlitzResourceProvider {
     fn fetch(&self, _doc_id: usize, request: Request, handler: Box<dyn NetHandler>) {
         let url = request.url.to_string();
         let mut resource_request = ResourceRequest::new(request.method, &url);
-        resource_request.headers = request.headers;
+        resource_request.headers = request.headers.into();
         if let Some(content_type) = request.content_type
             && !resource_request
                 .headers
@@ -76,50 +76,29 @@ impl NetProvider for BlitzResourceProvider {
             Body::Form(form) => serde_json::to_vec(&form).ok(),
             Body::Empty => None,
         };
-        if !resource_request.headers.contains_key(http::header::COOKIE)
-            && let Some(cookies) = self.shared.browsing_context.cookie_header(&url)
-            && let Ok(cookies) = http::HeaderValue::from_str(&cookies)
-        {
-            resource_request
-                .headers
-                .insert(http::header::COOKIE, cookies);
-        }
-
         self.shared.outstanding.fetch_add(1, Ordering::AcqRel);
         let provider = self.clone();
-        let spawn = std::thread::Builder::new()
-            .name("brimp-blitz-resource".to_string())
-            .spawn(move || {
-                let response = tokio::runtime::Builder::new_current_thread()
-                    .build()
-                    .ok()
-                    .and_then(|runtime| {
-                        runtime
-                            .block_on(provider.shared.loader.fetch(resource_request))
-                            .ok()
-                    });
-                match response {
+        let completion_provider = provider.clone();
+        let result = crate::request::fetch_callback(
+            Arc::clone(&provider.shared.loader),
+            Arc::clone(&provider.shared.browsing_context),
+            resource_request,
+            Box::new(move |response| {
+                match response.ok() {
                     Some(response) => {
                         let effective_url = if response.effective_url.is_empty() {
                             url
                         } else {
                             response.effective_url
                         };
-                        for header in response.headers.get_all(http::header::SET_COOKIE) {
-                            if let Ok(header) = header.to_str() {
-                                provider
-                                    .shared
-                                    .browsing_context
-                                    .store_response_cookie(&effective_url, header);
-                            }
-                        }
                         handler.bytes(effective_url, Bytes::from(response.body));
                     }
                     None => handler.bytes(url, Bytes::new()),
                 }
-                provider.complete();
-            });
-        if spawn.is_err() {
+                completion_provider.complete();
+            }),
+        );
+        if result.is_err() {
             self.complete();
         }
     }

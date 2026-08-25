@@ -7,6 +7,12 @@ members = [
     "crates/web-runtime",
     "crates/screenshot",
     "crates/network",
+    "crates/cli",
+    "benchmark",
+    "crates/persona",
+    "crates/cdp",
+    "bindings/python",
+    "bindings/node",
 ]
 resolver = "3"
 

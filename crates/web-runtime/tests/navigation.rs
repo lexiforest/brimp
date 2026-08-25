@@ -20,7 +20,7 @@ impl ResourceLoader for StaticLoader {
         );
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body: b"<!doctype html><html><head><title>Loaded</title></head><body id='ready'></body></html>".to_vec(),
             effective_url: request.url,
         })
@@ -91,7 +91,7 @@ impl ResourceLoader for SubresourceLoader {
         }
         Ok(ResourceResponse {
             status: StatusCode::OK,
-            headers,
+            headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
         })
@@ -167,6 +167,6 @@ fn navigation_updates_location_and_exposes_a_navigator_subset() {
             .unwrap()
             .to_string()
             .unwrap(),
-        "Brimp/0.1|MacIntel|en-US"
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36|MacIntel|en-US"
     );
 }

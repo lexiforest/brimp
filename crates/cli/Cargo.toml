@@ -1,0 +1,15 @@
+[package]
+name = "brimp-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "brimp"
+path = "src/main.rs"
+
+[dependencies]
+network = { path = "../network" }
+serde_json = "1"
+web-runtime = { path = "../web-runtime" }
+
