@@ -1,6 +1,15 @@
 {
-  "name": "brimp",
+  "name": "@brimp/brimp",
   "version": "0.1.0",
+  "description": "Lightweight in-process headless browser for agents",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexiforest/brimp.git"
+  },
+  "homepage": "https://github.com/lexiforest/brimp#readme",
+  "bugs": "https://github.com/lexiforest/brimp/issues",
+  "keywords": ["browser", "headless", "automation", "javascriptcore"],
   "main": "index.js",
   "types": "index.d.ts",
   "os": ["darwin"],

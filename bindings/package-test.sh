@@ -18,7 +18,7 @@ if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
 fi
 python_wheel=$1
 
-set -- "$output"/node/brimp-*.tgz
+set -- "$output"/node/brimp-brimp-*.tgz
 if [ "$#" -ne 1 ] || [ ! -f "$1" ]; then
   echo "expected exactly one Brimp npm package in $output/node" >&2
   exit 1
@@ -57,4 +57,4 @@ npm_config_cache="$test_root/npm-cache" npm install --prefix "$test_root/node" "
 
 BRIMP_PYTHON="$test_root/venv/bin/python" \
   python3 "$test_root/conformance/run.py" - \
-  "$test_root/node/node_modules/brimp"
+  "$test_root/node/node_modules/@brimp/brimp"

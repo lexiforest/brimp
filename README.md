@@ -35,7 +35,7 @@ Release packages currently target macOS arm64:
 
 ```sh
 python -m pip install brimp
-npm install brimp
+npm install @brimp/brimp
 ```
 
 The standalone `brimp` and `brimp-cdp` executables are produced by the source
@@ -77,7 +77,7 @@ asyncio.run(main())
 ### Node.js
 
 ```js
-const brimp = require('brimp')
+const brimp = require('@brimp/brimp')
 
 async function main() {
   const browser = await brimp.launch()
