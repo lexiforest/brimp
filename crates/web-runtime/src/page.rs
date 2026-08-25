@@ -193,14 +193,14 @@ impl Page {
             match (script.mode, script.source) {
                 (ScriptMode::Blocking, ScriptSource::Inline(source)) => {
                     self.process_blitz_resources().await;
-                    self.eval(&source)?;
+                    self.execute_page_script(&source);
                 }
                 (ScriptMode::Blocking, ScriptSource::External(src)) => {
                     self.process_blitz_resources().await;
                     let script_url = base_url.join(&src)?;
                     let source =
                         String::from_utf8(self.fetch_success(script_url.as_str()).await?.body)?;
-                    self.eval(&source)?;
+                    self.execute_page_script(&source);
                 }
                 (mode, ScriptSource::External(src)) => {
                     if mode == ScriptMode::Defer {
@@ -287,7 +287,7 @@ impl Page {
         let source = String::from_utf8(response.body)?;
         match loaded.mode {
             ScriptMode::Async => {
-                self.eval(&source)?;
+                self.execute_page_script(&source);
             }
             ScriptMode::Defer => {
                 deferred.insert(loaded.order, source);
@@ -306,10 +306,16 @@ impl Page {
         while let Some(script_order) = order.get(*next)
             && let Some(source) = loaded.remove(script_order)
         {
-            self.eval(&source)?;
+            self.execute_page_script(&source);
             *next += 1;
         }
         Ok(())
+    }
+
+    fn execute_page_script(&self, source: &str) {
+        let _ = self.js.eval(source);
+        let _ = self.perform_microtask_checkpoint();
+        let _ = self.start_pending_fetches();
     }
 
     async fn fetch_success(&self, url: &str) -> Result<network::ResourceResponse, NavigationError> {

@@ -146,3 +146,58 @@ fn parser_pauses_for_blocking_scripts_and_resumes_the_same_dom() {
         "yes|yes|37|true|true|true"
     );
 }
+
+struct ThrowingScriptLoader;
+
+#[async_trait]
+impl ResourceLoader for ThrowingScriptLoader {
+    async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        let (content_type, body) = match request.url.as_str() {
+            "https://errors.test/" => (
+                "text/html",
+                r#"<!doctype html>
+                <script>globalThis.beforeError = true; $R(1, 2);</script>
+                <script src="/blocking.js"></script>
+                <script src="/async.js" async></script>
+                <script src="/defer.js" defer></script>
+                <script>globalThis.afterErrors = true;</script>"#,
+            ),
+            "https://errors.test/blocking.js" => ("text/javascript", "missingBlockingGlobal()"),
+            "https://errors.test/async.js" => ("text/javascript", "missingAsyncGlobal()"),
+            "https://errors.test/defer.js" => ("text/javascript", "missingDeferredGlobal()"),
+            other => panic!("unexpected script request: {other}"),
+        };
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, content_type.parse().unwrap());
+        Ok(ResourceResponse {
+            status: StatusCode::OK,
+            headers: headers.into(),
+            body: body.as_bytes().to_vec(),
+            effective_url: request.url,
+        })
+    }
+}
+
+#[test]
+fn uncaught_page_script_errors_do_not_fail_navigation() {
+    let browser = Browser::with_resource_loader(Arc::new(ThrowingScriptLoader));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
+
+    runtime.block_on(page.goto("https://errors.test/")).unwrap();
+
+    assert_eq!(
+        page.eval("Number(beforeError && afterErrors)")
+            .unwrap()
+            .to_number()
+            .unwrap(),
+        1.0
+    );
+    assert_eq!(page.load_state(), web_runtime::LoadState::Complete);
+    assert!(
+        page.eval("$R").is_err(),
+        "the missing global remains absent"
+    );
+}
