@@ -5,8 +5,15 @@ build-backend = "maturin"
 [project]
 name = "brimp"
 version = "0.1.0"
+description = "Requests-style JavaScript-rendering browser client"
 requires-python = ">=3.10"
 readme = "README.md"
+license = "MIT OR Apache-2.0"
+keywords = ["browser", "headless", "requests", "javascriptcore"]
+
+[project.urls]
+Repository = "https://github.com/lexiforest/brimp"
+Issues = "https://github.com/lexiforest/brimp/issues"
 
 [tool.maturin]
 python-source = "python"

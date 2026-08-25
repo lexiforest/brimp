@@ -5,7 +5,8 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use web_runtime::{
-    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, PageOptions,
+    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, NavigationResponse,
+    PageOptions,
 };
 
 // Keep Mach-O's LINKEDIT string table eight-byte aligned on current macOS.
@@ -18,39 +19,65 @@ fn error(error: AutomationError) -> PyErr {
     PyRuntimeError::new_err(format!("brimp {}: {error}", error.code()))
 }
 
-#[pyclass(name = "Browser", module = "brimp._brimp")]
-struct PyBrowser {
-    inner: Arc<AutomationBrowser>,
-}
-
-#[pyclass(name = "Page", module = "brimp._brimp")]
-struct PyPage {
-    inner: AutomationPage,
-}
-
-#[pyclass(name = "CancellationToken", module = "brimp._brimp")]
-struct PyCancellationToken {
-    inner: CancellationToken,
+#[pyclass(name = "_Response", module = "brimp._brimp")]
+struct PyResponse {
+    response: NavigationResponse,
 }
 
 #[pymethods]
-impl PyCancellationToken {
+impl PyResponse {
+    #[getter]
+    fn status_code(&self) -> u16 {
+        self.response.status_code
+    }
+
+    #[getter]
+    fn reason(&self) -> &str {
+        &self.response.reason
+    }
+
+    #[getter]
+    fn url(&self) -> &str {
+        &self.response.url
+    }
+
+    #[getter]
+    fn headers(&self) -> Vec<(String, String)> {
+        self.response.headers.clone()
+    }
+
+    #[getter]
+    fn content<'py>(&self, py: Python<'py>) -> Bound<'py, PyBytes> {
+        PyBytes::new(py, &self.response.content)
+    }
+
+    #[getter]
+    fn html(&self) -> Option<&str> {
+        self.response.html.as_deref()
+    }
+
+    #[getter]
+    fn cookies(&self) -> Vec<(String, String)> {
+        self.response.cookies.clone()
+    }
+
+    #[getter]
+    fn elapsed(&self) -> f64 {
+        self.response.elapsed.as_secs_f64()
+    }
+}
+
+#[pyclass(name = "_Session", module = "brimp._brimp")]
+struct PySession {
+    browser: Arc<AutomationBrowser>,
+    page: AutomationPage,
+}
+
+#[pymethods]
+impl PySession {
     #[new]
-    fn new() -> Self {
-        Self {
-            inner: CancellationToken::new(),
-        }
-    }
-    fn cancel(&self) {
-        self.inner.cancel();
-    }
-}
-
-#[pymethods]
-impl PyBrowser {
-    #[staticmethod]
     #[pyo3(signature = (persona_json = None))]
-    fn launch(py: Python<'_>, persona_json: Option<&str>) -> PyResult<Self> {
+    fn new(py: Python<'_>, persona_json: Option<&str>) -> PyResult<Self> {
         let persona = persona_json
             .map(persona::Persona::from_json)
             .transpose()
@@ -58,49 +85,41 @@ impl PyBrowser {
                 error(AutomationError::InvalidInput(persona_error.to_string()))
             })?;
         py.detach(move || {
-            let browser = match persona {
-                Some(persona) => AutomationBrowser::with_persona(persona),
-                None => AutomationBrowser::new(),
-            }
-            .map_err(error)?;
-            Ok(Self {
-                inner: Arc::new(browser),
-            })
+            let browser = Arc::new(
+                match persona {
+                    Some(persona) => AutomationBrowser::with_persona(persona),
+                    None => AutomationBrowser::new(),
+                }
+                .map_err(error)?,
+            );
+            let page = browser.new_page(PageOptions::default()).map_err(error)?;
+            Ok(Self { browser, page })
         })
     }
-    fn new_page(&self, py: Python<'_>) -> PyResult<PyPage> {
-        let browser = Arc::clone(&self.inner);
-        py.detach(move || {
-            browser
-                .new_page(PageOptions::default())
-                .map(|inner| PyPage { inner })
-                .map_err(error)
-        })
-    }
-    fn close(&self, py: Python<'_>) {
-        let browser = Arc::clone(&self.inner);
-        py.detach(move || browser.close());
-    }
-}
 
-#[pymethods]
-impl PyPage {
-    fn goto(
+    #[pyo3(signature = (url, timeout_ms, headers = None))]
+    fn get(
         &self,
         py: Python<'_>,
         url: String,
         timeout_ms: u64,
-        token: &PyCancellationToken,
-    ) -> PyResult<()> {
-        let page = self.inner.clone();
-        let token = token.inner.clone();
+        headers: Option<Vec<(String, String)>>,
+    ) -> PyResult<PyResponse> {
+        let page = self.page.clone();
         py.detach(move || {
-            page.navigate_cancellable(url, Duration::from_millis(timeout_ms), token)
-                .map_err(error)
+            page.navigate_with_headers(
+                url,
+                Duration::from_millis(timeout_ms),
+                CancellationToken::new(),
+                headers.unwrap_or_default(),
+            )
+            .map(|response| PyResponse { response })
+            .map_err(error)
         })
     }
+
     fn evaluate(&self, py: Python<'_>, expression: String) -> PyResult<String> {
-        let page = self.inner.clone();
+        let page = self.page.clone();
         py.detach(move || {
             page.evaluate(expression)
                 .and_then(|value| {
@@ -110,22 +129,16 @@ impl PyPage {
                 .map_err(error)
         })
     }
-    fn title(&self, py: Python<'_>) -> PyResult<String> {
-        let page = self.inner.clone();
-        py.detach(move || page.title().map_err(error))
-    }
-    fn text_content(&self, py: Python<'_>) -> PyResult<String> {
-        let page = self.inner.clone();
-        py.detach(move || page.text_content().map_err(error))
-    }
+
     fn screenshot<'py>(&self, py: Python<'py>, full_page: bool) -> PyResult<Bound<'py, PyBytes>> {
-        let page = self.inner.clone();
+        let page = self.page.clone();
         let bytes = py.detach(move || page.screenshot(full_page).map_err(error))?;
         Ok(PyBytes::new(py, &bytes))
     }
+
     fn close(&self, py: Python<'_>) {
-        let page = self.inner.clone();
-        py.detach(move || page.close());
+        let browser = Arc::clone(&self.browser);
+        py.detach(move || browser.close());
     }
 }
 
@@ -133,9 +146,8 @@ impl PyPage {
 fn _brimp(module: &Bound<'_, PyModule>) -> PyResult<()> {
     #[cfg(target_os = "macos")]
     let _alignment = unsafe { std::ptr::read_volatile(&raw const NSApp) };
-    module.add_class::<PyBrowser>()?;
-    module.add_class::<PyPage>()?;
-    module.add_class::<PyCancellationToken>()?;
+    module.add_class::<PySession>()?;
+    module.add_class::<PyResponse>()?;
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

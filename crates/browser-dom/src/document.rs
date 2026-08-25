@@ -136,6 +136,17 @@ impl BrowserDocument {
         self.inner.root_node()
     }
 
+    pub fn outer_html(&self) -> String {
+        let root = self.root();
+        let mut html = String::new();
+        for child in &root.children {
+            if let Some(node) = self.node(*child) {
+                node.write_outer_html(&mut html);
+            }
+        }
+        html
+    }
+
     pub fn node(&self, node_id: NodeId) -> Option<&Node> {
         self.inner.get_node(node_id)
     }

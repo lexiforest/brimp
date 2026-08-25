@@ -485,6 +485,18 @@ impl BrowsingContext {
         (!value.is_empty()).then_some(value)
     }
 
+    pub fn cookies_for_url(&self, url: &str) -> Vec<(String, String)> {
+        let Ok(url) = url::Url::parse(url) else {
+            return Vec::new();
+        };
+        self.cookies
+            .lock()
+            .expect("cookie store lock poisoned")
+            .get_request_values(&url)
+            .map(|(name, value)| (name.to_owned(), value.to_owned()))
+            .collect()
+    }
+
     fn document_cookies(&self) -> String {
         let raw_url = self.url.lock().expect("browsing URL lock poisoned");
         let Some(url) = raw_url.as_deref().and_then(|url| url::Url::parse(url).ok()) else {

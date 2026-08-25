@@ -66,8 +66,19 @@ fn refresh_cookie_header(
     request: &mut ResourceRequest,
 ) -> Result<(), NetworkError> {
     context.apply_request_identity(&mut request.headers);
+    let supplied = request
+        .headers
+        .get(http::header::COOKIE)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
     request.headers.remove(http::header::COOKIE);
-    if let Some(cookies) = context.cookie_header(&request.url) {
+    let cookies = match (context.cookie_header(&request.url), supplied) {
+        (Some(stored), Some(supplied)) => Some(format!("{stored}; {supplied}")),
+        (Some(stored), None) => Some(stored),
+        (None, Some(supplied)) => Some(supplied),
+        (None, None) => None,
+    };
+    if let Some(cookies) = cookies {
         let value = http::HeaderValue::from_str(&cookies)
             .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
         request.headers.insert(http::header::COOKIE, value);

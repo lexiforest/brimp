@@ -18,10 +18,8 @@ for (const [name, expression] of Object.entries({javascript: "throw new Error('b
   catch (error) { result[name] = error.code }
 }
 const hanging = await browser.newPage()
-const controller = new AbortController()
-const task = hanging.goto(url + '/hang', { signal: controller.signal })
-setTimeout(() => controller.abort(), 50)
-try { await task } catch (error) { result.cancelled = error.code === 'cancelled' }
+try { await hanging.goto(url + '/hang', { timeoutMs: 50 }) }
+catch (error) { result.timeout = error.code === 'timeout' }
 await hanging.close(); await hanging.close()
 await page.close(); await page.close()
 try { await page.title() } catch (error) { result.closed = error.code }

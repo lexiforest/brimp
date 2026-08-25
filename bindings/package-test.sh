@@ -52,6 +52,7 @@ done
 
 python3 -m venv "$test_root/venv"
 "$test_root/venv/bin/python" -m pip install --no-index "$python_wheel"
+"$test_root/venv/bin/python" "$workspace/bindings/python/test_api.py"
 mkdir -p "$test_root/node"
 npm_config_cache="$test_root/npm-cache" npm install --prefix "$test_root/node" "$node_package"
 

@@ -123,7 +123,7 @@ fn navigate(
     let result = page.navigate_cancellable(url, timeout, cancellation);
     finished.store(true, Ordering::Release);
     let _ = monitor.join();
-    result
+    result.map(|_| ())
 }
 fn required_positional(arguments: &[String]) -> Result<&str, AutomationError> {
     arguments

@@ -113,6 +113,7 @@ impl NativePage {
         let token = token.inner.clone();
         blocking(move || {
             page.navigate_cancellable(url, Duration::from_millis(u64::from(timeout_ms)), token)
+                .map(|_| ())
         })
         .await
     }

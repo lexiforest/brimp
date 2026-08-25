@@ -10,7 +10,7 @@ use std::{
 use blitz_traits::net::NetProvider;
 use browser_dom::{BrowserDocument, HtmlParserSession, NodeId, ParseProgress};
 use jsc::{JsException, JsRuntime, JsValue};
-use network::{NetworkError, ResourceLoader, ResourceRequest};
+use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest};
 use screenshot::{ScreenshotError, ScreenshotOptions};
 use web_bindings::{
     BindingRuntime, BrowsingContext, FetchQueue, PendingFetch, TimerQueue, WrapperCache,
@@ -33,6 +33,7 @@ pub struct Page {
     load_state: LoadState,
     url: Option<String>,
     async_error: Option<JsException>,
+    persona: persona::Persona,
 }
 
 impl Page {
@@ -76,6 +77,7 @@ impl Page {
             load_state: LoadState::Idle,
             url: None,
             async_error: None,
+            persona: options.persona,
         })
     }
 
@@ -95,52 +97,116 @@ impl Page {
         self.bindings.reset_document(&self.js)
     }
 
-    fn reset_document_at(&mut self, base_url: &str) -> Result<(), JsException> {
+    fn reset_page_at(&mut self, base_url: &str) -> Result<(), JsException> {
         let net_provider: Arc<dyn NetProvider> = self.blitz_network.clone();
         let document = BrowserDocument::empty_at_with_net(Some(base_url), Some(net_provider));
         *self.document.borrow_mut() = document;
-        self.bindings.reset_document(&self.js)
+        let js = JsRuntime::new()?;
+        let timers = Rc::new(RefCell::new(TimerQueue::default()));
+        let fetches = Rc::new(RefCell::new(FetchQueue::default()));
+        let bindings = BindingRuntime::install(
+            &js,
+            Rc::clone(&self.document),
+            Rc::clone(&timers),
+            Arc::clone(&self.browsing_context),
+            Rc::clone(&fetches),
+        )?;
+        install_persona(&js, &self.persona)?;
+
+        self.bindings = bindings;
+        self.js = js;
+        self.timers = timers;
+        self.fetches = fetches;
+        self.tasks = TaskQueue::default();
+        self.async_error = None;
+        Ok(())
     }
 
-    pub async fn goto(&mut self, url: &str) -> Result<(), NavigationError> {
+    pub async fn goto(&mut self, url: &str) -> Result<NavigationResponse, NavigationError> {
+        self.goto_with_headers(url, HeaderList::new()).await
+    }
+
+    pub async fn goto_with_headers(
+        &mut self,
+        url: &str,
+        headers: HeaderList,
+    ) -> Result<NavigationResponse, NavigationError> {
+        let started = Instant::now();
         self.load_state = LoadState::Loading;
-        let response = match self.fetch_success(url).await {
+        let mut request = self.resource_request(url)?;
+        request.headers = headers;
+        let response = match crate::request::fetch(
+            self.loader.as_ref(),
+            &self.browsing_context,
+            request,
+        )
+        .await
+        {
             Ok(response) => response,
             Err(error) => {
                 self.load_state = LoadState::Failed;
-                return Err(error);
+                return Err(error.into());
             }
         };
-        if let Some(content_type) = response.headers.get(http::header::CONTENT_TYPE) {
-            let content_type = content_type
-                .to_str()
-                .map_err(|_| NavigationError::UnsupportedContentType("non-ASCII".to_string()))?;
-            if !content_type
-                .split(';')
-                .next()
-                .is_some_and(|mime| mime.trim().eq_ignore_ascii_case("text/html"))
-            {
-                self.load_state = LoadState::Failed;
-                return Err(NavigationError::UnsupportedContentType(
-                    content_type.to_string(),
-                ));
-            }
-        }
+        let status_code = response.status.as_u16();
+        let reason = response
+            .status
+            .canonical_reason()
+            .unwrap_or_default()
+            .to_owned();
+        let headers = response
+            .headers
+            .iter()
+            .map(|(name, value)| {
+                (
+                    name.as_str().to_owned(),
+                    String::from_utf8_lossy(value.as_bytes()).into_owned(),
+                )
+            })
+            .collect();
+        let is_html = response
+            .headers
+            .get(http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.split(';').next())
+            .is_none_or(|mime| {
+                mime.trim().eq_ignore_ascii_case("text/html")
+                    || mime.trim().eq_ignore_ascii_case("application/xhtml+xml")
+            });
         let effective_url = response.effective_url;
+        let content = response.body;
         self.browsing_context.set_url(&effective_url);
         self.url = Some(effective_url.clone());
-        let html = String::from_utf8(response.body)?;
-        if let Err(error) = self.reset_document_at(&effective_url) {
+        if let Err(error) = self.reset_page_at(&effective_url) {
             self.load_state = LoadState::Failed;
             return Err(error.into());
         }
-        if let Err(error) = self.parse_navigation_document(&html, &effective_url).await {
-            self.load_state = LoadState::Failed;
-            return Err(error);
-        }
-        self.process_blitz_resources().await;
+        let html = if is_html {
+            let source = String::from_utf8_lossy(&content);
+            if let Err(error) = self
+                .parse_navigation_document(&source, &effective_url)
+                .await
+            {
+                self.load_state = LoadState::Failed;
+                return Err(error);
+            }
+            self.process_blitz_resources().await;
+            Some(self.document.borrow().outer_html())
+        } else {
+            None
+        };
+        let cookies = self.browsing_context.cookies_for_url(&effective_url);
         self.load_state = LoadState::Complete;
-        Ok(())
+        Ok(NavigationResponse {
+            status_code,
+            reason,
+            url: effective_url,
+            headers,
+            content,
+            html,
+            cookies,
+            elapsed: started.elapsed(),
+        })
     }
 
     pub async fn wait_for_load(&self) -> Result<(), NavigationError> {
@@ -636,18 +702,28 @@ struct LoadedScript {
     result: Result<network::ResourceResponse, NetworkError>,
 }
 
+#[derive(Clone, Debug)]
+pub struct NavigationResponse {
+    pub status_code: u16,
+    pub reason: String,
+    pub url: String,
+    pub headers: Vec<(String, String)>,
+    pub content: Vec<u8>,
+    pub html: Option<String>,
+    pub cookies: Vec<(String, String)>,
+    pub elapsed: Duration,
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum NavigationError {
     #[error(transparent)]
     Network(#[from] NetworkError),
     #[error("navigation returned HTTP status {0}")]
     HttpStatus(u16),
-    #[error("navigation returned unsupported content type `{0}`")]
-    UnsupportedContentType(String),
-    #[error("HTML response is not UTF-8: {0}")]
-    InvalidUtf8(#[from] std::string::FromUtf8Error),
     #[error("invalid resource URL: {0}")]
     InvalidUrl(#[from] url::ParseError),
+    #[error("script response is not UTF-8: {0}")]
+    InvalidScriptUtf8(#[from] std::string::FromUtf8Error),
     #[error("document query failed: {0}")]
     Document(String),
     #[error("invalid cookie header: {0}")]

@@ -6,10 +6,10 @@ use std::sync::{
 use std::thread::JoinHandle;
 use std::time::Duration;
 
-use network::ResourceLoader;
+use network::{HeaderList, ResourceLoader};
 use serde_json::Value;
 
-use crate::{NavigationError, Page, PageOptions, ScreenshotOptions};
+use crate::{NavigationError, NavigationResponse, Page, PageOptions, ScreenshotOptions};
 
 #[derive(Debug, thiserror::Error)]
 pub enum AutomationError {
@@ -173,7 +173,7 @@ impl AutomationPage {
         &self,
         url: impl Into<String>,
         timeout: Duration,
-    ) -> Result<(), AutomationError> {
+    ) -> Result<NavigationResponse, AutomationError> {
         self.navigate_cancellable(url, timeout, CancellationToken::new())
     }
     pub fn navigate_cancellable(
@@ -181,16 +181,36 @@ impl AutomationPage {
         url: impl Into<String>,
         timeout: Duration,
         cancellation: CancellationToken,
-    ) -> Result<(), AutomationError> {
+    ) -> Result<NavigationResponse, AutomationError> {
+        self.navigate_with_headers(url, timeout, cancellation, Vec::new())
+    }
+    pub fn navigate_with_headers(
+        &self,
+        url: impl Into<String>,
+        timeout: Duration,
+        cancellation: CancellationToken,
+        headers: Vec<(String, String)>,
+    ) -> Result<NavigationResponse, AutomationError> {
         if timeout.is_zero() {
             return Err(AutomationError::InvalidInput(
                 "timeout must be positive".into(),
             ));
         }
+        let mut request_headers = HeaderList::new();
+        for (name, value) in headers {
+            let name = name.parse::<http::HeaderName>().map_err(|error| {
+                AutomationError::InvalidInput(format!("invalid header name: {error}"))
+            })?;
+            let value = value.parse::<http::HeaderValue>().map_err(|error| {
+                AutomationError::InvalidInput(format!("invalid header value: {error}"))
+            })?;
+            request_headers.append(name, value);
+        }
         self.request(|response| Command::Navigate {
             url: url.into(),
             timeout,
             cancellation,
+            headers: request_headers,
             response,
         })?
     }
@@ -291,7 +311,8 @@ enum Command {
         url: String,
         timeout: Duration,
         cancellation: CancellationToken,
-        response: mpsc::SyncSender<Result<(), AutomationError>>,
+        headers: HeaderList,
+        response: mpsc::SyncSender<Result<NavigationResponse, AutomationError>>,
     },
     Evaluate {
         expression: String,
@@ -337,11 +358,12 @@ fn run_page(
                 url,
                 timeout,
                 cancellation,
+                headers,
                 response,
             } => {
                 let result = runtime.block_on(async {
                     tokio::select! {
-                        result = page.goto(&url) => result.map_err(AutomationError::from),
+                        result = page.goto_with_headers(&url, headers) => result.map_err(AutomationError::from),
                         () = wait_for_cancellation(cancellation) => Err(AutomationError::Cancellation),
                         () = tokio::time::sleep(timeout) => Err(AutomationError::Timeout(timeout)),
                     }

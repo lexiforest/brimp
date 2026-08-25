@@ -2,16 +2,28 @@
 
 | API | Tested behavior |
 | --- | --- |
-| `launch(persona_json=None)` | Creates the shared in-process automation browser and validates an optional persona. |
-| `Browser.new_page()` | Creates an owner-thread Brimp page. |
-| `Page.goto(url, timeout=30.0)` | Navigates asynchronously; asyncio cancellation reaches the core token. |
-| `Page.evaluate(source)` | Returns JSON-compatible Python values and rejects unsupported JavaScript values. |
-| `Page.title()` / `Page.text_content()` | Returns canonical document output. |
-| `Page.screenshot(full_page=False)` | Returns PNG `bytes` without text conversion. |
-| `Page.close()` / `Browser.close()` | Closes children in order and is idempotent. |
+| `get(url, **options)` | Creates a temporary Session, returns a detached Response, and closes native resources. |
+| `Session(persona_json=None)` | Creates one synchronous native session with persistent transport and cookie state. |
+| `Session.get(url, params=None, headers=None, cookies=None, timeout=30)` | Performs a GET navigation with a clean per-navigation JavaScript realm. |
+| `Response.status_code`, `reason`, `url`, `headers` | Exposes final main-response metadata without raising for HTTP error statuses. |
+| `Response.content` / `text` | Exposes the original final HTTP response bytes and decoded text. |
+| `Response.html` | Exposes serialized post-JavaScript DOM for HTML responses and `None` otherwise. |
+| `Response.json()` / `raise_for_status()` | Decodes JSON and explicitly raises `HTTPError` for 4xx/5xx responses. |
+| `Session.evaluate(source)` | Returns JSON-compatible Python values and rejects unsupported JavaScript values. |
+| `Session.screenshot(path=None, full_page=False)` | Returns PNG bytes and optionally writes the same bytes to a path. |
+| `Session.close()` / context manager | Closes native resources deterministically and is idempotent. |
 
-Failures use `BrimpError.code`: `invalid_input`, `transport`, `http_status`,
-`navigation`, `javascript`, `timeout`, `cancelled`, `unsupported`, `closed`,
-`screenshot`, or `internal`. Locators, browser modes, and raw protocol dispatch
-are not exposed. Task cancellation raises `BrimpCancelledError`, which remains
-an `asyncio.CancelledError` and has code `cancelled`.
+Session headers and method headers are merged, with method values taking
+precedence. `User-Agent` and `Accept-Language` remain persona-owned. Session and
+method cookies are sent with browser-managed cookies; response cookies update
+the Session cookie mapping.
+
+The initial API deliberately supports GET only. Sessions are sequential and
+not thread-safe. POST bodies, streaming, multipart uploads, prepared requests,
+transport adapters, per-request proxies, and an asynchronous Python facade are
+not exposed.
+
+Failures derive from `BrimpError`: `ConnectionError`, `Timeout`,
+`TooManyRedirects`, `InvalidRequest`, `InvalidURL`, `HTTPError`, and
+`JavaScriptError`. Uncaught website scripts do not fail navigation; explicit
+`Session.evaluate()` exceptions raise `JavaScriptError`.

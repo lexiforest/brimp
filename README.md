@@ -3,8 +3,9 @@
 Brimp is a lightweight, headless browser for agents. It combines JavaScriptCore with
 Blitz's DOM implementation and curl-impersonate as the network stack.
 
-If you are familiar with `curl_cffi`, you can simply treat brimp as **curl_cffi with
-JavaScript enabled**. Brimp offers both python and nodejs bindings.
+If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
+same simple request/response workflow with a JavaScript-rendered HTML result.
+Brimp offers Python and Node.js bindings.
 
 Brimp is inspired by Cloudflare's [kitesurf](https://blog.cloudflare.com/kitesurf/).
 
@@ -26,6 +27,8 @@ curl_cffi.
 - Much faster than playwright with Chromium, on par with popular alternatives.
 - Python and Nodejs bindings.
 - Pre-compiled, so you don't have to compile on your machine.
+- MIT licensed.
+
 
 For performance comparisons, see the [benchmark](#benchmark).
 
@@ -56,22 +59,29 @@ brimp screenshot https://example.com --output example.png --full-page
 
 ### Python
 
-The Python and Node bindings are native extensions loaded into their host processes.
-They do not start a server and are not CDP clients, making them more lightweight.
+The Python binding is synchronous and in-process. `Response.text` is the
+original HTTP response text; `Response.html` is the live DOM serialized after
+page scripts execute.
 
 ```python
-import asyncio
 import brimp
 
-async def main():
-    browser = await brimp.launch()
-    page = await browser.new_page()
-    await page.goto("https://example.com")
-    print(await page.evaluate("document.title"))
-    await page.close()
-    await browser.close()
+response = brimp.get("https://example.com")
+print(response.status_code)
+print(response.html)
+```
 
-asyncio.run(main())
+Use a Session to retain cookies and connections and to access the current
+rendered document:
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    response = session.get("https://example.com", params={"q": "browser"})
+    response.raise_for_status()
+    print(session.evaluate("document.title"))
+    session.screenshot("example.png", full_page=True)
 ```
 
 ### Node.js
@@ -166,7 +176,7 @@ The implemented runtime supports:
 The canonical owner-thread automation API is exposed through:
 
 - the `brimp` CLI for evaluation and screenshots;
-- asynchronous in-process Python and Node native bindings; and
+- a synchronous Requests-style Python binding and asynchronous Node binding; and
 - a bounded loopback CDP server for the checked Puppeteer workflow.
 
 All four interfaces delegate navigation, JavaScript, lifecycle, and screenshots
