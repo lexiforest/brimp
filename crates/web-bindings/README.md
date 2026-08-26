@@ -4,8 +4,8 @@ Manual JavaScriptCore bindings for Brimp's browser-facing APIs.
 
 The binding runtime maps stable JavaScript wrappers to Blitz node identifiers
 and implements the initial DOM, CSSOM, event, timer, fetch, cookie, `Location`,
-and `Navigator` surfaces. Every DOM and layout operation reads or mutates the
-canonical `BrowserDocument` directly.
+`URL`, `URLSearchParams`, and `Navigator` surfaces. Every DOM and layout
+operation reads or mutates the canonical `BrowserDocument` directly.
 
 Key internal components include:
 

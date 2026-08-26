@@ -1,6 +1,6 @@
 use std::{
     cell::RefCell,
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     rc::Rc,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
@@ -18,6 +18,45 @@ use crate::WrapperCache;
 const CLASS_DEFINITIONS: &str = r#"
 const __eventListeners = new WeakMap();
 
+class DOMException extends Error {
+    constructor(message = "", name = "Error") {
+        super(String(message));
+        this.name = String(name);
+    }
+    get code() {
+        return DOMException.__codes[this.name] || 0;
+    }
+}
+DOMException.__codes = {
+    IndexSizeError: 1,
+    HierarchyRequestError: 3,
+    WrongDocumentError: 4,
+    InvalidCharacterError: 5,
+    NoModificationAllowedError: 7,
+    NotFoundError: 8,
+    NotSupportedError: 9,
+    InUseAttributeError: 10,
+    InvalidStateError: 11,
+    SyntaxError: 12,
+    InvalidModificationError: 13,
+    NamespaceError: 14,
+    InvalidAccessError: 15,
+    TypeMismatchError: 17,
+    SecurityError: 18,
+    NetworkError: 19,
+    AbortError: 20,
+    URLMismatchError: 21,
+    QuotaExceededError: 22,
+    TimeoutError: 23,
+    InvalidNodeTypeError: 24,
+    DataCloneError: 25,
+};
+for (const [name, code] of Object.entries(DOMException.__codes)) {
+    const constant = name.replace(/Error$/, "").replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase() + "_ERR";
+    Object.defineProperty(DOMException, constant, { value: code, enumerable: true });
+    Object.defineProperty(DOMException.prototype, constant, { value: code, enumerable: true });
+}
+
 class Event {
     constructor(type, options = {}) {
         if (arguments.length === 0) throw new TypeError("Event type is required");
@@ -25,24 +64,59 @@ class Event {
         this.bubbles = Boolean(options.bubbles);
         this.cancelable = Boolean(options.cancelable);
         this.target = null;
+        this.srcElement = null;
         this.currentTarget = null;
         this.eventPhase = 0;
         this.defaultPrevented = false;
+        this.composed = Boolean(options.composed);
+        this.isTrusted = false;
+        this.timeStamp = Date.now();
         this.__stopped = false;
         this.__immediateStopped = false;
         this.__dispatching = false;
+        this.__inPassiveListener = false;
     }
-    preventDefault() { if (this.cancelable) this.defaultPrevented = true; }
+    preventDefault() {
+        if (this.cancelable && !this.__inPassiveListener) this.defaultPrevented = true;
+    }
     stopPropagation() { this.__stopped = true; }
     stopImmediatePropagation() {
         this.__immediateStopped = true;
         this.__stopped = true;
     }
+    composedPath() { return this.__path ? this.__path.slice() : []; }
+    initEvent(type, bubbles = false, cancelable = false) {
+        if (arguments.length === 0) throw new TypeError("Event type is required");
+        if (this.__dispatching) return;
+        this.type = String(type);
+        this.bubbles = Boolean(bubbles);
+        this.cancelable = Boolean(cancelable);
+        this.defaultPrevented = false;
+        this.__stopped = false;
+        this.__immediateStopped = false;
+    }
+    get cancelBubble() { return this.__stopped; }
+    set cancelBubble(value) { if (value) this.stopPropagation(); }
+    get returnValue() { return !this.defaultPrevented; }
+    set returnValue(value) { if (!value) this.preventDefault(); }
 }
 Event.NONE = 0;
 Event.CAPTURING_PHASE = 1;
 Event.AT_TARGET = 2;
 Event.BUBBLING_PHASE = 3;
+
+class CustomEvent extends Event {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.detail = options.detail === undefined ? null : options.detail;
+    }
+    initCustomEvent(type, bubbles = false, cancelable = false, detail = null) {
+        if (arguments.length === 0) throw new TypeError("Event type is required");
+        if (this.__dispatching) return;
+        this.initEvent(type, bubbles, cancelable);
+        this.detail = detail;
+    }
+}
 
 function __listenerCapture(options) {
     return typeof options === "boolean" ? options : Boolean(options && options.capture);
@@ -56,8 +130,13 @@ function __invokeListeners(target, event, capture, phase) {
     for (const listener of listeners) {
         if (listener.type !== event.type || listener.capture !== capture) continue;
         if (listener.once) target.removeEventListener(event.type, listener.callback, listener.capture);
-        if (typeof listener.callback === "function") listener.callback.call(target, event);
-        else listener.callback.handleEvent(event);
+        event.__inPassiveListener = listener.passive;
+        try {
+            if (typeof listener.callback === "function") listener.callback.call(target, event);
+            else listener.callback.handleEvent(event);
+        } finally {
+            event.__inPassiveListener = false;
+        }
         if (event.__immediateStopped) break;
     }
 }
@@ -66,13 +145,22 @@ class EventTarget {
     addEventListener(type, callback, options = false) {
         if (callback == null) return;
         const capture = __listenerCapture(options);
+        const signal = options && typeof options === "object" ? options.signal : undefined;
+        if (signal && signal.aborted) return;
         const listeners = __eventListeners.get(this) || [];
         if (!listeners.some(item => item.type === String(type) && item.callback === callback && item.capture === capture)) {
-            listeners.push({
+            const listener = {
                 type: String(type), callback, capture,
                 once: Boolean(options && typeof options === "object" && options.once),
-            });
+                passive: Boolean(options && typeof options === "object" && options.passive),
+            };
+            listeners.push(listener);
             __eventListeners.set(this, listeners);
+            if (signal) {
+                signal.addEventListener("abort", () => {
+                    this.removeEventListener(type, callback, capture);
+                }, { once: true });
+            }
         }
     }
     removeEventListener(type, callback, options = false) {
@@ -91,6 +179,7 @@ class EventTarget {
         let ancestor = this instanceof Node ? this.parentNode : null;
         while (ancestor) { path.push(ancestor); ancestor = ancestor.parentNode; }
         if (this instanceof Node && path[path.length - 1] !== window) path.push(window);
+        event.__path = [this, ...path];
         try {
             for (let i = path.length - 1; i >= 0 && !event.__stopped; i--) {
                 __invokeListeners(path[i], event, true, Event.CAPTURING_PHASE);
@@ -105,19 +194,95 @@ class EventTarget {
                     if (event.__stopped) break;
                 }
             }
+            if (!event.__stopped) {
+                const handler = this[`on${event.type}`];
+                if (typeof handler === "function") handler.call(this, event);
+            }
             return !event.defaultPrevented;
         } finally {
             event.currentTarget = null;
             event.eventPhase = Event.NONE;
             event.__dispatching = false;
+            event.__path = [];
         }
     }
+}
+
+class AbortSignal extends EventTarget {
+    constructor() {
+        super();
+        this.aborted = false;
+        this.reason = undefined;
+        this.onabort = null;
+        this.__dependents = [];
+    }
+    throwIfAborted() {
+        if (this.aborted) throw this.reason;
+    }
+    static abort(reason = undefined) {
+        const signal = new AbortSignal();
+        signal.__abort(reason);
+        return signal;
+    }
+    static timeout(milliseconds) {
+        milliseconds = Number(milliseconds);
+        if (!Number.isFinite(milliseconds) || milliseconds < 0 || milliseconds > 0xffffffff) {
+            throw new TypeError("timeout must be an unsigned long long");
+        }
+        const signal = new AbortSignal();
+        setTimeout(() => signal.__abort(new DOMException("The operation timed out", "TimeoutError")), milliseconds);
+        return signal;
+    }
+    static any(signals) {
+        const inputs = Array.from(signals);
+        for (const signal of inputs) {
+            if (!(signal instanceof AbortSignal)) throw new TypeError("value is not an AbortSignal");
+        }
+        const result = new AbortSignal();
+        const alreadyAborted = inputs.find(signal => signal.aborted);
+        if (alreadyAborted) {
+            result.__abort(alreadyAborted.reason);
+            return result;
+        }
+        for (const signal of new Set(inputs)) signal.__dependents.push(result);
+        return result;
+    }
+    __abort(reason = undefined) {
+        if (this.aborted) return;
+        const abortReason = reason === undefined
+            ? new DOMException("The operation was aborted", "AbortError")
+            : reason;
+        const queue = [this];
+        const aborted = [];
+        while (queue.length) {
+            const signal = queue.shift();
+            if (signal.aborted) continue;
+            signal.aborted = true;
+            signal.reason = abortReason;
+            aborted.push(signal);
+            queue.push(...signal.__dependents);
+        }
+        for (const signal of aborted) {
+            const event = new Event("abort");
+            event.isTrusted = true;
+            signal.dispatchEvent(event);
+        }
+    }
+}
+
+class AbortController {
+    constructor() { this.signal = new AbortSignal(); }
+    abort(reason = undefined) { this.signal.__abort(reason); }
 }
 
 class Node extends EventTarget {
     get nodeType() { return __brimp("nodeType", this); }
     get nodeName() { return __brimp("nodeName", this); }
     get parentNode() { return __brimp("parentNode", this); }
+    get parentElement() {
+        const parent = this.parentNode;
+        return parent instanceof Element ? parent : null;
+    }
     get firstChild() { return __brimp("firstChild", this); }
     get lastChild() { return __brimp("lastChild", this); }
     get childNodes() { return __brimp("childNodes", this); }
@@ -128,6 +293,11 @@ class Node extends EventTarget {
     insertBefore(child, reference) { return __brimp("insertBefore", this, child, reference); }
 }
 
+class DOMImplementation {
+    hasFeature() { return true; }
+}
+const __domImplementation = new DOMImplementation();
+
 class Document extends Node {
     get title() { return __brimp("title", this); }
     get cookie() { return __brimp("cookie", this); }
@@ -135,11 +305,176 @@ class Document extends Node {
     get documentElement() { return __brimp("documentElement", this); }
     get head() { return __brimp("head", this); }
     get body() { return __brimp("body", this); }
+    get implementation() { return __domImplementation; }
     createElement(name) { return __brimp("createElement", this, name); }
     createTextNode(text) { return __brimp("createTextNode", this, text); }
+    createEvent(interfaceName) {
+        switch (String(interfaceName).toLowerCase()) {
+            case "event":
+            case "events":
+            case "htmlevents":
+            case "svgevents": return new Event("");
+            case "customevent": return new CustomEvent("");
+            default: throw new DOMException("The event interface is not supported", "NotSupportedError");
+        }
+    }
     getElementById(id) { return __brimp("getElementById", this, id); }
+    getElementsByTagName(name) {
+        return new HTMLCollection(() => __brimp("getElementsByTagName", this, name));
+    }
+    getElementsByClassName(names) {
+        return new HTMLCollection(() => __brimp("getElementsByClassName", this, names));
+    }
     querySelector(selector) { return __brimp("querySelector", this, selector); }
-    querySelectorAll(selector) { return __brimp("querySelectorAll", this, selector); }
+    querySelectorAll(selector) { return new NodeList(__brimp("querySelectorAll", this, selector)); }
+}
+
+const __classLists = new WeakMap();
+
+function __domTokenListTokens(element) {
+    const value = element.getAttribute("class") || "";
+    const tokens = value.split(/[\t\n\f\r ]+/).filter(Boolean);
+    return [...new Set(tokens)];
+}
+
+function __validateDomToken(token) {
+    token = String(token);
+    if (token === "") throw new DOMException("The token must not be empty", "SyntaxError");
+    if (/[\t\n\f\r ]/.test(token)) {
+        throw new DOMException("The token must not contain ASCII whitespace", "InvalidCharacterError");
+    }
+    return token;
+}
+
+class DOMTokenList {
+    constructor(element) {
+        this.__element = element;
+        return new Proxy(this, {
+            get(target, property, receiver) {
+                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
+                    return target.item(Number(property)) ?? undefined;
+                }
+                return Reflect.get(target, property, receiver);
+            },
+            has(target, property) {
+                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
+                    return Number(property) < target.length;
+                }
+                return Reflect.has(target, property);
+            },
+        });
+    }
+    get length() { return __domTokenListTokens(this.__element).length; }
+    get value() { return this.__element.getAttribute("class") || ""; }
+    set value(value) { this.__element.setAttribute("class", String(value)); }
+    item(index) { return __domTokenListTokens(this.__element)[Number(index)] ?? null; }
+    contains(token) { return __domTokenListTokens(this.__element).includes(String(token)); }
+    add(...tokens) {
+        tokens = tokens.map(__validateDomToken);
+        const values = __domTokenListTokens(this.__element);
+        for (const token of tokens) if (!values.includes(token)) values.push(token);
+        this.__element.setAttribute("class", values.join(" "));
+    }
+    remove(...tokens) {
+        tokens = tokens.map(__validateDomToken);
+        const remove = new Set(tokens);
+        const values = __domTokenListTokens(this.__element);
+        if (this.__element.getAttribute("class") !== null) {
+            this.__element.setAttribute("class", values.filter(token => !remove.has(token)).join(" "));
+        }
+    }
+    toggle(token, force = undefined) {
+        token = __validateDomToken(token);
+        const present = this.contains(token);
+        if (arguments.length > 1) {
+            if (Boolean(force)) { if (!present) this.add(token); return true; }
+            if (present) this.remove(token);
+            return false;
+        }
+        if (present) { this.remove(token); return false; }
+        this.add(token);
+        return true;
+    }
+    replace(token, newToken) {
+        token = String(token);
+        newToken = String(newToken);
+        if (token === "" || newToken === "") {
+            throw new DOMException("The token must not be empty", "SyntaxError");
+        }
+        if (/[\t\n\f\r ]/.test(token) || /[\t\n\f\r ]/.test(newToken)) {
+            throw new DOMException("The token must not contain ASCII whitespace", "InvalidCharacterError");
+        }
+        const values = __domTokenListTokens(this.__element);
+        const index = values.indexOf(token);
+        if (index === -1) return false;
+        values[index] = newToken;
+        this.__element.setAttribute("class", [...new Set(values)].join(" "));
+        return true;
+    }
+    supports() { throw new TypeError("classList has no supported tokens"); }
+    entries() { return __domTokenListTokens(this.__element).entries(); }
+    keys() { return __domTokenListTokens(this.__element).keys(); }
+    values() { return __domTokenListTokens(this.__element).values(); }
+    forEach(callback, thisArg = undefined) {
+        __domTokenListTokens(this.__element).forEach((value, index) => callback.call(thisArg, value, index, this));
+    }
+    toString() { return this.value; }
+    get [Symbol.toStringTag]() { return "DOMTokenList"; }
+}
+DOMTokenList.prototype.entries = Array.prototype.entries;
+DOMTokenList.prototype.keys = Array.prototype.keys;
+DOMTokenList.prototype.values = Array.prototype.values;
+DOMTokenList.prototype.forEach = Array.prototype.forEach;
+DOMTokenList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+
+class HTMLCollection {
+    constructor(items) {
+        this.__items = items;
+        return new Proxy(this, {
+            get(target, property, receiver) {
+                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
+                    return target.item(Number(property)) ?? undefined;
+                }
+                if (Reflect.has(target, property)) return Reflect.get(target, property, receiver);
+                if (typeof property === "string") return target.namedItem(property) ?? undefined;
+                return undefined;
+            },
+            has(target, property) {
+                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
+                    return Number(property) < target.length;
+                }
+                if (Reflect.has(target, property)) return true;
+                return typeof property === "string" && target.namedItem(property) !== null;
+            },
+            getOwnPropertyDescriptor(target, property) {
+                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
+                    const value = target.item(Number(property));
+                    return value === null ? undefined : {
+                        value, configurable: true, enumerable: true, writable: false,
+                    };
+                }
+                return Reflect.getOwnPropertyDescriptor(target, property);
+            },
+        });
+    }
+    get length() { return this.__items().length; }
+    item(index) { return this.__items()[Number(index)] ?? null; }
+    namedItem(name) {
+        name = String(name);
+        if (name === "") return null;
+        return this.__items().find(element => element.id === name || element.getAttribute("name") === name) ?? null;
+    }
+    get [Symbol.toStringTag]() { return "HTMLCollection"; }
+    [Symbol.iterator]() { return this.__items()[Symbol.iterator](); }
+}
+
+class NodeList extends Array {
+    constructor(items = []) {
+        if (typeof items === "number") super(items);
+        else super(...items);
+    }
+    item(index) { return this[Number(index)] ?? null; }
+    get [Symbol.toStringTag]() { return "NodeList"; }
 }
 
 class Element extends Node {
@@ -148,6 +483,12 @@ class Element extends Node {
     set id(value) { __brimp("setAttribute", this, "id", value); }
     get className() { return __brimp("getAttributeOrEmpty", this, "class"); }
     set className(value) { __brimp("setAttribute", this, "class", value); }
+    get classList() {
+        let list = __classLists.get(this);
+        if (!list) { list = new DOMTokenList(this); __classLists.set(this, list); }
+        return list;
+    }
+    set classList(value) {}
     get innerHTML() { return __brimp("innerHTML", this); }
     set innerHTML(value) { __brimp("setInnerHTML", this, value); }
     get style() { return __brimp("style", this); }
@@ -162,12 +503,42 @@ class Element extends Node {
     getAttribute(name) { return __brimp("getAttribute", this, name); }
     setAttribute(name, value) { __brimp("setAttribute", this, name, value); }
     removeAttribute(name) { __brimp("removeAttribute", this, name); }
+    hasAttribute(name) { return this.getAttribute(name) !== null; }
+    getElementsByTagName(name) {
+        return new HTMLCollection(() => __brimp("getElementsByTagName", this, name));
+    }
+    getElementsByClassName(names) {
+        return new HTMLCollection(() => __brimp("getElementsByClassName", this, names));
+    }
+    querySelector(selector) { return __brimp("querySelector", this, selector); }
+    querySelectorAll(selector) { return new NodeList(__brimp("querySelectorAll", this, selector)); }
+    matches(selector) { return __brimp("matches", this, selector); }
+    closest(selector) {
+        let element = this;
+        while (element) {
+            if (element.matches(selector)) return element;
+            element = element.parentElement;
+        }
+        return null;
+    }
     click() { this.dispatchEvent(new Event("click", { bubbles: true, cancelable: true })); }
 }
 
 class HTMLElement extends Element {}
+class HTMLAnchorElement extends HTMLElement {
+    get href() { return __brimp("elementUrl", this, "href"); }
+    set href(value) { this.setAttribute("href", value); }
+    get origin() { return __brimp("elementUrl", this, "origin"); }
+}
+class HTMLBaseElement extends HTMLElement {
+    get href() { return __brimp("elementUrl", this, "href"); }
+    set href(value) { this.setAttribute("href", value); }
+}
 class Text extends Node {}
 class Window extends EventTarget {}
+Object.defineProperty(Window, Symbol.hasInstance, {
+    value(object) { return object === globalThis; },
+});
 Object.defineProperties(Window.prototype, {
     innerWidth: { get() { return __brimp("innerWidth", this); } },
     innerHeight: { get() { return __brimp("innerHeight", this); } },
@@ -193,6 +564,113 @@ class Navigator {
     get language() { return "en-US"; }
     get languages() { return ["en-US", "en"]; }
 }
+
+function __urlRecord(input, base = undefined) {
+    try {
+        return JSON.parse(__brimp("urlParse", window, String(input), base === undefined ? "" : String(base)));
+    } catch (_) {
+        throw new TypeError("Invalid URL");
+    }
+}
+
+class URLSearchParams {
+    constructor(init = "", owner = null) {
+        this.__owner = owner;
+        if (typeof init === "string") {
+            this.__pairs = JSON.parse(__brimp("urlSearchParamsParse", window, init));
+        } else if (init != null && typeof init[Symbol.iterator] === "function") {
+            this.__pairs = Array.from(init, pair => {
+                if (pair == null || typeof pair[Symbol.iterator] !== "function") throw new TypeError("each query pair must be iterable");
+                const values = Array.from(pair);
+                if (values.length !== 2) throw new TypeError("each query pair must have two items");
+                return [String(values[0]), String(values[1])];
+            });
+        } else if (init != null) {
+            this.__pairs = Object.keys(init).map(name => [name, String(init[name])]);
+        } else {
+            this.__pairs = [];
+        }
+    }
+    get size() { return this.__pairs.length; }
+    append(name, value) { this.__pairs.push([String(name), String(value)]); this.__changed(); }
+    delete(name, value = undefined) {
+        name = String(name);
+        this.__pairs = this.__pairs.filter(pair => pair[0] !== name || (value !== undefined && pair[1] !== String(value)));
+        this.__changed();
+    }
+    get(name) { name = String(name); const pair = this.__pairs.find(pair => pair[0] === name); return pair ? pair[1] : null; }
+    getAll(name) { name = String(name); return this.__pairs.filter(pair => pair[0] === name).map(pair => pair[1]); }
+    has(name, value = undefined) {
+        name = String(name);
+        return this.__pairs.some(pair => pair[0] === name && (value === undefined || pair[1] === String(value)));
+    }
+    set(name, value) {
+        name = String(name); value = String(value);
+        const index = this.__pairs.findIndex(pair => pair[0] === name);
+        if (index === -1) this.__pairs.push([name, value]);
+        else {
+            this.__pairs[index][1] = value;
+            this.__pairs = this.__pairs.filter((pair, item) => pair[0] !== name || item === index);
+        }
+        this.__changed();
+    }
+    sort() {
+        this.__pairs = this.__pairs.map((pair, index) => [pair, index])
+            .sort((a, b) => a[0][0] < b[0][0] ? -1 : a[0][0] > b[0][0] ? 1 : a[1] - b[1])
+            .map(item => item[0]);
+        this.__changed();
+    }
+    entries() { return this.__pairs.map(pair => pair.slice())[Symbol.iterator](); }
+    keys() { return this.__pairs.map(pair => pair[0])[Symbol.iterator](); }
+    values() { return this.__pairs.map(pair => pair[1])[Symbol.iterator](); }
+    forEach(callback, thisArg = undefined) {
+        for (const [name, value] of this.__pairs) callback.call(thisArg, value, name, this);
+    }
+    toString() { return __brimp("urlSearchParamsSerialize", window, JSON.stringify(this.__pairs)); }
+    [Symbol.iterator]() { return this.entries(); }
+    __changed() { if (this.__owner !== null) this.__owner.search = this.toString(); }
+}
+
+class URL {
+    constructor(input, base = undefined) {
+        this.__href = __urlRecord(input, base).href;
+        this.__searchParams = new URLSearchParams(this.search, this);
+    }
+    static canParse(input, base = undefined) { try { __urlRecord(input, base); return true; } catch (_) { return false; } }
+    static parse(input, base = undefined) { try { return new URL(input, base); } catch (_) { return null; } }
+    get href() { return this.__href; }
+    set href(value) { this.__set("href", value); }
+    get origin() { return __urlRecord(this.__href).origin; }
+    get protocol() { return __urlRecord(this.__href).protocol; }
+    set protocol(value) { this.__set("protocol", value); }
+    get username() { return __urlRecord(this.__href).username; }
+    set username(value) { this.__set("username", value); }
+    get password() { return __urlRecord(this.__href).password; }
+    set password(value) { this.__set("password", value); }
+    get host() { return __urlRecord(this.__href).host; }
+    set host(value) { this.__set("host", value); }
+    get hostname() { return __urlRecord(this.__href).hostname; }
+    set hostname(value) { this.__set("hostname", value); }
+    get port() { return __urlRecord(this.__href).port; }
+    set port(value) { this.__set("port", value); }
+    get pathname() { return __urlRecord(this.__href).pathname; }
+    set pathname(value) { this.__set("pathname", value); }
+    get search() { return __urlRecord(this.__href).search; }
+    set search(value) { this.__set("search", value); }
+    get searchParams() { return this.__searchParams; }
+    get hash() { return __urlRecord(this.__href).hash; }
+    set hash(value) { this.__set("hash", value); }
+    toString() { return this.href; }
+    toJSON() { return this.href; }
+    __set(component, value) {
+        this.__href = __brimp("urlSet", window, this.__href, component, String(value));
+        if (this.__searchParams) {
+            this.__searchParams.__pairs = JSON.parse(__brimp("urlSearchParamsParse", window, this.search));
+        }
+    }
+}
+globalThis.URL = URL;
+globalThis.URLSearchParams = URLSearchParams;
 
 class Headers {
     constructor(init = undefined) {
@@ -268,6 +746,18 @@ class CSSStyleDeclaration {
     removeProperty(name) { return __brimp("styleRemoveProperty", this, name); }
 }
 
+globalThis.DOMImplementation = DOMImplementation;
+globalThis.DOMException = DOMException;
+globalThis.Event = Event;
+globalThis.CustomEvent = CustomEvent;
+globalThis.AbortSignal = AbortSignal;
+globalThis.AbortController = AbortController;
+globalThis.DOMTokenList = DOMTokenList;
+globalThis.HTMLCollection = HTMLCollection;
+globalThis.NodeList = NodeList;
+globalThis.HTMLAnchorElement = HTMLAnchorElement;
+globalThis.HTMLBaseElement = HTMLBaseElement;
+
 for (const [property, cssName] of [
     ["width", "width"],
     ["height", "height"],
@@ -283,8 +773,16 @@ for (const [property, cssName] of [
     });
 }
 
-globalThis.window = Object.create(Window.prototype);
-globalThis.self = globalThis.window;
+globalThis.window = globalThis;
+globalThis.self = globalThis;
+globalThis.addEventListener = EventTarget.prototype.addEventListener;
+globalThis.removeEventListener = EventTarget.prototype.removeEventListener;
+globalThis.dispatchEvent = EventTarget.prototype.dispatchEvent;
+Object.defineProperties(globalThis, {
+    innerWidth: { get: Object.getOwnPropertyDescriptor(Window.prototype, "innerWidth").get },
+    innerHeight: { get: Object.getOwnPropertyDescriptor(Window.prototype, "innerHeight").get },
+    devicePixelRatio: { get: Object.getOwnPropertyDescriptor(Window.prototype, "devicePixelRatio").get },
+});
 window.fetch = globalThis.fetch;
 globalThis.location = Object.create(Location.prototype);
 globalThis.navigator = Object.create(Navigator.prototype);
@@ -459,6 +957,10 @@ impl BrowsingContext {
         *self.url.lock().expect("browsing URL lock poisoned") = Some(url.into());
     }
 
+    fn current_url(&self) -> Option<String> {
+        self.url.lock().expect("browsing URL lock poisoned").clone()
+    }
+
     pub fn store_response_cookie(&self, url: &str, header: &str) {
         let (Ok(url), Ok(cookie)) = (
             url::Url::parse(url),
@@ -536,6 +1038,8 @@ struct Prototypes {
     node: ProtectedJsObject,
     document: ProtectedJsObject,
     html_element: ProtectedJsObject,
+    html_anchor_element: ProtectedJsObject,
+    html_base_element: ProtectedJsObject,
     text: ProtectedJsObject,
     css_style: ProtectedJsObject,
 }
@@ -566,6 +1070,8 @@ impl BindingRuntime {
             node: runtime.eval("Node.prototype")?.to_object()?,
             document: runtime.eval("Document.prototype")?.to_object()?,
             html_element: runtime.eval("HTMLElement.prototype")?.to_object()?,
+            html_anchor_element: runtime.eval("HTMLAnchorElement.prototype")?.to_object()?,
+            html_base_element: runtime.eval("HTMLBaseElement.prototype")?.to_object()?,
             text: runtime.eval("Text.prototype")?.to_object()?,
             css_style: runtime.eval("CSSStyleDeclaration.prototype")?.to_object()?,
         });
@@ -668,6 +1174,43 @@ fn dispatch(state: &BindingState, call: &NativeCall<'_>) -> Result<NativeValue, 
                 _ => return Err(NativeError::new("unknown Location property")),
             };
             Ok(NativeValue::String(value))
+        }
+        "urlParse" => {
+            let input = required_string(call, 2, "URL input")?;
+            let base = required_string(call, 3, "URL base")?;
+            let base = (!base.is_empty())
+                .then(|| url::Url::parse(&base).map_err(err))
+                .transpose()?;
+            let parsed = url::Url::options()
+                .base_url(base.as_ref())
+                .parse(&input)
+                .map_err(err)?;
+            Ok(NativeValue::String(url_record_json(&parsed)?))
+        }
+        "urlSet" => {
+            let href = required_string(call, 2, "URL href")?;
+            let component = required_string(call, 3, "URL component")?;
+            let value = required_string(call, 4, "URL component value")?;
+            Ok(NativeValue::String(set_url_component(
+                &href, &component, &value,
+            )?))
+        }
+        "urlSearchParamsParse" => {
+            let input = required_string(call, 2, "query")?;
+            let pairs = url::form_urlencoded::parse(input.trim_start_matches('?').as_bytes())
+                .into_owned()
+                .collect::<Vec<_>>();
+            Ok(NativeValue::String(
+                serde_json::to_string(&pairs).map_err(err)?,
+            ))
+        }
+        "urlSearchParamsSerialize" => {
+            let input = required_string(call, 2, "query pairs")?;
+            let pairs: Vec<(String, String)> = serde_json::from_str(&input).map_err(err)?;
+            let output = url::form_urlencoded::Serializer::new(String::new())
+                .extend_pairs(pairs)
+                .finish();
+            Ok(NativeValue::String(output))
         }
         "fetch" => {
             let url = required_string(call, 2, "fetch URL")?;
@@ -782,25 +1325,94 @@ fn dispatch(state: &BindingState, call: &NativeCall<'_>) -> Result<NativeValue, 
             let node = state.document.borrow().get_element_by_id(&id);
             optional_node(state, call, node)
         }
+        "getElementsByTagName" => {
+            let root_id = required_parent_node_target(state, call)?;
+            let name = required_string(call, 2, "name")?.to_ascii_lowercase();
+            let document = state.document.borrow();
+            let nodes = descendant_ids(&document, root_id)?
+                .into_iter()
+                .filter(|id| {
+                    document.node(*id).is_some_and(|node| match &node.data {
+                        NodeData::Element(element) => {
+                            name == "*" || element.name.local.as_ref() == name
+                        }
+                        _ => false,
+                    })
+                })
+                .collect::<Vec<_>>();
+            drop(document);
+            node_array(state, call, &nodes)
+        }
+        "getElementsByClassName" => {
+            let root_id = required_parent_node_target(state, call)?;
+            let names = required_string(call, 2, "class names")?
+                .split_ascii_whitespace()
+                .map(str::to_owned)
+                .collect::<Vec<_>>();
+            let document = state.document.borrow();
+            let nodes = if names.is_empty() {
+                Vec::new()
+            } else {
+                descendant_ids(&document, root_id)?
+                    .into_iter()
+                    .filter(|id| {
+                        document
+                            .node(*id)
+                            .and_then(|node| node.element_data())
+                            .and_then(|element| element.attr(LocalName::from("class")))
+                            .is_some_and(|classes| {
+                                let classes =
+                                    classes.split_ascii_whitespace().collect::<HashSet<_>>();
+                                names.iter().all(|name| classes.contains(name.as_str()))
+                            })
+                    })
+                    .collect()
+            };
+            drop(document);
+            node_array(state, call, &nodes)
+        }
         "querySelector" => {
-            required_document_target(state, call)?;
+            let root_id = required_parent_node_target(state, call)?;
             let selector = required_string(call, 2, "selector")?;
-            let node = state
-                .document
-                .borrow()
-                .query_selector(&selector)
-                .map_err(err)?;
+            let document = state.document.borrow();
+            let descendants = descendant_ids(&document, root_id)?
+                .into_iter()
+                .collect::<HashSet<_>>();
+            let node = document
+                .query_selector_all(&selector)
+                .map_err(err)?
+                .into_iter()
+                .find(|id| descendants.contains(id));
+            drop(document);
             optional_node(state, call, node)
         }
         "querySelectorAll" => {
-            required_document_target(state, call)?;
+            let root_id = required_parent_node_target(state, call)?;
             let selector = required_string(call, 2, "selector")?;
-            let nodes = state
-                .document
-                .borrow()
+            let document = state.document.borrow();
+            let descendants = descendant_ids(&document, root_id)?
+                .into_iter()
+                .collect::<HashSet<_>>();
+            let nodes = document
                 .query_selector_all(&selector)
-                .map_err(err)?;
+                .map_err(err)?
+                .into_iter()
+                .filter(|id| descendants.contains(id))
+                .collect::<Vec<_>>();
+            drop(document);
             node_array(state, call, &nodes)
+        }
+        "matches" => {
+            let id = required_element_target(state, call)?;
+            let selector = required_string(call, 2, "selector")?;
+            Ok(NativeValue::Boolean(
+                state
+                    .document
+                    .borrow()
+                    .query_selector_all(&selector)
+                    .map_err(err)?
+                    .contains(&id),
+            ))
         }
         "nodeType" => {
             let id = required_node_target(state, call)?;
@@ -941,6 +1553,54 @@ fn dispatch(state: &BindingState, call: &NativeCall<'_>) -> Result<NativeValue, 
                 .mutate()
                 .clear_attribute(id, name);
             Ok(NativeValue::Undefined)
+        }
+        "elementUrl" => {
+            let id = required_element_target(state, call)?;
+            let property = required_string(call, 2, "URL property")?;
+            let document = state.document.borrow();
+            let element = document
+                .node(id)
+                .and_then(|node| node.element_data())
+                .ok_or_else(stale_wrapper)?;
+            let input = element
+                .attr(LocalName::from("href"))
+                .unwrap_or_default()
+                .to_owned();
+            let document_url = state
+                .browsing_context
+                .current_url()
+                .and_then(|url| url::Url::parse(&url).ok());
+            let base_url = if element.name.local.as_ref() == "base" {
+                document_url.clone()
+            } else {
+                document
+                    .query_selector("base[href]")
+                    .ok()
+                    .flatten()
+                    .and_then(|base_id| {
+                        document
+                            .node(base_id)
+                            .and_then(|node| node.element_data())
+                            .and_then(|base| base.attr(LocalName::from("href")))
+                    })
+                    .and_then(|base| {
+                        url::Url::options()
+                            .base_url(document_url.as_ref())
+                            .parse(base)
+                            .ok()
+                    })
+                    .or(document_url)
+            };
+            let parsed = url::Url::options()
+                .base_url(base_url.as_ref())
+                .parse(&input)
+                .map_err(err)?;
+            let value = match property.as_str() {
+                "href" => parsed.as_str().to_owned(),
+                "origin" => parsed.origin().ascii_serialization(),
+                _ => return Err(NativeError::new("unknown element URL property")),
+            };
+            Ok(NativeValue::String(value))
         }
         "innerHTML" => {
             let id = required_element_target(state, call)?;
@@ -1106,6 +1766,24 @@ fn required_document_target(
     }
 }
 
+fn required_parent_node_target(
+    state: &BindingState,
+    call: &NativeCall<'_>,
+) -> Result<NodeId, NativeError> {
+    let id = required_node_target(state, call)?;
+    let is_parent_node = state.document.borrow().node(id).is_some_and(|node| {
+        matches!(
+            node.data,
+            NodeData::Document | NodeData::Element(_) | NodeData::AnonymousBlock(_)
+        )
+    });
+    if is_parent_node {
+        Ok(id)
+    } else {
+        Err(NativeError::new("receiver is not a ParentNode"))
+    }
+}
+
 fn required_element_target(
     state: &BindingState,
     call: &NativeCall<'_>,
@@ -1156,8 +1834,12 @@ fn node_value(
         let prototypes = prototypes(state);
         match node.data {
             NodeData::Document => prototypes.document.identity(),
-            NodeData::Element(_) | NodeData::AnonymousBlock(_) => {
-                prototypes.html_element.identity()
+            NodeData::Element(ref element) | NodeData::AnonymousBlock(ref element) => {
+                match element.name.local.as_ref() {
+                    "a" => prototypes.html_anchor_element.identity(),
+                    "base" => prototypes.html_base_element.identity(),
+                    _ => prototypes.html_element.identity(),
+                }
             }
             NodeData::Text(_) => prototypes.text.identity(),
             NodeData::Comment => prototypes.node.identity(),
@@ -1341,6 +2023,70 @@ fn inline_style_property(state: &BindingState, node_id: NodeId, name: &str) -> S
 
 fn resolve_document(state: &BindingState) {
     state.document.borrow_mut().resolve();
+}
+
+fn url_record_json(url: &url::Url) -> Result<String, NativeError> {
+    let host = match (url.host_str(), url.port()) {
+        (Some(host), Some(port)) => format!("{host}:{port}"),
+        (Some(host), None) => host.to_owned(),
+        (None, _) => String::new(),
+    };
+    serde_json::to_string(&serde_json::json!({
+        "href": url.as_str(),
+        "origin": url.origin().ascii_serialization(),
+        "protocol": format!("{}:", url.scheme()),
+        "username": url.username(),
+        "password": url.password().unwrap_or_default(),
+        "host": host,
+        "hostname": url.host_str().unwrap_or_default(),
+        "port": url.port().map(|port| port.to_string()).unwrap_or_default(),
+        "pathname": url.path(),
+        "search": url.query().map(|query| format!("?{query}")).unwrap_or_default(),
+        "hash": url.fragment().map(|fragment| format!("#{fragment}")).unwrap_or_default(),
+    }))
+    .map_err(err)
+}
+
+fn set_url_component(href: &str, component: &str, value: &str) -> Result<String, NativeError> {
+    if component == "href" {
+        return url::Url::parse(value).map(|url| url.into()).map_err(err);
+    }
+    let mut url = url::Url::parse(href).map_err(err)?;
+    match component {
+        "protocol" => {
+            let _ = url.set_scheme(value.trim_end_matches(':'));
+        }
+        "username" => {
+            let _ = url.set_username(value);
+        }
+        "password" => {
+            let _ = url.set_password(Some(value));
+        }
+        "host" => {
+            if let Ok(host_url) = url::Url::parse(&format!("{}://{value}/", url.scheme())) {
+                let _ = url.set_host(host_url.host_str());
+                let _ = url.set_port(host_url.port());
+            }
+        }
+        "hostname" => {
+            let _ = url.set_host(Some(value));
+        }
+        "port" => {
+            let port = if value.is_empty() {
+                None
+            } else if let Ok(port) = value.parse::<u16>() {
+                Some(port)
+            } else {
+                return Ok(url.into());
+            };
+            let _ = url.set_port(port);
+        }
+        "pathname" => url.set_path(value),
+        "search" => url.set_query((!value.is_empty()).then(|| value.trim_start_matches('?'))),
+        "hash" => url.set_fragment((!value.is_empty()).then(|| value.trim_start_matches('#'))),
+        _ => return Err(NativeError::new("unknown URL component")),
+    }
+    Ok(url.into())
 }
 
 fn stale_wrapper() -> NativeError {

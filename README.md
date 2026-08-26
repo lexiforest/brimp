@@ -7,7 +7,6 @@ If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
 same simple request/response workflow with a JavaScript-rendered HTML result.
 Brimp offers Python and Node.js bindings.
 
-Brimp is inspired by Cloudflare's [kitesurf](https://blog.cloudflare.com/kitesurf/).
 
 ## Why
 
@@ -190,6 +189,8 @@ cargo run -p brimp-cdp -- --bind 127.0.0.1:9222
 ## Development
 
 ### Architecture
+
+Brimp is inspired by Cloudflare's [kitesurf](https://blog.cloudflare.com/kitesurf/).
 
 The implemented runtime supports:
 

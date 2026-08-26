@@ -11,4 +11,5 @@ cookie_store = "0.22.1"
 http = "1"
 jsc = { path = "../jsc" }
 network = { path = "../network" }
+serde_json = "1"
 url = "2"

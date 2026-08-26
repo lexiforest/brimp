@@ -61,3 +61,40 @@ fn listeners_can_be_removed_and_cancel_dispatch() {
         "false,false,true"
     );
 }
+
+#[test]
+fn creates_legacy_events_and_abort_signals() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_content("<html><body></body></html>").unwrap();
+
+    let result = page
+        .eval(
+            r#"
+            const event = document.createEvent("Events");
+            event.initEvent("ready", true, true);
+            const controller = new AbortController();
+            const dependent = AbortSignal.any([controller.signal]);
+            let calls = 0;
+            dependent.addEventListener("abort", e => {
+                if (e.isTrusted && e.target === dependent) calls++;
+            });
+            controller.abort("done");
+            [
+                event.type,
+                event.bubbles,
+                event.cancelable,
+                dependent.aborted,
+                dependent.reason,
+                calls,
+                AbortSignal.abort().reason instanceof DOMException,
+                DOMException.ABORT_ERR,
+            ].join(",");
+            "#,
+        )
+        .unwrap()
+        .to_string()
+        .unwrap();
+
+    assert_eq!(result, "ready,true,true,true,done,1,true,20");
+}

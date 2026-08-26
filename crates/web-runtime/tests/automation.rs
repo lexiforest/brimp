@@ -36,6 +36,10 @@ fn shared_automation_workflow_navigates_evaluates_screenshots_and_closes() {
             .unwrap()["answer"],
         42
     );
+    page.evaluate("setTimeout(() => { globalThis.timerFinished = true; }, 10)")
+        .unwrap();
+    std::thread::sleep(Duration::from_millis(30));
+    assert_eq!(page.evaluate("timerFinished").unwrap(), true);
     assert!(page.text_content().unwrap().contains("Hello"));
     assert!(
         page.screenshot(false)

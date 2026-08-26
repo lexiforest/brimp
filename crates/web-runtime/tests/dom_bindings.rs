@@ -21,6 +21,10 @@ fn exposes_window_document_classes_and_stable_wrappers() {
     let page = page_with("<html><head></head><body><div id='box'>Hello</div></body></html>");
 
     assert_js(&page, "window === self");
+    assert_js(&page, "window.window === window && window.self === window");
+    assert_js(&page, "typeof addEventListener === 'function'");
+    assert_js(&page, "typeof removeEventListener === 'function'");
+    assert_js(&page, "typeof dispatchEvent === 'function'");
     assert_js(&page, "document === window.document");
     assert_js(&page, "document instanceof Document");
     assert_js(&page, "document instanceof Node");
@@ -33,6 +37,111 @@ fn exposes_window_document_classes_and_stable_wrappers() {
     assert_js(
         &page,
         "document.querySelector('#box') === document.getElementById('box')",
+    );
+}
+
+#[test]
+fn exposes_url_and_url_search_params() {
+    let page = page_with(
+        "<html><head><base href='https://example.test/base/'></head>\
+         <body><a id='link' href='../item?q=one'></a></body></html>",
+    );
+
+    assert_js(
+        &page,
+        "new URL('../item?q=one', 'https://example.test/base/').href === 'https://example.test/item?q=one'",
+    );
+    assert_js(
+        &page,
+        "new URL('https://user:pass@example.test:8443/a#b').origin === 'https://example.test:8443'",
+    );
+    assert_js(
+        &page,
+        "self.hasOwnProperty('URL') && self.hasOwnProperty('URLSearchParams')",
+    );
+    assert_js(
+        &page,
+        "(() => { const url = new URL('https://old.test:8000/'); url.host = 'new.test:9000'; return url.host === 'new.test:9000'; })()",
+    );
+    assert_js(
+        &page,
+        "(() => { const url = new URL('https://example.test/'); url.searchParams.append('a b', 'c+d'); return url.search === '?a+b=c%2Bd'; })()",
+    );
+    assert_js(
+        &page,
+        "(() => { const params = new URLSearchParams('b=2&a=1&a=3'); params.sort(); return params.toString() === 'a=1&a=3&b=2' && params.getAll('a').length === 2; })()",
+    );
+    assert_js(&page, "URL.canParse('/path', 'https://example.test/')");
+    assert_js(&page, "URL.parse('not a url') === null");
+    assert_js(
+        &page,
+        "document.querySelector('base') instanceof HTMLBaseElement && \
+         document.getElementById('link') instanceof HTMLAnchorElement && \
+         document.getElementById('link').href === 'https://example.test/item?q=one' && \
+         document.getElementById('link').origin === 'https://example.test'",
+    );
+}
+
+#[test]
+fn exposes_dom_implementation_has_feature() {
+    let page = page_with("<!doctype html><title>DOM implementation</title>");
+
+    assert_js(
+        &page,
+        "document.implementation === document.implementation && \
+         document.implementation instanceof DOMImplementation && \
+         document.implementation.hasFeature() && \
+         document.implementation.hasFeature('Core', '2.0')",
+    );
+}
+
+#[test]
+fn class_list_is_live_iterable_and_validates_tokens() {
+    let page =
+        page_with("<html><body><div id='box' class='  alpha alpha beta '></div></body></html>");
+
+    assert_js(
+        &page,
+        r##"(() => {
+            const box = document.getElementById("box");
+            const list = box.classList;
+            if (!(list instanceof DOMTokenList) || list !== box.classList) return false;
+            if (list.length !== 2 || list[0] !== "alpha" || list.item(1) !== "beta") return false;
+            if (String(list) !== "  alpha alpha beta ") return false;
+            list.add("gamma", "alpha");
+            list.remove("beta");
+            if ([...list].join(",") !== "alpha,gamma") return false;
+            if (!list.toggle("delta", true) || list.toggle("gamma", false)) return false;
+            if (!list.replace("delta", "epsilon") || list.contains("delta")) return false;
+            try { list.add("bad token"); return false; }
+            catch (error) { return error instanceof DOMException && error.name === "InvalidCharacterError"; }
+        })()"##,
+    );
+}
+
+#[test]
+fn element_queries_and_html_collections_are_scoped_and_live() {
+    let page = page_with(
+        "<html><body><section id='one'><div id='first' class='item common'></div></section>\
+         <section id='two'><div id='second' class='item'></div></section></body></html>",
+    );
+
+    assert_js(
+        &page,
+        r##"(() => {
+            const one = document.getElementById("one");
+            const collection = one.getElementsByClassName("item common");
+            if (!(collection instanceof HTMLCollection) || collection.length !== 1) return false;
+            if (collection[0].id !== "first" || collection.namedItem("first") !== collection[0]) return false;
+            const selected = one.querySelectorAll(".item");
+            if (!(selected instanceof NodeList) || selected.length !== 1 || selected.map(node => node.id).join() !== "first") return false;
+            if (one.querySelector("#second") !== null) return false;
+            if (!collection[0].matches(".common") || collection[0].closest("section") !== one) return false;
+            const added = document.createElement("div");
+            added.className = "item common";
+            one.appendChild(added);
+            return collection.length === 2 && one.getElementsByTagName("div").length === 2;
+        })()"##,
     );
 }
 

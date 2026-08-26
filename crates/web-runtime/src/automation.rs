@@ -352,7 +352,15 @@ fn run_page(
         }
     };
     let _ = ready.send(Ok(()));
-    while let Ok(command) = commands.recv() {
+    loop {
+        let command = match commands.recv_timeout(Duration::from_millis(1)) {
+            Ok(command) => command,
+            Err(mpsc::RecvTimeoutError::Timeout) => {
+                let _ = page.run_pending_tasks();
+                continue;
+            }
+            Err(mpsc::RecvTimeoutError::Disconnected) => break,
+        };
         match command {
             Command::Navigate {
                 url,

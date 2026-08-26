@@ -191,6 +191,11 @@ impl Page {
                 return Err(error);
             }
             self.process_blitz_resources().await;
+            self.execute_page_script(
+                "document.dispatchEvent(new Event('DOMContentLoaded'));\
+                 window.dispatchEvent(new Event('load'));",
+            );
+            let _ = self.run_pending_tasks();
             Some(self.document.borrow().outer_html())
         } else {
             None

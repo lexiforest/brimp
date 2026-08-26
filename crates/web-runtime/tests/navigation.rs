@@ -27,6 +27,58 @@ impl ResourceLoader for StaticLoader {
     }
 }
 
+struct LoadEventLoader;
+
+#[async_trait]
+impl ResourceLoader for LoadEventLoader {
+    async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/html"));
+        Ok(ResourceResponse {
+            status: StatusCode::OK,
+            headers: headers.into(),
+            body: br#"<!doctype html>
+                <meta name="first">
+                <meta name="second">
+                <script>
+                    globalThis.events = [];
+                    document.addEventListener("DOMContentLoaded", () => events.push("dom"));
+                    window.addEventListener("load", () => {
+                        events.push("load");
+                        setTimeout(() => events.push("timer"), 0);
+                    });
+                </script>"#
+                .to_vec(),
+            effective_url: request.url,
+        })
+    }
+}
+
+#[test]
+fn navigation_dispatches_load_events_and_runs_immediate_tasks() {
+    let browser = Browser::with_resource_loader(Arc::new(LoadEventLoader));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
+
+    runtime
+        .block_on(page.goto("https://example.test/"))
+        .unwrap();
+
+    assert_eq!(
+        page.eval("events.join(',')").unwrap().to_string().unwrap(),
+        "dom,load,timer"
+    );
+    assert_eq!(
+        page.eval("document.getElementsByTagName('meta').length")
+            .unwrap()
+            .to_number()
+            .unwrap(),
+        2.0
+    );
+}
+
 #[test]
 fn goto_fetches_and_installs_the_main_html_document() {
     let browser = Browser::with_resource_loader(Arc::new(StaticLoader));
