@@ -88,14 +88,17 @@ impl AutomationBrowser {
         }
     }
     pub fn with_persona(persona: persona::Persona) -> Result<Self, AutomationError> {
+        Self::with_persona_and_network_config(persona, network::CurlConfig::default())
+    }
+    pub fn with_persona_and_network_config(
+        persona: persona::Persona,
+        mut config: network::CurlConfig,
+    ) -> Result<Self, AutomationError> {
         persona
             .validate()
             .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-        let config = network::CurlConfig {
-            impersonation_profile: persona.transport_profile.clone(),
-            default_headers: false,
-            ..network::CurlConfig::default()
-        };
+        config.impersonation_profile = persona.transport_profile.clone();
+        config.default_headers = false;
         network::CurlResourceLoader::check_profile(&config)
             .map_err(|error| AutomationError::Transport(error.to_string()))?;
         let loader = Arc::new(

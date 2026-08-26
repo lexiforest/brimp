@@ -138,9 +138,12 @@ class Response:
 class Session:
     _PROTECTED_HEADERS = {"user-agent", "accept-language"}
 
-    def __init__(self, *, persona_json: str | None = None):
+    def __init__(self, *, persona_json: str | None = None, ca_bundle=None):
         try:
-            self._inner = _Session(persona_json)
+            self._inner = _Session(
+                persona_json,
+                None if ca_bundle is None else str(Path(ca_bundle)),
+            )
         except RuntimeError as error:
             raise _translate(error) from error
         self.headers = {}
@@ -233,7 +236,8 @@ def _add_params(url: str, params) -> str:
 
 def get(url: str, **kwargs) -> Response:
     persona_json = kwargs.pop("persona_json", None)
-    with Session(persona_json=persona_json) as session:
+    ca_bundle = kwargs.pop("ca_bundle", None)
+    with Session(persona_json=persona_json, ca_bundle=ca_bundle) as session:
         return session.get(url, **kwargs)
 
 

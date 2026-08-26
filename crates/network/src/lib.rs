@@ -218,10 +218,16 @@ impl ResourceLoader for CurlResourceLoader {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::{Read, Write};
+    use std::net::TcpListener;
+    use std::sync::{Mutex, mpsc};
     use std::time::{Duration, Instant};
+
+    static EXECUTOR_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn many_loader_clones_share_exactly_one_executor_thread() {
+        let _guard = EXECUTOR_TEST_LOCK.lock().unwrap();
         let baseline = multi::executor_thread_count();
         let loader = CurlResourceLoader::default();
         wait_for_threads(baseline + 1);
@@ -234,6 +240,44 @@ mod tests {
         assert_eq!(multi::executor_thread_count(), baseline + 1);
         drop(clones);
         drop(loader);
+        wait_for_threads(baseline);
+    }
+
+    #[test]
+    fn final_loader_can_be_released_by_its_worker_callback() {
+        let _guard = EXECUTOR_TEST_LOCK.lock().unwrap();
+        let baseline = multi::executor_thread_count();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut request = Vec::new();
+            let mut chunk = [0; 512];
+            while !request.windows(4).any(|window| window == b"\r\n\r\n") {
+                let count = stream.read(&mut chunk).unwrap();
+                request.extend_from_slice(&chunk[..count]);
+            }
+            stream
+                .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok")
+                .unwrap();
+        });
+        let loader = CurlResourceLoader::default();
+        wait_for_threads(baseline + 1);
+        let callback_owner = loader.clone();
+        let (done_sender, done_receiver) = mpsc::sync_channel(1);
+        loader
+            .fetch_callback(
+                ResourceRequest::get(format!("http://{address}/")),
+                Box::new(move |result| {
+                    assert_eq!(result.unwrap().body, b"ok");
+                    drop(callback_owner);
+                    done_sender.send(()).unwrap();
+                }),
+            )
+            .unwrap();
+        drop(loader);
+        done_receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+        server.join().unwrap();
         wait_for_threads(baseline);
     }
 

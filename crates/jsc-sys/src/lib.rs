@@ -17,6 +17,28 @@ pub type JSPropertyAttributes = c_uint;
 
 pub const K_JS_PROPERTY_ATTRIBUTE_NONE: JSPropertyAttributes = 0;
 
+/// Configures JavaScriptCore's Darwin exception-handler policy before initialization.
+///
+/// # Safety
+///
+/// This must run before any thread initializes JavaScriptCore or creates a VM.
+pub unsafe fn allow_mach_exception_handlers() -> bool {
+    // Resolve the private data symbol dynamically. A direct relocation against this mutable
+    // symbol produces invalid chained fixups in Python extension dylibs on macOS.
+    let address = unsafe {
+        libc::dlsym(
+            libc::RTLD_DEFAULT,
+            c"_ZN3JSC7Options33machExceptionHandlerSandboxPolicyE".as_ptr(),
+        )
+    };
+    if address.is_null() {
+        return false;
+    }
+    // `SandboxPolicy::Allow` is the second u8 enum value in the pinned WebKit API.
+    unsafe { address.cast::<u8>().write(1) };
+    true
+}
+
 pub type JSObjectCallAsFunctionCallback = Option<
     unsafe extern "C" fn(
         ctx: JSContextRef,
@@ -30,6 +52,11 @@ pub type JSObjectCallAsFunctionCallback = Option<
 
 #[link(name = "JavaScriptCore", kind = "framework")]
 unsafe extern "C" {
+    #[link_name = "_ZN3JSC10initializeEv"]
+    pub fn JSCInitialize();
+    #[link_name = "_ZN3JSC7Options10setOptionsEPKc"]
+    pub fn JSCSetOptions(options: *const c_char) -> bool;
+
     pub fn JSGlobalContextCreate(global_object_class: JSClassRef) -> JSGlobalContextRef;
     pub fn JSGlobalContextRelease(ctx: JSGlobalContextRef);
     pub fn JSContextGetGlobalObject(ctx: JSContextRef) -> JSObjectRef;
@@ -108,12 +135,8 @@ unsafe extern "C" {
     );
     pub fn JSObjectSetPrototype(ctx: JSContextRef, object: JSObjectRef, value: JSValueRef);
 
-    pub fn JSStringCreateWithUTF8CString(string: *const c_char) -> JSStringRef;
-    pub fn JSStringGetMaximumUTF8CStringSize(string: JSStringRef) -> usize;
-    pub fn JSStringGetUTF8CString(
-        string: JSStringRef,
-        buffer: *mut c_char,
-        buffer_size: usize,
-    ) -> usize;
+    pub fn JSStringCreateWithCharacters(characters: *const u16, num_chars: usize) -> JSStringRef;
+    pub fn JSStringGetLength(string: JSStringRef) -> usize;
+    pub fn JSStringGetCharactersPtr(string: JSStringRef) -> *const u16;
     pub fn JSStringRelease(string: JSStringRef);
 }

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::time::Duration;
 use thiserror::Error;
 use url::Url;
@@ -8,6 +9,7 @@ pub struct CurlConfig {
     pub default_headers: bool,
     pub connect_timeout: Duration,
     pub request_timeout: Duration,
+    pub ca_bundle: Option<PathBuf>,
     pub proxy: Option<Proxy>,
     pub queue_capacity: usize,
     pub max_response_bytes: usize,
@@ -19,6 +21,7 @@ impl Default for CurlConfig {
             default_headers: false,
             connect_timeout: Duration::from_secs(10),
             request_timeout: Duration::from_secs(30),
+            ca_bundle: None,
             proxy: None,
             queue_capacity: 256,
             max_response_bytes: 64 * 1024 * 1024,

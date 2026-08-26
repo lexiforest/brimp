@@ -3,5 +3,5 @@
 mod document;
 mod parser;
 
-pub use document::{BrowserDocument, NodeId, SelectorError};
-pub use parser::{HtmlParserSession, ParseProgress};
+pub use document::{BrowserDocument, CssomError, NodeId, SelectorError};
+pub use parser::{HtmlParserSession, ParseProgress, parse_xml_at_root};

@@ -89,10 +89,14 @@ impl ResourceLoader for ParserLoader {
                 "text/html",
                 r##"<!doctype html>
                 <link rel="stylesheet" href="/style.css">
+                <style>body { width: 50%; } #before { height: 100px; }</style>
                 <div id="before"></div>
                 <script>
                     document.body.setAttribute("data-inline-paused", document.querySelector("#after-inline") === null ? "yes" : "no");
                     document.body.setAttribute("data-style-width", document.querySelector("#before").getBoundingClientRect().width);
+                    document.body.setAttribute("data-window-named", before === document.getElementById("before") ? "yes" : "no");
+                    document.body.setAttribute("data-sheet-count", document.styleSheets.length);
+                    document.body.setAttribute("data-inline-rule-count", document.styleSheets[1].cssRules.length);
                     const inserted = document.createElement("p");
                     inserted.id = "inserted-during-parse";
                     document.body.appendChild(inserted);
@@ -135,6 +139,9 @@ fn parser_pauses_for_blocking_scripts_and_resumes_the_same_dom() {
                 document.body.getAttribute("data-inline-paused"),
                 document.body.getAttribute("data-external-paused"),
                 document.body.getAttribute("data-style-width"),
+                document.body.getAttribute("data-window-named"),
+                document.body.getAttribute("data-sheet-count"),
+                document.body.getAttribute("data-inline-rule-count"),
                 document.querySelector("#inserted-during-parse") !== null,
                 document.querySelector("#after-inline") !== null,
                 document.querySelector("#after-external") !== null
@@ -143,7 +150,7 @@ fn parser_pauses_for_blocking_scripts_and_resumes_the_same_dom() {
         .unwrap()
         .to_string()
         .unwrap(),
-        "yes|yes|37|true|true|true"
+        "yes|yes|37|yes|2|2|true|true|true"
     );
 }
 

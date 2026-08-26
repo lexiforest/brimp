@@ -11,6 +11,32 @@ fn evaluates_arithmetic() {
 }
 
 #[test]
+fn strings_preserve_embedded_nul_and_non_bmp_characters() {
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_global_function("nativeString", |_| {
+            Ok(NativeValue::String("before\0after 🦀".into()))
+        })
+        .unwrap();
+
+    let result = runtime.eval("nativeString()").unwrap().to_string().unwrap();
+
+    assert_eq!(result, "before\0after 🦀");
+}
+
+#[test]
+fn strings_replace_unpaired_utf16_surrogates() {
+    let runtime = JsRuntime::new().unwrap();
+    let result = runtime
+        .eval("'before ' + String.fromCharCode(0xD83C) + ' after'")
+        .unwrap()
+        .to_string()
+        .unwrap();
+
+    assert_eq!(result, "before \u{FFFD} after");
+}
+
+#[test]
 fn reports_javascript_exceptions() {
     let runtime = JsRuntime::new().unwrap();
     let error = runtime.eval("throw new Error('broken')").err().unwrap();

@@ -11,12 +11,21 @@ use html5ever::{
     tokenizer::TokenizerOpts,
     tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeBuilderOpts, TreeSink},
 };
+use xml5ever::tendril::TendrilSink;
 
 use crate::{BrowserDocument, NodeId};
 
 pub enum ParseProgress {
     Script(NodeId),
     Done,
+}
+
+pub fn parse_xml_at_root(document: Rc<RefCell<BrowserDocument>>, xml: &str, root: NodeId) -> bool {
+    let malformed = roxmltree::Document::parse(xml).is_err();
+    let errors = Rc::new(RefCell::new(Vec::new()));
+    let sink = SharedDocumentSink::with_errors(document, root, Rc::clone(&errors));
+    xml5ever::driver::parse_document(sink, Default::default()).one(xml);
+    malformed
 }
 
 pub struct HtmlParserSession {
@@ -26,12 +35,25 @@ pub struct HtmlParserSession {
 
 impl HtmlParserSession {
     pub fn new(document: Rc<RefCell<BrowserDocument>>, html: &str) -> Self {
-        let sink = SharedDocumentSink::new(document);
+        Self::new_with_root_and_scripting(document, html, 0, true)
+    }
+
+    pub fn new_at_root(document: Rc<RefCell<BrowserDocument>>, html: &str, root: NodeId) -> Self {
+        Self::new_with_root_and_scripting(document, html, root, false)
+    }
+
+    fn new_with_root_and_scripting(
+        document: Rc<RefCell<BrowserDocument>>,
+        html: &str,
+        root: NodeId,
+        scripting_enabled: bool,
+    ) -> Self {
+        let sink = SharedDocumentSink::new(document, root);
         let options = ParseOpts {
             tokenizer: TokenizerOpts::default(),
             tree_builder: TreeBuilderOpts {
                 exact_errors: false,
-                scripting_enabled: true,
+                scripting_enabled,
                 iframe_srcdoc: false,
                 drop_doctype: true,
                 quirks_mode: QuirksMode::NoQuirks,
@@ -66,15 +88,25 @@ impl HtmlParserSession {
 
 struct SharedDocumentSink {
     document: Rc<RefCell<BrowserDocument>>,
-    errors: RefCell<Vec<Cow<'static, str>>>,
+    root: NodeId,
+    errors: Rc<RefCell<Vec<Cow<'static, str>>>>,
     quirks_mode: Cell<QuirksMode>,
 }
 
 impl SharedDocumentSink {
-    fn new(document: Rc<RefCell<BrowserDocument>>) -> Self {
+    fn new(document: Rc<RefCell<BrowserDocument>>, root: NodeId) -> Self {
+        Self::with_errors(document, root, Rc::new(RefCell::new(Vec::new())))
+    }
+
+    fn with_errors(
+        document: Rc<RefCell<BrowserDocument>>,
+        root: NodeId,
+        errors: Rc<RefCell<Vec<Cow<'static, str>>>>,
+    ) -> Self {
         Self {
             document,
-            errors: RefCell::new(Vec::new()),
+            root,
+            errors,
             quirks_mode: Cell::new(QuirksMode::NoQuirks),
         }
     }
@@ -111,7 +143,7 @@ impl TreeSink for SharedDocumentSink {
     }
 
     fn get_document(&self) -> Self::Handle {
-        0
+        self.root
     }
 
     fn elem_name<'a>(&'a self, target: &'a Self::Handle) -> Self::ElemName<'a> {
@@ -130,20 +162,30 @@ impl TreeSink for SharedDocumentSink {
         attrs: Vec<html5ever::Attribute>,
         _flags: ElementFlags,
     ) -> Self::Handle {
-        self.mutate(|mutator| mutator.create_element(name, Self::convert_attrs(attrs)))
+        let id = self.mutate(|mutator| mutator.create_element(name, Self::convert_attrs(attrs)));
+        self.document.borrow_mut().set_node_document(id, self.root);
+        id
     }
 
-    fn create_comment(&self, _text: StrTendril) -> Self::Handle {
-        self.mutate(|mutator| mutator.create_comment_node())
+    fn create_comment(&self, text: StrTendril) -> Self::Handle {
+        let mut document = self.document.borrow_mut();
+        let id = document.create_comment(&text);
+        document.set_node_document(id, self.root);
+        id
     }
 
     fn create_pi(&self, _target: StrTendril, _data: StrTendril) -> Self::Handle {
-        self.mutate(|mutator| mutator.create_comment_node())
+        let id = self.mutate(|mutator| mutator.create_comment_node());
+        self.document.borrow_mut().set_node_document(id, self.root);
+        id
     }
 
     fn append(&self, parent_id: &Self::Handle, child: NodeOrText<Self::Handle>) {
-        self.mutate(|mutator| match child {
-            NodeOrText::AppendNode(id) => mutator.append_children(*parent_id, &[id]),
+        let created = self.mutate(|mutator| match child {
+            NodeOrText::AppendNode(id) => {
+                mutator.append_children(*parent_id, &[id]);
+                None
+            }
             NodeOrText::AppendText(text) => {
                 let last_child_id = mutator.last_child_id(*parent_id);
                 let appended =
@@ -151,14 +193,23 @@ impl TreeSink for SharedDocumentSink {
                 if !appended {
                     let id = mutator.create_text_node(&text);
                     mutator.append_children(*parent_id, &[id]);
+                    Some(id)
+                } else {
+                    None
                 }
             }
         });
+        if let Some(id) = created {
+            self.document.borrow_mut().set_node_document(id, self.root);
+        }
     }
 
     fn append_before_sibling(&self, sibling_id: &Self::Handle, new_node: NodeOrText<Self::Handle>) {
-        self.mutate(|mutator| match new_node {
-            NodeOrText::AppendNode(id) => mutator.insert_nodes_before(*sibling_id, &[id]),
+        let created = self.mutate(|mutator| match new_node {
+            NodeOrText::AppendNode(id) => {
+                mutator.insert_nodes_before(*sibling_id, &[id]);
+                None
+            }
             NodeOrText::AppendText(text) => {
                 let previous_id = mutator.previous_sibling_id(*sibling_id);
                 let appended =
@@ -166,9 +217,15 @@ impl TreeSink for SharedDocumentSink {
                 if !appended {
                     let id = mutator.create_text_node(&text);
                     mutator.insert_nodes_before(*sibling_id, &[id]);
+                    Some(id)
+                } else {
+                    None
                 }
             }
         });
+        if let Some(id) = created {
+            self.document.borrow_mut().set_node_document(id, self.root);
+        }
     }
 
     fn append_based_on_parent_node(
@@ -203,6 +260,21 @@ impl TreeSink for SharedDocumentSink {
 
     fn set_quirks_mode(&self, mode: QuirksMode) {
         self.quirks_mode.set(mode);
+    }
+
+    fn pop(&self, target: &Self::Handle) {
+        let is_style = self
+            .document
+            .borrow()
+            .node(*target)
+            .and_then(|node| node.element_data())
+            .is_some_and(|element| element.name.local.as_ref() == "style");
+        if is_style {
+            self.document
+                .borrow_mut()
+                .blitz_mut()
+                .process_style_element(*target);
+        }
     }
 
     fn add_attrs_if_missing(&self, target: &Self::Handle, attrs: Vec<html5ever::Attribute>) {

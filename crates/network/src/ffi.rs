@@ -28,6 +28,7 @@ pub(crate) const CURLOPT_PROXY: CurlOption = OBJECT + 4;
 pub(crate) const CURLOPT_POSTFIELDS: CurlOption = OBJECT + 15;
 pub(crate) const CURLOPT_HTTPHEADER: CurlOption = OBJECT + 23;
 pub(crate) const CURLOPT_HEADERDATA: CurlOption = OBJECT + 29;
+pub(crate) const CURLOPT_CAINFO: CurlOption = OBJECT + 65;
 pub(crate) const CURLOPT_CUSTOMREQUEST: CurlOption = OBJECT + 36;
 pub(crate) const CURLOPT_WRITEDATA: CurlOption = OBJECT + 1;
 pub(crate) const CURLOPT_ACCEPT_ENCODING: CurlOption = OBJECT + 102;

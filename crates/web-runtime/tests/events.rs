@@ -1,6 +1,28 @@
 use web_runtime::{Browser, PageOptions};
 
 #[test]
+fn global_event_methods_have_the_window_receiver() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_content("<html><body></body></html>").unwrap();
+
+    assert_eq!(
+        page.eval(
+            r#"
+            let received = false;
+            addEventListener("probe", () => { received = true; });
+            dispatchEvent(new Event("probe"));
+            Number(received);
+            "#,
+        )
+        .unwrap()
+        .to_number()
+        .unwrap(),
+        1.0
+    );
+}
+
+#[test]
 fn events_capture_target_and_bubble_over_stable_wrappers() {
     let browser = Browser::new().unwrap();
     let mut page = browser.new_page(PageOptions::default()).unwrap();

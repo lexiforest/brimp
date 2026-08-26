@@ -140,12 +140,22 @@ impl MultiExecutor {
 }
 impl Drop for MultiExecutor {
     fn drop(&mut self) {
-        let _ = self.sender.send(Command::Shutdown);
-        if let Some(worker) = self
+        let worker = self
             .worker
             .get_mut()
             .expect("curl worker lock poisoned")
-            .take()
+            .take();
+        let Some(worker) = worker else { return };
+
+        // A completion callback can own the final ResourceLoader clone. In that
+        // case the executor is dropped by its own worker; dropping the sender
+        // disconnects the queue and lets the loop exit, while joining here
+        // would panic because a thread cannot join itself.
+        if worker.thread().id() == std::thread::current().id() {
+            return;
+        }
+
+        let _ = self.sender.send(Command::Shutdown);
         {
             let _ = worker.join();
         }
@@ -479,6 +489,7 @@ struct Transfer {
     config: CurlConfig,
     url: CString,
     url_string: String,
+    ca_bundle: Option<CString>,
     proxy: Option<CString>,
     method: Method,
     method_string: Option<CString>,
@@ -514,6 +525,7 @@ impl Transfer {
             config,
             url,
             url_string: request.url,
+            ca_bundle: None,
             proxy: None,
             method: request.method,
             method_string: None,
@@ -576,6 +588,15 @@ impl Transfer {
                 CURLOPT_TIMEOUT_MS,
                 millis(self.config.request_timeout)?,
             )?;
+            if let Some(path) = &self.config.ca_bundle {
+                let path = path.to_str().ok_or_else(|| {
+                    NetworkError::InvalidRequest("CA bundle path is not valid UTF-8".into())
+                })?;
+                let value = CString::new(path)
+                    .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+                setopt(self.handle, CURLOPT_CAINFO, value.as_ptr())?;
+                self.ca_bundle = Some(value);
+            }
             if let Some(proxy) = &self.config.proxy {
                 let value = CString::new(proxy.url())
                     .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;

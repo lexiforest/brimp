@@ -290,6 +290,7 @@ dependencies = [
 name = "brimp-python"
 version = "0.1.0"
 dependencies = [
+ "network",
  "persona",
  "pyo3",
  "pyo3-build-config",
@@ -316,8 +317,10 @@ dependencies = [
  "html5ever",
  "image",
  "parley",
+ "roxmltree 0.21.1",
  "stylo",
  "stylo_traits",
+ "xml5ever",
 ]
 
 [[package]]
@@ -1237,6 +1240,9 @@ dependencies = [
 [[package]]
 name = "jsc-sys"
 version = "0.1.0"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "keyboard-types"
@@ -2969,13 +2975,17 @@ dependencies = [
 name = "web-bindings"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "blitz-dom",
  "browser-dom",
  "cookie_store",
+ "encoding_rs",
  "http",
  "jsc",
  "network",
+ "selectors",
  "serde_json",
+ "stylo",
  "url",
 ]
 

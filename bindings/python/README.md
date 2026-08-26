@@ -23,4 +23,12 @@ with brimp.Session() as session:
     session.screenshot("page.png", full_page=True)
 ```
 
+Private test and enterprise roots can be trusted without disabling certificate
+or hostname verification:
+
+```python
+with brimp.Session(ca_bundle="path/to/cacert.pem") as session:
+    response = session.get("https://internal.example")
+```
+
 See `SUPPORT.md` for the exact tested surface.

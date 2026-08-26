@@ -6,6 +6,7 @@ use std::{
     ptr::{self, NonNull},
     rc::Rc,
     slice,
+    sync::OnceLock,
 };
 
 use jsc_sys::{
@@ -36,6 +37,23 @@ pub struct JsRuntime {
 
 impl JsRuntime {
     pub fn new() -> Result<Self, JsException> {
+        static OPTIONS_READY: OnceLock<bool> = OnceLock::new();
+        let options_ready = OPTIONS_READY.get_or_init(|| {
+            // SAFETY: JSC initialization is process-global and internally guarded. Options are
+            // changed before the first VM is created and remain immutable afterward.
+            unsafe {
+                if !jsc_sys::allow_mach_exception_handlers() {
+                    return false;
+                }
+                jsc_sys::JSCInitialize();
+                jsc_sys::JSCSetOptions(c"useSharedArrayBuffer=true".as_ptr())
+            }
+        });
+        if !options_ready {
+            return Err(JsException::new(
+                "JavaScriptCore rejected the SharedArrayBuffer runtime option",
+            ));
+        }
         // SAFETY: a null class requests JSC's standard global object.
         let context = unsafe { JSGlobalContextCreate(ptr::null_mut()) };
         let context = NonNull::new(context.cast_mut())

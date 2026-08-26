@@ -61,6 +61,7 @@ impl Page {
             Rc::clone(&timers),
             Arc::clone(&browsing_context),
             Rc::clone(&fetches),
+            false,
         )?;
         install_persona(&js, &options.persona)?;
         Ok(Self {
@@ -97,7 +98,11 @@ impl Page {
         self.bindings.reset_document(&self.js)
     }
 
-    fn reset_page_at(&mut self, base_url: &str) -> Result<(), JsException> {
+    fn reset_page_at(
+        &mut self,
+        base_url: &str,
+        cross_origin_isolated: bool,
+    ) -> Result<(), JsException> {
         let net_provider: Arc<dyn NetProvider> = self.blitz_network.clone();
         let document = BrowserDocument::empty_at_with_net(Some(base_url), Some(net_provider));
         *self.document.borrow_mut() = document;
@@ -110,6 +115,7 @@ impl Page {
             Rc::clone(&timers),
             Arc::clone(&self.browsing_context),
             Rc::clone(&fetches),
+            cross_origin_isolated,
         )?;
         install_persona(&js, &self.persona)?;
 
@@ -148,6 +154,7 @@ impl Page {
                 return Err(error.into());
             }
         };
+        let cross_origin_isolated = response_is_cross_origin_isolated(&response.headers);
         let status_code = response.status.as_u16();
         let reason = response
             .status
@@ -177,7 +184,7 @@ impl Page {
         let content = response.body;
         self.browsing_context.set_url(&effective_url);
         self.url = Some(effective_url.clone());
-        if let Err(error) = self.reset_page_at(&effective_url) {
+        if let Err(error) = self.reset_page_at(&effective_url, cross_origin_isolated) {
             self.load_state = LoadState::Failed;
             return Err(error.into());
         }
@@ -384,6 +391,7 @@ impl Page {
     }
 
     fn execute_page_script(&self, source: &str) {
+        let _ = self.bindings.sync_window_named_properties(&self.js);
         let _ = self.js.eval(source);
         let _ = self.perform_microtask_checkpoint();
         let _ = self.start_pending_fetches();
@@ -673,6 +681,22 @@ impl Page {
         }
         Ok(())
     }
+}
+
+fn response_is_cross_origin_isolated(headers: &HeaderList) -> bool {
+    let opener = headers
+        .get("cross-origin-opener-policy")
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| value.trim().eq_ignore_ascii_case("same-origin"));
+    let embedder = headers
+        .get("cross-origin-embedder-policy")
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| {
+            let value = value.trim();
+            value.eq_ignore_ascii_case("require-corp")
+                || value.eq_ignore_ascii_case("credentialless")
+        });
+    opener && embedder
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

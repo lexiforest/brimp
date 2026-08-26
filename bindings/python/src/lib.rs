@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -76,8 +77,12 @@ struct PySession {
 #[pymethods]
 impl PySession {
     #[new]
-    #[pyo3(signature = (persona_json = None))]
-    fn new(py: Python<'_>, persona_json: Option<&str>) -> PyResult<Self> {
+    #[pyo3(signature = (persona_json = None, ca_bundle = None))]
+    fn new(
+        py: Python<'_>,
+        persona_json: Option<&str>,
+        ca_bundle: Option<String>,
+    ) -> PyResult<Self> {
         let persona = persona_json
             .map(persona::Persona::from_json)
             .transpose()
@@ -85,12 +90,14 @@ impl PySession {
                 error(AutomationError::InvalidInput(persona_error.to_string()))
             })?;
         py.detach(move || {
+            let persona = persona.unwrap_or_default();
+            let config = network::CurlConfig {
+                ca_bundle: ca_bundle.map(PathBuf::from),
+                ..network::CurlConfig::default()
+            };
             let browser = Arc::new(
-                match persona {
-                    Some(persona) => AutomationBrowser::with_persona(persona),
-                    None => AutomationBrowser::new(),
-                }
-                .map_err(error)?,
+                AutomationBrowser::with_persona_and_network_config(persona, config)
+                    .map_err(error)?,
             );
             let page = browser.new_page(PageOptions::default()).map_err(error)?;
             Ok(Self { browser, page })
