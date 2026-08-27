@@ -49,18 +49,16 @@ Notes:
 </ol>
 </small>
 
-For performance comparisons, see the [benchmark](#benchmark).
-
 ## Install
 
-Release packages currently target macOS arm64:
+Python wheels support manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and
+Windows x86-64:
 
-For python:
 ```sh
 pip install brimp
 ```
 
-For node.js:
+The Node package remains macOS ARM64:
 
 ```
 npm install @brimp/brimp
@@ -155,37 +153,11 @@ Chrome DevTools Protocol.
 
 ## Building from source
 
-As in the current stage, we only support building on local macOS environment.
-
 ### Prerequisites
 
-The current JSC binding targets macOS and dynamically links a JSCOnly build at:
-
-```text
-../WebKit/WebKitBuild/Release/JavaScriptCore.framework
-```
-
-Set `BRIMP_JSC_FRAMEWORK_DIR` to use a different framework directory. The
-Brimp-owned network transport links `libcurl-impersonate` from `/usr/local/lib`;
-set `BRIMP_CURL_LIB_DIR` to use another location.
-
-## Benchmark
-
-Here is the latest complete fixture benchmark for Brimp and the other agentic
-browsers. Each result validates the live DOM; incorrect samples are excluded
-from latency and memory aggregates. Cold results launch a fresh process, while
-warm results reuse a browser and create a fresh page.
-
-![Brimp browser benchmark comparison](benchmark/2026-08-25.svg)
-
-To run the benchmark:
-
-```sh
-cargo run -p brimp-benchmark --release -- --samples 20
-uv run --project benchmark/performance --no-sync python benchmark/performance/bench.py
-uv run --project benchmark/performance --no-sync python benchmark/memory/memory.py
-cargo run -p brimp-cdp -- --bind 127.0.0.1:9222
-```
+Source builds dynamically link JavaScriptCore and curl-impersonate. Set
+`BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their platform-specific library
+directories. See `NATIVE.md` for the expected layouts.
 
 ## Development
 
@@ -215,8 +187,6 @@ to `web-runtime`; none contains a second browser implementation.
 ```sh
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-python3 -m unittest discover -s benchmark/performance -p 'test_*.py' -v
-python3 -m unittest discover -s benchmark/memory -p 'test_*.py' -v
 ./bindings/package-test.sh
 ./crates/cdp/puppeteer-test.sh
 ```

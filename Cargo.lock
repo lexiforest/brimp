@@ -237,17 +237,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "brimp-benchmark"
-version = "0.1.1"
-dependencies = [
- "async-trait",
- "http",
- "network",
- "serde_json",
- "web-runtime",
-]
-
-[[package]]
 name = "brimp-cdp"
 version = "0.1.1"
 dependencies = [

@@ -2,9 +2,9 @@ name: Python wheels
 
 on:
   workflow_dispatch:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -126,7 +126,7 @@ jobs:
 
   publish:
     name: Publish wheels to PyPI
-    if: github.event_name == 'release' && !github.event.release.prerelease
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs:
       - build-linux
       - build-native

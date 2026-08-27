@@ -50,7 +50,7 @@ The release workflow produces self-contained CPython 3.10+ ABI3 wheels for:
 - Windows x86-64.
 
 Run the `Python wheels` workflow manually to exercise all builds without
-publishing. A non-prerelease GitHub release tagged `v<project-version>` publishes
-the validated four-wheel set through the `pypi` environment and PyPI Trusted
-Publishing. Source distributions are intentionally omitted because their native
-dependency build is not self-contained.
+publishing. Pushing a `v<project-version>` tag publishes the validated four-wheel
+set through the `pypi` environment and PyPI Trusted Publishing. Source
+distributions are intentionally omitted because their native dependency build
+is not self-contained.
