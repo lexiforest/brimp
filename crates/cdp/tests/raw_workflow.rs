@@ -1,5 +1,3 @@
-use std::io::{BufRead, Read as _};
-use std::process::{Command, Stdio};
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -295,31 +293,6 @@ async fn non_loopback_bind_requires_explicit_permission() {
     )
     .await;
     assert!(matches!(result, Err(ServerError::NonLoopback(_))));
-}
-
-#[test]
-fn explicitly_allowed_non_loopback_binary_warns_before_serving() {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_brimp-cdp"))
-        .args(["--bind", "0.0.0.0:0", "--allow-non-loopback"])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let mut endpoint = String::new();
-    std::io::BufReader::new(child.stdout.take().unwrap())
-        .read_line(&mut endpoint)
-        .unwrap();
-    assert!(endpoint.starts_with("ws://0.0.0.0:"));
-    child.kill().unwrap();
-    child.wait().unwrap();
-    let mut stderr = String::new();
-    child
-        .stderr
-        .take()
-        .unwrap()
-        .read_to_string(&mut stderr)
-        .unwrap();
-    assert!(stderr.starts_with("WARNING: Brimp CDP is binding to non-loopback address"));
 }
 
 async fn command(

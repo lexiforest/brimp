@@ -3,6 +3,7 @@ use std::process::ExitCode;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
+use brimp_cdp::{ServerConfig, ServerError, parse_bind, start};
 use web_runtime::{AutomationBrowser, AutomationError, CancellationToken, PageOptions};
 
 static INTERRUPTED: AtomicBool = AtomicBool::new(false);
@@ -16,11 +17,14 @@ extern "C" fn interrupt(_: i32) {
 }
 
 fn main() -> ExitCode {
+    let arguments = std::env::args().skip(1).collect::<Vec<_>>();
     #[cfg(unix)]
-    unsafe {
-        signal(2, interrupt);
+    if arguments.first().map(String::as_str) != Some("cdp") {
+        unsafe {
+            signal(2, interrupt);
+        }
     }
-    match run(std::env::args().skip(1).collect()) {
+    match run(arguments) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("{error}");
@@ -35,6 +39,7 @@ fn run(arguments: Vec<String>) -> Result<(), AutomationError> {
     };
     match command {
         "doctor" => doctor(),
+        "cdp" => cdp_command(&arguments[1..]),
         "eval" => eval_command(&arguments[1..]),
         "screenshot" => screenshot_command(&arguments[1..]),
         "--help" | "-h" | "help" => {
@@ -45,6 +50,53 @@ fn run(arguments: Vec<String>) -> Result<(), AutomationError> {
             "unknown command `{command}`\n{}",
             usage()
         ))),
+    }
+}
+
+fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
+    let mut bind = "127.0.0.1:9222";
+    let mut allow_non_loopback = false;
+    let mut arguments = arguments.iter();
+    while let Some(argument) = arguments.next() {
+        match argument.as_str() {
+            "--bind" => {
+                bind = arguments.next().map(String::as_str).ok_or_else(|| {
+                    AutomationError::InvalidInput("--bind requires HOST:PORT".into())
+                })?;
+            }
+            "--allow-non-loopback" => allow_non_loopback = true,
+            "--help" | "-h" => {
+                println!("usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback]");
+                return Ok(());
+            }
+            argument => {
+                return Err(AutomationError::InvalidInput(format!(
+                    "unknown cdp argument `{argument}`"
+                )));
+            }
+        }
+    }
+    let bind = parse_bind(bind).map_err(AutomationError::InvalidInput)?;
+    let runtime = tokio::runtime::Runtime::new()
+        .map_err(|error| AutomationError::Internal(error.to_string()))?;
+    runtime.block_on(async move {
+        let server = start(ServerConfig {
+            bind,
+            allow_non_loopback,
+        })
+        .await
+        .map_err(cdp_error)?;
+        println!("{}", server.browser_websocket_url());
+        std::future::pending::<()>().await;
+        #[allow(unreachable_code)]
+        Ok(())
+    })
+}
+
+fn cdp_error(error: ServerError) -> AutomationError {
+    match error {
+        ServerError::NonLoopback(_) => AutomationError::InvalidInput(error.to_string()),
+        _ => AutomationError::Internal(error.to_string()),
     }
 }
 
@@ -183,5 +235,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N]".into()
+    "usage: brimp doctor | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N]".into()
 }

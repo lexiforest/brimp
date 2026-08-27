@@ -64,8 +64,7 @@ The Node package remains macOS ARM64:
 npm install @brimp/brimp
 ```
 
-The standalone `brimp` and `brimp-cdp` executables are produced by the source
-build below.
+The standalone `brimp` executable is produced by the source build below.
 
 ## Usage
 
@@ -133,7 +132,7 @@ main().catch(error => {
 Start the bounded loopback CDP server and connect with `puppeteer-core`:
 
 ```sh
-brimp-cdp --bind 127.0.0.1:9222
+brimp cdp --bind 127.0.0.1:9222
 ```
 
 ```js

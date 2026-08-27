@@ -9,7 +9,9 @@ name = "brimp"
 path = "src/main.rs"
 
 [dependencies]
+brimp-cdp = { path = "../cdp" }
 network = { path = "../network" }
 persona = { path = "../persona" }
 serde_json = "1"
+tokio = { version = "1", features = ["rt-multi-thread"] }
 web-runtime = { path = "../web-runtime" }

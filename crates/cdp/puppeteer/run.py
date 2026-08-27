@@ -6,9 +6,9 @@ import sys
 
 def main():
     if len(sys.argv) != 3:
-        raise SystemExit("usage: run.py BRIMP_CDP_BINARY WORKFLOW_MJS")
+        raise SystemExit("usage: run.py BRIMP_BINARY WORKFLOW_MJS")
     server = subprocess.Popen(
-        [sys.argv[1], "--bind", "127.0.0.1:0"],
+        [sys.argv[1], "cdp", "--bind", "127.0.0.1:0"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

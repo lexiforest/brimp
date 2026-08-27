@@ -18,7 +18,3 @@ web-runtime = { path = "../web-runtime" }
 async-trait = "0.1"
 http = "1"
 network = { path = "../network" }
-
-[[bin]]
-name = "brimp-cdp"
-path = "src/main.rs"

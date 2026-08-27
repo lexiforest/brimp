@@ -4,6 +4,7 @@ Thin command-line interface over `web-runtime`'s canonical automation page.
 
 ```text
 brimp doctor
+brimp cdp [--bind HOST:PORT] [--allow-non-loopback]
 brimp eval URL --js EXPRESSION [--timeout-ms N]
 brimp screenshot URL --output PATH [--full-page] [--overwrite] [--timeout-ms N]
 ```

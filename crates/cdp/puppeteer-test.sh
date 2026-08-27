@@ -8,5 +8,5 @@ trap 'rm -rf "$test_root"' EXIT
 
 cp "$fixture/package.json" "$fixture/package-lock.json" "$fixture/workflow.mjs" "$test_root/"
 (cd "$test_root" && npm ci --ignore-scripts --no-audit --no-fund)
-cargo build --manifest-path "$workspace/Cargo.toml" -p brimp-cdp
-python3 "$fixture/run.py" "$workspace/target/debug/brimp-cdp" "$test_root/workflow.mjs"
+cargo build --manifest-path "$workspace/Cargo.toml" -p brimp-cli
+python3 "$fixture/run.py" "$workspace/target/debug/brimp" "$test_root/workflow.mjs"

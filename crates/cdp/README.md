@@ -1,6 +1,6 @@
 # Brimp CDP
 
-`brimp-cdp` exposes a deliberately small Chrome DevTools Protocol server over
+`brimp cdp` exposes a deliberately small Chrome DevTools Protocol server over
 HTTP discovery and WebSocket transport. It is a remote server/client boundary;
 unlike the Python and Node native extensions, protocol values are serialized as
 JSON and screenshots are base64 encoded.
