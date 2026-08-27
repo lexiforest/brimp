@@ -31,4 +31,12 @@ with brimp.Session(ca_bundle="path/to/cacert.pem") as session:
     response = session.get("https://internal.example")
 ```
 
+Persona JSON uses the versioned schema in [`../../persona/`](../../persona/README.md):
+
+```python
+persona_json = open("persona/example.json").read()
+with brimp.Session(persona_json=persona_json) as session:
+    print(session.get("https://example.com").status_code)
+```
+
 See `SUPPORT.md` for the exact tested surface.

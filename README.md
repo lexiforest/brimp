@@ -80,6 +80,7 @@ PNG from the command line:
 brimp doctor
 brimp eval https://example.com --js 'document.title'
 brimp screenshot https://example.com --output example.png --full-page
+brimp eval https://example.com --persona persona/example.json --js 'navigator.userAgent'
 ```
 
 ### Python

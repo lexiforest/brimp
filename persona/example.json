@@ -1,0 +1,335 @@
+{
+  "schema_version": 1,
+  "preset": "chrome-stable",
+  "identity": {
+    "family": "chromium",
+    "brand": "Chrome",
+    "version": "150.0.0.0",
+    "engine": "blink",
+    "platform": "macOS",
+    "platform_version": "15.7.0",
+    "architecture": "x86",
+    "bitness": "64",
+    "model": ""
+  },
+  "transport": {
+    "impersonation_profile": "chrome150"
+  },
+  "network": {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept_language": "en-US,en;q=0.9",
+    "accept_encoding": "gzip, deflate, br, zstd",
+    "sec_ch_ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+    "sec_ch_ua_mobile": "?0",
+    "sec_ch_ua_platform": "\"macOS\"",
+    "sec_ch_ua_full_version": "\"150.0.0.0\"",
+    "sec_ch_ua_full_version_list": "\"Not;A=Brand\";v=\"8.0.0.0\", \"Chromium\";v=\"150.0.0.0\", \"Google Chrome\";v=\"150.0.0.0\"",
+    "sec_ch_ua_arch": "\"x86\"",
+    "sec_ch_ua_bitness": "\"64\"",
+    "sec_ch_ua_platform_version": "\"15.7.0\"",
+    "sec_ch_ua_model": "\"\""
+  },
+  "features": {
+    "webgl": true,
+    "webgl2": true,
+    "webgpu": false,
+    "webrtc": true,
+    "battery": true,
+    "permissions": true,
+    "workers": true,
+    "service_worker": false,
+    "offscreen_canvas": true,
+    "touch": false,
+    "motion": false,
+    "orientation": false,
+    "bluetooth": true,
+    "geolocation": true,
+    "notifications": false
+  },
+  "viewport": {
+    "width": 1710,
+    "height": 896,
+    "device_scale_factor": 2
+  },
+  "screen": {
+    "width": 1710,
+    "height": 1107,
+    "avail_width": 1710,
+    "avail_height": 1017,
+    "avail_left": 0,
+    "avail_top": 25,
+    "left": 0,
+    "top": 0,
+    "color_depth": 30,
+    "pixel_depth": 30,
+    "is_extended": false,
+    "orientation_type": "landscape-primary",
+    "orientation_angle": 0
+  },
+  "window": {
+    "outer_width": 1710,
+    "outer_height": 1017,
+    "screen_x": 0,
+    "screen_y": 0
+  },
+  "css": {
+    "moz_prefix_enabled": false,
+    "webkit_prefix_enabled": true,
+    "media": {
+      "pointer": "fine",
+      "any_pointer": "fine",
+      "hover": "hover",
+      "any_hover": "hover",
+      "color_gamut": "p3",
+      "prefers_reduced_motion": "no-preference",
+      "orientation": "landscape",
+      "display_mode": "browser"
+    }
+  },
+  "graphics": {
+    "webgl_masked_vendor": "WebKit",
+    "webgl_masked_renderer": "WebKit WebGL",
+    "webgl_vendor": "Google Inc. (Intel Inc.)",
+    "webgl_renderer": "ANGLE (Intel Inc., Intel(R) Iris(TM) Plus Graphics OpenGL Engine, OpenGL 4.1)",
+    "webgl1": {
+      "parameters": { "3379": 16384, "34076": 16384 },
+      "extensions": ["ANGLE_instanced_arrays", "EXT_blend_minmax", "WEBGL_debug_renderer_info"],
+      "context_attributes": { "alpha": true, "antialias": true, "depth": true, "stencil": false },
+      "shader_precision_formats": [
+        { "shader_type": "35633", "precision_type": "36338", "range_min": 127, "range_max": 127, "precision": 23 }
+      ],
+      "block_unknown_parameters": false,
+      "block_unknown_extensions": true
+    },
+    "webgl2": {
+      "parameters": { "3379": 16384, "35375": 65536 },
+      "extensions": ["EXT_color_buffer_float", "WEBGL_debug_renderer_info"],
+      "context_attributes": { "alpha": true, "antialias": true, "depth": true, "stencil": false },
+      "block_unknown_parameters": false,
+      "block_unknown_extensions": true
+    }
+  },
+  "plugins": {
+    "entries": [
+      {
+        "name": "PDF Viewer",
+        "filename": "internal-pdf-viewer",
+        "description": "Portable Document Format",
+        "mime_types": [
+          { "type": "application/pdf", "suffixes": "pdf", "description": "Portable Document Format" },
+          { "type": "text/pdf", "suffixes": "pdf", "description": "Portable Document Format" }
+        ]
+      },
+      {
+        "name": "Chrome PDF Viewer",
+        "filename": "internal-pdf-viewer",
+        "description": "Portable Document Format",
+        "mime_types": [
+          { "type": "application/pdf", "suffixes": "pdf", "description": "Portable Document Format" },
+          { "type": "text/pdf", "suffixes": "pdf", "description": "Portable Document Format" }
+        ]
+      },
+      {
+        "name": "Chromium PDF Viewer",
+        "filename": "internal-pdf-viewer",
+        "description": "Portable Document Format",
+        "mime_types": [
+          { "type": "application/pdf", "suffixes": "pdf", "description": "Portable Document Format" },
+          { "type": "text/pdf", "suffixes": "pdf", "description": "Portable Document Format" }
+        ]
+      },
+      {
+        "name": "Microsoft Edge PDF Viewer",
+        "filename": "internal-pdf-viewer",
+        "description": "Portable Document Format",
+        "mime_types": [
+          { "type": "application/pdf", "suffixes": "pdf", "description": "Portable Document Format" },
+          { "type": "text/pdf", "suffixes": "pdf", "description": "Portable Document Format" }
+        ]
+      },
+      {
+        "name": "WebKit built-in PDF",
+        "filename": "internal-pdf-viewer",
+        "description": "Portable Document Format",
+        "mime_types": [
+          { "type": "application/pdf", "suffixes": "pdf", "description": "Portable Document Format" },
+          { "type": "text/pdf", "suffixes": "pdf", "description": "Portable Document Format" }
+        ]
+      }
+    ],
+    "pdf_enabled": true,
+    "block_system_entries": true
+  },
+  "chrome": {
+    "exposed": true,
+    "enumerable": true,
+    "runtime": true,
+    "app": true,
+    "load_times": true,
+    "csi": true,
+    "window_key_strategy": "native-order"
+  },
+  "navigator": {
+    "platform": "MacIntel",
+    "hardware_concurrency": 8,
+    "device_memory_gb": 8,
+    "max_touch_points": 0,
+    "connection_type": "wifi",
+    "connection_rtt_ms": 100,
+    "connection_downlink_mbps": "10",
+    "connection_effective_type": "4g",
+    "connection_save_data": false,
+    "notification_permission": "default",
+    "do_not_track": "",
+    "expose_global_privacy_control": false,
+    "global_privacy_control": false,
+    "permissions_enabled": true,
+    "bluetooth_enabled": true,
+    "bluetooth_available": true,
+    "media_devices_enabled": true,
+    "offscreen_canvas_enabled": true,
+    "vendor": "Google Inc.",
+    "product_sub": "20030107",
+    "pdf_viewer_enabled": true
+  },
+  "media": {
+    "speech_voices": ["Samantha", "Alex"],
+    "audio_inputs": 1,
+    "video_inputs": 1,
+    "audio_outputs": 1
+  },
+  "audio": {
+    "sample_rate": 48000,
+    "output_latency_ms": 20,
+    "max_channel_count": 2,
+    "compressor_reduction": "-20.538288116455078",
+    "frequency_data": ["-20.538288116455078", "-160"],
+    "time_domain_data": ["0.122705061", "-0.122705061"],
+    "rendered_buffer": ["0"],
+    "render_leading_silence_samples": 256,
+    "fake_completion_delay_ms": 0,
+    "native_shape": true,
+    "noise_enabled": true
+  },
+  "speech": {
+    "voices": [
+      { "voice_uri": "Samantha", "name": "Samantha", "lang": "en-US", "default": true, "local_service": true },
+      { "voice_uri": "Alex", "name": "Alex", "lang": "en-US", "default": false, "local_service": true }
+    ],
+    "block_system_voices": true,
+    "fake_completion_delay_ms": 0
+  },
+  "geolocation": {
+    "latitude": "37.7749",
+    "longitude": "-122.4194",
+    "accuracy_meters": 25
+  },
+  "webrtc": {
+    "ipv4": "192.0.2.10",
+    "ipv6": "2001:db8::10",
+    "substitute_ice_candidates": true,
+    "substitute_sdp": true
+  },
+  "battery": {
+    "charging": true,
+    "charging_time_seconds": 0,
+    "infinite_discharging_time": true,
+    "level_percent": 100
+  },
+  "storage": {
+    "quota_bytes": 64424509440,
+    "usage_bytes": 0,
+    "legacy_temporary_quota_bytes": 64424509440,
+    "legacy_persistent_quota_bytes": 64424509440
+  },
+  "fonts": {
+    "families": [
+      "Helvetica Neue",
+      "Geneva",
+      "Kohinoor Devanagari Medium",
+      "Luminari",
+      "PingFang HK Light",
+      "American Typewriter Semibold",
+      "Futura Bold",
+      "SignPainter-HouseScript Semibold",
+      "InaiMathi Bold",
+      "Galvji",
+      "MuktaMahee Regular",
+      "Noto Sans Gunjala Gondi Regular",
+      "Noto Sans Masaram Gondi Regular",
+      "Noto Serif Yezidi Regular",
+      "Apple SD Gothic Neo ExtraBold",
+      "STIX Two Math Regular",
+      "STIX Two Text Regular",
+      "Noto Sans Canadian Aboriginal Regular"
+    ],
+    "emoji_fallback": ["Apple Color Emoji"],
+    "text_metric_profile": "macos-sonoma",
+    "subpixel_antialiasing": true,
+    "hinting": "platform"
+  },
+  "canvas": {
+    "noise_enabled": true,
+    "noise_amplitude": 1,
+    "blink_low_entropy_probe": true
+  },
+  "domrect": {
+    "enabled": true,
+    "quantization_steps_per_px": 64,
+    "fill_empty_client_rects": true
+    ,"sampled_profile": "macos-chrome-150",
+    "transform_model": "blink",
+    "font_profile": "macos-sonoma",
+    "subpixel_unit": 64,
+    "rounding": "nearest",
+    "preserve_negative_zero": true,
+    "clamp_transforms": true
+  },
+  "engine": {
+    "enabled": true,
+    "family": "v8",
+    "profile": "chrome-150",
+    "version": "15.0",
+    "stack_format": "v8",
+    "date_now_short_interval_threshold_ms": 20,
+    "date_now_short_interval_scale_percent": 40,
+    "error_messages": {
+      "number.to_fixed.range": "toFixed() digits argument must be between 0 and 100"
+    },
+    "builtin_sources": {
+      "Array": "function Array() { [native code] }"
+    }
+  },
+  "svg": {
+    "bbox_width_factor": "1",
+    "text_width_factor": "0.62",
+    "baseline_factor": "0.78",
+    "expose_geometry_methods": true
+  },
+  "native_functions": {
+    "native_source": "function () { [native code] }",
+    "preserve_name": true,
+    "preserve_length": true,
+    "preserve_descriptors": true,
+    "illegal_invocation_errors": true,
+    "constructor_prototypes": true,
+    "sanitize_stacks": true
+  },
+  "noise": {
+    "enabled": true,
+    "canvas": true,
+    "webgl": true,
+    "audio": true,
+    "fonts": true,
+    "domrect": true,
+    "svg": true
+  },
+  "automation": {
+    "webdriver": false,
+    "expose_webdriver_helpers": false
+  },
+  "locale": "en-US",
+  "languages": ["en-US", "en"],
+  "timezone": "America/Los_Angeles"
+}

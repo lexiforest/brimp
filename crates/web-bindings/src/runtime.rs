@@ -4623,17 +4623,21 @@ pub struct BrowsingContext {
 }
 
 impl BrowsingContext {
-    pub fn set_request_identity(&self, user_agent: &str, locale: &str) -> Result<(), String> {
-        let headers = vec![
-            (
-                http::header::USER_AGENT,
-                http::HeaderValue::from_str(user_agent).map_err(|error| error.to_string())?,
-            ),
-            (
-                http::header::ACCEPT_LANGUAGE,
-                http::HeaderValue::from_str(locale).map_err(|error| error.to_string())?,
-            ),
-        ];
+    pub fn set_request_headers(
+        &self,
+        headers: impl IntoIterator<Item = (String, String)>,
+    ) -> Result<(), String> {
+        let headers = headers
+            .into_iter()
+            .filter(|(_, value)| !value.is_empty())
+            .map(|(name, value)| {
+                Ok((
+                    http::HeaderName::from_bytes(name.as_bytes())
+                        .map_err(|error| error.to_string())?,
+                    http::HeaderValue::from_str(&value).map_err(|error| error.to_string())?,
+                ))
+            })
+            .collect::<Result<Vec<_>, String>>()?;
         *self
             .request_headers
             .lock()

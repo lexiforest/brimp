@@ -61,6 +61,55 @@ fn eval_keeps_structured_data_on_stdout() {
 }
 
 #[test]
+fn eval_loads_the_versioned_persona_schema() {
+    let unique = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let path = std::env::temp_dir().join(format!("brimp-persona-{unique}.json"));
+    std::fs::write(
+        &path,
+        r#"{
+            "schema_version": 1,
+            "transport": { "impersonation_profile": "chrome150" },
+            "network": { "user_agent": "CLI Persona/1" },
+            "navigator": { "platform": "CLI-OS", "hardware_concurrency": 6 },
+            "viewport": { "width": 640, "height": 480, "device_scale_factor": 2 }
+        }"#,
+    )
+    .unwrap();
+    let (url, worker) = server(b"<!doctype html><title>Persona</title>");
+    let output = binary()
+        .args([
+            "eval",
+            &url,
+            "--persona",
+            path.to_str().unwrap(),
+            "--js",
+            "({ userAgent: navigator.userAgent, platform: navigator.platform, concurrency: navigator.hardwareConcurrency, viewport: [innerWidth, innerHeight, devicePixelRatio] })",
+        ])
+        .output()
+        .unwrap();
+    worker.join().unwrap();
+    std::fs::remove_file(path).unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        value,
+        serde_json::json!({
+            "userAgent": "CLI Persona/1",
+            "platform": "CLI-OS",
+            "concurrency": 6,
+            "viewport": [640, 480, 2]
+        })
+    );
+}
+
+#[test]
 fn screenshot_writes_binary_and_protects_existing_output() {
     let unique = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)

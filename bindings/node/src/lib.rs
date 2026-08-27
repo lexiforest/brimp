@@ -64,7 +64,7 @@ impl Browser {
     #[napi(factory)]
     pub async fn launch(persona_json: Option<String>) -> Result<Self> {
         let persona = persona_json
-            .map(|json| persona::Persona::from_json(&json))
+            .map(|json| persona::PersonaConfig::from_json(&json))
             .transpose()
             .map_err(|persona_error| {
                 error(AutomationError::InvalidInput(persona_error.to_string()))

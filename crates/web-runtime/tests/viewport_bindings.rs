@@ -7,7 +7,7 @@ fn exposes_and_updates_the_blitz_viewport() {
         .new_page(
             PageOptions::builder()
                 .viewport(1280, 720)
-                .device_pixel_ratio(2.0)
+                .device_pixel_ratio(2)
                 .build(),
         )
         .unwrap();

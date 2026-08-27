@@ -84,7 +84,7 @@ impl PySession {
         ca_bundle: Option<String>,
     ) -> PyResult<Self> {
         let persona = persona_json
-            .map(persona::Persona::from_json)
+            .map(persona::PersonaConfig::from_json)
             .transpose()
             .map_err(|persona_error| {
                 error(AutomationError::InvalidInput(persona_error.to_string()))

@@ -70,13 +70,13 @@ impl CancellationToken {
 
 pub struct AutomationBrowser {
     loader: Arc<dyn ResourceLoader>,
-    persona: Option<persona::Persona>,
+    persona: Option<persona::ResolvedPersona>,
     pages: Mutex<Vec<Weak<PageControl>>>,
     closed: AtomicBool,
 }
 impl AutomationBrowser {
     pub fn new() -> Result<Self, AutomationError> {
-        let persona = persona::Persona::default();
+        let persona = persona::PersonaConfig::default();
         Self::with_persona(persona)
     }
     pub fn with_resource_loader(loader: Arc<dyn ResourceLoader>) -> Self {
@@ -87,16 +87,31 @@ impl AutomationBrowser {
             closed: AtomicBool::new(false),
         }
     }
-    pub fn with_persona(persona: persona::Persona) -> Result<Self, AutomationError> {
+    pub fn with_persona_and_resource_loader(
+        persona: persona::PersonaConfig,
+        loader: Arc<dyn ResourceLoader>,
+    ) -> Result<Self, AutomationError> {
+        persona
+            .validate()
+            .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+        Ok(Self {
+            loader,
+            persona: Some(persona.resolve()),
+            pages: Mutex::new(Vec::new()),
+            closed: AtomicBool::new(false),
+        })
+    }
+    pub fn with_persona(persona: persona::PersonaConfig) -> Result<Self, AutomationError> {
         Self::with_persona_and_network_config(persona, network::CurlConfig::default())
     }
     pub fn with_persona_and_network_config(
-        persona: persona::Persona,
+        persona: persona::PersonaConfig,
         mut config: network::CurlConfig,
     ) -> Result<Self, AutomationError> {
         persona
             .validate()
             .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+        let persona = persona.resolve();
         config.impersonation_profile = persona.transport_profile.clone();
         config.default_headers = false;
         network::CurlResourceLoader::check_profile(&config)

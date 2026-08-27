@@ -49,7 +49,14 @@ fn run(arguments: Vec<String>) -> Result<(), AutomationError> {
 }
 
 fn doctor() -> Result<(), AutomationError> {
-    network::CurlResourceLoader::check_profile(&network::CurlConfig::default())
+    let profile = persona::PersonaConfig::default()
+        .resolve()
+        .transport_profile;
+    let config = network::CurlConfig {
+        impersonation_profile: profile.clone(),
+        ..network::CurlConfig::default()
+    };
+    network::CurlResourceLoader::check_profile(&config)
         .map_err(|error| AutomationError::Transport(error.to_string()))?;
     let browser = AutomationBrowser::new()?;
     let page = browser.new_page(PageOptions::default())?;
@@ -57,7 +64,7 @@ fn doctor() -> Result<(), AutomationError> {
     browser.close();
     println!(
         "{}",
-        serde_json::json!({"javascriptCore": "ok", "libcurlImpersonate": "ok", "profile": "chrome136"})
+        serde_json::json!({"javascriptCore": "ok", "libcurlImpersonate": "ok", "profile": profile})
     );
     Ok(())
 }
@@ -67,7 +74,7 @@ fn eval_command(arguments: &[String]) -> Result<(), AutomationError> {
     let expression = option(arguments, "--js")
         .ok_or_else(|| AutomationError::InvalidInput("eval requires --js EXPRESSION".into()))?;
     let timeout = timeout(arguments)?;
-    let (browser, page) = launch()?;
+    let (browser, page) = launch(arguments)?;
     navigate(&page, url, timeout)?;
     let value = page.evaluate(expression)?;
     println!("{value}");
@@ -87,7 +94,7 @@ fn screenshot_command(arguments: &[String]) -> Result<(), AutomationError> {
             path.display()
         )));
     }
-    let (browser, page) = launch()?;
+    let (browser, page) = launch(arguments)?;
     navigate(&page, url, timeout(arguments)?)?;
     let png = page.screenshot(flag(arguments, "--full-page"))?;
     std::fs::write(&path, png).map_err(|error| AutomationError::Screenshot(error.to_string()))?;
@@ -96,8 +103,16 @@ fn screenshot_command(arguments: &[String]) -> Result<(), AutomationError> {
     Ok(())
 }
 
-fn launch() -> Result<(AutomationBrowser, web_runtime::AutomationPage), AutomationError> {
-    let browser = AutomationBrowser::new()?;
+fn launch(
+    arguments: &[String],
+) -> Result<(AutomationBrowser, web_runtime::AutomationPage), AutomationError> {
+    let browser = if let Some(path) = option(arguments, "--persona") {
+        let persona = persona::PersonaConfig::from_json_file(path)
+            .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+        AutomationBrowser::with_persona(persona)?
+    } else {
+        AutomationBrowser::new()?
+    };
     let page = browser.new_page(PageOptions::default())?;
     Ok((browser, page))
 }
@@ -168,5 +183,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp eval URL --js EXPRESSION [--timeout-ms N] | brimp screenshot URL --output PATH [--full-page] [--overwrite] [--timeout-ms N]".into()
+    "usage: brimp doctor | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N]".into()
 }

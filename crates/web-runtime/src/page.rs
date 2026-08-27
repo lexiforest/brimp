@@ -33,7 +33,7 @@ pub struct Page {
     load_state: LoadState,
     url: Option<String>,
     async_error: Option<JsException>,
-    persona: persona::Persona,
+    persona: persona::ResolvedPersona,
 }
 
 impl Page {
@@ -44,7 +44,7 @@ impl Page {
         let js = JsRuntime::new()?;
         let browsing_context = Arc::new(BrowsingContext::default());
         browsing_context
-            .set_request_identity(&options.persona.user_agent, &options.persona.locale)
+            .set_request_headers(persona_request_headers(&options.persona))
             .map_err(JsException::from_message)?;
         let blitz_network = Arc::new(BlitzResourceProvider::new(
             Arc::clone(&loader),
@@ -767,10 +767,26 @@ pub enum NavigationError {
     NotLoaded(LoadState),
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PageOptions {
     viewport: Viewport,
-    persona: persona::Persona,
+    persona: persona::ResolvedPersona,
+}
+
+impl Default for PageOptions {
+    fn default() -> Self {
+        let persona = persona::PersonaConfig::default().resolve();
+        Self {
+            viewport: Viewport {
+                width: f64::from(persona.viewport.width),
+                height: f64::from(persona.viewport.height),
+                device_pixel_ratio: f64::from(persona.viewport.device_scale_factor),
+                scroll_x: 0.0,
+                scroll_y: 0.0,
+            },
+            persona,
+        }
+    }
 }
 
 impl PageOptions {
@@ -782,15 +798,15 @@ impl PageOptions {
         self.viewport
     }
 
-    pub fn persona(&self) -> &persona::Persona {
+    pub fn persona(&self) -> &persona::ResolvedPersona {
         &self.persona
     }
 
-    pub(crate) fn with_persona(mut self, persona: persona::Persona) -> Self {
+    pub(crate) fn with_persona(mut self, persona: persona::ResolvedPersona) -> Self {
         self.viewport = Viewport {
             width: f64::from(persona.viewport.width),
             height: f64::from(persona.viewport.height),
-            device_pixel_ratio: persona.viewport.device_pixel_ratio,
+            device_pixel_ratio: f64::from(persona.viewport.device_scale_factor),
             scroll_x: 0.0,
             scroll_y: 0.0,
         };
@@ -810,12 +826,19 @@ impl PageOptionsBuilder {
         self.options.viewport.height = f64::from(height);
         self.options.persona.viewport.width = width;
         self.options.persona.viewport.height = height;
+        self.options.persona.screen.width = width;
+        self.options.persona.screen.height = height;
+        self.options.persona.screen.avail_width = width;
+        self.options.persona.screen.avail_height = height;
+        self.options.persona.window.outer_width = width;
+        self.options.persona.window.outer_height = height;
         self
     }
 
-    pub fn device_pixel_ratio(mut self, device_pixel_ratio: f64) -> Self {
-        self.options.viewport.device_pixel_ratio = device_pixel_ratio;
-        self.options.persona.viewport.device_pixel_ratio = device_pixel_ratio;
+    pub fn device_pixel_ratio(mut self, device_pixel_ratio: u32) -> Self {
+        self.options.viewport.device_pixel_ratio = f64::from(device_pixel_ratio);
+        self.options.persona.viewport.device_scale_factor = device_pixel_ratio;
+        self.options.persona.screen.device_scale_factor = device_pixel_ratio;
         self
     }
 
@@ -824,32 +847,45 @@ impl PageOptionsBuilder {
     }
 }
 
-fn install_persona(runtime: &JsRuntime, persona: &persona::Persona) -> Result<(), JsException> {
-    let user_agent = serde_json::to_string(&persona.user_agent)
+fn install_persona(
+    runtime: &JsRuntime,
+    persona: &persona::ResolvedPersona,
+) -> Result<(), JsException> {
+    let persona = serde_json::to_string(persona)
         .map_err(|error| JsException::from_message(error.to_string()))?;
-    let platform = serde_json::to_string(&persona.platform)
-        .map_err(|error| JsException::from_message(error.to_string()))?;
-    let locale = serde_json::to_string(&persona.locale)
-        .map_err(|error| JsException::from_message(error.to_string()))?;
-    let languages = serde_json::to_string(&persona.languages)
-        .map_err(|error| JsException::from_message(error.to_string()))?;
-    runtime.eval(&format!(
-        r#"
-        Object.defineProperties(navigator, {{
-            userAgent: {{ value: {user_agent}, enumerable: true }},
-            platform: {{ value: {platform}, enumerable: true }},
-            language: {{ value: {locale}, enumerable: true }},
-            languages: {{ value: Object.freeze({languages}), enumerable: true }},
-        }});
-        globalThis.screen = Object.freeze({{
-            width: {}, height: {}, availWidth: {}, availHeight: {}, colorDepth: 24, pixelDepth: 24,
-        }});
-        window.screen = globalThis.screen;
-    "#,
-        persona.viewport.width,
-        persona.viewport.height,
-        persona.viewport.width,
-        persona.viewport.height
-    ))?;
+    let installer = include_str!("persona.js");
+    runtime.eval(&format!("({installer})({persona})"))?;
     Ok(())
+}
+
+fn persona_request_headers(persona: &persona::ResolvedPersona) -> Vec<(String, String)> {
+    let network = &persona.network;
+    [
+        ("user-agent", network.user_agent.as_str()),
+        ("accept", network.accept_header.as_str()),
+        ("accept-language", network.accept_language.as_str()),
+        ("accept-encoding", network.accept_encoding.as_str()),
+        ("sec-ch-ua", network.sec_ch_ua.as_str()),
+        ("sec-ch-ua-mobile", network.sec_ch_ua_mobile.as_str()),
+        ("sec-ch-ua-platform", network.sec_ch_ua_platform.as_str()),
+        (
+            "sec-ch-ua-full-version",
+            network.sec_ch_ua_full_version.as_str(),
+        ),
+        (
+            "sec-ch-ua-full-version-list",
+            network.sec_ch_ua_full_version_list.as_str(),
+        ),
+        ("sec-ch-ua-arch", network.sec_ch_ua_arch.as_str()),
+        ("sec-ch-ua-bitness", network.sec_ch_ua_bitness.as_str()),
+        (
+            "sec-ch-ua-platform-version",
+            network.sec_ch_ua_platform_version.as_str(),
+        ),
+        ("sec-ch-ua-model", network.sec_ch_ua_model.as_str()),
+    ]
+    .into_iter()
+    .filter(|(_, value)| !value.is_empty())
+    .map(|(name, value)| (name.to_string(), value.to_string()))
+    .collect()
 }
