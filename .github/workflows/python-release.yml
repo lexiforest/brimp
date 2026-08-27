@@ -34,10 +34,13 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Select build Python
+        run: echo "/opt/python/cp312-cp312/bin" >> "$GITHUB_PATH"
+
       - name: Download pinned native SDKs
         run: |
-          /opt/python/cp312-cp312/bin/python \
-            bindings/python/prepare_native.py \
+          python3 -m pip --version
+          python3 bindings/python/prepare_native.py \
             --target "${{ matrix.target }}" \
             --output ".native/${{ matrix.target }}"
 
@@ -57,7 +60,7 @@ jobs:
 
       - name: Validate and clean-install wheel
         run: >-
-          /opt/python/cp312-cp312/bin/python bindings/python/test_wheel.py
+          python3 bindings/python/test_wheel.py
           --target "${{ matrix.target }}"
           --directory dist
 
