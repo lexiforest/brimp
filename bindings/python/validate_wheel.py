@@ -25,7 +25,6 @@ REQUIRED_LIBRARIES = {
         "libicui18n",
         "libicuuc",
         "libfontconfig",
-        "libatomic",
     ),
     "aarch64-unknown-linux-gnu": (
         "libJavaScriptCore",
@@ -34,7 +33,6 @@ REQUIRED_LIBRARIES = {
         "libicui18n",
         "libicuuc",
         "libfontconfig",
-        "libatomic",
     ),
     "aarch64-apple-darwin": (
         "JavaScriptCore",
