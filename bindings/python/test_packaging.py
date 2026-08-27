@@ -39,10 +39,14 @@ class PackagingTests(unittest.TestCase):
             for target, platform in validate_wheel.PLATFORMS.items():
                 wheel = directory / f"brimp-{TEST_VERSION}-cp310-abi3-{platform}.whl"
                 extension = "brimp/_brimp.pyd" if "windows" in target else "brimp/_brimp.so"
+                library_suffix = ".dll" if "windows" in target else ".so"
+                if "apple" in target:
+                    library_suffix = ""
                 names = [
                     extension,
                     *(
-                        f"brimp.libs/{library}"
+                        f"{validate_wheel.NATIVE_LIBRARY_PREFIX[target]}"
+                        f"{library}-deadbeef{library_suffix}"
                         for library in validate_wheel.REQUIRED_LIBRARIES[target]
                     ),
                     *validate_wheel.REQUIRED_LICENSES,

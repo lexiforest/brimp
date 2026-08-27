@@ -33,16 +33,23 @@ REQUIRED_LIBRARIES = {
         "libicuuc",
     ),
     "aarch64-apple-darwin": (
-        "JavaScriptCore.framework/",
+        "JavaScriptCore",
         "libcurl-impersonate",
     ),
     "x86_64-pc-windows-msvc": (
-        "JavaScriptCore.dll",
-        "libcurl-impersonate.dll",
-        "icudt77.dll",
-        "icuin77.dll",
-        "icuuc77.dll",
+        "JavaScriptCore",
+        "libcurl-impersonate",
+        "icudt77",
+        "icuin77",
+        "icuuc77",
     ),
+}
+
+NATIVE_LIBRARY_PREFIX = {
+    "x86_64-unknown-linux-gnu": "brimp.libs/",
+    "aarch64-unknown-linux-gnu": "brimp.libs/",
+    "aarch64-apple-darwin": "brimp.dylibs/",
+    "x86_64-pc-windows-msvc": "brimp.libs/",
 }
 
 REQUIRED_LICENSES = (
@@ -93,9 +100,14 @@ def validate(wheel: Path, target: str) -> None:
         for name in names
     ):
         raise RuntimeError(f"{wheel.name} contains debug symbols")
+    native_names = [
+        name for name in names if name.startswith(NATIVE_LIBRARY_PREFIX[target])
+    ]
     for required in REQUIRED_LIBRARIES[target]:
-        if not any(required in name for name in names):
-            raise RuntimeError(f"{wheel.name} does not bundle {required}")
+        if not any(required.lower() in name.lower() for name in native_names):
+            raise RuntimeError(
+                f"{wheel.name} does not bundle {required}; found {native_names}"
+            )
     for required in REQUIRED_LICENSES:
         if required not in names:
             raise RuntimeError(f"{wheel.name} does not bundle {required}")
