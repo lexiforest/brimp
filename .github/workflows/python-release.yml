@@ -37,6 +37,12 @@ jobs:
       - name: Select build Python
         run: echo "/opt/python/cp312-cp312/bin" >> "$GITHUB_PATH"
 
+      - name: Install Linux system dependencies
+        run: |
+          dnf install -y fontconfig-devel pkgconf-pkg-config
+          cc --version
+          pkg-config --modversion fontconfig
+
       - name: Download pinned native SDKs
         run: |
           python3 -m pip --version
@@ -59,10 +65,11 @@ jobs:
             --out dist
 
       - name: Validate and clean-install wheel
-        run: >-
-          python3 bindings/python/test_wheel.py
-          --target "${{ matrix.target }}"
-          --directory dist
+        run: |
+          auditwheel show dist/*.whl
+          python3 bindings/python/test_wheel.py \
+            --target "${{ matrix.target }}" \
+            --directory dist
 
       - name: Upload wheel
         uses: actions/upload-artifact@v7
