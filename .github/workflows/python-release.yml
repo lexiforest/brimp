@@ -31,6 +31,9 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v6
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Download pinned native SDKs
         run: |
           /opt/python/cp312-cp312/bin/python \
