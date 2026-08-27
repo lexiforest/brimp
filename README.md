@@ -3,6 +3,8 @@
 Brimp is a lightweight, headless browser for agents. It combines JavaScriptCore with
 Blitz's DOM implementation and curl-impersonate as the network stack.
 
+Documentation: [docs.brimp.ai](https://docs.brimp.ai)
+
 If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
 same simple request/response workflow with a JavaScript-rendered HTML result.
 Brimp offers Python and Node.js bindings.

@@ -1,5 +1,7 @@
 /target
 /dist
+/docs/.astro
+/docs/dist
 /out.png
 **/__pycache__/
 **/node_modules/
