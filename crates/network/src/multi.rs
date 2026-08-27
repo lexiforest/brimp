@@ -16,34 +16,7 @@ use crate::{
     CurlConfig, HeaderList, NetworkError, ResourceCallback, ResourceRequest, ResourceResponse,
 };
 
-const CURL_SOCKET_TIMEOUT: c_int = -1;
-const CURL_POLL_IN: c_int = 1;
-const CURL_POLL_OUT: c_int = 2;
-const CURL_POLL_INOUT: c_int = 3;
-const CURL_POLL_REMOVE: c_int = 4;
-const CURL_CSELECT_IN: c_int = 1;
-const CURL_CSELECT_OUT: c_int = 2;
-const CURL_CSELECT_ERR: c_int = 4;
-const POLLIN: i16 = 0x0001;
-const POLLOUT: i16 = 0x0004;
-const POLLERR: i16 = 0x0008;
-const POLLHUP: i16 = 0x0010;
 static EXECUTOR_THREADS: AtomicUsize = AtomicUsize::new(0);
-#[repr(C)]
-struct PollFd {
-    fd: c_int,
-    events: i16,
-    revents: i16,
-}
-unsafe extern "C" {
-    fn poll(fds: *mut PollFd, count: usize, timeout: c_int) -> c_int;
-}
-
-#[derive(Default)]
-struct SocketState {
-    sockets: HashMap<c_int, i16>,
-    timeout_ms: c_int,
-}
 
 enum Completion {
     Future(oneshot::Sender<Result<ResourceResponse, NetworkError>>),
@@ -180,26 +153,6 @@ fn run(config: CurlConfig, receiver: Receiver<Command>) {
         );
         return;
     }
-    let mut socket_state = Box::new(SocketState {
-        sockets: HashMap::new(),
-        timeout_ms: 20,
-    });
-    unsafe {
-        let state = socket_state.as_mut() as *mut SocketState as *mut c_void;
-        let _ = curl_multi_setopt(
-            multi,
-            CURLMOPT_SOCKETFUNCTION,
-            socket_callback
-                as extern "C" fn(*mut Curl, c_int, c_int, *mut c_void, *mut c_void) -> c_int,
-        );
-        let _ = curl_multi_setopt(multi, CURLMOPT_SOCKETDATA, state);
-        let _ = curl_multi_setopt(
-            multi,
-            CURLMOPT_TIMERFUNCTION,
-            timer_callback as extern "C" fn(*mut CurlMulti, c_long, *mut c_void) -> c_int,
-        );
-        let _ = curl_multi_setopt(multi, CURLMOPT_TIMERDATA, state);
-    }
     let mut active = HashMap::<usize, Box<Transfer>>::new();
     let mut idle = Vec::new();
     let mut shutdown = false;
@@ -242,8 +195,8 @@ fn run(config: CurlConfig, receiver: Receiver<Command>) {
         }
         drive(multi, &mut active, &mut idle);
         if !active.is_empty() {
-            wait_for_sockets(multi, socket_state.as_mut() as *mut SocketState);
-            drain_completions(multi, &mut active, &mut idle);
+            wait_for_activity(multi, &mut active, &mut idle);
+            drive(multi, &mut active, &mut idle);
         }
     }
     for handle in idle {
@@ -317,13 +270,13 @@ fn drive(
     idle: &mut Vec<*mut Curl>,
 ) {
     let mut running = 0;
-    let result = unsafe { curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &mut running) };
+    let result = unsafe { curl_multi_perform(multi, &mut running) };
     if result != CURLM_OK {
         cancel_all(
             multi,
             active,
             idle,
-            NetworkError::Transport(format!("curl multi socket action failed ({result})")),
+            NetworkError::Transport(format!("curl multi perform failed ({result})")),
         );
         return;
     }
@@ -366,77 +319,21 @@ fn drain_completions(
     }
 }
 
-fn wait_for_sockets(multi: *mut CurlMulti, state: *mut SocketState) {
-    let mut fds = unsafe { &*state }
-        .sockets
-        .iter()
-        .map(|(&fd, &events)| PollFd {
-            fd,
-            events,
-            revents: 0,
-        })
-        .collect::<Vec<_>>();
-    let timeout = unsafe { &*state }.timeout_ms.clamp(0, 20);
-    let ready = unsafe { poll(fds.as_mut_ptr(), fds.len(), timeout) };
-    if ready <= 0 {
-        let mut running = 0;
-        unsafe {
-            let _ = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &mut running);
-        }
-        return;
+fn wait_for_activity(
+    multi: *mut CurlMulti,
+    active: &mut HashMap<usize, Box<Transfer>>,
+    idle: &mut Vec<*mut Curl>,
+) {
+    let mut ready = 0;
+    let result = unsafe { curl_multi_poll(multi, ptr::null_mut(), 0, 20, &mut ready) };
+    if result != CURLM_OK {
+        cancel_all(
+            multi,
+            active,
+            idle,
+            NetworkError::Transport(format!("curl multi poll failed ({result})")),
+        );
     }
-    for fd in fds.into_iter().filter(|fd| fd.revents != 0) {
-        let mut events = 0;
-        if fd.revents & POLLIN != 0 {
-            events |= CURL_CSELECT_IN;
-        }
-        if fd.revents & POLLOUT != 0 {
-            events |= CURL_CSELECT_OUT;
-        }
-        if fd.revents & (POLLERR | POLLHUP) != 0 {
-            events |= CURL_CSELECT_ERR;
-        }
-        let mut running = 0;
-        unsafe {
-            let _ = curl_multi_socket_action(multi, fd.fd, events, &mut running);
-        }
-    }
-}
-
-extern "C" fn socket_callback(
-    _easy: *mut Curl,
-    socket: c_int,
-    what: c_int,
-    user: *mut c_void,
-    _socket_data: *mut c_void,
-) -> c_int {
-    if user.is_null() {
-        return 0;
-    }
-    let state = unsafe { &mut *(user as *mut SocketState) };
-    match what {
-        CURL_POLL_IN => {
-            state.sockets.insert(socket, POLLIN);
-        }
-        CURL_POLL_OUT => {
-            state.sockets.insert(socket, POLLOUT);
-        }
-        CURL_POLL_INOUT => {
-            state.sockets.insert(socket, POLLIN | POLLOUT);
-        }
-        CURL_POLL_REMOVE => {
-            state.sockets.remove(&socket);
-        }
-        _ => {}
-    }
-    0
-}
-extern "C" fn timer_callback(_multi: *mut CurlMulti, timeout: c_long, user: *mut c_void) -> c_int {
-    if !user.is_null() {
-        unsafe { &mut *(user as *mut SocketState) }.timeout_ms =
-            c_int::try_from(timeout).unwrap_or(20).max(0);
-    }
-    0
 }
 
 fn cancel_dropped(

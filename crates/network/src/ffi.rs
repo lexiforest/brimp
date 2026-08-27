@@ -42,10 +42,6 @@ pub(crate) const CURLOPT_TIMEOUT_MS: CurlOption = 155;
 pub(crate) const CURLOPT_CONNECTTIMEOUT_MS: CurlOption = 156;
 pub(crate) const CURLINFO_EFFECTIVE_URL: CurlInfo = 0x100001;
 pub(crate) const CURLINFO_RESPONSE_CODE: CurlInfo = 0x200002;
-pub(crate) const CURLMOPT_SOCKETFUNCTION: c_uint = 20_001;
-pub(crate) const CURLMOPT_SOCKETDATA: c_uint = 10_002;
-pub(crate) const CURLMOPT_TIMERFUNCTION: c_uint = 20_004;
-pub(crate) const CURLMOPT_TIMERDATA: c_uint = 10_005;
 static INIT: Once = Once::new();
 unsafe extern "C" {
     fn curl_global_init(flags: c_long) -> CurlCode;
@@ -65,14 +61,15 @@ unsafe extern "C" {
     pub(crate) fn curl_multi_init() -> *mut CurlMulti;
     pub(crate) fn curl_multi_add_handle(multi: *mut CurlMulti, easy: *mut Curl) -> CurlMCode;
     pub(crate) fn curl_multi_remove_handle(multi: *mut CurlMulti, easy: *mut Curl) -> CurlMCode;
-    pub(crate) fn curl_multi_socket_action(
+    pub(crate) fn curl_multi_perform(multi: *mut CurlMulti, running: *mut c_int) -> CurlMCode;
+    pub(crate) fn curl_multi_poll(
         multi: *mut CurlMulti,
-        socket: c_int,
-        events: c_int,
-        running: *mut c_int,
+        extra_fds: *mut c_void,
+        extra_nfds: c_uint,
+        timeout_ms: c_int,
+        numfds: *mut c_int,
     ) -> CurlMCode;
     pub(crate) fn curl_multi_info_read(multi: *mut CurlMulti, queued: *mut c_int) -> *mut CurlMsg;
-    pub(crate) fn curl_multi_setopt(multi: *mut CurlMulti, option: c_uint, ...) -> CurlMCode;
     pub(crate) fn curl_multi_cleanup(multi: *mut CurlMulti) -> CurlMCode;
 }
 pub(crate) fn global_init() {

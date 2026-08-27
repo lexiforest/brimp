@@ -1,0 +1,172 @@
+name: Python wheels
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    name: Build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-24.04
+            image: quay.io/pypa/manylinux_2_28_x86_64
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
+            image: quay.io/pypa/manylinux_2_28_aarch64
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image }}
+    timeout-minutes: 120
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Download pinned native SDKs
+        run: |
+          /opt/python/cp312-cp312/bin/python \
+            bindings/python/prepare_native.py \
+            --target "${{ matrix.target }}" \
+            --output ".native/${{ matrix.target }}"
+
+      - name: Build and repair wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          container: off
+          target: ${{ matrix.target }}
+          args: >-
+            --release
+            --locked
+            --auditwheel repair
+            --compatibility manylinux_2_28
+            --manifest-path bindings/python/Cargo.toml
+            --out dist
+
+      - name: Validate and clean-install wheel
+        run: >-
+          /opt/python/cp312-cp312/bin/python bindings/python/test_wheel.py
+          --target "${{ matrix.target }}"
+          --directory dist
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel-${{ matrix.target }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  build-native:
+    name: Build ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-26
+            deployment_target: "11.0"
+          - target: x86_64-pc-windows-msvc
+            runner: windows-2025
+            deployment_target: ""
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Download pinned native SDKs
+        run: >-
+          python bindings/python/prepare_native.py
+          --target "${{ matrix.target }}"
+          --output ".native/${{ matrix.target }}"
+
+      - name: Build and repair wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          container: off
+          target: ${{ matrix.target }}
+          args: >-
+            --release
+            --locked
+            --auditwheel repair
+            --compatibility pypi
+            --manifest-path bindings/python/Cargo.toml
+            --out dist
+
+      - name: Validate and clean-install wheel
+        run: >-
+          python bindings/python/test_wheel.py
+          --target "${{ matrix.target }}"
+          --directory dist
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel-${{ matrix.target }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  publish:
+    name: Publish wheels to PyPI
+    if: github.event_name == 'release' && !github.event.release.prerelease
+    needs:
+      - build-linux
+      - build-native
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Download wheels
+        uses: actions/download-artifact@v8
+        with:
+          pattern: wheel-*
+          path: dist
+          merge-multiple: true
+
+      - name: Validate release wheel set
+        shell: bash
+        run: |
+          for target in \
+            x86_64-unknown-linux-gnu \
+            aarch64-unknown-linux-gnu \
+            aarch64-apple-darwin \
+            x86_64-pc-windows-msvc
+          do
+            python bindings/python/validate_wheel.py \
+              --target "$target" \
+              --directory dist \
+              --tag "$GITHUB_REF_NAME"
+          done
+          test "$(find dist -maxdepth 1 -name '*.whl' | wc -l)" -eq 4
+
+      - name: Publish wheels
+        uses: pypa/gh-action-pypi-publish@release/v1

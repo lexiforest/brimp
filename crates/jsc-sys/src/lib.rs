@@ -22,6 +22,7 @@ pub const K_JS_PROPERTY_ATTRIBUTE_NONE: JSPropertyAttributes = 0;
 /// # Safety
 ///
 /// This must run before any thread initializes JavaScriptCore or creates a VM.
+#[cfg(target_os = "macos")]
 pub unsafe fn allow_mach_exception_handlers() -> bool {
     // Resolve the private data symbol dynamically. A direct relocation against this mutable
     // symbol produces invalid chained fixups in Python extension dylibs on macOS.
@@ -50,11 +51,17 @@ pub type JSObjectCallAsFunctionCallback = Option<
     ) -> JSValueRef,
 >;
 
-#[link(name = "JavaScriptCore", kind = "framework")]
+#[cfg_attr(target_os = "macos", link(name = "JavaScriptCore", kind = "framework"))]
+#[cfg_attr(not(target_os = "macos"), link(name = "JavaScriptCore"))]
 unsafe extern "C" {
-    #[link_name = "_ZN3JSC10initializeEv"]
+    #[cfg_attr(target_env = "msvc", link_name = "?initialize@JSC@@YAXXZ")]
+    #[cfg_attr(not(target_env = "msvc"), link_name = "_ZN3JSC10initializeEv")]
     pub fn JSCInitialize();
-    #[link_name = "_ZN3JSC7Options10setOptionsEPKc"]
+    #[cfg_attr(target_env = "msvc", link_name = "?setOptions@Options@JSC@@SA_NPEBD@Z")]
+    #[cfg_attr(
+        not(target_env = "msvc"),
+        link_name = "_ZN3JSC7Options10setOptionsEPKc"
+    )]
     pub fn JSCSetOptions(options: *const c_char) -> bool;
 
     pub fn JSGlobalContextCreate(global_object_class: JSClassRef) -> JSGlobalContextRef;

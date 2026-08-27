@@ -1,6 +1,6 @@
 {
   "name": "@brimp/brimp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight in-process headless browser for agents",
   "license": "MIT OR Apache-2.0",
   "repository": {

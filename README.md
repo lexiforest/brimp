@@ -221,7 +221,8 @@ python3 -m unittest discover -s benchmark/memory -p 'test_*.py' -v
 ./crates/cdp/puppeteer-test.sh
 ```
 
-Current release artifacts target macOS arm64. Python and Node packages bundle
-the arm64 libcurl-impersonate dylib and use macOS system frameworks at runtime;
-source builds use the configurable native discovery paths above. See each
+Python wheels are built for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and
+Windows x86-64, and bundle JavaScriptCore, curl-impersonate, and their required
+non-system runtimes. The Node package remains macOS ARM64. Source builds use the
+configurable native discovery paths described in `NATIVE.md`; see each
 interface's `SUPPORT.md` for its exact tested surface.

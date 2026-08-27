@@ -42,8 +42,11 @@ impl JsRuntime {
             // SAFETY: JSC initialization is process-global and internally guarded. Options are
             // changed before the first VM is created and remain immutable afterward.
             unsafe {
-                if !jsc_sys::allow_mach_exception_handlers() {
-                    return false;
+                #[cfg(target_os = "macos")]
+                {
+                    if !jsc_sys::allow_mach_exception_handlers() {
+                        return false;
+                    }
                 }
                 jsc_sys::JSCInitialize();
                 jsc_sys::JSCSetOptions(c"useSharedArrayBuffer=true".as_ptr())

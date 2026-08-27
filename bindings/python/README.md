@@ -40,3 +40,17 @@ with brimp.Session(persona_json=persona_json) as session:
 ```
 
 See `SUPPORT.md` for the exact tested surface.
+
+## Binary wheels
+
+The release workflow produces self-contained CPython 3.10+ ABI3 wheels for:
+
+- manylinux 2.28 x86-64 and ARM64;
+- macOS 11 or newer on Apple silicon; and
+- Windows x86-64.
+
+Run the `Python wheels` workflow manually to exercise all builds without
+publishing. A non-prerelease GitHub release tagged `v<project-version>` publishes
+the validated four-wheel set through the `pypi` environment and PyPI Trusted
+Publishing. Source distributions are intentionally omitted because their native
+dependency build is not self-contained.

@@ -238,7 +238,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-benchmark"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "http",
@@ -249,7 +249,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-cdp"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64",
@@ -266,7 +266,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "network",
  "persona",
@@ -276,7 +276,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-node"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "napi",
  "napi-build",
@@ -289,7 +289,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-python"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "network",
  "persona",
@@ -310,7 +310,7 @@ dependencies = [
 
 [[package]]
 name = "browser-dom"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "blitz-dom",
  "blitz-html",
@@ -1233,14 +1233,14 @@ dependencies = [
 
 [[package]]
 name = "jsc"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "jsc-sys",
 ]
 
 [[package]]
 name = "jsc-sys"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "libc",
 ]
@@ -1447,7 +1447,7 @@ dependencies = [
 
 [[package]]
 name = "network"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "http",
@@ -1634,7 +1634,7 @@ checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
 
 [[package]]
 name = "persona"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2040,7 +2040,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "screenshot"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyrender",
  "anyrender_vello_cpu",
@@ -2973,7 +2973,7 @@ dependencies = [
 
 [[package]]
 name = "web-bindings"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64",
  "blitz-dom",
@@ -2991,7 +2991,7 @@ dependencies = [
 
 [[package]]
 name = "web-runtime"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "async-trait",
  "blitz-dom",

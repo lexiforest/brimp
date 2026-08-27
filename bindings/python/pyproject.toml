@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "brimp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Requests-style JavaScript-rendering browser client"
 requires-python = ">=3.10"
 readme = "README.md"
@@ -19,3 +19,4 @@ Issues = "https://github.com/lexiforest/brimp/issues"
 python-source = "python"
 module-name = "brimp._brimp"
 features = ["pyo3/extension-module"]
+strip = true
