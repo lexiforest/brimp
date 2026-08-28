@@ -4,7 +4,7 @@ use std::time::Duration;
 use async_trait::async_trait;
 use http::{HeaderMap, HeaderValue, StatusCode};
 use network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
-use web_runtime::{AutomationBrowser, AutomationError, PageOptions};
+use web_runtime::{AutomationBrowser, AutomationError, PageOptions, RemoteArgument};
 
 struct WorkflowLoader;
 #[async_trait]
@@ -28,8 +28,61 @@ impl ResourceLoader for WorkflowLoader {
 fn shared_automation_workflow_navigates_evaluates_screenshots_and_closes() {
     let browser = AutomationBrowser::with_resource_loader(Arc::new(WorkflowLoader));
     let page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_viewport(640, 480, 2.0).unwrap();
+    page.add_preload_script("test-preload", "globalThis.preloaded = 42")
+        .unwrap();
     page.navigate("https://example.test/", Duration::from_secs(1))
         .unwrap();
+    let viewport = page.viewport().unwrap();
+    assert_eq!((viewport.width, viewport.height), (640.0, 480.0));
+    assert_eq!(viewport.device_pixel_ratio, 2.0);
+    assert_eq!(page.evaluate("preloaded").unwrap(), 42);
+    let remote = page
+        .evaluate_remote(
+            "({answer: 42, nested: {ok: true}})",
+            false,
+            Some("test".into()),
+            false,
+        )
+        .unwrap();
+    let object_id = remote["objectId"].as_str().unwrap().to_owned();
+    let properties = page
+        .remote_object_properties(object_id.clone(), true, false)
+        .unwrap();
+    let answer_property = properties["result"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|property| property["name"] == "answer")
+        .unwrap();
+    assert_eq!(answer_property["value"]["value"], 42);
+    let answer = page
+        .call_function_remote(
+            "function () { return this.answer; }",
+            Some(object_id.clone()),
+            Vec::<RemoteArgument>::new(),
+            true,
+            None,
+            false,
+        )
+        .unwrap();
+    assert_eq!(answer["value"], 42);
+    let promised = page
+        .evaluate_remote(
+            "new Promise(resolve => setTimeout(() => resolve(42), 5))",
+            true,
+            None,
+            true,
+        )
+        .unwrap();
+    assert_eq!(promised["value"], 42);
+    assert_eq!(page.release_remote_object_group("test").unwrap(), 2);
+    assert!(!page.release_remote_object(object_id.clone()).unwrap());
+    assert!(!page.release_remote_object(object_id).unwrap());
+    assert!(page.remove_preload_script("test-preload").unwrap());
+    page.navigate("https://example.test/next", Duration::from_secs(1))
+        .unwrap();
+    assert_eq!(page.evaluate("typeof preloaded").unwrap(), "undefined");
     assert_eq!(page.title().unwrap(), "Workflow");
     assert_eq!(
         page.evaluate("({ answer: 6 * 7, values: [true, null] })")

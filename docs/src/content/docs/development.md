@@ -47,8 +47,8 @@ cargo clippy --workspace --all-targets -- -D warnings
 ```
 
 The package test is the combined macOS ARM64 Python and Node check. The
-Puppeteer workflow installs its exact locked dependency into a temporary
-directory and connects to `brimp cdp`.
+The client workflow installs its exact locked Puppeteer and Playwright
+dependencies into a temporary directory and connects both to `brimp cdp`.
 
 For a quicker interface-specific cycle:
 

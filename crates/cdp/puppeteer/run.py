@@ -5,8 +5,8 @@ import sys
 
 
 def main():
-    if len(sys.argv) != 3:
-        raise SystemExit("usage: run.py BRIMP_BINARY WORKFLOW_MJS")
+    if len(sys.argv) < 3:
+        raise SystemExit("usage: run.py BRIMP_BINARY WORKFLOW_MJS...")
     server = subprocess.Popen(
         [sys.argv[1], "cdp", "--bind", "127.0.0.1:0"],
         stdout=subprocess.PIPE,
@@ -21,10 +21,24 @@ def main():
         browser_url = "http://" + websocket_url.removeprefix("ws://").split("/", 1)[0]
         env = os.environ.copy()
         env["BRIMP_CDP_URL"] = browser_url
-        result = subprocess.run(["node", sys.argv[2]], env=env, text=True, capture_output=True, check=False)
-        if result.returncode:
-            raise RuntimeError(f"Puppeteer workflow failed ({result.returncode}):\n{result.stderr}")
-        print(result.stdout.strip())
+        for workflow in sys.argv[2:]:
+            try:
+                result = subprocess.run(
+                    ["node", workflow],
+                    env=env,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                    timeout=30,
+                )
+            except subprocess.TimeoutExpired as error:
+                stderr = error.stderr or ""
+                if isinstance(stderr, bytes):
+                    stderr = stderr.decode(errors="replace")
+                raise RuntimeError(f"Client workflow timed out ({workflow}):\n{stderr}") from error
+            if result.returncode:
+                raise RuntimeError(f"Client workflow failed ({workflow}, {result.returncode}):\n{result.stderr}")
+            print(result.stdout.strip())
     finally:
         server.terminate()
         try:

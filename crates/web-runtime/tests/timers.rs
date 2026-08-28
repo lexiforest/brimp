@@ -79,3 +79,63 @@ fn microtasks_run_at_the_end_of_the_javascript_checkpoint() {
         "script,script-end,microtask"
     );
 }
+
+#[test]
+fn mutation_observer_reports_changes_at_a_timer_checkpoint() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_content("<html><body><main>before</main></body></html>")
+        .unwrap();
+    page.eval(
+        r#"
+        globalThis.observedMutation = null;
+        globalThis.observer = new MutationObserver((records, observer) => {
+            observedMutation = [records[0].type, records[0].target === document.body];
+            observer.disconnect();
+        });
+        observer.observe(document.body, {childList: true, subtree: true});
+        document.querySelector("main").textContent = "after";
+        "#,
+    )
+    .unwrap();
+
+    std::thread::sleep(std::time::Duration::from_millis(20));
+    page.run_pending_tasks().unwrap();
+
+    assert_eq!(
+        page.eval("observedMutation.join(',')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "childList,true"
+    );
+}
+
+#[test]
+fn intersection_observer_reports_viewport_geometry() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_content("<html><body><main style='width:100px;height:100px'></main></body></html>")
+        .unwrap();
+    page.eval(
+        r#"
+        globalThis.intersection = null;
+        globalThis.observer = new IntersectionObserver((entries, observer) => {
+            intersection = [entries[0].isIntersecting, entries[0].intersectionRatio];
+            observer.disconnect();
+        }, {threshold: 1});
+        observer.observe(document.querySelector("main"));
+        "#,
+    )
+    .unwrap();
+
+    page.run_pending_tasks().unwrap();
+
+    assert_eq!(
+        page.eval("intersection[0] && intersection[1] === 1")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true"
+    );
+}

@@ -11,5 +11,6 @@ security warning before binding.
 
 See `SUPPORT.md` for the exact tested method subset.
 
-Run `./crates/cdp/puppeteer-test.sh` to install the exact locked Puppeteer
-version into a temporary directory and execute the recorded workflow.
+Run `./crates/cdp/puppeteer-test.sh` to install the exact locked Puppeteer and
+Playwright versions into a temporary directory and execute both public-API
+workflows.

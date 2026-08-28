@@ -32,8 +32,10 @@ pub struct Page {
     loader: Arc<dyn ResourceLoader>,
     load_state: LoadState,
     url: Option<String>,
+    document_ready: bool,
     async_error: Option<JsException>,
     persona: persona::ResolvedPersona,
+    preload_scripts: Vec<(String, String)>,
 }
 
 impl Page {
@@ -77,8 +79,10 @@ impl Page {
             loader,
             load_state: LoadState::Idle,
             url: None,
+            document_ready: false,
             async_error: None,
             persona: options.persona,
+            preload_scripts: Vec::new(),
         })
     }
 
@@ -95,6 +99,7 @@ impl Page {
             self.viewport.device_pixel_ratio as f32,
         );
         *self.document.borrow_mut() = document;
+        self.document_ready = true;
         self.bindings.reset_document(&self.js)
     }
 
@@ -106,6 +111,7 @@ impl Page {
         let net_provider: Arc<dyn NetProvider> = self.blitz_network.clone();
         let document = BrowserDocument::empty_at_with_net(Some(base_url), Some(net_provider));
         *self.document.borrow_mut() = document;
+        self.document_ready = false;
         let js = JsRuntime::new()?;
         let timers = Rc::new(RefCell::new(TimerQueue::default()));
         let fetches = Rc::new(RefCell::new(FetchQueue::default()));
@@ -188,6 +194,9 @@ impl Page {
             self.load_state = LoadState::Failed;
             return Err(error.into());
         }
+        for (_, source) in &self.preload_scripts {
+            self.execute_page_script(source);
+        }
         let html = if is_html {
             let source = String::from_utf8_lossy(&content);
             if let Err(error) = self
@@ -197,6 +206,7 @@ impl Page {
                 self.load_state = LoadState::Failed;
                 return Err(error);
             }
+            self.document_ready = true;
             self.process_blitz_resources().await;
             self.execute_page_script(
                 "document.dispatchEvent(new Event('DOMContentLoaded'));\
@@ -235,6 +245,17 @@ impl Page {
 
     pub fn url(&self) -> Option<&str> {
         self.url.as_deref()
+    }
+
+    pub fn add_preload_script(&mut self, identifier: String, source: String) {
+        self.preload_scripts.push((identifier, source));
+    }
+
+    pub fn remove_preload_script(&mut self, identifier: &str) -> bool {
+        let original_len = self.preload_scripts.len();
+        self.preload_scripts
+            .retain(|(candidate, _)| candidate != identifier);
+        self.preload_scripts.len() != original_len
     }
 
     async fn parse_navigation_document(
@@ -453,9 +474,11 @@ impl Page {
         self.viewport.width = f64::from(width);
         self.viewport.height = f64::from(height);
         self.viewport.device_pixel_ratio = device_pixel_ratio;
-        self.document
-            .borrow_mut()
-            .set_viewport(width, height, device_pixel_ratio as f32);
+        if self.document_ready {
+            self.document
+                .borrow_mut()
+                .set_viewport(width, height, device_pixel_ratio as f32);
+        }
     }
 
     pub fn screenshot(&mut self, path: impl AsRef<Path>) -> Result<(), ScreenshotError> {

@@ -181,7 +181,7 @@ async fn serve_discovery(
 ) -> std::io::Result<()> {
     let websocket = format!("ws://{addr}/devtools/browser/brimp");
     let body = match path {
-        "/json/version" => serde_json::to_vec(&json!({
+        "/json/version" | "/json/version/" => serde_json::to_vec(&json!({
             "Browser": "Brimp/0.1.0",
             "Protocol-Version": "1.3",
             "User-Agent": "Brimp/0.1.0",
@@ -189,7 +189,7 @@ async fn serve_discovery(
             "webSocketDebuggerUrl": websocket
         }))
         .unwrap(),
-        "/json" | "/json/list" => b"[]".to_vec(),
+        "/json" | "/json/" | "/json/list" | "/json/list/" => b"[]".to_vec(),
         _ => {
             write_http(stream, "404 Not Found", "text/plain", b"not found").await?;
             return Ok(());
@@ -224,7 +224,12 @@ async fn serve_websocket(
                 let (response, events_before_response) =
                     match serde_json::from_str::<Request>(&text) {
                         Ok(request) => {
-                            let events_before_response = request.method == "Target.attachToTarget";
+                            let events_before_response = matches!(
+                                request.method.as_str(),
+                                "Target.attachToTarget"
+                                    | "Target.attachToBrowserTarget"
+                                    | "Target.createTarget"
+                            );
                             (state.dispatch(&request).await, events_before_response)
                         }
                         Err(error) => (

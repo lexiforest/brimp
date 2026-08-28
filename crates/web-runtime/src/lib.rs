@@ -6,7 +6,9 @@ mod request;
 mod task;
 mod viewport;
 
-pub use automation::{AutomationBrowser, AutomationError, AutomationPage, CancellationToken};
+pub use automation::{
+    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, RemoteArgument,
+};
 pub use browser::Browser;
 pub use page::{
     LoadState, NavigationError, NavigationResponse, Page, PageOptions, PageOptionsBuilder,

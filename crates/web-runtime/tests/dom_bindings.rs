@@ -45,6 +45,10 @@ fn exposes_window_document_classes_and_stable_wrappers() {
     assert_js(&page, "document.body === document.body");
     assert_js(&page, "window instanceof Window");
     assert_js(&page, "new DOMRect(1, 2, 3, 4).right === 4");
+    assert_js(
+        &page,
+        "(() => { const box = document.getElementById('box'); return box.getClientRects().length === 1 && (box.scrollIntoView(), true); })()",
+    );
     assert_js(&page, "document.body.style instanceof CSSStyleDeclaration");
     assert_js(
         &page,
@@ -53,6 +57,29 @@ fn exposes_window_document_classes_and_stable_wrappers() {
     assert_js(
         &page,
         "(() => { const box = document.getElementById('box'); box.title = 'tip'; box.autofocus = true; box.tabIndex = 7; box.classList = 'one two'; return box.title === 'tip' && box.hasAttribute('autofocus') && box.tabIndex === 7 && box.className === 'one two'; })()",
+    );
+}
+
+#[test]
+fn focus_tracks_the_active_element_and_dispatches_events() {
+    let page =
+        page_with("<html><body><input id='first'><textarea id='second'></textarea></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            const events = [];
+            const first = document.getElementById("first");
+            const second = document.getElementById("second");
+            first.addEventListener("focus", () => events.push("first-focus"));
+            first.addEventListener("blur", () => events.push("first-blur"));
+            second.addEventListener("focus", () => events.push("second-focus"));
+            first.focus();
+            first.value = "one";
+            second.focus();
+            second.value = "two";
+            return document.activeElement === second && first.value === "one" &&
+                second.value === "two" && events.join(",") === "first-focus,first-blur,second-focus";
+        })()"#,
     );
 }
 
