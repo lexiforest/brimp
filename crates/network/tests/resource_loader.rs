@@ -3,18 +3,160 @@ use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::pin::Pin;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc;
 use std::task::{Context, Poll, Wake, Waker};
 use std::time::{Duration, Instant};
 
 use http::{HeaderValue, Method};
 use network::{
     CurlConfig, CurlResourceLoader, NetworkError, Proxy, ResourceLoader, ResourceRequest,
+    ResourceStreamDirective, ResourceStreamEvent,
 };
 
 fn runtime() -> tokio::runtime::Runtime {
     tokio::runtime::Builder::new_current_thread()
         .build()
         .unwrap()
+}
+
+#[test]
+fn streaming_callback_delivers_chunks_before_completion() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let (continue_sender, continue_receiver) = mpsc::channel();
+    let server = std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let _ = request_head(&mut stream);
+        stream
+            .write_all(b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nfirst\r\n")
+            .unwrap();
+        stream.flush().unwrap();
+        continue_receiver
+            .recv_timeout(Duration::from_secs(2))
+            .unwrap();
+        stream.write_all(b"6\r\nsecond\r\n0\r\n\r\n").unwrap();
+    });
+    let (event_sender, event_receiver) = mpsc::channel();
+    let loader = CurlResourceLoader::default();
+    let _stream = loader
+        .fetch_stream_callback(
+            ResourceRequest::get(format!("http://{address}/stream")),
+            Box::new(move |event, _| {
+                let _ = event_sender.send(event);
+                ResourceStreamDirective::Continue
+            }),
+        )
+        .unwrap();
+    let first = event_receiver.recv_timeout(Duration::from_secs(2)).unwrap();
+    assert!(matches!(
+        first,
+        ResourceStreamEvent::Headers { status, .. } if status == 200
+    ));
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Chunk(bytes) if bytes == b"first"
+    ));
+    continue_sender.send(()).unwrap();
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Chunk(bytes) if bytes == b"second"
+    ));
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Complete
+    ));
+    server.join().unwrap();
+}
+
+#[test]
+fn streaming_handle_pauses_and_resumes_curl_without_losing_the_chunk() {
+    let (url, server) = one_response(b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\n\r\nhello");
+    let (event_sender, event_receiver) = mpsc::channel();
+    let first_chunk = Arc::new(AtomicBool::new(true));
+    let callback_first_chunk = Arc::clone(&first_chunk);
+    let loader = CurlResourceLoader::default();
+    let stream = loader
+        .fetch_stream_callback(
+            ResourceRequest::get(url),
+            Box::new(move |event, _| match event {
+                ResourceStreamEvent::Chunk(_)
+                    if callback_first_chunk.swap(false, Ordering::AcqRel) =>
+                {
+                    ResourceStreamDirective::Pause
+                }
+                event => {
+                    let _ = event_sender.send(event);
+                    ResourceStreamDirective::Continue
+                }
+            }),
+        )
+        .unwrap();
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Headers { .. }
+    ));
+    assert!(
+        event_receiver
+            .recv_timeout(Duration::from_millis(100))
+            .is_err()
+    );
+    stream.resume();
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Chunk(bytes) if bytes == b"hello"
+    ));
+    assert!(matches!(
+        event_receiver.recv_timeout(Duration::from_secs(2)).unwrap(),
+        ResourceStreamEvent::Complete
+    ));
+    server.join().unwrap();
+}
+
+#[test]
+fn cancelling_a_stream_removes_the_curl_transfer() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let (closed_sender, closed_receiver) = mpsc::channel();
+    let server = std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let _ = request_head(&mut stream);
+        stream
+            .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 1000000\r\n\r\n")
+            .unwrap();
+        stream.flush().unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(2)))
+            .unwrap();
+        let mut byte = [0];
+        closed_sender
+            .send(stream.read(&mut byte).unwrap_or(0))
+            .unwrap();
+    });
+    let (headers_sender, headers_receiver) = mpsc::channel();
+    let loader = CurlResourceLoader::default();
+    let stream = loader
+        .fetch_stream_callback(
+            ResourceRequest::get(format!("http://{address}/cancel")),
+            Box::new(move |event, _| {
+                if matches!(event, ResourceStreamEvent::Headers { .. }) {
+                    let _ = headers_sender.send(());
+                }
+                ResourceStreamDirective::Continue
+            }),
+        )
+        .unwrap();
+    headers_receiver
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    stream.cancel();
+    assert_eq!(
+        closed_receiver
+            .recv_timeout(Duration::from_secs(2))
+            .unwrap(),
+        0
+    );
+    server.join().unwrap();
 }
 fn request_head(stream: &mut TcpStream) -> Vec<u8> {
     let mut bytes = Vec::new();

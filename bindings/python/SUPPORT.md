@@ -3,7 +3,7 @@
 | API | Tested behavior |
 | --- | --- |
 | `get(url, **options)` | Creates a temporary Session, returns a detached Response, and closes native resources. |
-| `Session(persona_json=None, ca_bundle=None)` | Creates one synchronous native session with persistent transport and cookie state; an optional PEM CA bundle trusts private test or enterprise roots. |
+| `Session(..., enable_worker=False, enable_streaming_networking=False, storage_path=None, storage_quota_bytes=None)` | Creates one synchronous native page session; heavy browser subsystems are absent unless explicitly enabled. |
 | `Session.get(url, params=None, headers=None, cookies=None, timeout=30)` | Performs a GET navigation with a clean per-navigation JavaScript realm. |
 | `Response.status_code`, `reason`, `url`, `headers` | Exposes final main-response metadata without raising for HTTP error statuses. |
 | `Response.content` / `text` | Exposes the original final HTTP response bytes and decoded text. |

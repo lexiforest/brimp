@@ -7,7 +7,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use web_runtime::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken, NavigationResponse,
-    PageOptions,
+    PageOptions, PersistentStorageOptions,
 };
 
 // Keep Mach-O's LINKEDIT string table eight-byte aligned on current macOS.
@@ -77,11 +77,15 @@ struct PySession {
 #[pymethods]
 impl PySession {
     #[new]
-    #[pyo3(signature = (persona_json = None, ca_bundle = None))]
+    #[pyo3(signature = (persona_json = None, ca_bundle = None, enable_worker = false, enable_streaming_networking = false, storage_path = None, storage_quota_bytes = None))]
     fn new(
         py: Python<'_>,
         persona_json: Option<&str>,
         ca_bundle: Option<String>,
+        enable_worker: bool,
+        enable_streaming_networking: bool,
+        storage_path: Option<String>,
+        storage_quota_bytes: Option<u64>,
     ) -> PyResult<Self> {
         let persona = persona_json
             .map(persona::PersonaConfig::from_json)
@@ -90,6 +94,16 @@ impl PySession {
                 error(AutomationError::InvalidInput(persona_error.to_string()))
             })?;
         py.detach(move || {
+            if storage_quota_bytes == Some(0) {
+                return Err(error(AutomationError::InvalidInput(
+                    "storage_quota_bytes must be positive".into(),
+                )));
+            }
+            if storage_path.is_none() && storage_quota_bytes.is_some() {
+                return Err(error(AutomationError::InvalidInput(
+                    "storage_quota_bytes requires storage_path".into(),
+                )));
+            }
             let persona = persona.unwrap_or_default();
             let config = network::CurlConfig {
                 ca_bundle: ca_bundle.map(PathBuf::from),
@@ -99,7 +113,15 @@ impl PySession {
                 AutomationBrowser::with_persona_and_network_config(persona, config)
                     .map_err(error)?,
             );
-            let page = browser.new_page(PageOptions::default()).map_err(error)?;
+            let mut page_options = PageOptions::builder()
+                .worker_system(enable_worker)
+                .streaming_networking(enable_streaming_networking);
+            if let Some(path) = storage_path {
+                let storage = PersistentStorageOptions::new(path)
+                    .quota_bytes(storage_quota_bytes.unwrap_or(1024 * 1024 * 1024));
+                page_options = page_options.persistent_storage(storage);
+            }
+            let page = browser.new_page(page_options.build()).map_err(error)?;
             Ok(Self { browser, page })
         })
     }

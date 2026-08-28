@@ -39,7 +39,7 @@ class Page {
 
 class Browser {
   constructor(inner) { this._inner = inner }
-  async newPage() { return new Page(await call(() => this._inner.newPage())) }
+  async newPage(options = {}) { return new Page(await call(() => this._inner.newPage(options))) }
   close() { return call(() => this._inner.close()) }
 }
 

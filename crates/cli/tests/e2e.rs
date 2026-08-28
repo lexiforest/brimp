@@ -99,6 +99,42 @@ fn eval_keeps_structured_data_on_stdout() {
 }
 
 #[test]
+fn eval_page_options_enable_opt_in_subsystems() {
+    let unique = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let storage = std::env::temp_dir().join(format!("brimp-cli-storage-{unique}"));
+    let (url, worker) = server(b"<!doctype html><title>Options</title>");
+    let output = binary()
+        .args([
+            "eval",
+            &url,
+            "--enable-worker",
+            "--enable-streaming-networking",
+            "--storage-path",
+            storage.to_str().unwrap(),
+            "--js",
+            "localStorage.enabled = 'yes'; [typeof Worker, typeof WebSocket, typeof indexedDB, typeof navigator.storage]",
+        ])
+        .output()
+        .unwrap();
+    worker.join().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<serde_json::Value>(&output.stdout).unwrap(),
+        serde_json::json!(["function", "function", "object", "object"])
+    );
+    if storage.exists() {
+        std::fs::remove_dir_all(storage).unwrap();
+    }
+}
+
+#[test]
 fn eval_loads_the_versioned_persona_schema() {
     let unique = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)

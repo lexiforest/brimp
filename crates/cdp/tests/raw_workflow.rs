@@ -265,13 +265,20 @@ async fn discovery_and_raw_websocket_workflow() {
         &mut socket,
         60,
         "Runtime.evaluate",
-        json!({"expression": "[navigator.userAgent, navigator.platform, navigator.language, navigator.languages]", "returnByValue": true}),
+        json!({"expression": "[navigator.userAgent, navigator.platform, navigator.language, navigator.languages, Object.hasOwn(navigator, 'userAgent'), Function.prototype.toString.call(Object.getOwnPropertyDescriptor(Navigator.prototype, 'userAgent').get)]", "returnByValue": true}),
         Some(&session),
     )
     .await;
     assert_eq!(
         identity["result"]["result"]["value"],
-        json!(["BrimpTest/1.0", "TestOS", "zh-TW", ["zh-TW", "en"]])
+        json!([
+            "BrimpTest/1.0",
+            "TestOS",
+            "zh-TW",
+            ["zh-TW", "en"],
+            false,
+            "function get userAgent() { [native code] }"
+        ])
     );
     let document = command(
         &mut socket,
@@ -710,6 +717,7 @@ async fn non_loopback_bind_requires_explicit_permission() {
         ServerConfig {
             bind: "0.0.0.0:0".parse().unwrap(),
             allow_non_loopback: false,
+            ..ServerConfig::default()
         },
         browser(),
     )

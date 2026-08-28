@@ -23,10 +23,17 @@ Brimp's versioned persona schema.
 ### `browser.newPage()`
 
 ```ts
-newPage(): Promise<Page>
+newPage(options?: {
+  enableWorker?: boolean
+  enableStreamingNetworking?: boolean
+  storagePath?: string
+  storageQuotaBytes?: number
+}): Promise<Page>
 ```
 
-Creates an `about:blank` page with its own owner thread.
+Creates an `about:blank` page with its own owner thread. Worker, streaming
+networking, and persistent-storage APIs are absent unless their page options
+enable them. `storagePath` enables persistence with a 1 GiB default quota.
 
 ### `browser.close()`
 

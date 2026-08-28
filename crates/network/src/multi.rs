@@ -14,6 +14,7 @@ use tokio::sync::oneshot;
 use crate::ffi::*;
 use crate::{
     CurlConfig, HeaderList, NetworkError, ResourceCallback, ResourceRequest, ResourceResponse,
+    ResourceStreamCallback, ResourceStreamDirective, ResourceStreamEvent, ResourceStreamHandle,
 };
 
 static EXECUTOR_THREADS: AtomicUsize = AtomicUsize::new(0);
@@ -21,10 +22,18 @@ static EXECUTOR_THREADS: AtomicUsize = AtomicUsize::new(0);
 enum Completion {
     Future(oneshot::Sender<Result<ResourceResponse, NetworkError>>),
     Callback(Option<ResourceCallback>),
+    Stream {
+        callback: Option<ResourceStreamCallback>,
+        handle: ResourceStreamHandle,
+    },
 }
 impl Completion {
     fn is_closed(&self) -> bool {
-        matches!(self, Self::Future(sender) if sender.is_closed())
+        match self {
+            Self::Future(sender) => sender.is_closed(),
+            Self::Stream { handle, .. } => handle.is_cancelled(),
+            Self::Callback(_) => false,
+        }
     }
     fn send(&mut self, result: Result<ResourceResponse, NetworkError>) {
         match self {
@@ -38,6 +47,48 @@ impl Completion {
                     callback(result);
                 }
             }
+            Self::Stream { callback, handle } => {
+                if let Some(callback) = callback.as_mut() {
+                    match result {
+                        Ok(_) => {
+                            let _ = callback(ResourceStreamEvent::Complete, handle);
+                        }
+                        Err(error) => {
+                            let _ = callback(ResourceStreamEvent::Error(error), handle);
+                        }
+                    }
+                }
+                *callback = None;
+            }
+        }
+    }
+
+    fn stream_event(&mut self, event: ResourceStreamEvent) -> ResourceStreamDirective {
+        if let Self::Stream {
+            callback: Some(callback),
+            handle,
+        } = self
+        {
+            let directive = callback(event, handle);
+            match directive {
+                ResourceStreamDirective::Continue => {}
+                ResourceStreamDirective::Pause => handle.pause(),
+                ResourceStreamDirective::Cancel => handle.cancel(),
+            }
+            directive
+        } else {
+            ResourceStreamDirective::Continue
+        }
+    }
+
+    fn is_stream(&self) -> bool {
+        matches!(self, Self::Stream { .. })
+    }
+
+    fn stream_handle(&self) -> Option<&ResourceStreamHandle> {
+        match self {
+            Self::Stream { handle, .. } => Some(handle),
+            _ => None,
         }
     }
 }
@@ -106,6 +157,24 @@ impl MultiExecutor {
             Completion::Callback(Some(callback)),
         )) {
             Ok(()) => Ok(()),
+            Err(TrySendError::Full(_)) => Err(NetworkError::QueueFull),
+            Err(TrySendError::Disconnected(_)) => Err(NetworkError::Closed),
+        }
+    }
+    pub(crate) fn fetch_stream_callback(
+        &self,
+        request: ResourceRequest,
+        callback: ResourceStreamCallback,
+    ) -> Result<ResourceStreamHandle, NetworkError> {
+        let handle = ResourceStreamHandle::new();
+        match self.sender.try_send(Command::Submit(
+            request,
+            Completion::Stream {
+                callback: Some(callback),
+                handle: handle.clone(),
+            },
+        )) {
+            Ok(()) => Ok(handle),
             Err(TrySendError::Full(_)) => Err(NetworkError::QueueFull),
             Err(TrySendError::Disconnected(_)) => Err(NetworkError::Closed),
         }
@@ -188,6 +257,7 @@ fn run(config: CurlConfig, receiver: Receiver<Command>) {
             }
         }
         cancel_dropped(multi, &mut active, &mut idle);
+        resume_streams(&mut active);
         if shutdown {
             cancel_all(multi, &mut active, &mut idle, NetworkError::Closed);
             reject_remaining(&receiver, NetworkError::Closed);
@@ -360,6 +430,22 @@ fn cancel_dropped(
         }
     }
 }
+
+fn resume_streams(active: &mut HashMap<usize, Box<Transfer>>) {
+    for transfer in active.values_mut() {
+        let should_resume = transfer
+            .completion
+            .as_ref()
+            .and_then(Completion::stream_handle)
+            .is_some_and(|handle| !handle.is_paused() && transfer.curl_paused);
+        if should_resume {
+            let code = unsafe { curl_easy_pause(transfer.handle, CURLPAUSE_CONT) };
+            if code == CURLE_OK {
+                transfer.curl_paused = false;
+            }
+        }
+    }
+}
 fn cancel_all(
     multi: *mut CurlMulti,
     active: &mut HashMap<usize, Box<Transfer>>,
@@ -396,6 +482,9 @@ struct Transfer {
     headers: HeaderList,
     response_body: Vec<u8>,
     too_large: bool,
+    received_body_bytes: usize,
+    sent_stream_headers: bool,
+    curl_paused: bool,
 }
 impl Transfer {
     fn new(
@@ -432,6 +521,9 @@ impl Transfer {
             headers: HeaderList::new(),
             response_body: Vec::new(),
             too_large: false,
+            received_body_bytes: 0,
+            sent_stream_headers: false,
+            curl_paused: false,
         });
         for (name, value) in request.headers.iter() {
             let Ok(value) = value.to_str() else { continue };
@@ -473,6 +565,9 @@ impl Transfer {
         }
         unsafe {
             setopt(self.handle, CURLOPT_URL, self.url.as_ptr())?;
+            if self.config.prefer_http3 {
+                setopt(self.handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_3)?;
+            }
             setopt(self.handle, CURLOPT_ACCEPT_ENCODING, c"".as_ptr())?;
             setopt(self.handle, CURLOPT_FOLLOWLOCATION, 0 as c_long)?;
             setopt(
@@ -592,6 +687,18 @@ impl Transfer {
                 .and_then(|value| value.parse::<u16>().ok())
                 .and_then(|value| StatusCode::from_u16(value).ok());
             self.headers = HeaderList::new();
+        } else if line.is_empty() {
+            if !self.sent_stream_headers
+                && let (Some(status), Some(completion)) = (self.status, self.completion.as_mut())
+                && completion.is_stream()
+            {
+                let _ = completion.stream_event(ResourceStreamEvent::Headers {
+                    status,
+                    headers: self.headers.clone(),
+                    url: self.url_string.clone(),
+                });
+                self.sent_stream_headers = true;
+            }
         } else if let Some((name, value)) = line.split_once(':')
             && let (Ok(name), Ok(value)) = (
                 HeaderName::from_bytes(name.trim().as_bytes()),
@@ -624,13 +731,26 @@ extern "C" fn write_body(data: *mut c_char, size: usize, count: usize, user: *mu
         return 0;
     }
     let transfer = unsafe { &mut *(user as *mut Transfer) };
-    if transfer.response_body.len().saturating_add(length) > transfer.config.max_response_bytes {
+    if transfer.received_body_bytes.saturating_add(length) > transfer.config.max_response_bytes {
         transfer.too_large = true;
         return 0;
     }
-    transfer
-        .response_body
-        .extend_from_slice(unsafe { std::slice::from_raw_parts(data.cast::<u8>(), length) });
+    let bytes = unsafe { std::slice::from_raw_parts(data.cast::<u8>(), length) };
+    transfer.received_body_bytes = transfer.received_body_bytes.saturating_add(length);
+    if let Some(completion) = transfer.completion.as_mut()
+        && completion.is_stream()
+    {
+        match completion.stream_event(ResourceStreamEvent::Chunk(bytes.to_vec())) {
+            ResourceStreamDirective::Continue => {}
+            ResourceStreamDirective::Pause => {
+                transfer.curl_paused = true;
+                return CURL_WRITEFUNC_PAUSE;
+            }
+            ResourceStreamDirective::Cancel => return 0,
+        }
+    } else {
+        transfer.response_body.extend_from_slice(bytes);
+    }
     length
 }
 extern "C" fn write_header(

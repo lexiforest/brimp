@@ -1444,6 +1444,7 @@ dependencies = [
  "http",
  "thiserror",
  "tokio",
+ "tungstenite",
  "url",
 ]
 
@@ -2994,9 +2995,11 @@ dependencies = [
  "persona",
  "png 0.18.1",
  "screenshot",
+ "serde",
  "serde_json",
  "thiserror",
  "tokio",
+ "tungstenite",
  "url",
  "web-bindings",
 ]

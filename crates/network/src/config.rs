@@ -7,6 +7,7 @@ use url::Url;
 pub struct CurlConfig {
     pub impersonation_profile: String,
     pub default_headers: bool,
+    pub prefer_http3: bool,
     pub connect_timeout: Duration,
     pub request_timeout: Duration,
     pub ca_bundle: Option<PathBuf>,
@@ -19,6 +20,7 @@ impl Default for CurlConfig {
         Self {
             impersonation_profile: "chrome136".into(),
             default_headers: false,
+            prefer_http3: true,
             connect_timeout: Duration::from_secs(10),
             request_timeout: Duration::from_secs(30),
             ca_bundle: None,

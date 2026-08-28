@@ -15,8 +15,29 @@ const MAX_EVENTS: usize = 256;
 const MAX_TARGETS: usize = 32;
 const MAX_SESSIONS: usize = 64;
 
+fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
+    let mut rendered = String::with_capacity(template.len());
+    let mut remaining = template;
+    while let Some((offset, placeholder, value)) = replacements
+        .iter()
+        .filter_map(|(placeholder, value)| {
+            remaining
+                .find(placeholder)
+                .map(|offset| (offset, *placeholder, *value))
+        })
+        .min_by_key(|(offset, _, _)| *offset)
+    {
+        rendered.push_str(&remaining[..offset]);
+        rendered.push_str(value);
+        remaining = &remaining[offset + placeholder.len()..];
+    }
+    rendered.push_str(remaining);
+    rendered
+}
+
 pub(crate) struct ConnectionState {
     browser: Arc<AutomationBrowser>,
+    page_options: PageOptions,
     pages: HashMap<String, PageTarget>,
     sessions: HashMap<String, String>,
     browser_sessions: HashSet<String>,
@@ -40,9 +61,10 @@ pub(crate) struct ConnectionState {
 }
 
 impl ConnectionState {
-    pub(crate) fn new(browser: Arc<AutomationBrowser>) -> Self {
+    pub(crate) fn new(browser: Arc<AutomationBrowser>, page_options: PageOptions) -> Self {
         Self {
             browser,
+            page_options,
             pages: HashMap::new(),
             sessions: HashMap::new(),
             browser_sessions: HashSet::new(),
@@ -260,7 +282,7 @@ impl ConnectionState {
             return Err(DispatchError::invalid_params("unknown browserContextId"));
         }
         let browser = Arc::clone(&self.browser);
-        let options = PageOptions::default();
+        let options = self.page_options.clone();
         let viewport = options.viewport();
         let page = tokio::task::spawn_blocking(move || browser.new_page(options))
             .await
@@ -869,14 +891,14 @@ impl ConnectionState {
         let node_id = u64_param(&request.params, "nodeId")?;
         let selector = string_param(&request.params, "selector")?;
         let selector = serde_json::to_string(selector).map_err(internal_json)?;
+        let node_id = node_id.to_string();
+        let source = render_script(
+            include_str!("scripts/query_selector.js"),
+            &[("__NODE_ID__", &node_id), ("__SELECTOR__", &selector)],
+        );
         let page = self.page_for_session(session)?.clone();
         let result = tokio::task::spawn_blocking(move || {
-            let remote = page.evaluate_remote(
-                format!("globalThis.__brimpCdpRemoteObjects?.backendNodes?.get({node_id})?.querySelector({selector}) ?? null"),
-                false,
-                None,
-                false,
-            )?;
+            let remote = page.evaluate_remote(source, false, None, false)?;
             let Some(object_id) = remote["objectId"].as_str() else {
                 return Ok::<_, AutomationError>(0);
             };
@@ -897,14 +919,14 @@ impl ConnectionState {
         let node_id = u64_param(&request.params, "nodeId")?;
         let selector = string_param(&request.params, "selector")?;
         let selector = serde_json::to_string(selector).map_err(internal_json)?;
+        let node_id = node_id.to_string();
+        let source = render_script(
+            include_str!("scripts/query_selector_all.js"),
+            &[("__NODE_ID__", &node_id), ("__SELECTOR__", &selector)],
+        );
         let page = self.page_for_session(session)?.clone();
         let node_ids = tokio::task::spawn_blocking(move || {
-            let remote = page.evaluate_remote(
-                format!("Array.from(globalThis.__brimpCdpRemoteObjects?.backendNodes?.get({node_id})?.querySelectorAll({selector}) ?? [])"),
-                false,
-                None,
-                false,
-            )?;
+            let remote = page.evaluate_remote(source, false, None, false)?;
             let array_id = remote["objectId"]
                 .as_str()
                 .ok_or_else(|| AutomationError::Internal("query result had no objectId".into()))?
@@ -939,22 +961,24 @@ impl ConnectionState {
     async fn get_attributes(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let node_id = u64_param(&request.params, "nodeId")?;
+        let node_id = node_id.to_string();
+        let source = render_script(
+            include_str!("scripts/get_attributes.js"),
+            &[("__NODE_ID__", &node_id)],
+        );
         let page = self.page_for_session(session)?.clone();
-        let attributes = tokio::task::spawn_blocking(move || {
-            page.evaluate(format!(
-                "(() => {{ const node = globalThis.__brimpCdpRemoteObjects?.backendNodes?.get({node_id}); if (!node || typeof node.getAttributeNames !== 'function') throw new Error('DOM node has no attributes'); return node.getAttributeNames().flatMap(name => [name, node.getAttribute(name)]); }})()"
-            ))
-        })
-        .await
-        .map_err(internal_join)??;
+        let attributes = tokio::task::spawn_blocking(move || page.evaluate(source))
+            .await
+            .map_err(internal_join)??;
         Ok(json!({"attributes": attributes}))
     }
 
     async fn get_content_quads(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let node = remote_node_expression(&request.params)?;
-        let source = format!(
-            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; const node = {node}; if (!node || typeof node.getBoundingClientRect !== 'function') throw new Error('DOM node has no layout box'); const rect = node.getBoundingClientRect(); if (rect.width <= 0 || rect.height <= 0) return {{quads: []}}; return {{quads: [[rect.left, rect.top, rect.right, rect.top, rect.right, rect.bottom, rect.left, rect.bottom]]}}; }})()"
+        let source = render_script(
+            include_str!("scripts/get_content_quads.js"),
+            &[("__NODE__", &node)],
         );
         let page = self.page_for_session(session)?.clone();
         tokio::task::spawn_blocking(move || page.evaluate(source))
@@ -966,8 +990,9 @@ impl ConnectionState {
     async fn get_box_model(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let node = remote_node_expression(&request.params)?;
-        let source = format!(
-            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; const node = {node}; if (!node || typeof node.getBoundingClientRect !== 'function') throw new Error('DOM node has no layout box'); const rect = node.getBoundingClientRect(); const quad = [rect.left, rect.top, rect.right, rect.top, rect.right, rect.bottom, rect.left, rect.bottom]; return {{model: {{content: quad, padding: quad, border: quad, margin: quad, width: rect.width, height: rect.height}}}}; }})()"
+        let source = render_script(
+            include_str!("scripts/get_box_model.js"),
+            &[("__NODE__", &node)],
         );
         let page = self.page_for_session(session)?.clone();
         tokio::task::spawn_blocking(move || page.evaluate(source))
@@ -991,8 +1016,10 @@ impl ConnectionState {
     ) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let node = remote_node_expression(&request.params)?;
-        let source = format!(
-            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; const node = {node}; if (!node || typeof node.{method} !== 'function') throw new Error('DOM node does not support {method}'); node.{method}(); return true; }})()"
+        let method = serde_json::to_string(method).map_err(internal_json)?;
+        let source = render_script(
+            include_str!("scripts/invoke_node_method.js"),
+            &[("__NODE__", &node), ("__METHOD__", &method)],
         );
         let page = self.page_for_session(session)?.clone();
         tokio::task::spawn_blocking(move || page.evaluate(source))
@@ -1109,29 +1136,12 @@ impl ConnectionState {
                 .map(str::to_owned)
                 .collect::<Vec<_>>()
         });
-        let user_agent_json = serde_json::to_string(&user_agent).map_err(internal_json)?;
-        let platform_override = platform
-            .as_deref()
-            .map(serde_json::to_string)
-            .transpose()
-            .map_err(internal_json)?
-            .map(|value| format!("descriptors.platform = {{value: {value}, enumerable: true}};"))
-            .unwrap_or_default();
-        let language_override = languages
-            .as_ref()
-            .map(|languages| {
-                Ok::<_, serde_json::Error>(format!(
-                    "descriptors.language = {{value: {}, enumerable: true}}; descriptors.languages = {{value: Object.freeze({}), enumerable: true}};",
-                    serde_json::to_string(language)?,
-                    serde_json::to_string(languages)?
-                ))
-            })
-            .transpose()
-            .map_err(internal_json)?
-            .unwrap_or_default();
-        let source = format!(
-            "(() => {{ const descriptors = Object.getOwnPropertyDescriptors(navigator); descriptors.userAgent = {{value: {user_agent_json}, enumerable: true}}; {platform_override} {language_override} const replacement = Object.create(Object.getPrototypeOf(navigator), descriptors); globalThis.navigator = replacement; window.navigator = replacement; return true; }})()"
-        );
+        let identity_override = json!({
+            "userAgent": &user_agent,
+            "platform": &platform,
+            "language": languages.as_ref().map(|_| language),
+            "languages": &languages,
+        });
         let target_id = self.target_for_session(&session)?.to_owned();
         let target = self
             .pages
@@ -1147,11 +1157,8 @@ impl ConnectionState {
                 .push(("Accept-Language".into(), accept_language));
         }
         let page = target.page.clone();
-        let preload = source.clone();
         tokio::task::spawn_blocking(move || {
-            page.remove_preload_script("cdp-user-agent")?;
-            page.add_preload_script("cdp-user-agent", preload)?;
-            page.evaluate(source)?;
+            page.set_navigator_identity_override(identity_override)?;
             Ok::<_, AutomationError>(())
         })
         .await
@@ -1302,29 +1309,26 @@ impl ConnectionState {
             .get("modifiers")
             .and_then(Value::as_u64)
             .unwrap_or(0);
-        let source = format!(
-            r#"(() => {{
-                const target = document.elementFromPoint({x}, {y});
-                if (!target) return true;
-                const options = {{
-                    bubbles: true, cancelable: true, view: window,
-                    clientX: {x}, clientY: {y}, button: {button}, buttons: {buttons},
-                    detail: {click_count}, altKey: Boolean({modifiers} & 1),
-                    ctrlKey: Boolean({modifiers} & 2), metaKey: Boolean({modifiers} & 4),
-                    shiftKey: Boolean({modifiers} & 8)
-                }};
-                target.dispatchEvent(new MouseEvent({dom_event:?}, options));
-                if ({event_type:?} === 'mousePressed') globalThis.__brimpCdpMouseDownTarget = target;
-                if ({event_type:?} === 'mouseReleased') {{
-                    if (globalThis.__brimpCdpMouseDownTarget === target && {button} === 0) {{
-                        if (typeof target.focus === 'function') target.focus();
-                        target.dispatchEvent(new MouseEvent('click', options));
-                        if ({click_count} === 2) target.dispatchEvent(new MouseEvent('dblclick', options));
-                    }}
-                    delete globalThis.__brimpCdpMouseDownTarget;
-                }}
-                return true;
-            }})()"#
+        let x = x.to_string();
+        let y = y.to_string();
+        let button = button.to_string();
+        let buttons = buttons.to_string();
+        let click_count = click_count.to_string();
+        let modifiers = modifiers.to_string();
+        let dom_event = serde_json::to_string(dom_event).map_err(internal_json)?;
+        let event_type = serde_json::to_string(event_type).map_err(internal_json)?;
+        let source = render_script(
+            include_str!("scripts/dispatch_mouse_event.js"),
+            &[
+                ("__X__", &x),
+                ("__Y__", &y),
+                ("__BUTTON__", &button),
+                ("__BUTTONS__", &buttons),
+                ("__CLICK_COUNT__", &click_count),
+                ("__MODIFIERS__", &modifiers),
+                ("__DOM_EVENT__", &dom_event),
+                ("__EVENT_TYPE__", &event_type),
+            ],
         );
         let page = self.page_for_session(session)?.clone();
         tokio::task::spawn_blocking(move || page.evaluate(source))
@@ -1365,33 +1369,26 @@ impl ConnectionState {
         let key = serde_json::to_string(key).map_err(internal_json)?;
         let code = serde_json::to_string(code).map_err(internal_json)?;
         let text = serde_json::to_string(text).map_err(internal_json)?;
-        let source = format!(
-            r#"(() => {{
-                const target = document.activeElement || document.body;
-                const event = new KeyboardEvent({dom_event:?}, {{
-                    bubbles: true, cancelable: true, key: {key}, code: {code},
-                    repeat: {repeat}, altKey: Boolean({modifiers} & 1),
-                    ctrlKey: Boolean({modifiers} & 2), metaKey: Boolean({modifiers} & 4),
-                    shiftKey: Boolean({modifiers} & 8)
-                }});
-                const accepted = target.dispatchEvent(event);
-                if (accepted && ({event_type:?} === 'keyDown' || {event_type:?} === 'rawKeyDown' || {event_type:?} === 'char')) {{
-                    let insertion = {text};
-                    if ({key} === 'Backspace') {{
-                        target.value = Array.from(String(target.value || '')).slice(0, -1).join('');
-                        target.dispatchEvent(new Event('input', {{bubbles: true}}));
-                    }} else if (insertion && 'value' in target) {{
-                        target.value = String(target.value || '') + insertion;
-                        target.dispatchEvent(new Event('input', {{bubbles: true}}));
-                    }}
-                }}
-                return true;
-            }})()"#,
-            repeat = request
-                .params
-                .get("autoRepeat")
-                .and_then(Value::as_bool)
-                .unwrap_or(false)
+        let repeat = request
+            .params
+            .get("autoRepeat")
+            .and_then(Value::as_bool)
+            .unwrap_or(false)
+            .to_string();
+        let modifiers = modifiers.to_string();
+        let dom_event = serde_json::to_string(dom_event).map_err(internal_json)?;
+        let event_type = serde_json::to_string(event_type).map_err(internal_json)?;
+        let source = render_script(
+            include_str!("scripts/dispatch_key_event.js"),
+            &[
+                ("__DOM_EVENT__", &dom_event),
+                ("__EVENT_TYPE__", &event_type),
+                ("__KEY__", &key),
+                ("__CODE__", &code),
+                ("__TEXT__", &text),
+                ("__REPEAT__", &repeat),
+                ("__MODIFIERS__", &modifiers),
+            ],
         );
         let page = self.page_for_session(session)?.clone();
         tokio::task::spawn_blocking(move || page.evaluate(source))
@@ -1404,8 +1401,9 @@ impl ConnectionState {
         let session = self.session(request)?;
         let text = string_param(&request.params, "text")?;
         let text = serde_json::to_string(text).map_err(internal_json)?;
-        let source = format!(
-            "(() => {{ const target = document.activeElement; if (!target || !('value' in target)) return false; target.value = String(target.value || '') + {text}; target.dispatchEvent(new Event('input', {{bubbles: true}})); return true; }})()"
+        let source = render_script(
+            include_str!("scripts/insert_text.js"),
+            &[("__TEXT__", &text)],
         );
         let page = self.page_for_session(session)?.clone();
         let inserted = tokio::task::spawn_blocking(move || page.evaluate(source))

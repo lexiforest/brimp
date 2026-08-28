@@ -9,7 +9,7 @@ use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
 use tokio_tungstenite::tungstenite::protocol::WebSocketConfig;
 use tokio_tungstenite::tungstenite::{Error as WebSocketError, Message};
-use web_runtime::AutomationBrowser;
+use web_runtime::{AutomationBrowser, PageOptions};
 
 use crate::dispatch::ConnectionState;
 use crate::protocol::{Request, Response};
@@ -17,10 +17,11 @@ use crate::protocol::{Request, Response};
 const MAX_HTTP_HEADER: usize = 16 * 1024;
 const MAX_MESSAGE: usize = 1024 * 1024;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct ServerConfig {
     pub bind: SocketAddr,
     pub allow_non_loopback: bool,
+    pub page_options: PageOptions,
 }
 
 impl Default for ServerConfig {
@@ -28,6 +29,7 @@ impl Default for ServerConfig {
         Self {
             bind: SocketAddr::from(([127, 0, 0, 1], 0)),
             allow_non_loopback: false,
+            page_options: PageOptions::default(),
         }
     }
 }
@@ -89,6 +91,7 @@ pub async fn start_with_browser(
     }
     let listener = TcpListener::bind(config.bind).await?;
     let addr = listener.local_addr()?;
+    let page_options = config.page_options;
     let (shutdown_tx, mut shutdown_rx) = oneshot::channel();
     let task = tokio::spawn(async move {
         loop {
@@ -97,7 +100,8 @@ pub async fn start_with_browser(
                 accepted = listener.accept() => {
                     let (stream, _) = accepted?;
                     let browser = Arc::clone(&browser);
-                    tokio::spawn(async move { let _ = handle_connection(stream, addr, browser).await; });
+                    let page_options = page_options.clone();
+                    tokio::spawn(async move { let _ = handle_connection(stream, addr, browser, page_options).await; });
                 }
             }
         }
@@ -114,6 +118,7 @@ async fn handle_connection(
     mut stream: TcpStream,
     addr: SocketAddr,
     browser: Arc<AutomationBrowser>,
+    page_options: PageOptions,
 ) -> Result<(), WebSocketError> {
     let mut header = vec![0; MAX_HTTP_HEADER];
     loop {
@@ -171,7 +176,7 @@ async fn handle_connection(
         .max_message_size(Some(MAX_MESSAGE))
         .max_frame_size(Some(MAX_MESSAGE));
     let socket = tokio_tungstenite::accept_async_with_config(stream, Some(config)).await?;
-    serve_websocket(socket, browser).await
+    serve_websocket(socket, browser, page_options).await
 }
 
 async fn serve_discovery(
@@ -216,8 +221,9 @@ async fn write_http(
 async fn serve_websocket(
     mut socket: tokio_tungstenite::WebSocketStream<TcpStream>,
     browser: Arc<AutomationBrowser>,
+    page_options: PageOptions,
 ) -> Result<(), WebSocketError> {
-    let mut state = ConnectionState::new(browser);
+    let mut state = ConnectionState::new(browser, page_options);
     while let Some(message) = socket.next().await {
         match message? {
             Message::Text(text) => {

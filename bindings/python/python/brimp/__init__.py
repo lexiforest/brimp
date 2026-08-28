@@ -138,11 +138,24 @@ class Response:
 class Session:
     _PROTECTED_HEADERS = {"user-agent", "accept-language"}
 
-    def __init__(self, *, persona_json: str | None = None, ca_bundle=None):
+    def __init__(
+        self,
+        *,
+        persona_json: str | None = None,
+        ca_bundle=None,
+        enable_worker: bool = False,
+        enable_streaming_networking: bool = False,
+        storage_path=None,
+        storage_quota_bytes: int | None = None,
+    ):
         try:
             self._inner = _Session(
                 persona_json,
                 None if ca_bundle is None else str(Path(ca_bundle)),
+                bool(enable_worker),
+                bool(enable_streaming_networking),
+                None if storage_path is None else str(Path(storage_path)),
+                storage_quota_bytes,
             )
         except RuntimeError as error:
             raise _translate(error) from error
@@ -235,9 +248,19 @@ def _add_params(url: str, params) -> str:
 
 
 def get(url: str, **kwargs) -> Response:
-    persona_json = kwargs.pop("persona_json", None)
-    ca_bundle = kwargs.pop("ca_bundle", None)
-    with Session(persona_json=persona_json, ca_bundle=ca_bundle) as session:
+    session_options = {
+        name: kwargs.pop(name)
+        for name in (
+            "persona_json",
+            "ca_bundle",
+            "enable_worker",
+            "enable_streaming_networking",
+            "storage_path",
+            "storage_quota_bytes",
+        )
+        if name in kwargs
+    }
+    with Session(**session_options) as session:
         return session.get(url, **kwargs)
 
 

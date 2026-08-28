@@ -3,7 +3,7 @@
 | API | Tested behavior |
 | --- | --- |
 | `launch({personaJson})` | Creates the shared in-process automation browser and validates an optional persona. |
-| `Browser.newPage()` | Creates an owner-thread Brimp page. |
+| `Browser.newPage(options)` | Creates an owner-thread Brimp page with disabled-by-default worker, streaming-networking, and persistent-storage options. |
 | `Page.goto(url, {timeoutMs, signal})` | Navigates asynchronously; `AbortSignal` reaches the core token. |
 | `Page.evaluate(source)` | Returns JSON-compatible JavaScript values and rejects unsupported values. |
 | `Page.title()` / `Page.textContent()` | Returns canonical document output. |

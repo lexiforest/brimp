@@ -23,13 +23,27 @@ as `Session.get()` plus `persona_json` and `ca_bundle` for session creation.
 ## `Session`
 
 ```python
-brimp.Session(*, persona_json: str | None = None, ca_bundle=None)
+brimp.Session(
+    *,
+    persona_json: str | None = None,
+    ca_bundle=None,
+    enable_worker: bool = False,
+    enable_streaming_networking: bool = False,
+    storage_path=None,
+    storage_quota_bytes: int | None = None,
+)
 ```
 
 Creates a persistent browsing session. `persona_json` is JSON text following
 Brimp's versioned persona schema. `ca_bundle` is a PEM file used to trust
 private or enterprise certificate authorities without disabling certificate or
 hostname verification.
+
+The three browser subsystems are disabled by default. `enable_worker` enables
+the worker-family APIs. `enable_streaming_networking` enables WebSocket,
+EventSource, streaming Fetch, and the stream classes. Supplying `storage_path`
+enables origin-partitioned persistent storage at that directory; its default
+quota is 1 GiB and `storage_quota_bytes` overrides it.
 
 Sessions expose mutable `headers` and `cookies` dictionaries and support the
 context-manager protocol.

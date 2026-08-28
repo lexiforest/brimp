@@ -3,6 +3,19 @@ use std::{cell::RefCell, rc::Rc};
 use jsc::{JsRuntime, NativeError, NativeValue};
 
 #[test]
+fn independent_runtime_can_run_on_an_owner_thread() {
+    let main = JsRuntime::new().unwrap();
+    assert_eq!(main.eval("21 * 2").unwrap().to_number().unwrap(), 42.0);
+    let result = std::thread::spawn(|| {
+        let worker = JsRuntime::new().unwrap();
+        worker.eval("6 * 7").unwrap().to_number().unwrap()
+    })
+    .join()
+    .unwrap();
+    assert_eq!(result, 42.0);
+}
+
+#[test]
 fn evaluates_arithmetic() {
     let runtime = JsRuntime::new().unwrap();
     let result = runtime.eval("1 + 2").unwrap();

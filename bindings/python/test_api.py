@@ -105,6 +105,26 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), content)
             self.assertTrue(content.startswith(b"\x89PNG\r\n\x1a\n"))
 
+    def test_page_subsystems_are_opt_in(self):
+        with brimp.Session() as session:
+            self.assertEqual(
+                session.evaluate(
+                    "[typeof Worker, typeof WebSocket, typeof indexedDB, typeof navigator.storage]"
+                ),
+                ["undefined", "undefined", "undefined", "undefined"],
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            with brimp.Session(
+                enable_worker=True,
+                enable_streaming_networking=True,
+                storage_path=directory,
+            ) as session:
+                self.assertEqual(
+                    session.evaluate("typeof navigator.storage"),
+                    "object",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -41,6 +41,17 @@ non-loopback bind unless `--allow-non-loopback` is explicit. Every reachable
 CDP client can control the browser, so exposing this server is security
 sensitive.
 
+All page-creating commands accept these opt-in page options:
+
+```text
+--enable-worker
+--enable-streaming-networking
+--storage-path PATH [--storage-quota-bytes N]
+```
+
+They are disabled when omitted. For `brimp cdp`, they become the defaults for
+every target created by that server process.
+
 ## Exit codes
 
 | Code | Category |

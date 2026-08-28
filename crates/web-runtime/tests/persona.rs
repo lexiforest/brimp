@@ -3,7 +3,7 @@ use http::{HeaderMap, HeaderValue, StatusCode};
 use network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use web_runtime::{AutomationBrowser, PageOptions};
+use web_runtime::{AutomationBrowser, PageOptions, PersistentStorageOptions};
 
 #[derive(Default)]
 struct IdentityLoader {
@@ -112,7 +112,7 @@ fn request_and_javascript_observe_one_coherent_identity() {
     let page = browser.new_page(PageOptions::default()).unwrap();
     page.navigate("https://identity.test/", Duration::from_secs(1))
         .unwrap();
-    let observed = page.evaluate("({ userAgent: navigator.userAgent, appVersion: navigator.appVersion, platform: navigator.platform, language: navigator.language, languages: navigator.languages, hardwareConcurrency: navigator.hardwareConcurrency, deviceMemory: navigator.deviceMemory, maxTouchPoints: navigator.maxTouchPoints, connection: navigator.connection, doNotTrack: navigator.doNotTrack, vendor: navigator.vendor, productSub: navigator.productSub, pdfViewerEnabled: navigator.pdfViewerEnabled, webdriver: navigator.webdriver, uaData: [navigator.userAgentData.platform, navigator.userAgentData.brands[0].brand], viewport: [window.innerWidth, window.innerHeight, window.devicePixelRatio], screen: [screen.width, screen.height, screen.availWidth, screen.availHeight, screen.availLeft, screen.availTop, screen.colorDepth, screen.pixelDepth, screen.orientation.type, screen.orientation.angle], window: [window.outerWidth, window.outerHeight, window.screenX, window.screenY], chrome: [Object.keys(chrome), 'app' in chrome, typeof chrome.csi] })").unwrap();
+    let observed = page.evaluate("({ userAgent: navigator.userAgent, appVersion: navigator.appVersion, platform: navigator.platform, language: navigator.language, languages: navigator.languages, hardwareConcurrency: navigator.hardwareConcurrency, deviceMemory: navigator.deviceMemory, maxTouchPoints: navigator.maxTouchPoints, connection: { type: navigator.connection.type, rtt: navigator.connection.rtt, downlink: navigator.connection.downlink, effectiveType: navigator.connection.effectiveType, saveData: navigator.connection.saveData }, doNotTrack: navigator.doNotTrack, vendor: navigator.vendor, productSub: navigator.productSub, pdfViewerEnabled: navigator.pdfViewerEnabled, webdriver: navigator.webdriver, uaData: [navigator.userAgentData.platform, navigator.userAgentData.brands[0].brand], viewport: [window.innerWidth, window.innerHeight, window.devicePixelRatio], screen: [screen.width, screen.height, screen.availWidth, screen.availHeight, screen.availLeft, screen.availTop, screen.colorDepth, screen.pixelDepth, screen.orientation.type, screen.orientation.angle], window: [window.outerWidth, window.outerHeight, window.screenX, window.screenY], chrome: [Object.keys(chrome), 'app' in chrome, typeof chrome.csi] })").unwrap();
     let request = &loader.requests.lock().unwrap()[0];
     assert_eq!(
         request
@@ -181,6 +181,161 @@ fn request_and_javascript_observe_one_coherent_identity() {
         observed["chrome"],
         serde_json::json!([["runtime", "csi"], false, "function"])
     );
+}
+
+#[test]
+fn browser_builtins_have_native_sources_and_web_idl_shapes() {
+    let loader = Arc::new(IdentityLoader::default());
+    let browser = AutomationBrowser::with_persona_and_resource_loader(
+        persona::PersonaConfig::default(),
+        loader,
+    )
+    .unwrap();
+    let page = browser.new_page(PageOptions::default()).unwrap();
+    let observed = page
+        .evaluate(
+            r#"(() => {
+                function authoredFunction() { return 42; }
+                const userAgent = Object.getOwnPropertyDescriptor(
+                    Navigator.prototype,
+                    "userAgent",
+                );
+                const querySelector = Document.prototype.querySelector;
+                const nonNativeBuiltins = [];
+                for (const name of Object.getOwnPropertyNames(globalThis)) {
+                    const constructor = globalThis[name];
+                    if (!/^[A-Z]/.test(name) || typeof constructor !== "function") continue;
+                    const constructorSource = Function.prototype.toString.call(constructor);
+                    if (!constructorSource.includes("[native code]")) {
+                        nonNativeBuiltins.push(name);
+                    }
+                    const prototype = constructor.prototype;
+                    if (!prototype) continue;
+                    for (const key of Reflect.ownKeys(prototype)) {
+                        const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
+                        for (const [kind, fn] of [
+                            ["value", descriptor.value],
+                            ["get", descriptor.get],
+                            ["set", descriptor.set],
+                        ]) {
+                            if (
+                                typeof fn === "function"
+                                && !Function.prototype.toString.call(fn).includes("[native code]")
+                            ) nonNativeBuiltins.push(`${name}.${String(key)}:${kind}`);
+                        }
+                    }
+                }
+                return {
+                    navigatorHasOwnUserAgent: Object.hasOwn(navigator, "userAgent"),
+                    navigatorGetter: Function.prototype.toString.call(userAgent.get),
+                    navigatorDescriptor: {
+                        enumerable: userAgent.enumerable,
+                        configurable: userAgent.configurable,
+                        hasSetter: typeof userAgent.set === "function",
+                    },
+                    documentConstructor: Function.prototype.toString.call(Document),
+                    querySelector: Function.prototype.toString.call(querySelector),
+                    functionToString: Function.prototype.toString.call(Function.prototype.toString),
+                    authoredFunction: Function.prototype.toString.call(authoredFunction),
+                    timeout: Function.prototype.toString.call(setTimeout),
+                    uaDataMethod: Function.prototype.toString.call(
+                        NavigatorUAData.prototype.getHighEntropyValues,
+                    ),
+                    screenTag: Object.prototype.toString.call(screen),
+                    pluginsTag: Object.prototype.toString.call(navigator.plugins),
+                    pluginsPrototype: Object.getPrototypeOf(navigator.plugins) === PluginArray.prototype,
+                    pluginsIsArray: Array.isArray(navigator.plugins),
+                    pluginMimeRelationship: navigator.plugins.length === 0
+                        || navigator.plugins[0][0].enabledPlugin === navigator.plugins[0],
+                    uaBrands: navigator.userAgentData.brands,
+                    doNotTrack: navigator.doNotTrack,
+                    coherentScreen: screen.width >= innerWidth
+                        && screen.height >= innerHeight
+                        && screen.availWidth <= screen.width
+                        && screen.availHeight <= screen.height
+                        && screen.colorDepth === screen.pixelDepth,
+                    constructorDescriptors: [Document, PluginArray, Screen].map(constructor => {
+                        const descriptor = Object.getOwnPropertyDescriptor(
+                            globalThis,
+                            constructor.name,
+                        );
+                        return [descriptor.writable, descriptor.enumerable, descriptor.configurable];
+                    }),
+                    markerLeaked: "__brimpMarkWebBuiltin" in globalThis,
+                    hostBridgeLeaked: "__brimp" in globalThis,
+                    bindingLexicalsLeaked: typeof __eventListeners !== "undefined",
+                    nonNativeBuiltins,
+                };
+            })()"#,
+        )
+        .unwrap();
+
+    assert_eq!(observed["navigatorHasOwnUserAgent"], false);
+    assert_eq!(
+        observed["navigatorGetter"],
+        "function get userAgent() { [native code] }"
+    );
+    assert_eq!(
+        observed["navigatorDescriptor"],
+        serde_json::json!({
+            "enumerable": true,
+            "configurable": true,
+            "hasSetter": false,
+        })
+    );
+    assert_eq!(
+        observed["documentConstructor"],
+        "function Document() { [native code] }"
+    );
+    assert_eq!(
+        observed["querySelector"],
+        "function querySelector() { [native code] }"
+    );
+    assert_eq!(
+        observed["functionToString"],
+        "function toString() { [native code] }"
+    );
+    assert!(
+        observed["authoredFunction"]
+            .as_str()
+            .unwrap()
+            .contains("return 42")
+    );
+    assert_eq!(
+        observed["timeout"],
+        "function setTimeout() { [native code] }"
+    );
+    assert_eq!(
+        observed["uaDataMethod"],
+        "function getHighEntropyValues() { [native code] }"
+    );
+    assert_eq!(observed["screenTag"], "[object Screen]");
+    assert_eq!(observed["pluginsTag"], "[object PluginArray]");
+    assert_eq!(observed["pluginsPrototype"], true);
+    assert_eq!(observed["pluginsIsArray"], false);
+    assert_eq!(observed["pluginMimeRelationship"], true);
+    assert_eq!(
+        observed["uaBrands"],
+        serde_json::json!([
+            {"brand": "Not;A=Brand", "version": "8"},
+            {"brand": "Chromium", "version": "150"},
+            {"brand": "Google Chrome", "version": "150"},
+        ])
+    );
+    assert_eq!(observed["doNotTrack"], serde_json::Value::Null);
+    assert_eq!(observed["coherentScreen"], true);
+    assert_eq!(
+        observed["constructorDescriptors"],
+        serde_json::json!([
+            [true, false, true],
+            [true, false, true],
+            [true, false, true]
+        ])
+    );
+    assert_eq!(observed["markerLeaked"], false);
+    assert_eq!(observed["hostBridgeLeaked"], false);
+    assert_eq!(observed["bindingLexicalsLeaked"], false);
+    assert_eq!(observed["nonNativeBuiltins"], serde_json::json!([]));
 }
 
 #[test]
@@ -269,7 +424,15 @@ fn structured_browser_apis_return_configured_persona_values() {
     )
     .unwrap();
     let browser = AutomationBrowser::with_persona_and_resource_loader(persona, loader).unwrap();
-    let page = browser.new_page(PageOptions::default()).unwrap();
+    let page = browser
+        .new_page(
+            PageOptions::builder()
+                .persistent_storage(PersistentStorageOptions::new(
+                    std::env::temp_dir().join("brimp-persona-storage-shape"),
+                ))
+                .build(),
+        )
+        .unwrap();
 
     let synchronous = page
         .evaluate(
@@ -317,7 +480,7 @@ fn structured_browser_apis_return_configured_persona_values() {
             "mediaSource": [true, false],
             "voice": ["persona-voice", "Persona Voice", "fr-CA", true, false],
             "position": [25.033, 121.5654, 7, 15.5, 90, 2.5],
-            "legacyQuota": [12345, 200000],
+            "legacyQuota": [0, 1073741824],
             "audioCodec": {
                 "mimeType": "audio/persona",
                 "clockRate": 16000,
@@ -363,7 +526,7 @@ fn structured_browser_apis_return_configured_persona_values() {
             "devices": ["audioinput", "audioinput", "videoinput", "audiooutput"],
             "decoding": [true, true, false],
             "battery": [false, 3600, 7200, 0.42],
-            "storage": { "usage": 12345, "quota": 1000000 }
+            "storage": { "usage": 0, "quota": 1073741824 }
         })
     );
 }

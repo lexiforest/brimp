@@ -11,3 +11,7 @@ the exhaustive tested API and error-code surface.
 
 `launch({ personaJson })` accepts JSON text using the versioned schema and
 runtime-support matrix in [`../../persona/`](../../persona/README.md).
+
+Worker, streaming-networking, and persistent-storage APIs are page-scoped and
+disabled by default. Enable them through `browser.newPage({ enableWorker,
+enableStreamingNetworking, storagePath, storageQuotaBytes })`.

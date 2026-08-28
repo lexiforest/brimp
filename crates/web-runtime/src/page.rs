@@ -1,26 +1,37 @@
 use std::{
     cell::{Ref, RefCell, RefMut},
-    collections::BTreeMap,
-    path::Path,
+    collections::{BTreeMap, HashMap},
+    path::{Path, PathBuf},
     rc::Rc,
-    sync::Arc,
+    sync::{
+        Arc,
+        atomic::{AtomicUsize, Ordering},
+    },
     time::{Duration, Instant},
 };
 
 use blitz_traits::net::NetProvider;
 use browser_dom::{BrowserDocument, HtmlParserSession, NodeId, ParseProgress};
-use jsc::{JsException, JsRuntime, JsValue};
+use jsc::{JsException, JsRuntime, JsValue, ProtectedJsObject};
 use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest};
 use screenshot::{ScreenshotError, ScreenshotOptions};
 use web_bindings::{
-    BindingRuntime, BrowsingContext, FetchQueue, PendingFetch, TimerQueue, WrapperCache,
+    BindingQueues, BindingRuntime, BrowsingContext, FetchQueue, PendingFetch,
+    PendingWebSocketOperation, PendingWorkerOperation,
+    PersistentStorage as BindingPersistentStorage, StreamingQueue, TimerQueue, WebFeatureFlags,
+    WorkerQueue, WrapperCache,
 };
 
-use crate::{TaskQueue, TaskSender, Viewport, blitz_net::BlitzResourceProvider};
+use crate::{
+    TaskQueue, TaskSender, Viewport,
+    blitz_net::BlitzResourceProvider,
+    worker::{ServiceWorkerResponse, WorkerCoordinator, WorkerRealm},
+};
 
 pub struct Page {
     // Bindings must drop before `js`, because their objects are protected in that context.
     bindings: BindingRuntime,
+    persona_identity_setter: ProtectedJsObject,
     timers: Rc<RefCell<TimerQueue>>,
     browsing_context: Arc<BrowsingContext>,
     blitz_network: Arc<BlitzResourceProvider>,
@@ -35,13 +46,23 @@ pub struct Page {
     document_ready: bool,
     async_error: Option<JsException>,
     persona: persona::ResolvedPersona,
+    subsystems: BrowserSubsystemOptions,
+    navigator_identity_override: Option<String>,
     preload_scripts: Vec<(String, String)>,
+    worker_queue: Rc<RefCell<WorkerQueue>>,
+    workers: HashMap<u64, WorkerInstance>,
+    worker_coordinator: WorkerCoordinator,
+    streaming_queue: Rc<RefCell<StreamingQueue>>,
+    websockets: HashMap<u64, network::WebSocketHandle>,
+    fetch_streams: RefCell<HashMap<u64, network::ResourceStreamHandle>>,
+    service_worker: Option<(u64, String)>,
 }
 
 impl Page {
     pub(crate) fn new(
         options: PageOptions,
         loader: Arc<dyn ResourceLoader>,
+        worker_coordinator: WorkerCoordinator,
     ) -> Result<Self, JsException> {
         let js = JsRuntime::new()?;
         let browsing_context = Arc::new(BrowsingContext::default());
@@ -57,17 +78,35 @@ impl Page {
         let document = Rc::new(RefCell::new(initial_document));
         let timers = Rc::new(RefCell::new(TimerQueue::default()));
         let fetches = Rc::new(RefCell::new(FetchQueue::default()));
+        let worker_queue = Rc::new(RefCell::new(WorkerQueue::default()));
+        let streaming_queue = Rc::new(RefCell::new(StreamingQueue::default()));
         let bindings = BindingRuntime::install(
             &js,
             Rc::clone(&document),
-            Rc::clone(&timers),
             Arc::clone(&browsing_context),
-            Rc::clone(&fetches),
             false,
+            options.subsystems.web_features(),
+            options
+                .subsystems
+                .persistent_storage
+                .as_ref()
+                .map(|options| {
+                    Arc::new(BindingPersistentStorage::new(
+                        options.root.clone(),
+                        options.quota_bytes,
+                    ))
+                }),
+            BindingQueues {
+                timers: Rc::clone(&timers),
+                fetches: Rc::clone(&fetches),
+                workers: Rc::clone(&worker_queue),
+                streaming: Rc::clone(&streaming_queue),
+            },
         )?;
-        install_persona(&js, &options.persona)?;
+        let persona_identity_setter = install_persona(&js, &options.persona, &options.subsystems)?;
         Ok(Self {
             bindings,
+            persona_identity_setter,
             timers,
             browsing_context,
             blitz_network,
@@ -82,7 +121,16 @@ impl Page {
             document_ready: false,
             async_error: None,
             persona: options.persona,
+            subsystems: options.subsystems,
+            navigator_identity_override: None,
             preload_scripts: Vec::new(),
+            worker_queue,
+            workers: HashMap::new(),
+            worker_coordinator,
+            streaming_queue,
+            websockets: HashMap::new(),
+            fetch_streams: RefCell::new(HashMap::new()),
+            service_worker: None,
         })
     }
 
@@ -108,6 +156,9 @@ impl Page {
         base_url: &str,
         cross_origin_isolated: bool,
     ) -> Result<(), JsException> {
+        self.terminate_workers();
+        self.close_websockets();
+        self.cancel_fetch_streams();
         let net_provider: Arc<dyn NetProvider> = self.blitz_network.clone();
         let document = BrowserDocument::empty_at_with_net(Some(base_url), Some(net_provider));
         *self.document.borrow_mut() = document;
@@ -115,20 +166,40 @@ impl Page {
         let js = JsRuntime::new()?;
         let timers = Rc::new(RefCell::new(TimerQueue::default()));
         let fetches = Rc::new(RefCell::new(FetchQueue::default()));
+        let worker_queue = Rc::new(RefCell::new(WorkerQueue::default()));
+        let streaming_queue = Rc::new(RefCell::new(StreamingQueue::default()));
         let bindings = BindingRuntime::install(
             &js,
             Rc::clone(&self.document),
-            Rc::clone(&timers),
             Arc::clone(&self.browsing_context),
-            Rc::clone(&fetches),
             cross_origin_isolated,
+            self.subsystems.web_features(),
+            self.subsystems.persistent_storage.as_ref().map(|options| {
+                Arc::new(BindingPersistentStorage::new(
+                    options.root.clone(),
+                    options.quota_bytes,
+                ))
+            }),
+            BindingQueues {
+                timers: Rc::clone(&timers),
+                fetches: Rc::clone(&fetches),
+                workers: Rc::clone(&worker_queue),
+                streaming: Rc::clone(&streaming_queue),
+            },
         )?;
-        install_persona(&js, &self.persona)?;
+        let persona_identity_setter = install_persona(&js, &self.persona, &self.subsystems)?;
+        if let Some(identity_override) = &self.navigator_identity_override {
+            js.call_function_with_string(&persona_identity_setter, identity_override)?;
+        }
 
         self.bindings = bindings;
+        self.persona_identity_setter = persona_identity_setter;
         self.js = js;
         self.timers = timers;
         self.fetches = fetches;
+        self.worker_queue = worker_queue;
+        self.streaming_queue = streaming_queue;
+        self.service_worker = None;
         self.tasks = TaskQueue::default();
         self.async_error = None;
         Ok(())
@@ -256,6 +327,16 @@ impl Page {
         self.preload_scripts
             .retain(|(candidate, _)| candidate != identifier);
         self.preload_scripts.len() != original_len
+    }
+
+    pub(crate) fn set_navigator_identity_override(
+        &mut self,
+        identity_override: String,
+    ) -> Result<(), JsException> {
+        self.js
+            .call_function_with_string(&self.persona_identity_setter, &identity_override)?;
+        self.navigator_identity_override = Some(identity_override);
+        Ok(())
     }
 
     async fn parse_navigation_document(
@@ -520,11 +601,15 @@ impl Page {
     }
 
     pub fn run_one_task(&mut self) -> Result<bool, JsException> {
+        self.start_pending_workers()?;
+        self.start_pending_websockets()?;
         let timer_callback = self.timers.borrow_mut().pop_due();
         if let Some(callback) = timer_callback {
             self.js.call_function(&callback)?;
             self.perform_microtask_checkpoint()?;
             self.start_pending_fetches()?;
+            self.start_pending_workers()?;
+            self.start_pending_websockets()?;
             return Ok(true);
         }
         let Some(task) = self.tasks.pop() else {
@@ -536,6 +621,8 @@ impl Page {
         }
         self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
+        self.start_pending_workers()?;
+        self.start_pending_websockets()?;
         Ok(true)
     }
 
@@ -598,17 +685,105 @@ impl Page {
         let pending_fetches = self.fetches.borrow_mut().take_pending();
         for pending in pending_fetches {
             let id = pending.id;
-            let request = match self.prepare_fetch_request(pending) {
+            let streaming = pending.streaming;
+            let mut request = match self.prepare_fetch_request(pending) {
                 Ok(request) => request,
                 Err(error) => {
                     self.reject_fetch(id, &error)?;
                     continue;
                 }
             };
+            if let Some((worker_id, key)) = &self.service_worker
+                && let Some(response) = self
+                    .worker_coordinator
+                    .dispatch_fetch(key.clone(), request.clone())
+            {
+                self.complete_service_worker_fetch(id, *worker_id, streaming, response)?;
+                continue;
+            }
             let requested_url = request.url.clone();
             let loader = Arc::clone(&self.loader);
             let browsing_context = Arc::clone(&self.browsing_context);
             let sender = self.task_sender();
+            let buffered_bytes = Arc::new(AtomicUsize::new(0));
+            let callback_buffered_bytes = Arc::clone(&buffered_bytes);
+            if streaming {
+                browsing_context.apply_request_identity(&mut request.headers);
+                if let Some(cookie) = browsing_context.cookie_header(&request.url)
+                    && let Ok(value) = http::HeaderValue::from_str(&cookie)
+                {
+                    request.headers.insert(http::header::COOKIE, value);
+                }
+                let result = loader.fetch_stream_callback(
+                    request,
+                    Box::new(move |event, control| {
+                        const HIGH_WATER_MARK: usize = 256 * 1024;
+                        const LOW_WATER_MARK: usize = 128 * 1024;
+                        let chunk_length = match &event {
+                            network::ResourceStreamEvent::Chunk(bytes) => bytes.len(),
+                            _ => 0,
+                        };
+                        if chunk_length != 0 {
+                            let reserved = callback_buffered_bytes.fetch_update(
+                                Ordering::AcqRel,
+                                Ordering::Acquire,
+                                |current| {
+                                    (current.saturating_add(chunk_length) <= HIGH_WATER_MARK)
+                                        .then_some(current + chunk_length)
+                                },
+                            );
+                            if reserved.is_err() {
+                                let resume_control = control.clone();
+                                let resume_buffered_bytes = Arc::clone(&callback_buffered_bytes);
+                                if sender
+                                    .post(move |_| {
+                                        if resume_buffered_bytes.load(Ordering::Acquire)
+                                            <= LOW_WATER_MARK
+                                        {
+                                            resume_control.resume();
+                                        }
+                                    })
+                                    .is_err()
+                                {
+                                    return network::ResourceStreamDirective::Cancel;
+                                }
+                                return network::ResourceStreamDirective::Pause;
+                            }
+                        }
+                        let task_buffered_bytes = Arc::clone(&callback_buffered_bytes);
+                        let task_control = control.clone();
+                        if sender
+                            .post(move |page| {
+                                if let Err(error) = page.handle_fetch_stream_event(id, event) {
+                                    page.async_error = Some(error);
+                                }
+                                if chunk_length != 0 {
+                                    let remaining = task_buffered_bytes
+                                        .fetch_sub(chunk_length, Ordering::AcqRel)
+                                        .saturating_sub(chunk_length);
+                                    if remaining <= LOW_WATER_MARK {
+                                        task_control.resume();
+                                    }
+                                }
+                            })
+                            .is_err()
+                        {
+                            if chunk_length != 0 {
+                                callback_buffered_bytes.fetch_sub(chunk_length, Ordering::AcqRel);
+                            }
+                            return network::ResourceStreamDirective::Cancel;
+                        }
+                        network::ResourceStreamDirective::Continue
+                    }),
+                );
+                match result {
+                    Ok(handle) => {
+                        self.fetch_streams.borrow_mut().insert(id, handle);
+                    }
+                    Err(error) => self.reject_fetch(id, &error.to_string())?,
+                }
+                continue;
+            }
             let result = crate::request::fetch_callback(
                 loader,
                 browsing_context,
@@ -629,6 +804,405 @@ impl Page {
             }
         }
         Ok(())
+    }
+
+    fn complete_service_worker_fetch(
+        &self,
+        id: u64,
+        _worker_id: u64,
+        streaming: bool,
+        response: ServiceWorkerResponse,
+    ) -> Result<(), JsException> {
+        let status = http::StatusCode::from_u16(response.status)
+            .map_err(|error| JsException::from_message(error.to_string()))?;
+        let mut headers = HeaderList::new();
+        for [name, value] in response.headers {
+            if let (Ok(name), Ok(value)) = (
+                http::HeaderName::from_bytes(name.as_bytes()),
+                http::HeaderValue::from_str(&value),
+            ) {
+                headers.append(name, value);
+            }
+        }
+        if streaming {
+            let headers_json = headers
+                .iter()
+                .filter_map(|(name, value)| value.to_str().ok().map(|value| [name.as_str(), value]))
+                .collect::<Vec<_>>();
+            if let Some(settlement) = self.fetches.borrow_mut().take_settlement(id) {
+                settlement.resolve(
+                    &self.js,
+                    &serde_json::json!({
+                        "streamId": id,
+                        "status": status.as_u16(),
+                        "statusText": response.status_text,
+                        "headers": headers_json,
+                        "url": "",
+                        "redirected": false,
+                    })
+                    .to_string(),
+                )?;
+            }
+            self.bindings.deliver_fetch_stream_event(
+                &self.js,
+                id,
+                &serde_json::json!({"type": "chunk", "bytes": response.body.into_bytes()})
+                    .to_string(),
+            )?;
+            self.bindings.deliver_fetch_stream_event(
+                &self.js,
+                id,
+                &serde_json::json!({"type": "complete"}).to_string(),
+            )?;
+        } else {
+            self.complete_fetch(
+                id,
+                Ok((
+                    String::new(),
+                    network::ResourceResponse {
+                        status,
+                        headers,
+                        body: response.body.into_bytes(),
+                        effective_url: String::new(),
+                    },
+                )),
+            )?;
+        }
+        Ok(())
+    }
+
+    fn handle_fetch_stream_event(
+        &self,
+        id: u64,
+        event: network::ResourceStreamEvent,
+    ) -> Result<(), JsException> {
+        match event {
+            network::ResourceStreamEvent::Headers {
+                status,
+                mut headers,
+                url,
+            } => {
+                headers.remove(http::header::CONTENT_ENCODING);
+                headers.remove(http::header::CONTENT_LENGTH);
+                let headers = headers
+                    .iter()
+                    .filter_map(|(name, value)| {
+                        value.to_str().ok().map(|value| [name.as_str(), value])
+                    })
+                    .collect::<Vec<_>>();
+                if let Some(settlement) = self.fetches.borrow_mut().take_settlement(id) {
+                    settlement.resolve(
+                        &self.js,
+                        &serde_json::json!({
+                            "streamId": id,
+                            "status": status.as_u16(),
+                            "statusText": status.canonical_reason().unwrap_or_default(),
+                            "headers": headers,
+                            "url": url,
+                            "redirected": false,
+                        })
+                        .to_string(),
+                    )?;
+                }
+            }
+            network::ResourceStreamEvent::Chunk(bytes) => {
+                self.bindings.deliver_fetch_stream_event(
+                    &self.js,
+                    id,
+                    &serde_json::json!({"type": "chunk", "bytes": bytes}).to_string(),
+                )?;
+            }
+            network::ResourceStreamEvent::Complete => {
+                self.fetch_streams.borrow_mut().remove(&id);
+                self.bindings.deliver_fetch_stream_event(
+                    &self.js,
+                    id,
+                    &serde_json::json!({"type": "complete"}).to_string(),
+                )?;
+            }
+            network::ResourceStreamEvent::Error(error) => {
+                self.fetch_streams.borrow_mut().remove(&id);
+                if let Some(settlement) = self.fetches.borrow_mut().take_settlement(id) {
+                    settlement.reject(&self.js, &error.to_string())?;
+                } else {
+                    self.bindings.deliver_fetch_stream_event(
+                        &self.js,
+                        id,
+                        &serde_json::json!({"type": "error", "message": error.to_string()})
+                            .to_string(),
+                    )?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn start_pending_workers(&mut self) -> Result<(), JsException> {
+        let operations = self.worker_queue.borrow_mut().take_pending();
+        for operation in operations {
+            match operation {
+                PendingWorkerOperation::Create {
+                    id,
+                    url,
+                    kind,
+                    name,
+                    scope,
+                } => {
+                    let url = match url::Url::parse(&url) {
+                        Ok(url) => url,
+                        Err(error) => {
+                            self.deliver_worker_error(id, &error.to_string())?;
+                            continue;
+                        }
+                    };
+                    self.workers
+                        .insert(id, WorkerInstance::Starting(Vec::new()));
+                    let loader = Arc::clone(&self.loader);
+                    let context = Arc::clone(&self.browsing_context);
+                    let sender = self.task_sender();
+                    let result = crate::request::fetch_callback(
+                        loader,
+                        context,
+                        ResourceRequest::get(url.as_str()),
+                        Box::new(move |result| {
+                            let result = result.map_err(|error| error.to_string());
+                            let _ = sender.post(move |page| {
+                                page.finish_worker_start(
+                                    id,
+                                    url.to_string(),
+                                    kind,
+                                    name,
+                                    scope,
+                                    result,
+                                )
+                            });
+                        }),
+                    );
+                    if let Err(error) = result {
+                        self.deliver_worker_error(id, &error.to_string())?;
+                    }
+                }
+                PendingWorkerOperation::Post { id, message_json } => {
+                    if let Some(worker) = self.workers.get_mut(&id) {
+                        match worker {
+                            WorkerInstance::Starting(messages) => messages.push(message_json),
+                            WorkerInstance::Running(WorkerBackend::Local(worker)) => {
+                                let events = worker.borrow_mut().post_message(&message_json);
+                                for event in events {
+                                    self.bindings.deliver_worker_event(&self.js, id, &event)?;
+                                }
+                            }
+                            WorkerInstance::Running(WorkerBackend::Coordinated { key }) => {
+                                let events = self
+                                    .worker_coordinator
+                                    .post(key.clone(), message_json)
+                                    .map_err(JsException::from_message)?;
+                                for event in events {
+                                    self.bindings.deliver_worker_event(&self.js, id, &event)?;
+                                }
+                            }
+                        }
+                    }
+                }
+                PendingWorkerOperation::Terminate { id } => {
+                    self.workers.remove(&id);
+                }
+                PendingWorkerOperation::Unregister { id } => {
+                    if let Some(WorkerInstance::Running(WorkerBackend::Coordinated { key })) =
+                        self.workers.remove(&id)
+                    {
+                        self.worker_coordinator.remove(key);
+                    }
+                    if self
+                        .service_worker
+                        .as_ref()
+                        .is_some_and(|(worker_id, _)| *worker_id == id)
+                    {
+                        self.service_worker = None;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn finish_worker_start(
+        &mut self,
+        id: u64,
+        url: String,
+        kind: String,
+        name: String,
+        scope: String,
+        result: Result<network::ResourceResponse, String>,
+    ) {
+        let pending = match self.workers.remove(&id) {
+            Some(WorkerInstance::Starting(messages)) => messages,
+            _ => return,
+        };
+        let response = match result {
+            Ok(response) if response.status.is_success() => response,
+            Ok(response) => {
+                let _ = self.deliver_worker_error(id, &format!("HTTP {}", response.status));
+                return;
+            }
+            Err(error) => {
+                let _ = self.deliver_worker_error(id, &error);
+                return;
+            }
+        };
+        let source = match String::from_utf8(response.body) {
+            Ok(source) => source,
+            Err(error) => {
+                let _ = self.deliver_worker_error(id, &error.to_string());
+                return;
+            }
+        };
+        if kind == "shared" || kind == "service" {
+            let key = if kind == "shared" {
+                format!("shared\0{url}\0{name}")
+            } else {
+                format!("service\0{scope}")
+            };
+            match self
+                .worker_coordinator
+                .connect(key.clone(), source, kind.clone())
+            {
+                Ok(mut events) => {
+                    for message in pending {
+                        match self.worker_coordinator.post(key.clone(), message) {
+                            Ok(outputs) => events.extend(outputs),
+                            Err(error) => {
+                                let _ = self.deliver_worker_error(id, &error);
+                            }
+                        }
+                    }
+                    for event in events {
+                        let _ = self.bindings.deliver_worker_event(&self.js, id, &event);
+                    }
+                    let _ = self.bindings.deliver_worker_event(
+                        &self.js,
+                        id,
+                        &serde_json::json!({"type": "ready"}).to_string(),
+                    );
+                    if kind == "service" {
+                        self.service_worker = Some((id, key.clone()));
+                    }
+                    self.workers.insert(
+                        id,
+                        WorkerInstance::Running(WorkerBackend::Coordinated { key }),
+                    );
+                }
+                Err(error) => {
+                    let _ = self.deliver_worker_error(id, &error);
+                }
+            }
+            return;
+        }
+        match WorkerRealm::new(source, &kind) {
+            Ok(mut worker) => {
+                for message in pending {
+                    for event in worker.post_message(&message) {
+                        let _ = self.bindings.deliver_worker_event(&self.js, id, &event);
+                    }
+                }
+                for event in worker.take_outputs() {
+                    let _ = self.bindings.deliver_worker_event(&self.js, id, &event);
+                }
+                let _ = self.bindings.deliver_worker_event(
+                    &self.js,
+                    id,
+                    &serde_json::json!({"type": "ready"}).to_string(),
+                );
+                let worker = Rc::new(RefCell::new(worker));
+                self.workers
+                    .insert(id, WorkerInstance::Running(WorkerBackend::Local(worker)));
+            }
+            Err(error) => {
+                let _ = self.deliver_worker_error(id, &error);
+            }
+        }
+    }
+
+    fn deliver_worker_error(&self, id: u64, message: &str) -> Result<(), JsException> {
+        let event = serde_json::json!({"type": "error", "message": message}).to_string();
+        self.bindings.deliver_worker_event(&self.js, id, &event)
+    }
+
+    fn terminate_workers(&mut self) {
+        self.service_worker = None;
+        self.workers.clear();
+    }
+
+    fn start_pending_websockets(&mut self) -> Result<(), JsException> {
+        let operations = self.streaming_queue.borrow_mut().take_pending();
+        for operation in operations {
+            match operation {
+                PendingWebSocketOperation::Create { id, url } => {
+                    let mut headers = HeaderList::new();
+                    self.browsing_context.apply_request_identity(&mut headers);
+                    let sender = self.task_sender();
+                    let handle = self.loader.open_websocket(
+                        url,
+                        headers,
+                        Box::new(move |event| {
+                            let event = match event {
+                                network::WebSocketEvent::Open => serde_json::json!({"type": "open"}),
+                                network::WebSocketEvent::Text(data) => serde_json::json!({"type": "message", "data": data}),
+                                network::WebSocketEvent::Binary(data) => serde_json::json!({"type": "message", "data": data}),
+                                network::WebSocketEvent::Close { code, reason } => serde_json::json!({"type": "close", "code": code, "reason": reason, "wasClean": code == 1000}),
+                                network::WebSocketEvent::Error(message) => serde_json::json!({"type": "error", "message": message}),
+                            }.to_string();
+                            let _ = sender.post(move |page| {
+                                if let Err(error) = page.bindings.deliver_websocket_event(&page.js, id, &event) {
+                                    page.async_error = Some(error);
+                                }
+                            });
+                        }),
+                    );
+                    match handle {
+                        Ok(handle) => {
+                            self.websockets.insert(id, handle);
+                        }
+                        Err(error) => {
+                            self.bindings.deliver_websocket_event(
+                                &self.js,
+                                id,
+                                &serde_json::json!({"type": "error", "message": error.to_string()})
+                                    .to_string(),
+                            )?;
+                        }
+                    }
+                }
+                PendingWebSocketOperation::SendText { id, message } => {
+                    if let Some(socket) = self.websockets.get(&id) {
+                        let _ = socket.send_text(message);
+                    }
+                }
+                PendingWebSocketOperation::Close { id } => {
+                    if let Some(socket) = self.websockets.remove(&id) {
+                        let _ = socket.close();
+                    }
+                }
+                PendingWebSocketOperation::CancelFetch { id } => {
+                    if let Some(stream) = self.fetch_streams.borrow_mut().remove(&id) {
+                        stream.cancel();
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn close_websockets(&mut self) {
+        for (_, socket) in self.websockets.drain() {
+            let _ = socket.close();
+        }
+    }
+
+    fn cancel_fetch_streams(&self) {
+        for (_, stream) in self.fetch_streams.borrow_mut().drain() {
+            stream.cancel();
+        }
     }
 
     fn prepare_fetch_request(&self, pending: PendingFetch) -> Result<ResourceRequest, String> {
@@ -703,6 +1277,24 @@ impl Page {
             settlement.reject(&self.js, error)?;
         }
         Ok(())
+    }
+}
+
+enum WorkerInstance {
+    Starting(Vec<String>),
+    Running(WorkerBackend),
+}
+
+enum WorkerBackend {
+    Local(Rc<RefCell<WorkerRealm>>),
+    Coordinated { key: String },
+}
+
+impl Drop for Page {
+    fn drop(&mut self) {
+        self.terminate_workers();
+        self.close_websockets();
+        self.cancel_fetch_streams();
     }
 }
 
@@ -794,6 +1386,7 @@ pub enum NavigationError {
 pub struct PageOptions {
     viewport: Viewport,
     persona: persona::ResolvedPersona,
+    subsystems: BrowserSubsystemOptions,
 }
 
 impl Default for PageOptions {
@@ -808,6 +1401,7 @@ impl Default for PageOptions {
                 scroll_y: 0.0,
             },
             persona,
+            subsystems: BrowserSubsystemOptions::default(),
         }
     }
 }
@@ -823,6 +1417,10 @@ impl PageOptions {
 
     pub fn persona(&self) -> &persona::ResolvedPersona {
         &self.persona
+    }
+
+    pub fn subsystems(&self) -> &BrowserSubsystemOptions {
+        &self.subsystems
     }
 
     pub(crate) fn with_persona(mut self, persona: persona::ResolvedPersona) -> Self {
@@ -844,6 +1442,21 @@ pub struct PageOptionsBuilder {
 }
 
 impl PageOptionsBuilder {
+    pub fn worker_system(mut self, enabled: bool) -> Self {
+        self.options.subsystems.worker_system = enabled;
+        self
+    }
+
+    pub fn streaming_networking(mut self, enabled: bool) -> Self {
+        self.options.subsystems.streaming_networking = enabled;
+        self
+    }
+
+    pub fn persistent_storage(mut self, options: PersistentStorageOptions) -> Self {
+        self.options.subsystems.persistent_storage = Some(options);
+        self
+    }
+
     pub fn viewport(mut self, width: u32, height: u32) -> Self {
         self.options.viewport.width = f64::from(width);
         self.options.viewport.height = f64::from(height);
@@ -873,12 +1486,72 @@ impl PageOptionsBuilder {
 fn install_persona(
     runtime: &JsRuntime,
     persona: &persona::ResolvedPersona,
-) -> Result<(), JsException> {
+    subsystems: &BrowserSubsystemOptions,
+) -> Result<ProtectedJsObject, JsException> {
     let persona = serde_json::to_string(persona)
         .map_err(|error| JsException::from_message(error.to_string()))?;
     let installer = include_str!("persona.js");
-    runtime.eval(&format!("({installer})({persona})"))?;
-    Ok(())
+    let features = subsystems.web_features().json();
+    runtime
+        .eval(&format!("({installer})({persona},{features})"))?
+        .to_object()
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct BrowserSubsystemOptions {
+    worker_system: bool,
+    streaming_networking: bool,
+    persistent_storage: Option<PersistentStorageOptions>,
+}
+
+impl BrowserSubsystemOptions {
+    pub fn worker_system(&self) -> bool {
+        self.worker_system
+    }
+
+    pub fn streaming_networking(&self) -> bool {
+        self.streaming_networking
+    }
+
+    pub fn persistent_storage(&self) -> Option<&PersistentStorageOptions> {
+        self.persistent_storage.as_ref()
+    }
+
+    fn web_features(&self) -> WebFeatureFlags {
+        WebFeatureFlags {
+            worker_system: self.worker_system,
+            streaming_networking: self.streaming_networking,
+            persistent_storage: self.persistent_storage.is_some(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PersistentStorageOptions {
+    root: PathBuf,
+    quota_bytes: u64,
+}
+
+impl PersistentStorageOptions {
+    pub fn new(root: impl Into<PathBuf>) -> Self {
+        Self {
+            root: root.into(),
+            quota_bytes: 1024 * 1024 * 1024,
+        }
+    }
+
+    pub fn quota_bytes(mut self, quota_bytes: u64) -> Self {
+        self.quota_bytes = quota_bytes;
+        self
+    }
+
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
+    pub fn quota(&self) -> u64 {
+        self.quota_bytes
+    }
 }
 
 fn persona_request_headers(persona: &persona::ResolvedPersona) -> Vec<(String, String)> {

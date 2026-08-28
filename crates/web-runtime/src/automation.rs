@@ -9,7 +9,30 @@ use std::time::{Duration, Instant};
 use network::{HeaderList, ResourceLoader};
 use serde_json::Value;
 
-use crate::{NavigationError, NavigationResponse, Page, PageOptions, ScreenshotOptions, Viewport};
+use crate::{
+    NavigationError, NavigationResponse, Page, PageOptions, ScreenshotOptions, Viewport,
+    worker::WorkerCoordinator,
+};
+
+fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
+    let mut rendered = String::with_capacity(template.len());
+    let mut remaining = template;
+    while let Some((offset, placeholder, value)) = replacements
+        .iter()
+        .filter_map(|(placeholder, value)| {
+            remaining
+                .find(placeholder)
+                .map(|offset| (offset, *placeholder, *value))
+        })
+        .min_by_key(|(offset, _, _)| *offset)
+    {
+        rendered.push_str(&remaining[..offset]);
+        rendered.push_str(value);
+        remaining = &remaining[offset + placeholder.len()..];
+    }
+    rendered.push_str(remaining);
+    rendered
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum AutomationError {
@@ -73,6 +96,7 @@ pub struct AutomationBrowser {
     persona: Option<persona::ResolvedPersona>,
     pages: Mutex<Vec<Weak<PageControl>>>,
     closed: AtomicBool,
+    workers: WorkerCoordinator,
 }
 impl AutomationBrowser {
     pub fn new() -> Result<Self, AutomationError> {
@@ -85,6 +109,7 @@ impl AutomationBrowser {
             persona: None,
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
+            workers: WorkerCoordinator::new().expect("shared worker coordinator must start"),
         }
     }
     pub fn with_persona_and_resource_loader(
@@ -99,6 +124,7 @@ impl AutomationBrowser {
             persona: Some(persona.resolve()),
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
+            workers: WorkerCoordinator::new().map_err(AutomationError::Internal)?,
         })
     }
     pub fn with_persona(persona: persona::PersonaConfig) -> Result<Self, AutomationError> {
@@ -125,6 +151,7 @@ impl AutomationBrowser {
             persona: Some(persona),
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
+            workers: WorkerCoordinator::new().map_err(AutomationError::Internal)?,
         })
     }
     pub fn new_page(&self, options: PageOptions) -> Result<AutomationPage, AutomationError> {
@@ -135,7 +162,7 @@ impl AutomationBrowser {
             .persona
             .clone()
             .map_or(options.clone(), |persona| options.with_persona(persona));
-        let page = AutomationPage::launch(options, Arc::clone(&self.loader))?;
+        let page = AutomationPage::launch(options, Arc::clone(&self.loader), self.workers.clone())?;
         self.pages
             .lock()
             .expect("automation page list poisoned")
@@ -169,12 +196,13 @@ impl AutomationPage {
     fn launch(
         options: PageOptions,
         loader: Arc<dyn ResourceLoader>,
+        workers: WorkerCoordinator,
     ) -> Result<Self, AutomationError> {
         let (commands, receiver) = mpsc::channel();
         let (ready_sender, ready_receiver) = mpsc::sync_channel(1);
         let worker = std::thread::Builder::new()
             .name("brimp-page-owner".into())
-            .spawn(move || run_page(options, loader, receiver, ready_sender))
+            .spawn(move || run_page(options, loader, workers, receiver, ready_sender))
             .map_err(|error| AutomationError::Internal(error.to_string()))?;
         ready_receiver
             .recv()
@@ -348,6 +376,17 @@ impl AutomationPage {
             response,
         })?
     }
+    pub fn set_navigator_identity_override(
+        &self,
+        identity_override: Value,
+    ) -> Result<(), AutomationError> {
+        let identity_override = serde_json::to_string(&identity_override)
+            .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+        self.request(|response| Command::SetNavigatorIdentityOverride {
+            identity_override,
+            response,
+        })?
+    }
     pub fn add_preload_script(
         &self,
         identifier: impl Into<String>,
@@ -508,6 +547,10 @@ enum Command {
         device_pixel_ratio: f64,
         response: mpsc::SyncSender<Result<(), AutomationError>>,
     },
+    SetNavigatorIdentityOverride {
+        identity_override: String,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
+    },
     AddPreloadScript {
         identifier: String,
         source: String,
@@ -527,10 +570,11 @@ enum Command {
 fn run_page(
     options: PageOptions,
     loader: Arc<dyn ResourceLoader>,
+    workers: WorkerCoordinator,
     commands: mpsc::Receiver<Command>,
     ready: mpsc::SyncSender<Result<(), AutomationError>>,
 ) {
-    let mut page = match Page::new(options, loader) {
+    let mut page = match Page::new(options, loader, workers) {
         Ok(page) => page,
         Err(error) => {
             let _ = ready.send(Err(AutomationError::Internal(error.to_string())));
@@ -677,6 +721,15 @@ fn run_page(
                 page.set_viewport(width, height, device_pixel_ratio);
                 let _ = response.send(Ok(()));
             }
+            Command::SetNavigatorIdentityOverride {
+                identity_override,
+                response,
+            } => {
+                let result = page
+                    .set_navigator_identity_override(identity_override)
+                    .map_err(|error| AutomationError::JavaScript(error.to_string()));
+                let _ = response.send(result);
+            }
             Command::AddPreloadScript {
                 identifier,
                 source,
@@ -723,8 +776,9 @@ async fn wait_for_cancellation(cancellation: CancellationToken) {
 fn evaluate(page: &Page, expression: &str) -> Result<Value, AutomationError> {
     let encoded = serde_json::to_string(expression)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    let source = format!(
-        r#"(() => {{ const value = (0, eval)({encoded}); const kind = typeof value; if (kind === "undefined" || kind === "function" || kind === "symbol" || kind === "bigint") throw new Error("BRIMP_UNSUPPORTED_RESULT:" + kind); let json; try {{ json = JSON.stringify(value); }} catch (error) {{ throw new Error("BRIMP_UNSUPPORTED_RESULT:" + error.message); }} if (json === undefined) throw new Error("BRIMP_UNSUPPORTED_RESULT:unserializable"); return json; }})()"#
+    let source = render_script(
+        include_str!("automation/evaluate_json.js"),
+        &[("__EXPRESSION__", &encoded)],
     );
     let json = page
         .eval(&source)
@@ -760,13 +814,11 @@ fn evaluate_remote(
 ) -> Result<Value, AutomationError> {
     let expression = serde_json::to_string(expression)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    evaluate_remote_maybe_await(
-        page,
-        &format!("const value = (0, eval)({expression});"),
-        return_by_value,
-        object_group,
-        await_promise,
-    )
+    let body = render_script(
+        include_str!("automation/evaluate_expression.js"),
+        &[("__EXPRESSION__", &expression)],
+    );
+    evaluate_remote_maybe_await(page, &body, return_by_value, object_group, await_promise)
 }
 
 fn call_function_remote(
@@ -794,29 +846,13 @@ fn call_function_remote(
         .collect::<Vec<_>>();
     let arguments = serde_json::to_string(&arguments)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    let body = format!(
-        "const declarationSource = {declaration};\
-         const declaration = (0, eval)('(' + declarationSource + ')');\
-         const receiverId = {receiver};\
-         const receiver = receiverId === null ? globalThis : state.objects.get(receiverId);\
-         if (receiverId !== null && receiver === undefined) throw new Error('Unknown remote object: ' + receiverId);\
-         const specs = {arguments};\
-         const args = specs.map(spec => {{\
-             if ('objectId' in spec) {{\
-                 const value = state.objects.get(spec.objectId);\
-                 if (value === undefined) throw new Error('Unknown remote object: ' + spec.objectId);\
-                 return value;\
-             }}\
-             if ('unserializableValue' in spec) {{\
-                 if (spec.unserializableValue === 'NaN') return NaN;\
-                 if (spec.unserializableValue === 'Infinity') return Infinity;\
-                 if (spec.unserializableValue === '-Infinity') return -Infinity;\
-                 if (spec.unserializableValue === '-0') return -0;\
-                 if (spec.unserializableValue.endsWith('n')) return BigInt(spec.unserializableValue.slice(0, -1));\
-             }}\
-             return spec.value;\
-         }});\
-         const value = declaration.apply(receiver, args);"
+    let body = render_script(
+        include_str!("automation/call_function.js"),
+        &[
+            ("__DECLARATION__", &declaration),
+            ("__RECEIVER__", &receiver),
+            ("__ARGUMENTS__", &arguments),
+        ],
     );
     evaluate_remote_maybe_await(page, &body, return_by_value, object_group, await_promise)
 }
@@ -831,19 +867,9 @@ fn evaluate_remote_maybe_await(
     if !await_promise {
         return evaluate_remote_source(page, body, return_by_value, object_group);
     }
-    let setup = format!(
-        r#"(() => {{
-            const state = globalThis.__brimpCdpRemoteObjects ||
-                (globalThis.__brimpCdpRemoteObjects = {{next: 1, objects: new Map(), groups: new Map(), objectGroups: new Map()}});
-            {body}
-            const pending = {{settled: false, rejected: false, value: undefined}};
-            state.pendingPromise = pending;
-            Promise.resolve(value).then(
-                result => {{ pending.value = result; pending.settled = true; }},
-                error => {{ pending.value = error; pending.rejected = true; pending.settled = true; }}
-            );
-            return true;
-        }})()"#
+    let setup = render_script(
+        include_str!("automation/await_promise.js"),
+        &[("__BODY__", body)],
     );
     page.eval(&setup)
         .map_err(|error| AutomationError::JavaScript(error.to_string()))?;
@@ -851,7 +877,7 @@ fn evaluate_remote_maybe_await(
     let started = Instant::now();
     loop {
         let settled = page
-            .eval("Boolean(globalThis.__brimpCdpRemoteObjects?.pendingPromise?.settled)")
+            .eval(include_str!("automation/promise_settled.js"))
             .map_err(|error| AutomationError::JavaScript(error.to_string()))?
             .to_string()
             .map_err(|error| AutomationError::JavaScript(error.to_string()))?
@@ -868,7 +894,7 @@ fn evaluate_remote_maybe_await(
     }
     evaluate_remote_source(
         page,
-        "const pending = state.pendingPromise; delete state.pendingPromise; if (pending.rejected) throw pending.value; const value = pending.value;",
+        include_str!("automation/promise_result.js"),
         return_by_value,
         object_group,
     )
@@ -882,39 +908,16 @@ fn evaluate_remote_source(
 ) -> Result<Value, AutomationError> {
     let object_group = serde_json::to_string(&object_group)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    let source = format!(
-        r#"(() => {{
-            const state = globalThis.__brimpCdpRemoteObjects ||
-                (globalThis.__brimpCdpRemoteObjects = {{next: 1, objects: new Map(), groups: new Map(), objectGroups: new Map()}});
-            {body}
-            const type = typeof value;
-            const group = {object_group};
-            let result;
-            if (value === null) result = {{type: 'object', subtype: 'null', value: null}};
-            else if (type === 'undefined') result = {{type: 'undefined'}};
-            else if (type === 'number' && (!Number.isFinite(value) || Object.is(value, -0))) result = {{type: 'number', unserializableValue: Object.is(value, -0) ? '-0' : String(value)}};
-            else if (type === 'bigint') result = {{type: 'bigint', unserializableValue: String(value) + 'n'}};
-            else if (type !== 'object' && type !== 'function' && type !== 'symbol') result = {{type, value}};
-            else if ({return_by_value}) result = {{type, value}};
-            else {{
-                const objectId = 'object-' + state.next++;
-                state.objects.set(objectId, value);
-                if (group !== null && group !== '') {{
-                    let ids = state.groups.get(group);
-                    if (ids === undefined) state.groups.set(group, ids = new Set());
-                    ids.add(objectId);
-                    state.objectGroups.set(objectId, group);
-                }}
-                result = {{
-                    type,
-                    subtype: Array.isArray(value) ? 'array' : (value && typeof value.nodeType === 'number' ? 'node' : undefined),
-                    className: value && value.constructor ? value.constructor.name : undefined,
-                    description: type === 'function' ? String(value) : Object.prototype.toString.call(value),
-                    objectId
-                }};
-            }}
-            return JSON.stringify(result);
-        }})()"#
+    let source = render_script(
+        include_str!("automation/evaluate_remote.js"),
+        &[
+            ("__BODY__", body),
+            ("__OBJECT_GROUP__", &object_group),
+            (
+                "__RETURN_BY_VALUE__",
+                if return_by_value { "true" } else { "false" },
+            ),
+        ],
     );
     let json = page
         .eval(&source)
@@ -933,64 +936,23 @@ fn remote_object_properties(
 ) -> Result<Value, AutomationError> {
     let object_id = serde_json::to_string(object_id)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    let source = format!(
-        r#"(() => {{
-            const state = globalThis.__brimpCdpRemoteObjects;
-            const objectId = {object_id};
-            if (!state || !state.objects.has(objectId)) throw new Error('Unknown remote object: ' + objectId);
-            const object = state.objects.get(objectId);
-            const group = state.objectGroups.get(objectId) ?? null;
-            const remote = value => {{
-                const type = typeof value;
-                if (value === null) return {{type: 'object', subtype: 'null', value: null}};
-                if (type === 'undefined') return {{type: 'undefined'}};
-                if (type === 'number' && (!Number.isFinite(value) || Object.is(value, -0)))
-                    return {{type: 'number', unserializableValue: Object.is(value, -0) ? '-0' : String(value)}};
-                if (type === 'bigint') return {{type: 'bigint', unserializableValue: String(value) + 'n'}};
-                if (type !== 'object' && type !== 'function' && type !== 'symbol') return {{type, value}};
-                const childId = 'object-' + state.next++;
-                state.objects.set(childId, value);
-                if (group !== null) {{
-                    let ids = state.groups.get(group);
-                    if (ids === undefined) state.groups.set(group, ids = new Set());
-                    ids.add(childId);
-                    state.objectGroups.set(childId, group);
-                }}
-                return {{
-                    type,
-                    subtype: Array.isArray(value) ? 'array' : (value && typeof value.nodeType === 'number' ? 'node' : undefined),
-                    className: value && value.constructor ? value.constructor.name : undefined,
-                    description: type === 'function' || type === 'symbol' ? String(value) : Object.prototype.toString.call(value),
-                    objectId: childId
-                }};
-            }};
-            const result = [];
-            const seen = new Set();
-            for (let current = object; current !== null; current = {own_properties} ? null : Object.getPrototypeOf(current)) {{
-                for (const key of Reflect.ownKeys(Object(current))) {{
-                    const name = typeof key === 'symbol' ? String(key) : key;
-                    if (seen.has(name)) continue;
-                    seen.add(name);
-                    const descriptor = Object.getOwnPropertyDescriptor(current, key);
-                    if ({accessor_properties_only} && !descriptor.get && !descriptor.set) continue;
-                    const property = {{
-                        name,
-                        configurable: descriptor.configurable,
-                        enumerable: descriptor.enumerable,
-                        isOwn: current === object
-                    }};
-                    if ('value' in descriptor) {{
-                        property.value = remote(descriptor.value);
-                        property.writable = descriptor.writable;
-                    }} else {{
-                        if (descriptor.get) property.get = remote(descriptor.get);
-                        if (descriptor.set) property.set = remote(descriptor.set);
-                    }}
-                    result.push(property);
-                }}
-            }}
-            return JSON.stringify({{result, internalProperties: [], privateProperties: []}});
-        }})()"#
+    let source = render_script(
+        include_str!("automation/remote_object_properties.js"),
+        &[
+            ("__OBJECT_ID__", &object_id),
+            (
+                "__OWN_PROPERTIES__",
+                if own_properties { "true" } else { "false" },
+            ),
+            (
+                "__ACCESSOR_PROPERTIES_ONLY__",
+                if accessor_properties_only {
+                    "true"
+                } else {
+                    "false"
+                },
+            ),
+        ],
     );
     let json = page
         .eval(&source)
@@ -1005,30 +967,9 @@ fn remote_object_properties(
 fn describe_remote_node(page: &Page, object_id: &str) -> Result<Value, AutomationError> {
     let object_id = serde_json::to_string(object_id)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
-    let source = format!(
-        r#"(() => {{
-            const state = globalThis.__brimpCdpRemoteObjects;
-            const objectId = {object_id};
-            if (!state || !state.objects.has(objectId)) throw new Error('Unknown remote object: ' + objectId);
-            const node = state.objects.get(objectId);
-            if (!node || typeof node.nodeType !== 'number') throw new Error('Remote object is not a DOM node: ' + objectId);
-            if (!state.nodeIds) {{ state.nextNode = 1; state.nodeIds = new WeakMap(); state.backendNodes = new Map(); }}
-            let backendNodeId = state.nodeIds.get(node);
-            if (backendNodeId === undefined) {{
-                backendNodeId = state.nextNode++;
-                state.nodeIds.set(node, backendNodeId);
-                state.backendNodes.set(backendNodeId, node);
-            }}
-            return JSON.stringify({{
-                nodeId: backendNodeId,
-                backendNodeId,
-                nodeType: node.nodeType,
-                nodeName: node.nodeName || '',
-                localName: node.localName || '',
-                nodeValue: node.nodeValue || '',
-                childNodeCount: node.childNodes ? node.childNodes.length : 0
-            }});
-        }})()"#
+    let source = render_script(
+        include_str!("automation/describe_remote_node.js"),
+        &[("__OBJECT_ID__", &object_id)],
     );
     let json = page
         .eval(&source)
@@ -1044,23 +985,23 @@ fn resolve_remote_node(
     backend_node_id: u64,
     object_group: Option<&str>,
 ) -> Result<Value, AutomationError> {
-    evaluate_remote_source(
-        page,
-        &format!(
-            "if (!state.backendNodes || !state.backendNodes.has({backend_node_id})) throw new Error('Unknown backend node: {backend_node_id}'); const value = state.backendNodes.get({backend_node_id});"
-        ),
-        false,
-        object_group,
-    )
+    let backend_node_id = backend_node_id.to_string();
+    let body = render_script(
+        include_str!("automation/resolve_remote_node.js"),
+        &[("__BACKEND_NODE_ID__", &backend_node_id)],
+    );
+    evaluate_remote_source(page, &body, false, object_group)
 }
 
 fn release_remote_object(page: &Page, object_id: &str) -> Result<bool, AutomationError> {
     let object_id = serde_json::to_string(object_id)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+    let source = render_script(
+        include_str!("automation/release_remote_object.js"),
+        &[("__OBJECT_ID__", &object_id)],
+    );
     let value = page
-        .eval(&format!(
-            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; if (!state) return false; const group = state.objectGroups.get({object_id}); if (group !== undefined) {{ state.groups.get(group)?.delete({object_id}); state.objectGroups.delete({object_id}); }} return state.objects.delete({object_id}); }})()"
-        ))
+        .eval(&source)
         .map_err(|error| AutomationError::JavaScript(error.to_string()))?;
     Ok(value
         .to_string()
@@ -1071,10 +1012,12 @@ fn release_remote_object(page: &Page, object_id: &str) -> Result<bool, Automatio
 fn release_remote_object_group(page: &Page, object_group: &str) -> Result<usize, AutomationError> {
     let object_group = serde_json::to_string(object_group)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+    let source = render_script(
+        include_str!("automation/release_remote_object_group.js"),
+        &[("__OBJECT_GROUP__", &object_group)],
+    );
     let value = page
-        .eval(&format!(
-            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; if (!state) return 0; const ids = state.groups.get({object_group}); if (!ids) return 0; for (const id of ids) {{ state.objects.delete(id); state.objectGroups.delete(id); }} state.groups.delete({object_group}); return ids.size; }})()"
-        ))
+        .eval(&source)
         .map_err(|error| AutomationError::JavaScript(error.to_string()))?;
     let count = value
         .to_number()

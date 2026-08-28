@@ -3,13 +3,19 @@
 mod config;
 mod ffi;
 mod multi;
+mod websocket;
 
 use async_trait::async_trait;
 pub use config::{CurlConfig, Proxy, ProxyKind, ProxyParseError};
 use http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode};
 use multi::MultiExecutor;
 use std::ops::Index;
+use std::sync::{
+    Arc,
+    atomic::{AtomicU8, Ordering},
+};
 use thiserror::Error;
+pub use websocket::{WebSocketEvent, WebSocketHandle};
 
 /// An insertion-ordered HTTP header list. Duplicate fields remain distinct.
 #[derive(Debug, Clone, Default)]
@@ -105,6 +111,102 @@ pub struct ResourceResponse {
     pub effective_url: String,
 }
 
+#[derive(Debug, Clone)]
+pub enum ResourceStreamEvent {
+    Headers {
+        status: StatusCode,
+        headers: HeaderList,
+        url: String,
+    },
+    Chunk(Vec<u8>),
+    Complete,
+    Error(NetworkError),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ResourceStreamDirective {
+    Continue,
+    Pause,
+    Cancel,
+}
+
+const STREAM_RUNNING: u8 = 0;
+const STREAM_PAUSED: u8 = 1;
+const STREAM_CANCELLED: u8 = 2;
+
+/// Controls one in-flight streaming request. Clones refer to the same curl
+/// transfer and may safely be used by the page task that consumes a chunk.
+#[derive(Debug)]
+pub struct ResourceStreamHandle {
+    state: Arc<AtomicU8>,
+    owner: bool,
+}
+
+impl ResourceStreamHandle {
+    pub fn new() -> Self {
+        Self {
+            state: Arc::new(AtomicU8::new(STREAM_RUNNING)),
+            owner: true,
+        }
+    }
+
+    pub fn resume(&self) {
+        let _ = self.state.compare_exchange(
+            STREAM_PAUSED,
+            STREAM_RUNNING,
+            Ordering::AcqRel,
+            Ordering::Acquire,
+        );
+    }
+
+    pub fn cancel(&self) {
+        self.state.store(STREAM_CANCELLED, Ordering::Release);
+    }
+
+    pub fn is_cancelled(&self) -> bool {
+        self.state.load(Ordering::Acquire) == STREAM_CANCELLED
+    }
+
+    pub(crate) fn pause(&self) {
+        let _ = self.state.compare_exchange(
+            STREAM_RUNNING,
+            STREAM_PAUSED,
+            Ordering::AcqRel,
+            Ordering::Acquire,
+        );
+    }
+
+    pub(crate) fn is_paused(&self) -> bool {
+        self.state.load(Ordering::Acquire) == STREAM_PAUSED
+    }
+}
+
+impl Default for ResourceStreamHandle {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Clone for ResourceStreamHandle {
+    fn clone(&self) -> Self {
+        Self {
+            state: Arc::clone(&self.state),
+            owner: false,
+        }
+    }
+}
+
+impl Drop for ResourceStreamHandle {
+    fn drop(&mut self) {
+        if self.owner {
+            self.cancel();
+        }
+    }
+}
+
+pub type ResourceStreamCallback =
+    Box<dyn FnMut(ResourceStreamEvent, &ResourceStreamHandle) -> ResourceStreamDirective + Send>;
+
 #[derive(Debug, Error, Clone)]
 pub enum NetworkError {
     #[error("invalid resource request: {0}")]
@@ -155,17 +257,65 @@ pub trait ResourceLoader: Send + Sync {
             )),
         }
     }
+
+    fn open_websocket(
+        &self,
+        _url: String,
+        _headers: HeaderList,
+        _callback: Box<dyn Fn(WebSocketEvent) + Send>,
+    ) -> Result<WebSocketHandle, NetworkError> {
+        Err(NetworkError::Transport(
+            "this resource loader does not support WebSocket".into(),
+        ))
+    }
+
+    fn fetch_stream_callback(
+        &self,
+        request: ResourceRequest,
+        mut callback: ResourceStreamCallback,
+    ) -> Result<ResourceStreamHandle, NetworkError> {
+        let handle = ResourceStreamHandle::new();
+        let callback_handle = handle.clone();
+        self.fetch_callback(
+            request,
+            Box::new(move |result| match result {
+                Ok(response) => {
+                    let _ = callback(
+                        ResourceStreamEvent::Headers {
+                            status: response.status,
+                            headers: response.headers,
+                            url: response.effective_url,
+                        },
+                        &callback_handle,
+                    );
+                    if !callback_handle.is_cancelled() {
+                        let _ =
+                            callback(ResourceStreamEvent::Chunk(response.body), &callback_handle);
+                    }
+                    if !callback_handle.is_cancelled() {
+                        let _ = callback(ResourceStreamEvent::Complete, &callback_handle);
+                    }
+                }
+                Err(error) => {
+                    let _ = callback(ResourceStreamEvent::Error(error), &callback_handle);
+                }
+            }),
+        )?;
+        Ok(handle)
+    }
 }
 
 /// Cloneable transport handle. Clones share exactly one curl multi executor.
 #[derive(Debug, Clone)]
 pub struct CurlResourceLoader {
     executor: std::sync::Arc<MultiExecutor>,
+    config: CurlConfig,
 }
 impl CurlResourceLoader {
     pub fn new(config: CurlConfig) -> Result<Self, NetworkError> {
         Ok(Self {
-            executor: std::sync::Arc::new(MultiExecutor::new(config)?),
+            executor: std::sync::Arc::new(MultiExecutor::new(config.clone())?),
+            config,
         })
     }
     pub fn check_profile(config: &CurlConfig) -> Result<(), NetworkError> {
@@ -212,6 +362,21 @@ impl ResourceLoader for CurlResourceLoader {
         callback: ResourceCallback,
     ) -> Result<(), NetworkError> {
         self.executor.fetch_callback(request, callback)
+    }
+    fn open_websocket(
+        &self,
+        url: String,
+        headers: HeaderList,
+        callback: Box<dyn Fn(WebSocketEvent) + Send>,
+    ) -> Result<WebSocketHandle, NetworkError> {
+        websocket::open(self.config.clone(), url, headers, callback)
+    }
+    fn fetch_stream_callback(
+        &self,
+        request: ResourceRequest,
+        callback: ResourceStreamCallback,
+    ) -> Result<ResourceStreamHandle, NetworkError> {
+        self.executor.fetch_stream_callback(request, callback)
     }
 }
 

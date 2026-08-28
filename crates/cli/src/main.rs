@@ -4,7 +4,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use brimp_cdp::{ServerConfig, ServerError, parse_bind, start};
-use web_runtime::{AutomationBrowser, AutomationError, CancellationToken, PageOptions};
+use web_runtime::{
+    AutomationBrowser, AutomationError, CancellationToken, PageOptions, PersistentStorageOptions,
+};
 
 static INTERRUPTED: AtomicBool = AtomicBool::new(false);
 #[cfg(unix)]
@@ -56,6 +58,7 @@ fn run(arguments: Vec<String>) -> Result<(), AutomationError> {
 fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
     let mut bind = "127.0.0.1:9222";
     let mut allow_non_loopback = false;
+    let page_options = page_options(arguments)?;
     let mut arguments = arguments.iter();
     while let Some(argument) = arguments.next() {
         match argument.as_str() {
@@ -65,8 +68,16 @@ fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
                 })?;
             }
             "--allow-non-loopback" => allow_non_loopback = true,
+            "--enable-worker" | "--enable-streaming-networking" => {}
+            "--storage-path" | "--storage-quota-bytes" => {
+                arguments.next().ok_or_else(|| {
+                    AutomationError::InvalidInput(format!("{argument} requires a value"))
+                })?;
+            }
             "--help" | "-h" => {
-                println!("usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback]");
+                println!(
+                    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]"
+                );
                 return Ok(());
             }
             argument => {
@@ -83,6 +94,7 @@ fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
         let server = start(ServerConfig {
             bind,
             allow_non_loopback,
+            page_options,
         })
         .await
         .map_err(cdp_error)?;
@@ -165,8 +177,54 @@ fn launch(
     } else {
         AutomationBrowser::new()?
     };
-    let page = browser.new_page(PageOptions::default())?;
+    let page = browser.new_page(page_options(arguments)?)?;
     Ok((browser, page))
+}
+
+fn page_options(arguments: &[String]) -> Result<PageOptions, AutomationError> {
+    let mut builder = PageOptions::builder()
+        .worker_system(flag(arguments, "--enable-worker"))
+        .streaming_networking(flag(arguments, "--enable-streaming-networking"));
+    let storage_path = option(arguments, "--storage-path");
+    if flag(arguments, "--storage-path") && storage_path.is_none() {
+        return Err(AutomationError::InvalidInput(
+            "--storage-path requires PATH".into(),
+        ));
+    }
+    if flag(arguments, "--storage-quota-bytes")
+        && option(arguments, "--storage-quota-bytes").is_none()
+    {
+        return Err(AutomationError::InvalidInput(
+            "--storage-quota-bytes requires a value".into(),
+        ));
+    }
+    if let Some(path) = storage_path {
+        if path.starts_with('-') {
+            return Err(AutomationError::InvalidInput(
+                "--storage-path requires PATH".into(),
+            ));
+        }
+        let quota = option(arguments, "--storage-quota-bytes")
+            .unwrap_or("1073741824")
+            .parse::<u64>()
+            .map_err(|_| {
+                AutomationError::InvalidInput(
+                    "--storage-quota-bytes must be a positive integer".into(),
+                )
+            })?;
+        if quota == 0 {
+            return Err(AutomationError::InvalidInput(
+                "--storage-quota-bytes must be a positive integer".into(),
+            ));
+        }
+        builder =
+            builder.persistent_storage(PersistentStorageOptions::new(path).quota_bytes(quota));
+    } else if option(arguments, "--storage-quota-bytes").is_some() {
+        return Err(AutomationError::InvalidInput(
+            "--storage-quota-bytes requires --storage-path".into(),
+        ));
+    }
+    Ok(builder.build())
 }
 fn navigate(
     page: &web_runtime::AutomationPage,
@@ -235,5 +293,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N]".into()
+    "usage: brimp doctor | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] [PAGE OPTIONS] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]".into()
 }

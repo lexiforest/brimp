@@ -5,7 +5,7 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use web_runtime::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken as CoreCancellationToken,
-    PageOptions,
+    PageOptions, PersistentStorageOptions,
 };
 
 #[cfg(target_os = "macos")]
@@ -59,6 +59,45 @@ impl Default for CancellationToken {
 pub struct Browser {
     inner: Arc<AutomationBrowser>,
 }
+
+#[napi(object)]
+pub struct NativePageOptions {
+    pub enable_worker: Option<bool>,
+    pub enable_streaming_networking: Option<bool>,
+    pub storage_path: Option<String>,
+    pub storage_quota_bytes: Option<f64>,
+}
+
+fn page_options(options: Option<NativePageOptions>) -> Result<PageOptions> {
+    let options = options.unwrap_or(NativePageOptions {
+        enable_worker: None,
+        enable_streaming_networking: None,
+        storage_path: None,
+        storage_quota_bytes: None,
+    });
+    let mut builder = PageOptions::builder()
+        .worker_system(options.enable_worker.unwrap_or(false))
+        .streaming_networking(options.enable_streaming_networking.unwrap_or(false));
+    if options.storage_path.is_none() && options.storage_quota_bytes.is_some() {
+        return Err(error(AutomationError::InvalidInput(
+            "storageQuotaBytes requires storagePath".into(),
+        )));
+    }
+    if let Some(path) = options.storage_path {
+        let quota = options
+            .storage_quota_bytes
+            .unwrap_or(1024.0 * 1024.0 * 1024.0);
+        if !quota.is_finite() || quota <= 0.0 || quota.fract() != 0.0 || quota > u64::MAX as f64 {
+            return Err(error(AutomationError::InvalidInput(
+                "storageQuotaBytes must be a positive integer".into(),
+            )));
+        }
+        builder = builder
+            .persistent_storage(PersistentStorageOptions::new(path).quota_bytes(quota as u64));
+    }
+    Ok(builder.build())
+}
+
 #[napi]
 impl Browser {
     #[napi(factory)]
@@ -79,9 +118,10 @@ impl Browser {
         })
     }
     #[napi]
-    pub async fn new_page(&self) -> Result<NativePage> {
+    pub async fn new_page(&self, options: Option<NativePageOptions>) -> Result<NativePage> {
         let browser = Arc::clone(&self.inner);
-        blocking(move || browser.new_page(PageOptions::default()))
+        let options = page_options(options)?;
+        blocking(move || browser.new_page(options))
             .await
             .map(|inner| NativePage { inner })
     }

@@ -39,6 +39,17 @@ with brimp.Session(persona_json=persona_json) as session:
     print(session.get("https://example.com").status_code)
 ```
 
+Heavy browser subsystems are page-scoped and disabled by default:
+
+```python
+with brimp.Session(
+    enable_worker=True,
+    enable_streaming_networking=True,
+    storage_path="profile/storage",
+) as session:
+    session.get("https://example.com")
+```
+
 See `SUPPORT.md` for the exact tested surface.
 
 ## Binary wheels

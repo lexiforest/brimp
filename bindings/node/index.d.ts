@@ -1,4 +1,10 @@
 export interface LaunchOptions { personaJson?: string }
+export interface PageOptions {
+  enableWorker?: boolean
+  enableStreamingNetworking?: boolean
+  storagePath?: string
+  storageQuotaBytes?: number
+}
 export interface GotoOptions { timeoutMs?: number; signal?: AbortSignal }
 export interface ScreenshotOptions { fullPage?: boolean }
 export declare class BrimpError extends Error {
@@ -13,7 +19,7 @@ export declare class Page {
   close(): Promise<void>
 }
 export declare class Browser {
-  newPage(): Promise<Page>
+  newPage(options?: PageOptions): Promise<Page>
   close(): Promise<void>
 }
 export declare function launch(options?: LaunchOptions): Promise<Browser>
