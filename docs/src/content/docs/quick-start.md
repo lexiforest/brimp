@@ -68,7 +68,7 @@ brimp screenshot https://example.com \
   --full-page
 ```
 
-## Puppeteer over CDP
+## Playwright or Puppeteer over CDP
 
 Start Brimp's loopback CDP server:
 
@@ -76,7 +76,20 @@ Start Brimp's loopback CDP server:
 brimp cdp --bind 127.0.0.1:9222
 ```
 
-Then connect with `puppeteer-core`:
+Connect with `playwright-core`:
+
+```js
+import { chromium } from 'playwright-core'
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+const context = browser.contexts()[0] ?? await browser.newContext()
+const page = await context.newPage()
+await page.goto('https://example.com')
+console.log(await page.evaluate(() => document.title))
+await browser.close()
+```
+
+Or connect with `puppeteer-core`:
 
 ```js
 const puppeteer = require('puppeteer-core')

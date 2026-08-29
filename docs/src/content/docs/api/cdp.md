@@ -16,6 +16,60 @@ brimp cdp --bind 127.0.0.1:9222
 The server prints its browser WebSocket URL after binding. Use the HTTP origin
 with Puppeteer's `browserURL` option or connect directly to the WebSocket URL.
 
+## Connect with Playwright
+
+Install `playwright-core`; Brimp supplies the browser process, so Playwright
+does not need to download Chromium:
+
+```sh
+npm install playwright-core
+```
+
+Start Brimp in one terminal:
+
+```sh
+brimp cdp --bind 127.0.0.1:9222
+```
+
+Then connect through Playwright's public CDP API. The endpoint may be the HTTP
+origin shown below or the `ws://.../devtools/browser/...` URL printed by Brimp.
+
+```js
+import { chromium } from 'playwright-core'
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+
+try {
+  const context = browser.contexts()[0] ?? await browser.newContext()
+  const page = await context.newPage()
+
+  await page.setViewportSize({ width: 1280, height: 720 })
+  await page.goto('https://example.com', { waitUntil: 'load' })
+
+  console.log(await page.evaluate(() => document.title))
+  await page.screenshot({ path: 'example.png' })
+  await page.close()
+} finally {
+  await browser.close()
+}
+```
+
+`connectOverCDP()` is the supported Playwright connection path. Do not call
+`chromium.launch()`: that asks Playwright to start a Chromium executable rather
+than attach to Brimp. Playwright documents CDP attachment as a lower-fidelity
+connection than its native protocol; only the Brimp methods listed below are
+available. See Playwright's official
+[`BrowserType.connectOverCDP()` documentation](https://playwright.dev/docs/api/class-browsertype#browser-type-connect-over-cdp).
+
+## Client support
+
+| Client | Connection API | Status |
+| --- | --- | --- |
+| Playwright | `chromium.connectOverCDP(httpOrWsEndpoint)` | Tested against the repository's locked `playwright-core` workflow. |
+| Puppeteer | `puppeteer.connect({ browserURL })` | Tested against the repository's locked `puppeteer-core` workflow. |
+| Raw CDP | Discovery HTTP plus flattened WebSocket sessions | Tested by the Rust protocol workflow. |
+| Chrome DevTools UI and arbitrary CDP tooling | Varies | Not a compatibility target; unsupported methods fail explicitly. |
+
 ## Supported methods
 
 The following list is exhaustive. An absent method returns CDP error `-32601`.

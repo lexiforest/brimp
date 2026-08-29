@@ -35,10 +35,18 @@ export default defineConfig({
           label: 'API',
           items: [
             { label: 'Overview', slug: 'api' },
+            { label: 'Language bindings', slug: 'api/bindings' },
             { label: 'Python', slug: 'api/python' },
             { label: 'Node.js', slug: 'api/node' },
             { label: 'CLI', slug: 'api/cli' },
             { label: 'CDP', slug: 'api/cdp' },
+          ],
+        },
+        {
+          label: 'Architecture',
+          items: [
+            { label: 'JavaScriptCore integration', slug: 'architecture/javascript-runtime' },
+            { label: 'Subsystem implementation', slug: 'architecture/subsystems' },
           ],
         },
         { label: 'Development', slug: 'development' },

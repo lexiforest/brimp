@@ -31,7 +31,7 @@ The CLI, Python binding, Node binding, and CDP server all delegate to the same
 implementations.
 
 ```text
-CLI          Python          Node          CDP / Puppeteer
+CLI          Python          Node          CDP / Playwright / Puppeteer
  │              │              │                  │
  └──────────────┴──────────────┴──────────────────┘
                          │

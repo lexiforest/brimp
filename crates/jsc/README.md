@@ -27,3 +27,10 @@ cargo run -p jsc --example console
 ```
 
 The JavaScriptCore framework setup is documented in `../jsc-sys/README.md`.
+
+Browser pages layer `web-bindings` and `web-runtime` over this crate. To execute
+source against an installed page rather than a bare JavaScript global object,
+use `web_runtime::Page::eval`; it returns a lifetime-bound `JsValue`, performs a
+microtask checkpoint, and starts Fetch work queued by the script. The full
+ownership and evaluation paths are documented at
+`docs/src/content/docs/architecture/javascript-runtime.md`.

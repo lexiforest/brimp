@@ -11,6 +11,22 @@ security warning before binding.
 
 See `SUPPORT.md` for the exact tested method subset.
 
+Playwright connects through its public CDP attachment API:
+
+```js
+import { chromium } from 'playwright-core'
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+const context = browser.contexts()[0] ?? await browser.newContext()
+const page = await context.newPage()
+await page.goto('https://example.com')
+console.log(await page.evaluate(() => document.title))
+await browser.close()
+```
+
+The complete method matrix and client notes are maintained in the documentation
+site's `api/cdp` page.
+
 Run `./crates/cdp/puppeteer-test.sh` to install the exact locked Puppeteer and
 Playwright versions into a temporary directory and execute both public-API
 workflows.

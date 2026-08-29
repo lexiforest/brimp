@@ -5,6 +5,14 @@ Blitz's DOM implementation and curl-impersonate as the network stack.
 
 Documentation: [docs.brimp.ai](https://docs.brimp.ai)
 
+Key references:
+
+- [CLI commands](https://docs.brimp.ai/api/cli/)
+- [CDP support matrix and Playwright connection](https://docs.brimp.ai/api/cdp/)
+- [Python and Node binding APIs](https://docs.brimp.ai/api/bindings/)
+- [JavaScriptCore integration and direct page evaluation](https://docs.brimp.ai/architecture/javascript-runtime/)
+- [Subsystem implementation](https://docs.brimp.ai/architecture/subsystems/)
+
 If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
 same simple request/response workflow with a JavaScript-rendered HTML result.
 Brimp offers Python and Node.js bindings.
@@ -131,26 +139,26 @@ main().catch(error => {
 
 ### With CDP clients
 
-Start the bounded loopback CDP server and connect with `puppeteer-core`:
+Start the bounded loopback CDP server and connect with `playwright-core`:
 
 ```sh
 brimp cdp --bind 127.0.0.1:9222
 ```
 
 ```js
-const puppeteer = require('puppeteer-core')
+import { chromium } from 'playwright-core'
 
-const browser = await puppeteer.connect({
-  browserURL: 'http://127.0.0.1:9222',
-})
-const [page] = await browser.pages()
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+const context = browser.contexts()[0] ?? await browser.newContext()
+const page = await context.newPage()
 await page.goto('https://example.com')
 console.log(await page.evaluate(() => document.title))
-await browser.disconnect()
+await browser.close()
 ```
 
 Brimp implements the CDP subset needed by this workflow, not the complete
-Chrome DevTools Protocol.
+Chrome DevTools Protocol. Puppeteer is also supported through
+`puppeteer.connect({ browserURL: 'http://127.0.0.1:9222' })`.
 
 ## Building from source
 
@@ -178,7 +186,7 @@ The canonical owner-thread automation API is exposed through:
 
 - the `brimp` CLI for evaluation and screenshots;
 - a synchronous Requests-style Python binding and asynchronous Node binding; and
-- a bounded loopback CDP server for the checked Puppeteer workflow.
+- a bounded loopback CDP server for the checked Playwright and Puppeteer workflows.
 
 All four interfaces delegate navigation, JavaScript, lifecycle, and screenshots
 to `web-runtime`; none contains a second browser implementation.

@@ -14,6 +14,12 @@ Key internal components include:
 - `TimerQueue` and `FetchQueue`, which hand work back to the page owner thread;
 - `BrowsingContext`, which stores URL and cookie state.
 
+The core browser JavaScript is split by API domain under `src/runtime/` and
+concatenated into one dependency-ordered evaluation unit. Optional Canvas,
+WebGL, WebGPU, WebAudio, worker, streaming-networking, and persistent-storage
+scripts are installed independently according to page options. Native dispatch
+is split along the same subsystem boundaries.
+
 This crate is primarily an implementation layer for `web-runtime`. Applications
 should normally construct a `web_runtime::Browser` and interact with a `Page`
 instead of installing bindings directly.

@@ -1,6 +1,6 @@
 ---
 title: CLI and CDP examples
-description: Shell automation and a supported Puppeteer workflow.
+description: Shell automation and supported Playwright and Puppeteer workflows.
 ---
 
 ## Check native dependencies
@@ -84,6 +84,29 @@ console.log(result)
 await fs.writeFile('example.png', png)
 await browser.disconnect()
 ```
+
+## Connect Playwright
+
+Playwright attaches through its public `connectOverCDP()` API:
+
+```js
+import { chromium } from 'playwright-core'
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+
+try {
+  const context = browser.contexts()[0] ?? await browser.newContext()
+  const page = await context.newPage()
+  await page.goto('https://example.com', { waitUntil: 'load' })
+  console.log(await page.evaluate(() => document.title))
+  await page.close()
+} finally {
+  await browser.close()
+}
+```
+
+Use `playwright-core`, not a Playwright browser download: Brimp is the browser
+process being controlled.
 
 Do not expose the server to a network unless you intend to give every reachable
 client control of the browser. Non-loopback binds require
