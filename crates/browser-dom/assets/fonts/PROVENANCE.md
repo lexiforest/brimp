@@ -18,9 +18,10 @@ does not enumerate or load host system fonts.
 ## Noto Color Emoji
 
 - File: `noto-color-emoji.ttf`
+- Format: COLRv1 with TrueType outlines (`Noto-COLRv1.ttf` upstream artifact)
 - Upstream: `googlefonts/noto-emoji`
 - Version: 2.051 (Unicode 17.0)
 - Upstream commit: `8998f5dd683424a73e2314a8c1f1e359c19e8742`
-- Font SHA-256: `72a635cb3d2f3524c51620cdde406b217204e8a6a06c6a096ff8ed4b5fd6e27b`
+- Font SHA-256: `0ae57fe58645638523ba35f388d93739d292539a9acb84df5700c81b1e1a28d2`
 - License: SIL Open Font License 1.1
 - License file: `LICENSE-NOTO-COLOR-EMOJI-OFL-1.1.txt`

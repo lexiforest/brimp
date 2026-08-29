@@ -4,11 +4,26 @@ use blitz_dom::BaseDocument;
 
 use crate::{ScreenshotError, ScreenshotOptions, png::encode_rgba};
 
+pub struct RenderedRgba {
+    pub pixels: Vec<u8>,
+    pub width: u32,
+    pub height: u32,
+}
+
 pub fn render_png(
     document: &mut BaseDocument,
     options: ScreenshotOptions,
     device_pixel_ratio: f64,
 ) -> Result<Vec<u8>, ScreenshotError> {
+    let rendered = render_rgba(document, options, device_pixel_ratio)?;
+    encode_rgba(&rendered.pixels, rendered.width, rendered.height)
+}
+
+pub fn render_rgba(
+    document: &mut BaseDocument,
+    options: ScreenshotOptions,
+    device_pixel_ratio: f64,
+) -> Result<RenderedRgba, ScreenshotError> {
     document.resolve(0.0);
 
     let physical_width = physical_dimension(options.width as f64, device_pixel_ratio)?;
@@ -29,7 +44,7 @@ pub fn render_png(
     };
     let physical_height = physical_dimension(css_height, device_pixel_ratio)?;
 
-    let rgba = render_to_buffer::<VelloCpuImageRenderer, _>(
+    let pixels = render_to_buffer::<VelloCpuImageRenderer, _>(
         |scene| {
             blitz_paint::paint_scene(
                 scene,
@@ -44,7 +59,11 @@ pub fn render_png(
         physical_width,
         physical_height,
     );
-    encode_rgba(&rgba, physical_width, physical_height)
+    Ok(RenderedRgba {
+        pixels,
+        width: physical_width,
+        height: physical_height,
+    })
 }
 
 fn physical_dimension(css: f64, scale: f64) -> Result<u32, ScreenshotError> {

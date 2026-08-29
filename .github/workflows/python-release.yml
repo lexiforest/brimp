@@ -39,8 +39,9 @@ jobs:
 
       - name: Install Linux system dependencies
         run: |
-          dnf install -y fontconfig-devel pkgconf-pkg-config
+          dnf install -y alsa-lib-devel fontconfig-devel pkgconf-pkg-config
           cc --version
+          pkg-config --modversion alsa
           pkg-config --modversion fontconfig
 
       - name: Download pinned native SDKs

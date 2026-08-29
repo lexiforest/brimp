@@ -3,7 +3,8 @@ mod renderer;
 
 use std::{error::Error, fmt, io, path::Path};
 
-pub use renderer::render_png;
+pub use png::encode_rgba;
+pub use renderer::{RenderedRgba, render_png, render_rgba};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ScreenshotOptions {
@@ -25,6 +26,7 @@ impl ScreenshotOptions {
 #[derive(Debug)]
 pub enum ScreenshotError {
     InvalidDimensions,
+    Render(String),
     Encode(::png::EncodingError),
     Io(io::Error),
 }
@@ -34,6 +36,7 @@ impl fmt::Display for ScreenshotError {
         match self {
             Self::InvalidDimensions => formatter
                 .write_str("screenshot dimensions must be between 1 and 65535 physical pixels"),
+            Self::Render(error) => formatter.write_str(error),
             Self::Encode(error) => write!(formatter, "could not encode PNG: {error}"),
             Self::Io(error) => write!(formatter, "could not write screenshot: {error}"),
         }
@@ -46,6 +49,7 @@ impl Error for ScreenshotError {
             Self::Encode(error) => Some(error),
             Self::Io(error) => Some(error),
             Self::InvalidDimensions => None,
+            Self::Render(_) => None,
         }
     }
 }

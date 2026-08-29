@@ -16,22 +16,71 @@ use jsc::{
 };
 use style::dom_apis::{MayUseInvalidation, QueryAll, QuerySelectorAllResult, query_selector};
 
-use crate::{PersistentStorage, WrapperCache};
+use crate::{
+    PersistentStorage, WrapperCache,
+    angle::{AngleStore, UniformValue},
+    audio::AudioStore,
+    canvas::{
+        CanvasColorSpace, CanvasColorType, CanvasDrawEffects, CanvasFilterInput,
+        CanvasFilterOperation, CanvasLightSource, CanvasPaintStyle, CanvasShadowStyle, CanvasStore,
+        CanvasStrokeStyle,
+    },
+    gpu::{
+        GpuBindGroupEntry, GpuBindGroupLayoutEntry, GpuColorAttachment, GpuColorTarget,
+        GpuComputeCommand, GpuDepthStencilAttachment, GpuDepthStencilState, GpuMultisampleState,
+        GpuPrimitiveState, GpuRenderBundleEncoderDescriptor, GpuRenderCommand,
+        GpuSamplerDescriptor, GpuStore, GpuTextureViewDescriptor, GpuTimestampWrites,
+        GpuVertexBufferLayout,
+    },
+};
 
-const CLASS_DEFINITIONS: &str = include_str!("runtime.js");
+mod dispatch_audio;
+mod dispatch_canvas;
+mod dispatch_dom;
+mod dispatch_gpu;
+mod dispatch_platform;
+mod dispatch_webgl;
+
+const CLASS_DEFINITIONS: &str = concat!(
+    include_str!("runtime/bootstrap.js"),
+    include_str!("runtime/events_messaging.js"),
+    include_str!("runtime/dom_core.js"),
+    include_str!("runtime/cssom.js"),
+    include_str!("runtime/document_collections.js"),
+    include_str!("runtime/elements.js"),
+    include_str!("runtime/html_elements.js"),
+    include_str!("runtime/window_location.js"),
+    include_str!("runtime/url_encoding_files.js"),
+    include_str!("runtime/storage_fetch.js"),
+    include_str!("runtime/css_style.js"),
+    include_str!("runtime/observers.js"),
+    include_str!("runtime/install.js"),
+);
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct WebFeatureFlags {
     pub worker_system: bool,
     pub streaming_networking: bool,
     pub persistent_storage: bool,
+    pub canvas: bool,
+    pub webgl: bool,
+    pub webgpu: bool,
+    pub webaudio: bool,
+    pub webaudio_output: bool,
 }
 
 impl WebFeatureFlags {
     pub fn json(self) -> String {
         format!(
-            "{{\"workerSystem\":{},\"streamingNetworking\":{},\"persistentStorage\":{}}}",
-            self.worker_system, self.streaming_networking, self.persistent_storage,
+            "{{\"workerSystem\":{},\"streamingNetworking\":{},\"persistentStorage\":{},\"canvas\":{},\"webgl\":{},\"webgpu\":{},\"webaudio\":{},\"webaudioOutput\":{}}}",
+            self.worker_system,
+            self.streaming_networking,
+            self.persistent_storage,
+            self.canvas,
+            self.webgl,
+            self.webgpu,
+            self.webaudio,
+            self.webaudio_output,
         )
     }
 }
@@ -233,9 +282,81 @@ pub struct BrowsingContext {
     url: Mutex<Option<String>>,
     cookies: Mutex<cookie_store::CookieStore>,
     request_headers: Mutex<Vec<(http::HeaderName, http::HeaderValue)>>,
+    resource_cors: Mutex<HashMap<String, ResourceCorsPolicy>>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct ResourceCorsPolicy {
+    allow_origin: Option<String>,
+    allow_credentials: bool,
+    credentials_sent: bool,
 }
 
 impl BrowsingContext {
+    pub fn store_resource_cors(
+        &self,
+        requested_url: &str,
+        effective_url: &str,
+        headers: &network::HeaderList,
+        credentials_sent: bool,
+    ) {
+        let policy = ResourceCorsPolicy {
+            allow_origin: headers
+                .get(http::header::ACCESS_CONTROL_ALLOW_ORIGIN)
+                .and_then(|value| value.to_str().ok())
+                .map(str::trim)
+                .map(str::to_owned),
+            allow_credentials: headers
+                .get(http::header::ACCESS_CONTROL_ALLOW_CREDENTIALS)
+                .and_then(|value| value.to_str().ok())
+                .is_some_and(|value| value.trim().eq_ignore_ascii_case("true")),
+            credentials_sent,
+        };
+        let mut policies = self
+            .resource_cors
+            .lock()
+            .expect("resource CORS policy lock poisoned");
+        policies.insert(requested_url.to_owned(), policy.clone());
+        policies.insert(effective_url.to_owned(), policy);
+    }
+
+    fn resource_origin_clean(&self, source_url: &str, cors_mode: Option<&str>) -> bool {
+        let Ok(source) = url::Url::parse(source_url) else {
+            return false;
+        };
+        if source.scheme() == "data" {
+            return true;
+        }
+        let document = self
+            .current_url()
+            .and_then(|url| url::Url::parse(&url).ok());
+        if document
+            .as_ref()
+            .is_some_and(|document| document.origin() == source.origin())
+        {
+            return true;
+        }
+        let Some(cors_mode) = cors_mode else {
+            return false;
+        };
+        let Some(document_origin) = document.map(|url| url.origin().ascii_serialization()) else {
+            return false;
+        };
+        let policies = self
+            .resource_cors
+            .lock()
+            .expect("resource CORS policy lock poisoned");
+        let Some(policy) = policies.get(source_url) else {
+            return false;
+        };
+        let exact_origin = policy.allow_origin.as_deref() == Some(document_origin.as_str());
+        match cors_mode {
+            "use-credentials" => exact_origin && policy.allow_credentials,
+            _ if policy.credentials_sent => exact_origin && policy.allow_credentials,
+            _ => exact_origin || policy.allow_origin.as_deref() == Some("*"),
+        }
+    }
+
     pub fn set_request_headers(
         &self,
         headers: impl IntoIterator<Item = (String, String)>,
@@ -357,6 +478,10 @@ struct BindingState {
     streaming: Rc<RefCell<StreamingQueue>>,
     websocket_delivery: RefCell<Option<ProtectedJsObject>>,
     fetch_stream_delivery: RefCell<Option<ProtectedJsObject>>,
+    canvases: RefCell<CanvasStore>,
+    audio: RefCell<AudioStore>,
+    gpu: RefCell<GpuStore>,
+    angles: RefCell<AngleStore>,
 }
 
 struct Prototypes {
@@ -372,6 +497,27 @@ struct Prototypes {
 }
 
 impl BindingRuntime {
+    pub fn canvas_rasters(&self) -> Result<Vec<crate::canvas::CanvasRaster>, String> {
+        let _angle_guard = crate::angle::lock();
+        let webgl = self.state.canvases.borrow().webgl_dimensions();
+        for (id, width, height) in webgl {
+            if width == 0 || height == 0 {
+                continue;
+            }
+            let mut pixels = self
+                .state
+                .angles
+                .borrow()
+                .read_canvas_rgba(id, 0, 0, width, height)?;
+            flip_rows(&mut pixels, width, height);
+            self.state
+                .canvases
+                .borrow_mut()
+                .write_rgba(id, width, height, 0, 0, width, height, &pixels)?;
+        }
+        Ok(self.state.canvases.borrow_mut().rasters())
+    }
+
     pub fn install(
         runtime: &JsRuntime,
         document: Rc<RefCell<BrowserDocument>>,
@@ -397,6 +543,10 @@ impl BindingRuntime {
             streaming: queues.streaming,
             websocket_delivery: RefCell::new(None),
             fetch_stream_delivery: RefCell::new(None),
+            canvases: RefCell::new(CanvasStore::default()),
+            audio: RefCell::new(AudioStore::default()),
+            gpu: RefCell::new(GpuStore::default()),
+            angles: RefCell::new(AngleStore::default()),
         });
         let callback_state = Rc::clone(&state);
         runtime.set_global_function("__brimp", move |call| dispatch(&callback_state, &call))?;
@@ -442,6 +592,37 @@ impl BindingRuntime {
             runtime.eval("delete globalThis.__brimpDeliverWebSocket")?;
             runtime.eval("delete globalThis.__brimpDeliverFetchStream")?;
             runtime.eval("delete globalThis.__brimpStreamingHost")?;
+        }
+        if features.canvas || features.webgl || features.webgpu {
+            let canvas_state = Rc::clone(&state);
+            runtime.set_global_function("__brimpCanvasHost", move |call| {
+                dispatch(&canvas_state, &call)
+            })?;
+            runtime.eval(include_str!("canvas.js"))?;
+            runtime.eval("delete globalThis.__brimpCanvasHost")?;
+        }
+        if features.webaudio {
+            let audio_state = Rc::clone(&state);
+            runtime.set_global_function("__brimpAudioHost", move |call| {
+                dispatch(&audio_state, &call)
+            })?;
+            runtime.eval(include_str!("audio.js"))?;
+            runtime.eval("delete globalThis.__brimpAudioHost")?;
+        }
+        if features.webgpu {
+            let gpu_state = Rc::clone(&state);
+            runtime
+                .set_global_function("__brimpGpuHost", move |call| dispatch(&gpu_state, &call))?;
+            runtime.eval(include_str!("gpu.js"))?;
+            runtime.eval("delete globalThis.__brimpGpuHost")?;
+        }
+        if features.webgl {
+            let webgl_state = Rc::clone(&state);
+            runtime.set_global_function("__brimpWebGlHost", move |call| {
+                dispatch(&webgl_state, &call)
+            })?;
+            runtime.eval(include_str!("webgl.js"))?;
+            runtime.eval("delete globalThis.__brimpWebGlHost")?;
         }
         runtime.eval(if cross_origin_isolated {
             include_str!("cross_origin_isolated.js")
@@ -554,6 +735,9 @@ impl BindingRuntime {
         self.state.wrappers.clear();
         self.state.style_wrappers.clear();
         self.state.computed_style_wrappers.clear();
+        self.state.canvases.borrow_mut().clear();
+        self.state.audio.borrow_mut().clear();
+        *self.state.angles.borrow_mut() = AngleStore::default();
         let document_id = self.state.document.borrow().root().id;
         let prototype = self
             .state
@@ -641,1274 +825,57 @@ impl BindingRuntime {
 
 fn dispatch(state: &BindingState, call: &NativeCall<'_>) -> Result<NativeValue, NativeError> {
     let operation = required_string(call, 0, "operation")?;
+    let _angle_guard = operation_uses_angle(&operation).then(crate::angle::lock);
     match operation.as_str() {
         "runtimeFeatures" => Ok(NativeValue::String(state.features.json())),
-        "workerCreate" => {
-            if !state.features.worker_system {
-                return Err(NativeError::new("worker system is disabled"));
-            }
-            let url = required_string(call, 2, "worker script URL")?;
-            let kind = required_string(call, 3, "worker kind")?;
-            let name = required_string(call, 4, "worker name")?;
-            let scope = required_string(call, 5, "worker scope")?;
-            let mut workers = state.workers.borrow_mut();
-            let id = workers.next_id;
-            workers.next_id = workers.next_id.wrapping_add(1).max(1);
-            workers.pending.push_back(PendingWorkerOperation::Create {
-                id,
-                url,
-                kind,
-                name,
-                scope,
-            });
-            Ok(NativeValue::Number(id as f64))
+        operation if operation == "canvasFeatures" || operation.starts_with("canvas") => {
+            dispatch_canvas::dispatch(state, call, operation)
         }
-        "workerPost" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing worker id"))?
-                .to_number()? as u64;
-            let message_json = required_string(call, 3, "worker message")?;
-            state
-                .workers
-                .borrow_mut()
-                .pending
-                .push_back(PendingWorkerOperation::Post { id, message_json });
-            Ok(NativeValue::Undefined)
+        operation if operation.starts_with("audio") => {
+            dispatch_audio::dispatch(state, call, operation)
         }
-        "workerTerminate" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing worker id"))?
-                .to_number()? as u64;
-            let mut workers = state.workers.borrow_mut();
-            workers
-                .pending
-                .push_back(PendingWorkerOperation::Terminate { id });
-            Ok(NativeValue::Undefined)
+        operation if operation.starts_with("gpu") => dispatch_gpu::dispatch(state, call, operation),
+        operation if operation.starts_with("webgl") => {
+            dispatch_webgl::dispatch(state, call, operation)
         }
-        "workerUnregister" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing worker id"))?
-                .to_number()? as u64;
-            state
-                .workers
-                .borrow_mut()
-                .pending
-                .push_back(PendingWorkerOperation::Unregister { id });
-            Ok(NativeValue::Undefined)
+        operation if is_platform_operation(operation) => {
+            dispatch_platform::dispatch(state, call, operation)
         }
-        "webSocketCreate" => {
-            if !state.features.streaming_networking {
-                return Err(NativeError::new("streaming networking is disabled"));
-            }
-            let url = required_string(call, 2, "WebSocket URL")?;
-            let mut streaming = state.streaming.borrow_mut();
-            let id = streaming.next_id;
-            streaming.next_id = streaming.next_id.wrapping_add(1).max(1);
-            streaming
-                .pending
-                .push_back(PendingWebSocketOperation::Create { id, url });
-            Ok(NativeValue::Number(id as f64))
-        }
-        "webSocketSend" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing WebSocket id"))?
-                .to_number()? as u64;
-            let message = required_string(call, 3, "WebSocket message")?;
-            state
-                .streaming
-                .borrow_mut()
-                .pending
-                .push_back(PendingWebSocketOperation::SendText { id, message });
-            Ok(NativeValue::Undefined)
-        }
-        "webSocketClose" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing WebSocket id"))?
-                .to_number()? as u64;
-            state
-                .streaming
-                .borrow_mut()
-                .pending
-                .push_back(PendingWebSocketOperation::Close { id });
-            Ok(NativeValue::Undefined)
-        }
-        "fetchStreamCancel" => {
-            let id = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing Fetch stream id"))?
-                .to_number()? as u64;
-            state
-                .streaming
-                .borrow_mut()
-                .pending
-                .push_back(PendingWebSocketOperation::CancelFetch { id });
-            Ok(NativeValue::Undefined)
-        }
-        "persistentList" => {
-            let namespace = required_string(call, 2, "storage namespace")?;
-            let storage = persistent_storage(state)?;
-            let origin = storage_origin(state)?;
-            let entries = storage.list(&origin, &namespace).map_err(err)?;
-            Ok(NativeValue::String(
-                serde_json::to_string(&entries).map_err(err)?,
-            ))
-        }
-        "persistentGet" => {
-            let namespace = required_string(call, 2, "storage namespace")?;
-            let key = required_string(call, 3, "storage key")?;
-            let storage = persistent_storage(state)?;
-            let origin = storage_origin(state)?;
-            Ok(match storage.get(&origin, &namespace, &key).map_err(err)? {
-                Some(value) => NativeValue::String(value),
-                None => NativeValue::Null,
-            })
-        }
-        "persistentSet" => {
-            let namespace = required_string(call, 2, "storage namespace")?;
-            let key = required_string(call, 3, "storage key")?;
-            let value = required_string(call, 4, "storage value")?;
-            let storage = persistent_storage(state)?;
-            let origin = storage_origin(state)?;
-            storage
-                .set(&origin, &namespace, &key, &value)
-                .map_err(err)?;
-            Ok(NativeValue::Undefined)
-        }
-        "persistentDelete" => {
-            let namespace = required_string(call, 2, "storage namespace")?;
-            let key = required_string(call, 3, "storage key")?;
-            let storage = persistent_storage(state)?;
-            let origin = storage_origin(state)?;
-            storage.delete(&origin, &namespace, &key).map_err(err)?;
-            Ok(NativeValue::Undefined)
-        }
-        "persistentClear" => {
-            let namespace = required_string(call, 2, "storage namespace")?;
-            let storage = persistent_storage(state)?;
-            let origin = storage_origin(state)?;
-            storage.clear(&origin, &namespace).map_err(err)?;
-            Ok(NativeValue::Undefined)
-        }
-        "persistentEstimate" => {
-            let storage = persistent_storage(state)?;
-            let usage = match storage_origin(state) {
-                Ok(origin) => storage.usage(&origin).map_err(err)?,
-                Err(_) => 0,
-            };
-            Ok(NativeValue::String(format!(
-                "{{\"usage\":{},\"quota\":{}}}",
-                usage,
-                storage.quota()
-            )))
-        }
-        "setTimeout" => {
-            let callback = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing timer callback"))?
-                .to_function()?;
-            let delay = call
-                .argument(3)
-                .map(|value| value.to_number())
-                .transpose()?
-                .unwrap_or(0.0);
-            let id = state.timers.borrow_mut().schedule(delay, callback);
-            Ok(NativeValue::Number(f64::from(id)))
-        }
-        "clearTimeout" => {
-            let id = call
-                .argument(2)
-                .map(|value| value.to_number())
-                .transpose()?
-                .unwrap_or(0.0) as u32;
-            state.timers.borrow_mut().clear(id);
-            Ok(NativeValue::Undefined)
-        }
-        "queueMicrotask" => {
-            let callback = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing microtask callback"))?
-                .to_function()?;
-            state.timers.borrow_mut().queue_microtask(callback);
-            Ok(NativeValue::Undefined)
-        }
-        "location" => {
-            let property = required_string(call, 2, "location property")?;
-            let raw_url = state
-                .browsing_context
-                .url
-                .lock()
-                .expect("browsing URL lock poisoned");
-            let Some(raw_url) = raw_url.as_deref() else {
-                return Ok(NativeValue::String(String::new()));
-            };
-            let url = url::Url::parse(raw_url).map_err(err)?;
-            let value = match property.as_str() {
-                "href" => url.as_str().to_string(),
-                "protocol" => format!("{}:", url.scheme()),
-                "host" => match (url.host_str(), url.port()) {
-                    (Some(host), Some(port)) => format!("{host}:{port}"),
-                    (Some(host), None) => host.to_string(),
-                    (None, _) => String::new(),
-                },
-                "hostname" => url.host_str().unwrap_or_default().to_string(),
-                "port" => url.port().map(|port| port.to_string()).unwrap_or_default(),
-                "pathname" => url.path().to_string(),
-                "search" => url
-                    .query()
-                    .map(|query| format!("?{query}"))
-                    .unwrap_or_default(),
-                "hash" => url
-                    .fragment()
-                    .map(|hash| format!("#{hash}"))
-                    .unwrap_or_default(),
-                "origin" => url.origin().ascii_serialization(),
-                _ => return Err(NativeError::new("unknown Location property")),
-            };
-            Ok(NativeValue::String(value))
-        }
-        "urlParse" => {
-            let input = required_string(call, 2, "URL input")?;
-            let base = required_string(call, 3, "URL base")?;
-            let base = (!base.is_empty())
-                .then(|| url::Url::parse(&base).map_err(err))
-                .transpose()?;
-            let parsed = url::Url::options()
-                .base_url(base.as_ref())
-                .parse(&input)
-                .map_err(err)?;
-            Ok(NativeValue::String(url_record_json(&parsed)?))
-        }
-        "urlSet" => {
-            let href = required_string(call, 2, "URL href")?;
-            let component = required_string(call, 3, "URL component")?;
-            let value = required_string(call, 4, "URL component value")?;
-            Ok(NativeValue::String(set_url_component(
-                &href, &component, &value,
-            )?))
-        }
-        "urlSearchParamsParse" => {
-            let input = required_string(call, 2, "query")?;
-            let pairs = url::form_urlencoded::parse(input.trim_start_matches('?').as_bytes())
-                .into_owned()
-                .collect::<Vec<_>>();
-            Ok(NativeValue::String(
-                serde_json::to_string(&pairs).map_err(err)?,
-            ))
-        }
-        "urlSearchParamsSerialize" => {
-            let input = required_string(call, 2, "query pairs")?;
-            let pairs: Vec<(String, String)> = serde_json::from_str(&input).map_err(err)?;
-            let output = url::form_urlencoded::Serializer::new(String::new())
-                .extend_pairs(pairs)
-                .finish();
-            Ok(NativeValue::String(output))
-        }
-        "encodingCanonical" => {
-            let label = required_string(call, 2, "encoding label")?;
-            match encoding_rs::Encoding::for_label_no_replacement(label.as_bytes()) {
-                Some(encoding) => Ok(NativeValue::String(encoding.name().to_ascii_lowercase())),
-                None => Ok(NativeValue::Null),
-            }
-        }
-        "legacyQueryEncodeBlock" => {
-            let label = required_string(call, 2, "encoding label")?;
-            let block_start = call
-                .argument(3)
-                .ok_or_else(|| NativeError::new("missing code point block"))?
-                .to_number()? as u32;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .ok_or_else(|| NativeError::new("invalid document encoding"))?;
-            let encoded = (block_start..block_start.saturating_add(256))
-                .map(|code_point| {
-                    char::from_u32(code_point)
-                        .map(|character| legacy_query_encode(encoding, &character.to_string()))
-                        .unwrap_or_else(|| "%EF%BF%BD".to_owned())
-                })
-                .collect::<Vec<_>>();
-            Ok(NativeValue::String(
-                serde_json::to_string(&encoded).map_err(err)?,
-            ))
-        }
-        "legacyQueryEncode" => {
-            let label = required_string(call, 2, "encoding label")?;
-            let input = required_string(call, 3, "query input")?;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .ok_or_else(|| NativeError::new("invalid document encoding"))?;
-            Ok(NativeValue::String(legacy_query_encode(encoding, &input)))
-        }
-        "formUrlEncode" => {
-            let label = required_string(call, 2, "form encoding label")?;
-            let input = required_string(call, 3, "form field value")?;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .unwrap_or(encoding_rs::UTF_8);
-            Ok(NativeValue::String(form_url_encode(encoding, &input)))
-        }
-        "decodeBytes" => {
-            let label = required_string(call, 2, "encoding label")?;
-            let bytes_json = required_string(call, 3, "encoded bytes")?;
-            let fatal = call
-                .argument(4)
-                .ok_or_else(|| NativeError::new("missing fatal flag"))?
-                .to_boolean();
-            let ignore_bom = call
-                .argument(5)
-                .ok_or_else(|| NativeError::new("missing ignoreBOM flag"))?
-                .to_boolean();
-            let stream = call
-                .argument(6)
-                .ok_or_else(|| NativeError::new("missing stream flag"))?
-                .to_boolean();
-            let bytes: Vec<u8> = serde_json::from_str(&bytes_json).map_err(err)?;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .ok_or_else(|| NativeError::new("invalid encoding label"))?;
-            match decode_bytes(encoding, &bytes, fatal, ignore_bom, !stream)? {
-                Some(decoded) => Ok(NativeValue::String(decoded)),
-                None => Ok(NativeValue::Null),
-            }
-        }
-        "encodeUtf8" => {
-            let input = required_string(call, 2, "text")?;
-            Ok(NativeValue::String(
-                serde_json::to_string(input.as_bytes()).map_err(err)?,
-            ))
-        }
-        "base64Encode" => {
-            use base64::Engine as _;
-            let bytes_json = required_string(call, 2, "bytes")?;
-            let bytes: Vec<u8> = serde_json::from_str(&bytes_json).map_err(err)?;
-            Ok(NativeValue::String(
-                base64::engine::general_purpose::STANDARD.encode(bytes),
-            ))
-        }
-        "base64Decode" => {
-            use base64::{Engine as _, alphabet, engine};
-            let input = required_string(call, 2, "base64 input")?;
-            let input = input
-                .bytes()
-                .filter(|byte| !matches!(byte, b'\t' | b'\n' | b'\x0C' | b'\r' | b' '))
-                .collect::<Vec<_>>();
-            let config = engine::general_purpose::GeneralPurposeConfig::new()
-                .with_decode_padding_mode(engine::DecodePaddingMode::Indifferent)
-                .with_decode_allow_trailing_bits(true);
-            let decoder = engine::GeneralPurpose::new(&alphabet::STANDARD, config);
-            match decoder.decode(input) {
-                Ok(bytes) => Ok(NativeValue::String(
-                    serde_json::to_string(&bytes).map_err(err)?,
-                )),
-                Err(_) => Ok(NativeValue::Null),
-            }
-        }
-        "fetch" | "fetchStream" => {
-            let url = required_string(call, 2, "fetch URL")?;
-            let method = required_string(call, 3, "fetch method")?;
-            let headers_json = required_string(call, 4, "fetch headers")?;
-            let body = call
-                .argument(5)
-                .filter(|value| !value.is_null_or_undefined())
-                .map(|value| value.to_string())
-                .transpose()?;
-            let (promise, settlement) = call.make_deferred_promise()?.into_parts();
-            let mut fetches = state.fetches.borrow_mut();
-            let id = fetches.next_id();
-            fetches.push(
-                PendingFetch {
-                    id,
-                    url,
-                    method,
-                    headers_json,
-                    body,
-                    streaming: operation == "fetchStream",
-                },
-                settlement,
-            );
-            Ok(NativeValue::ProtectedObject(promise))
-        }
-        "innerWidth" | "innerHeight" | "devicePixelRatio" => {
-            let metrics = state.document.borrow().viewport_metrics();
-            let index = match operation.as_str() {
-                "innerWidth" => 0,
-                "innerHeight" => 1,
-                _ => 2,
-            };
-            Ok(NativeValue::Number(metrics[index]))
-        }
-        "domParserParse" => {
-            let input = required_string(call, 2, "input")?;
-            let content_type = required_string(call, 3, "type")?;
-            let root = state.document.borrow_mut().create_document();
-            if content_type == "text/html" {
-                let mut parser =
-                    HtmlParserSession::new_at_root(Rc::clone(&state.document), &input, root);
-                while !matches!(parser.resume(), ParseProgress::Done) {}
-            } else if parse_xml_at_root(Rc::clone(&state.document), &input, root) {
-                let mut document = state.document.borrow_mut();
-                document
-                    .blitz_mut()
-                    .mutate()
-                    .remove_and_drop_all_children(root);
-                let name = QualName::new(
-                    None,
-                    Namespace::from("http://www.mozilla.org/newlayout/xml/parsererror.xml"),
-                    LocalName::from("parsererror"),
-                );
-                let mut mutator = document.blitz_mut().mutate();
-                let error = mutator.create_element(name, vec![]);
-                let text = mutator.create_text_node("XML parsing error");
-                mutator.append_children(error, &[text]);
-                mutator.append_children(root, &[error]);
-                drop(mutator);
-                document.adopt_subtree(error, root);
-            }
-            node_value(state, call, root)
-        }
-        "documentElement" => {
-            let root = required_document_target(state, call)?;
-            let document = state.document.borrow();
-            let id = document.node(root).and_then(|node| {
-                node.children
-                    .iter()
-                    .copied()
-                    .find(|id| document.node(*id).is_some_and(|node| node.is_element()))
-            });
-            drop(document);
-            optional_node(state, call, id)
-        }
-        "title" => {
-            let root = required_document_target(state, call)?;
-            let document = state.document.borrow();
-            let title = subtree_query_selector_all(&document, root, "title")?
-                .into_iter()
-                .next()
-                .and_then(|id| document.node(id))
-                .map(|node| node.text_content())
-                .unwrap_or_default();
-            Ok(NativeValue::String(title))
-        }
-        "cookie" => {
-            required_document_target(state, call)?;
-            Ok(NativeValue::String(
-                state.browsing_context.document_cookies(),
-            ))
-        }
-        "setCookie" => {
-            required_document_target(state, call)?;
-            let cookie = required_string(call, 2, "cookie")?;
-            state.browsing_context.set_document_cookie(&cookie);
-            Ok(NativeValue::Undefined)
-        }
-        "head" => {
-            let root = required_document_target(state, call)?;
-            let document = state.document.borrow();
-            let id = subtree_query_selector_all(&document, root, "head")?
-                .into_iter()
-                .next();
-            drop(document);
-            optional_node(state, call, id)
-        }
-        "body" => {
-            let root = required_document_target(state, call)?;
-            let document = state.document.borrow();
-            let id = subtree_query_selector_all(&document, root, "body")?
-                .into_iter()
-                .next();
-            drop(document);
-            optional_node(state, call, id)
-        }
-        "createElement" => {
-            let owner = required_document_target(state, call)?;
-            let tag = required_string(call, 2, "tag name")?.to_ascii_lowercase();
-            if tag.is_empty() {
-                return Err(NativeError::new("tag name cannot be empty"));
-            }
-            let name = QualName::new(None, ns!(html), LocalName::from(tag));
-            let id = {
-                let mut document = state.document.borrow_mut();
-                let id = document.blitz_mut().mutate().create_element(name, vec![]);
-                document.set_node_document(id, owner);
-                id
-            };
-            node_value(state, call, id)
-        }
-        "createElementNS" => {
-            let owner = required_document_target(state, call)?;
-            let namespace = call
-                .argument(2)
-                .filter(|value| !value.is_null_or_undefined())
-                .map(|value| value.to_string())
-                .transpose()?
-                .unwrap_or_default();
-            let qualified_name = required_string(call, 3, "qualified name")?;
-            let mut parts = qualified_name.split(':');
-            let first = parts.next().unwrap_or_default();
-            let second = parts.next();
-            if qualified_name.is_empty()
-                || parts.next().is_some()
-                || first.is_empty()
-                || second.is_some_and(str::is_empty)
-            {
-                return Err(NativeError::new("invalid qualified name"));
-            }
-            let (prefix, local_name) = match second {
-                Some(local_name) => (Some(Prefix::from(first)), local_name),
-                None => (None, first),
-            };
-            if prefix.is_some() && namespace.is_empty() {
-                return Err(NativeError::new("a prefixed name requires a namespace"));
-            }
-            let name = QualName::new(
-                prefix,
-                Namespace::from(namespace),
-                LocalName::from(local_name),
-            );
-            let id = {
-                let mut document = state.document.borrow_mut();
-                let id = document.blitz_mut().mutate().create_element(name, vec![]);
-                document.set_node_document(id, owner);
-                id
-            };
-            node_value(state, call, id)
-        }
-        "createTextNode" => {
-            let owner = required_document_target(state, call)?;
-            let text = required_string(call, 2, "text")?;
-            let id = {
-                let mut document = state.document.borrow_mut();
-                let id = document.blitz_mut().mutate().create_text_node(&text);
-                document.set_node_document(id, owner);
-                id
-            };
-            node_value(state, call, id)
-        }
-        "createComment" => {
-            let owner = required_document_target(state, call)?;
-            let data = required_string(call, 2, "comment data")?;
-            let id = {
-                let mut document = state.document.borrow_mut();
-                let id = document.create_comment(&data);
-                document.set_node_document(id, owner);
-                id
-            };
-            node_value(state, call, id)
-        }
-        "createDocumentFragment" => {
-            let owner = required_document_target(state, call)?;
-            let id = {
-                let mut document = state.document.borrow_mut();
-                let id = document.create_document_fragment();
-                document.set_node_document(id, owner);
-                id
-            };
-            node_value(state, call, id)
-        }
-        "getElementById" => {
-            let root = required_document_target(state, call)?;
-            let id = required_string(call, 2, "id")?;
-            let document = state.document.borrow();
-            let node = descendant_ids(&document, root)?
-                .into_iter()
-                .find(|node_id| {
-                    document
-                        .node(*node_id)
-                        .and_then(|node| node.element_data())
-                        .and_then(|element| element.attr(LocalName::from("id")))
-                        == Some(id.as_str())
-                });
-            drop(document);
-            optional_node(state, call, node)
-        }
-        "elementFromPoint" => {
-            required_document_target(state, call)?;
-            let x = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing x coordinate"))?
-                .to_number()?;
-            let y = call
-                .argument(3)
-                .ok_or_else(|| NativeError::new("missing y coordinate"))?
-                .to_number()?;
-            let viewport = state.document.borrow().viewport_metrics();
-            if !x.is_finite()
-                || !y.is_finite()
-                || x < 0.0
-                || y < 0.0
-                || x >= viewport[0]
-                || y >= viewport[1]
-            {
-                return Ok(NativeValue::Null);
-            }
-            resolve_document(state);
-            let node = state.document.borrow().element_at_point(x, y);
-            optional_node(state, call, node)
-        }
-        "getElementsByTagName" => {
-            let root_id = required_parent_node_target(state, call)?;
-            let name = required_string(call, 2, "name")?.to_ascii_lowercase();
-            let document = state.document.borrow();
-            let nodes = descendant_ids(&document, root_id)?
-                .into_iter()
-                .filter(|id| {
-                    document.node(*id).is_some_and(|node| match &node.data {
-                        NodeData::Element(element) => {
-                            name == "*" || element.name.local.as_ref() == name
-                        }
-                        _ => false,
-                    })
-                })
-                .collect::<Vec<_>>();
-            drop(document);
-            node_array(state, call, &nodes)
-        }
-        "getElementsByClassName" => {
-            let root_id = required_parent_node_target(state, call)?;
-            let names = required_string(call, 2, "class names")?
-                .split_ascii_whitespace()
-                .map(str::to_owned)
-                .collect::<Vec<_>>();
-            let document = state.document.borrow();
-            let nodes = if names.is_empty() {
-                Vec::new()
-            } else {
-                descendant_ids(&document, root_id)?
-                    .into_iter()
-                    .filter(|id| {
-                        document
-                            .node(*id)
-                            .and_then(|node| node.element_data())
-                            .and_then(|element| element.attr(LocalName::from("class")))
-                            .is_some_and(|classes| {
-                                let classes =
-                                    classes.split_ascii_whitespace().collect::<HashSet<_>>();
-                                names.iter().all(|name| classes.contains(name.as_str()))
-                            })
-                    })
-                    .collect()
-            };
-            drop(document);
-            node_array(state, call, &nodes)
-        }
-        "getElementsByName" => {
-            let root_id = required_document_target(state, call)?;
-            let name = required_string(call, 2, "name")?;
-            let document = state.document.borrow();
-            let nodes = descendant_ids(&document, root_id)?
-                .into_iter()
-                .filter(|id| {
-                    document
-                        .node(*id)
-                        .and_then(|node| node.element_data())
-                        .is_some_and(|element| {
-                            element.name.ns == ns!(html)
-                                && element.attr(LocalName::from("name")) == Some(name.as_str())
-                        })
-                })
-                .collect::<Vec<_>>();
-            drop(document);
-            node_array(state, call, &nodes)
-        }
-        "querySelector" => {
-            let root_id = required_parent_node_target(state, call)?;
-            let selector = required_string(call, 2, "selector")?;
-            let document = state.document.borrow();
-            let node = subtree_query_selector_all(&document, root_id, &selector)?
-                .into_iter()
-                .next();
-            drop(document);
-            optional_node(state, call, node)
-        }
-        "querySelectorAll" => {
-            let root_id = required_parent_node_target(state, call)?;
-            let selector = required_string(call, 2, "selector")?;
-            let document = state.document.borrow();
-            let nodes = subtree_query_selector_all(&document, root_id, &selector)?;
-            drop(document);
-            node_array(state, call, &nodes)
-        }
-        "matches" => {
-            let id = required_element_target(state, call)?;
-            let selector = required_string(call, 2, "selector")?;
-            Ok(NativeValue::Boolean(
-                state
-                    .document
-                    .borrow()
-                    .query_selector_all(&selector)
-                    .map_err(err)?
-                    .contains(&id),
-            ))
-        }
-        "ownerDocument" => {
-            let id = required_node_target(state, call)?;
-            let document = state.document.borrow();
-            let owner = if document.is_document(id) {
-                None
-            } else {
-                document.node_document(id)
-            };
-            drop(document);
-            optional_node(state, call, owner)
-        }
-        "nodeType" => {
-            let id = required_node_target(state, call)?;
-            let document = state.document.borrow();
-            let node = document.node(id).ok_or_else(stale_wrapper)?;
-            let node_type = if document.is_document_fragment(id) {
-                11.0
-            } else {
-                match node.data {
-                    NodeData::Element(_) | NodeData::AnonymousBlock(_) => 1.0,
-                    NodeData::Text(_) => 3.0,
-                    NodeData::Comment => 8.0,
-                    NodeData::Document => 9.0,
-                }
-            };
-            Ok(NativeValue::Number(node_type))
-        }
-        "nodeName" => {
-            let id = required_node_target(state, call)?;
-            let document = state.document.borrow();
-            let node = document.node(id).ok_or_else(stale_wrapper)?;
-            let name = if document.is_document_fragment(id) {
-                "#document-fragment".to_owned()
-            } else {
-                match &node.data {
-                    NodeData::Element(element) | NodeData::AnonymousBlock(element) => {
-                        element.name.local.to_string().to_ascii_uppercase()
-                    }
-                    NodeData::Text(_) => "#text".to_owned(),
-                    NodeData::Comment => "#comment".to_owned(),
-                    NodeData::Document => "#document".to_owned(),
-                }
-            };
-            Ok(NativeValue::String(name))
-        }
-        "parentNode" => {
-            let id = required_node_target(state, call)?;
-            let parent = state
-                .document
-                .borrow()
-                .node(id)
-                .ok_or_else(stale_wrapper)?
-                .parent;
-            optional_node(state, call, parent)
-        }
-        "firstChild" => {
-            let id = required_node_target(state, call)?;
-            let child = state
-                .document
-                .borrow()
-                .node(id)
-                .ok_or_else(stale_wrapper)?
-                .children
-                .first()
-                .copied();
-            optional_node(state, call, child)
-        }
-        "lastChild" => {
-            let id = required_node_target(state, call)?;
-            let child = state
-                .document
-                .borrow()
-                .node(id)
-                .ok_or_else(stale_wrapper)?
-                .children
-                .last()
-                .copied();
-            optional_node(state, call, child)
-        }
-        "previousSibling" | "nextSibling" => {
-            let id = required_node_target(state, call)?;
-            let document = state.document.borrow();
-            let node = document.node(id).ok_or_else(stale_wrapper)?;
-            let parent = node.parent.and_then(|parent| document.node(parent));
-            let sibling = parent.and_then(|parent| {
-                let index = parent.children.iter().position(|child| *child == id)?;
-                if operation == "previousSibling" {
-                    index.checked_sub(1).map(|index| parent.children[index])
-                } else {
-                    parent.children.get(index + 1).copied()
-                }
-            });
-            drop(document);
-            optional_node(state, call, sibling)
-        }
-        "childNodes" => {
-            let id = required_node_target(state, call)?;
-            let children = state
-                .document
-                .borrow()
-                .node(id)
-                .ok_or_else(stale_wrapper)?
-                .children
-                .clone();
-            node_array(state, call, &children)
-        }
-        "textContent" => {
-            let id = required_node_target(state, call)?;
-            let document = state.document.borrow();
-            let node = document.node(id).ok_or_else(stale_wrapper)?;
-            let text = document
-                .comment_data(id)
-                .map(str::to_owned)
-                .unwrap_or_else(|| node.text_content());
-            Ok(NativeValue::String(text))
-        }
-        "setTextContent" => {
-            let id = required_node_target(state, call)?;
-            let value = required_string(call, 2, "textContent")?;
-            set_text_content(state, id, &value)?;
-            Ok(NativeValue::Undefined)
-        }
-        "appendChild" => mutate_child(state, call, ChildMutation::Append),
-        "removeChild" => mutate_child(state, call, ChildMutation::Remove),
-        "insertBefore" => mutate_child(state, call, ChildMutation::InsertBefore),
-        "cloneNode" => {
-            let id = required_node_target(state, call)?;
-            let deep = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing deep flag"))?
-                .to_boolean();
-            let clone = {
-                let mut document = state.document.borrow_mut();
-                let mut mutator = document.blitz_mut().mutate();
-                let clone = mutator.deep_clone_node(id);
-                if !deep {
-                    mutator.remove_and_drop_all_children(clone);
-                }
-                drop(mutator);
-                document.copy_node_metadata(id, clone, deep);
-                clone
-            };
-            node_value(state, call, clone)
-        }
-        "tagName" => {
-            let id = required_element_target(state, call)?;
-            let document = state.document.borrow();
-            let element = document
-                .node(id)
-                .and_then(|node| node.element_data())
-                .ok_or_else(stale_wrapper)?;
-            let local_name = element.name.local.to_string();
-            let tag_name = if element.name.ns == ns!(html) {
-                local_name.to_ascii_uppercase()
-            } else if let Some(prefix) = &element.name.prefix {
-                format!("{prefix}:{local_name}")
-            } else {
-                local_name
-            };
-            Ok(NativeValue::String(tag_name))
-        }
-        "localName" | "namespaceURI" | "prefix" => {
-            let id = required_element_target(state, call)?;
-            let document = state.document.borrow();
-            let element = document
-                .node(id)
-                .and_then(|node| node.element_data())
-                .ok_or_else(stale_wrapper)?;
-            match operation.as_str() {
-                "localName" => Ok(NativeValue::String(element.name.local.to_string())),
-                "namespaceURI" => {
-                    if element.name.ns.is_empty() {
-                        Ok(NativeValue::Null)
-                    } else {
-                        Ok(NativeValue::String(element.name.ns.to_string()))
-                    }
-                }
-                "prefix" => match &element.name.prefix {
-                    Some(prefix) => Ok(NativeValue::String(prefix.to_string())),
-                    None => Ok(NativeValue::Null),
-                },
-                _ => unreachable!(),
-            }
-        }
-        "getAttribute" | "getAttributeOrEmpty" => {
-            let id = required_element_target(state, call)?;
-            let name = required_string(call, 2, "attribute name")?.to_ascii_lowercase();
-            let document = state.document.borrow();
-            let value = document
-                .node(id)
-                .and_then(|node| node.element_data())
-                .and_then(|element| element.attr(LocalName::from(name)));
-            match (operation.as_str(), value) {
-                ("getAttributeOrEmpty", None) => Ok(NativeValue::String(String::new())),
-                (_, None) => Ok(NativeValue::Null),
-                (_, Some(value)) => Ok(NativeValue::String(value.to_owned())),
-            }
-        }
-        "elementAttributes" => {
-            let id = required_element_target(state, call)?;
-            let document = state.document.borrow();
-            let element = document
-                .node(id)
-                .and_then(|node| node.element_data())
-                .ok_or_else(stale_wrapper)?;
-            let attributes = element
-                .attrs()
-                .iter()
-                .map(|attribute| {
-                    let prefix = attribute.name.prefix.as_ref().map(ToString::to_string);
-                    let local_name = attribute.name.local.to_string();
-                    let name = prefix
-                        .as_ref()
-                        .map(|prefix| format!("{prefix}:{local_name}"))
-                        .unwrap_or_else(|| local_name.clone());
-                    serde_json::json!({
-                        "namespaceURI": if attribute.name.ns.is_empty() {
-                            None
-                        } else {
-                            Some(attribute.name.ns.to_string())
-                        },
-                        "prefix": prefix,
-                        "localName": local_name,
-                        "name": name,
-                        "value": attribute.value,
-                    })
-                })
-                .collect::<Vec<_>>();
-            Ok(NativeValue::String(
-                serde_json::to_string(&attributes).map_err(err)?,
-            ))
-        }
-        "setAttribute" => {
-            let id = required_element_target(state, call)?;
-            let name = required_string(call, 2, "attribute name")?.to_ascii_lowercase();
-            let value = required_string(call, 3, "attribute value")?;
-            let name = QualName::new(None, ns!(), LocalName::from(name));
-            state
-                .document
-                .borrow_mut()
-                .blitz_mut()
-                .mutate()
-                .set_attribute(id, name, &value);
-            Ok(NativeValue::Undefined)
-        }
-        "removeAttribute" => {
-            let id = required_element_target(state, call)?;
-            let name = required_string(call, 2, "attribute name")?.to_ascii_lowercase();
-            let name = QualName::new(None, ns!(), LocalName::from(name));
-            state
-                .document
-                .borrow_mut()
-                .blitz_mut()
-                .mutate()
-                .clear_attribute(id, name);
-            Ok(NativeValue::Undefined)
-        }
-        "elementUrl" => {
-            let id = required_element_target(state, call)?;
-            let property = required_string(call, 2, "URL property")?;
-            let document = state.document.borrow();
-            let element = document
-                .node(id)
-                .and_then(|node| node.element_data())
-                .ok_or_else(stale_wrapper)?;
-            let attribute = if property == "origin" {
-                "href"
-            } else {
-                property.as_str()
-            };
-            let input = element
-                .attr(LocalName::from(attribute))
-                .unwrap_or_default()
-                .to_owned();
-            let document_url = state
-                .browsing_context
-                .current_url()
-                .and_then(|url| url::Url::parse(&url).ok());
-            let base_url = if element.name.local.as_ref() == "base" {
-                document_url.clone()
-            } else {
-                document
-                    .query_selector("base[href]")
-                    .ok()
-                    .flatten()
-                    .and_then(|base_id| {
-                        document
-                            .node(base_id)
-                            .and_then(|node| node.element_data())
-                            .and_then(|base| base.attr(LocalName::from("href")))
-                    })
-                    .and_then(|base| {
-                        url::Url::options()
-                            .base_url(document_url.as_ref())
-                            .parse(base)
-                            .ok()
-                    })
-                    .or(document_url)
-            };
-            let parsed = url::Url::options()
-                .base_url(base_url.as_ref())
-                .parse(&input);
-            let value = match (property.as_str(), parsed) {
-                ("origin", Ok(parsed)) => parsed.origin().ascii_serialization(),
-                (_, Ok(parsed)) => parsed.as_str().to_owned(),
-                (_, Err(_)) => input,
-            };
-            Ok(NativeValue::String(value))
-        }
-        "innerHTML" => {
-            let id = required_element_target(state, call)?;
-            let document = state.document.borrow();
-            let node = document.node(id).ok_or_else(stale_wrapper)?;
-            let mut html = String::new();
-            for child in &node.children {
-                document
-                    .node(*child)
-                    .ok_or_else(stale_wrapper)?
-                    .write_outer_html(&mut html);
-            }
-            Ok(NativeValue::String(html))
-        }
-        "setInnerHTML" => {
-            let id = required_element_target(state, call)?;
-            let html = required_string(call, 2, "innerHTML")?;
-            let removed = descendant_ids(&state.document.borrow(), id)?;
-            state
-                .document
-                .borrow_mut()
-                .blitz_mut()
-                .mutate()
-                .set_inner_html(id, &html);
-            state.wrappers.remove_nodes(&removed);
-            state.style_wrappers.remove_nodes(&removed);
-            Ok(NativeValue::Undefined)
-        }
-        "style" => {
-            let id = required_element_target(state, call)?;
-            let prototype = prototypes(state).css_style.identity();
-            let style = state
-                .style_wrappers
-                .wrap_with_prototype(call, id, prototype);
-            Ok(NativeValue::Object(style))
-        }
-        "getComputedStyle" => {
-            let id = required_element_target(state, call)?;
-            resolve_document(state);
-            let prototype = prototypes(state).css_style.identity();
-            let style = state
-                .computed_style_wrappers
-                .wrap_with_prototype(call, id, prototype);
-            Ok(NativeValue::Object(style))
-        }
-        "styleSheetElements" => {
-            required_document_target(state, call)?;
-            let nodes = state.document.borrow().stylesheet_node_ids();
-            node_array(state, call, &nodes)
-        }
-        "styleSheetRules" => {
-            let id = required_element_target(state, call)?;
-            cssom_json(
-                state
-                    .document
-                    .borrow()
-                    .stylesheet_rule_texts(id)
-                    .ok_or(CssomError::NotAStyleSheet),
-            )
-        }
-        "parseStyleSheetRule" => {
-            let rule = required_string(call, 2, "CSS rule")?;
-            cssom_json(
-                state
-                    .document
-                    .borrow()
-                    .parse_stylesheet_rule(&rule)
-                    .map(|rule| vec![rule]),
-            )
-        }
-        "parseStyleSheetText" => {
-            let css = required_string(call, 2, "stylesheet text")?;
-            cssom_json(Ok(state.document.borrow().parse_stylesheet_text(&css)))
-        }
-        "styleRuleDeclarations" => {
-            let rule = required_string(call, 2, "CSS style rule")?;
-            let declarations = state
-                .document
-                .borrow()
-                .style_rule_declarations(&rule)
-                .unwrap_or_default();
-            Ok(NativeValue::String(
-                serde_json::to_string(&declarations).map_err(err)?,
-            ))
-        }
-        "styleRuleGetProperty" => {
-            let rule = required_string(call, 2, "CSS style rule")?;
-            let name = required_string(call, 3, "CSS property name")?;
-            Ok(NativeValue::String(
-                state
-                    .document
-                    .borrow()
-                    .style_rule_property(&rule, &name)
-                    .unwrap_or_default(),
-            ))
-        }
-        "nestedRuleTexts" => {
-            let rule = required_string(call, 2, "CSS grouping rule")?;
-            cssom_json(
-                state
-                    .document
-                    .borrow()
-                    .nested_rule_texts(&rule)
-                    .ok_or(CssomError::Syntax),
-            )
-        }
-        "styleSheetInsertRule" => {
-            let id = required_element_target(state, call)?;
-            let rule = required_string(call, 2, "CSS rule")?;
-            let index = call
-                .argument(3)
-                .ok_or_else(|| NativeError::new("missing CSS rule index"))?
-                .to_number()? as usize;
-            cssom_json(
-                state
-                    .document
-                    .borrow_mut()
-                    .insert_stylesheet_rule(id, &rule, index),
-            )
-        }
-        "styleSheetDeleteRule" => {
-            let id = required_element_target(state, call)?;
-            let index = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing CSS rule index"))?
-                .to_number()? as usize;
-            cssom_json(
-                state
-                    .document
-                    .borrow_mut()
-                    .delete_stylesheet_rule(id, index),
-            )
-        }
-        "styleSheetReplaceRule" => {
-            let id = required_element_target(state, call)?;
-            let rule = required_string(call, 2, "CSS rule")?;
-            let index = call
-                .argument(3)
-                .ok_or_else(|| NativeError::new("missing CSS rule index"))?
-                .to_number()? as usize;
-            cssom_json(
-                state
-                    .document
-                    .borrow_mut()
-                    .replace_stylesheet_rule(id, &rule, index),
-            )
-        }
-        "styleSheetReplace" => {
-            let id = required_element_target(state, call)?;
-            let css = required_string(call, 2, "stylesheet text")?;
-            cssom_json(state.document.borrow_mut().replace_stylesheet(id, &css))
-        }
-        "styleGetProperty" => {
-            let name = required_string(call, 2, "property name")?;
-            let object = required_object(call, 1, "style receiver")?;
-            if let Some(id) = state.style_wrappers.node_id(object) {
-                Ok(NativeValue::String(inline_style_property(state, id, &name)))
-            } else if let Some(id) = state.computed_style_wrappers.node_id(object) {
-                resolve_document(state);
-                Ok(NativeValue::String(
-                    state
-                        .document
-                        .borrow()
-                        .computed_style_property(id, &name)
-                        .unwrap_or_default(),
-                ))
-            } else {
-                Err(NativeError::new("receiver is not a CSSStyleDeclaration"))
-            }
-        }
-        "styleDeclarations" => {
-            let object = required_object(call, 1, "style receiver")?;
-            let declarations = if let Some(id) = state.style_wrappers.node_id(object) {
-                state
-                    .document
-                    .borrow()
-                    .inline_style_declarations(id)
-                    .unwrap_or_default()
-            } else if let Some(id) = state.computed_style_wrappers.node_id(object) {
-                resolve_document(state);
-                state.document.borrow().computed_style_declarations(id)
-            } else {
-                return Err(NativeError::new("receiver is not a CSSStyleDeclaration"));
-            };
-            Ok(NativeValue::String(
-                serde_json::to_string(&declarations).map_err(err)?,
-            ))
-        }
-        "styleCssText" => {
-            let object = required_object(call, 1, "style receiver")?;
-            if let Some(id) = state.style_wrappers.node_id(object) {
-                Ok(NativeValue::String(
-                    state
-                        .document
-                        .borrow()
-                        .inline_style_css(id)
-                        .unwrap_or_default(),
-                ))
-            } else if state.computed_style_wrappers.node_id(object).is_some() {
-                Ok(NativeValue::String(String::new()))
-            } else {
-                Err(NativeError::new("receiver is not a CSSStyleDeclaration"))
-            }
-        }
-        "styleWritable" => {
-            let object = required_object(call, 1, "style receiver")?;
-            Ok(NativeValue::Boolean(
-                state.style_wrappers.node_id(object).is_some(),
-            ))
-        }
-        "styleSetCssText" => {
-            let id = required_style_target(state, call)?;
-            let css = required_string(call, 2, "declaration text")?;
-            state.document.borrow_mut().set_inline_style_css(id, &css);
-            Ok(NativeValue::Undefined)
-        }
-        "styleSetProperty" => {
-            let id = required_style_target(state, call)?;
-            let name = required_string(call, 2, "property name")?;
-            let value = required_string(call, 3, "property value")?;
-            state
-                .document
-                .borrow_mut()
-                .set_style_property(id, &name, &value);
-            Ok(NativeValue::Undefined)
-        }
-        "styleRemoveProperty" => {
-            let id = required_style_target(state, call)?;
-            let name = required_string(call, 2, "property name")?;
-            let old = inline_style_property(state, id, &name);
-            state.document.borrow_mut().remove_style_property(id, &name);
-            Ok(NativeValue::String(old))
-        }
-        "clientWidth" | "clientHeight" | "offsetWidth" | "offsetHeight" => {
-            let id = required_element_target(state, call)?;
-            resolve_document(state);
-            let document = state.document.borrow();
-            let size = if operation.starts_with("client") {
-                document.client_size(id)
-            } else {
-                document.offset_size(id)
-            }
-            .ok_or_else(stale_wrapper)?;
-            let index = usize::from(operation.ends_with("Height"));
-            Ok(NativeValue::Number(size[index]))
-        }
-        "boundingRect" => {
-            let id = required_element_target(state, call)?;
-            resolve_document(state);
-            let rect = state
-                .document
-                .borrow()
-                .bounding_rect(id)
-                .ok_or_else(stale_wrapper)?;
-            let values = rect.into_iter().map(NativeValue::Number).collect();
-            Ok(NativeValue::ProtectedObject(call.make_value_array(values)?))
-        }
-        _ => Err(NativeError::new(format!(
-            "unknown native DOM operation: {operation}"
-        ))),
+        operation => dispatch_dom::dispatch(state, call, operation),
     }
+}
+
+fn is_platform_operation(operation: &str) -> bool {
+    operation.starts_with("worker")
+        || operation.starts_with("webSocket")
+        || operation.starts_with("persistent")
+        || operation.starts_with("url")
+        || operation.starts_with("encoding")
+        || operation.starts_with("legacyQuery")
+        || operation.starts_with("base64")
+        || operation.starts_with("fetch")
+        || matches!(
+            operation,
+            "setTimeout"
+                | "clearTimeout"
+                | "queueMicrotask"
+                | "location"
+                | "formUrlEncode"
+                | "decodeBytes"
+                | "encodeUtf8"
+        )
+}
+
+fn operation_uses_angle(operation: &str) -> bool {
+    operation.starts_with("webgl")
+        || matches!(
+            operation,
+            "canvasReset"
+                | "canvas2dDrawCanvas"
+                | "canvasCreateImageBitmap"
+                | "canvas2dCreatePattern"
+                | "canvasEncode"
+        )
 }
 
 fn decode_bytes(
@@ -2045,6 +1012,200 @@ fn required_string(
         .to_string()
 }
 
+fn required_numbers<const N: usize>(
+    call: &NativeCall<'_>,
+    start: usize,
+    label: &str,
+) -> Result<[f64; N], NativeError> {
+    let mut values = [0.0; N];
+    for (offset, value) in values.iter_mut().enumerate() {
+        *value = call
+            .argument(start + offset)
+            .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+            .to_number()?;
+    }
+    Ok(values)
+}
+
+fn required_number(call: &NativeCall<'_>, index: usize, label: &str) -> Result<f64, NativeError> {
+    call.argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_number()
+}
+
+fn required_boolean(call: &NativeCall<'_>, index: usize, label: &str) -> Result<bool, NativeError> {
+    Ok(call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_boolean())
+}
+
+fn required_u32(call: &NativeCall<'_>, index: usize, label: &str) -> Result<u32, NativeError> {
+    let value = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_number()?;
+    if !value.is_finite() || value < 0.0 || value > f64::from(u32::MAX) {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(value.trunc() as u32)
+}
+
+fn required_u64(call: &NativeCall<'_>, index: usize, label: &str) -> Result<u64, NativeError> {
+    let value = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_number()?;
+    if !value.is_finite() || value < 0.0 || value > u64::MAX as f64 || value.fract() != 0.0 {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(value as u64)
+}
+
+fn required_i32(call: &NativeCall<'_>, index: usize, label: &str) -> Result<i32, NativeError> {
+    let value = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_number()?;
+    if !value.is_finite() || value < f64::from(i32::MIN) || value > f64::from(i32::MAX) {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(value.trunc() as i32)
+}
+
+fn required_f32_array(
+    call: &NativeCall<'_>,
+    index: usize,
+    label: &str,
+) -> Result<Vec<f32>, NativeError> {
+    let bytes = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_bytes()?;
+    if bytes.len() % std::mem::size_of::<f32>() != 0 {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(bytes
+        .chunks_exact(std::mem::size_of::<f32>())
+        .map(|chunk| f32::from_ne_bytes(chunk.try_into().expect("four-byte f32 chunk")))
+        .collect())
+}
+
+fn required_i32_array(
+    call: &NativeCall<'_>,
+    index: usize,
+    label: &str,
+) -> Result<Vec<i32>, NativeError> {
+    let bytes = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_bytes()?;
+    if bytes.len() % std::mem::size_of::<i32>() != 0 {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(bytes
+        .chunks_exact(std::mem::size_of::<i32>())
+        .map(|chunk| i32::from_ne_bytes(chunk.try_into().expect("four-byte i32 chunk")))
+        .collect())
+}
+
+fn required_u32_array(
+    call: &NativeCall<'_>,
+    index: usize,
+    label: &str,
+) -> Result<Vec<u32>, NativeError> {
+    let bytes = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_bytes()?;
+    if bytes.len() % std::mem::size_of::<u32>() != 0 {
+        return Err(NativeError::new(format!("invalid {label}")));
+    }
+    Ok(bytes
+        .chunks_exact(std::mem::size_of::<u32>())
+        .map(|chunk| u32::from_ne_bytes(chunk.try_into().expect("four-byte u32 chunk")))
+        .collect())
+}
+
+fn canvas_dimensions(call: &NativeCall<'_>) -> Result<(u32, u32), NativeError> {
+    Ok((
+        required_u32(call, 2, "canvas width")?,
+        required_u32(call, 3, "canvas height")?,
+    ))
+}
+
+fn flip_rows(pixels: &mut [u8], width: u32, height: u32) {
+    let row_bytes = width as usize * 4;
+    for top in 0..height as usize / 2 {
+        let bottom = height as usize - top - 1;
+        let (before_bottom, bottom_and_after) = pixels.split_at_mut(bottom * row_bytes);
+        before_bottom[top * row_bytes..(top + 1) * row_bytes]
+            .swap_with_slice(&mut bottom_and_after[..row_bytes]);
+    }
+}
+
+fn crop_rgba(
+    pixels: &[u8],
+    source_width: u32,
+    source_height: u32,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
+) -> Result<Vec<u8>, NativeError> {
+    let end_x = x
+        .checked_add(width)
+        .ok_or_else(|| NativeError::new("external image crop x range overflow"))?;
+    let end_y = y
+        .checked_add(height)
+        .ok_or_else(|| NativeError::new("external image crop y range overflow"))?;
+    if end_x > source_width || end_y > source_height {
+        return Err(NativeError::new(
+            "external image crop exceeds the source dimensions",
+        ));
+    }
+    let source_stride = usize::try_from(source_width)
+        .ok()
+        .and_then(|width| width.checked_mul(4))
+        .ok_or_else(|| NativeError::new("external image row size overflow"))?;
+    let row_bytes = usize::try_from(width)
+        .ok()
+        .and_then(|width| width.checked_mul(4))
+        .ok_or_else(|| NativeError::new("external image crop row size overflow"))?;
+    let output_len = row_bytes
+        .checked_mul(height as usize)
+        .ok_or_else(|| NativeError::new("external image crop size overflow"))?;
+    let x = usize::try_from(x)
+        .ok()
+        .and_then(|x| x.checked_mul(4))
+        .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
+    let mut output = Vec::with_capacity(output_len);
+    for row in y..end_y {
+        let start = (row as usize)
+            .checked_mul(source_stride)
+            .and_then(|start| start.checked_add(x))
+            .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
+        let end = start
+            .checked_add(row_bytes)
+            .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
+        output.extend_from_slice(
+            pixels
+                .get(start..end)
+                .ok_or_else(|| NativeError::new("external image pixels are incomplete"))?,
+        );
+    }
+    Ok(output)
+}
+
+fn premultiply_rgba(pixels: &mut [u8]) {
+    for pixel in pixels.chunks_exact_mut(4) {
+        let alpha = u16::from(pixel[3]);
+        for component in &mut pixel[..3] {
+            *component = ((u16::from(*component) * alpha + 127) / 255) as u8;
+        }
+    }
+}
+
 fn required_object(
     call: &NativeCall<'_>,
     index: usize,
@@ -2113,6 +1274,124 @@ fn required_element_target(
         Err(NativeError::new("receiver is not an Element"))
     }
 }
+
+fn required_canvas_target(
+    state: &BindingState,
+    call: &NativeCall<'_>,
+) -> Result<NodeId, NativeError> {
+    let id = required_element_target(state, call)?;
+    if state.document.borrow().node(id).is_some_and(|node| {
+        matches!(&node.data, NodeData::Element(element) if element.name.local.as_ref() == "canvas")
+    }) {
+        Ok(id)
+    } else {
+        Err(NativeError::new("receiver is not an HTMLCanvasElement"))
+    }
+}
+
+fn required_canvas_argument(
+    state: &BindingState,
+    call: &NativeCall<'_>,
+    index: usize,
+) -> Result<NodeId, NativeError> {
+    let object = required_object(call, index, "canvas argument")?;
+    let id = state
+        .wrappers
+        .node_id(object)
+        .ok_or_else(|| NativeError::new("argument is not a native Node"))?;
+    if state.document.borrow().node(id).is_some_and(|node| {
+        matches!(&node.data, NodeData::Element(element) if element.name.local.as_ref() == "canvas")
+    }) {
+        Ok(id)
+    } else {
+        Err(NativeError::new("argument is not an HTMLCanvasElement"))
+    }
+}
+
+fn resolve_element_attribute_url(
+    document: &BrowserDocument,
+    browsing_context: &BrowsingContext,
+    id: NodeId,
+    attribute: &str,
+) -> Option<String> {
+    let input = document
+        .node(id)?
+        .element_data()?
+        .attr(LocalName::from(attribute))?;
+    let document_url = browsing_context
+        .current_url()
+        .and_then(|url| url::Url::parse(&url).ok());
+    let base_url = document
+        .query_selector("base[href]")
+        .ok()
+        .flatten()
+        .and_then(|base_id| {
+            document
+                .node(base_id)
+                .and_then(|node| node.element_data())
+                .and_then(|base| base.attr(LocalName::from("href")))
+        })
+        .and_then(|base| {
+            url::Url::options()
+                .base_url(document_url.as_ref())
+                .parse(base)
+                .ok()
+        })
+        .or(document_url);
+    url::Url::options()
+        .base_url(base_url.as_ref())
+        .parse(input)
+        .ok()
+        .map(|url| url.to_string())
+}
+
+fn required_image_target(
+    state: &BindingState,
+    call: &NativeCall<'_>,
+) -> Result<NodeId, NativeError> {
+    let id = required_element_target(state, call)?;
+    if state.document.borrow().node(id).is_some_and(|node| {
+        matches!(&node.data, NodeData::Element(element) if element.name.local.as_ref() == "img")
+    }) {
+        Ok(id)
+    } else {
+        Err(NativeError::new("receiver is not an HTMLImageElement"))
+    }
+}
+
+fn required_image_argument(
+    state: &BindingState,
+    call: &NativeCall<'_>,
+    index: usize,
+) -> Result<NodeId, NativeError> {
+    let object = required_object(call, index, "image argument")?;
+    let id = state
+        .wrappers
+        .node_id(object)
+        .ok_or_else(|| NativeError::new("argument is not a native Node"))?;
+    if state.document.borrow().node(id).is_some_and(|node| {
+        matches!(&node.data, NodeData::Element(element) if element.name.local.as_ref() == "img")
+    }) {
+        Ok(id)
+    } else {
+        Err(NativeError::new("argument is not an HTMLImageElement"))
+    }
+}
+
+fn decoded_raster_image(
+    state: &BindingState,
+    image: NodeId,
+) -> Result<(u32, u32, Vec<u8>), NativeError> {
+    let document = state.document.borrow();
+    let image = document
+        .node(image)
+        .and_then(|node| node.element_data())
+        .and_then(|element| element.raster_image_data())
+        .ok_or_else(|| NativeError::new("HTMLImageElement has no decoded raster image"))?;
+    Ok((image.width, image.height, image.data.as_ref().to_vec()))
+}
+
+include!("runtime_graphics.rs");
 
 fn required_style_target(
     state: &BindingState,
@@ -2549,4 +1828,17 @@ fn storage_origin(state: &BindingState) -> Result<String, NativeError> {
         ));
     }
     Ok(origin)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{flip_rows, premultiply_rgba};
+
+    #[test]
+    fn webgl_source_unpack_flips_and_premultiplies_rgba() {
+        let mut pixels = vec![200, 100, 50, 128, 10, 20, 30, 255];
+        flip_rows(&mut pixels, 1, 2);
+        premultiply_rgba(&mut pixels);
+        assert_eq!(pixels, [10, 20, 30, 255, 100, 50, 25, 128]);
+    }
 }

@@ -26,14 +26,22 @@ Brimp's versioned persona schema.
 newPage(options?: {
   enableWorker?: boolean
   enableStreamingNetworking?: boolean
+  enableCanvas?: boolean
+  enableWebGL?: boolean
+  enableWebGPU?: boolean
+  enableWebAudio?: boolean
+  enableWebAudioOutput?: boolean
   storagePath?: string
   storageQuotaBytes?: number
 }): Promise<Page>
 ```
 
 Creates an `about:blank` page with its own owner thread. Worker, streaming
-networking, and persistent-storage APIs are absent unless their page options
-enable them. `storagePath` enables persistence with a 1 GiB default quota.
+networking, Canvas 2D, WebGL, WebGPU, WebAudio, and persistent-storage APIs are
+all absent unless their independent page options enable them. `storagePath`
+enables persistence with a 1 GiB default quota.
+`enableWebAudio` uses a device-free sink. `enableWebAudioOutput` also enables
+WebAudio and authorizes the system output device.
 
 ### `browser.close()`
 

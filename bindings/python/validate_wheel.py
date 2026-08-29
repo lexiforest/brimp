@@ -24,6 +24,7 @@ REQUIRED_LIBRARIES = {
         "libicudata",
         "libicui18n",
         "libicuuc",
+        "libasound",
         "libfontconfig",
     ),
     "aarch64-unknown-linux-gnu": (
@@ -32,6 +33,7 @@ REQUIRED_LIBRARIES = {
         "libicudata",
         "libicui18n",
         "libicuuc",
+        "libasound",
         "libfontconfig",
     ),
     "aarch64-apple-darwin": (

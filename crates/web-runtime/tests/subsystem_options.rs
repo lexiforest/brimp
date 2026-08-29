@@ -11,14 +11,24 @@ use network::{
 };
 use web_runtime::{Browser, PageOptions, PersistentStorageOptions};
 
-struct UnusedLoader;
+#[path = "subsystem_options/audio.rs"]
+mod audio;
+#[path = "subsystem_options/canvas.rs"]
+mod canvas;
+#[path = "subsystem_options/gpu.rs"]
+mod gpu;
+#[path = "subsystem_options/support.rs"]
+mod support;
+#[path = "subsystem_options/webgl_context_extensions.rs"]
+mod webgl_context_extensions;
+#[path = "subsystem_options/webgl_drawing_queries.rs"]
+mod webgl_drawing_queries;
+#[path = "subsystem_options/webgl_shaders_buffers.rs"]
+mod webgl_shaders_buffers;
+#[path = "subsystem_options/webgl_textures_framebuffers.rs"]
+mod webgl_textures_framebuffers;
 
-#[async_trait::async_trait]
-impl ResourceLoader for UnusedLoader {
-    async fn fetch(&self, _: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
-        panic!("subsystem option tests do not navigate")
-    }
-}
+use support::UnusedLoader;
 
 struct HtmlLoader;
 
@@ -197,6 +207,11 @@ fn browser_subsystems_are_absent_by_default() {
     assert!(!options.subsystems().worker_system());
     assert!(!options.subsystems().streaming_networking());
     assert!(options.subsystems().persistent_storage().is_none());
+    assert!(!options.subsystems().canvas());
+    assert!(!options.subsystems().webgl());
+    assert!(!options.subsystems().webgpu());
+    assert!(!options.subsystems().webaudio());
+    assert!(!options.subsystems().webaudio_output());
 
     let browser = Browser::with_resource_loader(Arc::new(UnusedLoader));
     let page = browser.new_page(options).unwrap();
@@ -212,6 +227,12 @@ fn browser_subsystems_are_absent_by_default() {
                 indexedDB: typeof indexedDB,
                 caches: typeof caches,
                 storage: "storage" in navigator,
+                canvas2d: typeof HTMLCanvasElement.prototype.getContext,
+                imageBitmap: typeof createImageBitmap,
+                path2d: typeof Path2D,
+                webgpu: "gpu" in navigator,
+                audioContext: typeof AudioContext,
+                mediaStream: typeof MediaStream,
             })"#,
         )
         .unwrap()
@@ -219,7 +240,7 @@ fn browser_subsystems_are_absent_by_default() {
         .unwrap();
     assert_eq!(
         observed,
-        r#"{"worker":"undefined","sharedWorker":"undefined","serviceWorker":false,"webSocket":"undefined","eventSource":"undefined","webTransport":"undefined","indexedDB":"undefined","caches":"undefined","storage":false}"#,
+        r#"{"worker":"undefined","sharedWorker":"undefined","serviceWorker":false,"webSocket":"undefined","eventSource":"undefined","webTransport":"undefined","indexedDB":"undefined","caches":"undefined","storage":false,"canvas2d":"undefined","imageBitmap":"undefined","path2d":"undefined","webgpu":false,"audioContext":"undefined","mediaStream":"undefined"}"#,
     );
 }
 
@@ -230,13 +251,56 @@ fn browser_subsystems_require_explicit_options() {
         .worker_system(true)
         .streaming_networking(true)
         .persistent_storage(storage.clone())
+        .canvas(true)
+        .webgl(true)
+        .webgpu(true)
+        .webaudio(true)
         .build();
 
     assert!(options.subsystems().worker_system());
     assert!(options.subsystems().streaming_networking());
     assert_eq!(options.subsystems().persistent_storage(), Some(&storage));
+    assert!(options.subsystems().canvas());
+    assert!(options.subsystems().webgl());
+    assert!(options.subsystems().webgpu());
+    assert!(options.subsystems().webaudio());
     assert_eq!(storage.root().to_string_lossy(), "profile/storage");
     assert_eq!(storage.quota(), 4096);
+}
+
+#[test]
+fn graphics_and_audio_options_are_independent() {
+    let observed = |options: PageOptions| {
+        let features = options.subsystems();
+        (
+            features.canvas(),
+            features.webgl(),
+            features.webgpu(),
+            features.webaudio(),
+            features.webaudio_output(),
+        )
+    };
+
+    assert_eq!(
+        observed(PageOptions::builder().canvas(true).build()),
+        (true, false, false, false, false)
+    );
+    assert_eq!(
+        observed(PageOptions::builder().webgl(true).build()),
+        (false, true, false, false, false)
+    );
+    assert_eq!(
+        observed(PageOptions::builder().webgpu(true).build()),
+        (false, false, true, false, false)
+    );
+    assert_eq!(
+        observed(PageOptions::builder().webaudio(true).build()),
+        (false, false, false, true, false)
+    );
+    assert_eq!(
+        observed(PageOptions::builder().webaudio_output(true).build()),
+        (false, false, false, true, true)
+    );
 }
 
 #[test]

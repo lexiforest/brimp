@@ -45,10 +45,19 @@ Heavy browser subsystems are page-scoped and disabled by default:
 with brimp.Session(
     enable_worker=True,
     enable_streaming_networking=True,
+    enable_canvas=True,
+    enable_webgl=True,
+    enable_webgpu=True,
+    enable_webaudio=True,
+    enable_webaudio_output=True,
     storage_path="profile/storage",
 ) as session:
     session.get("https://example.com")
 ```
+
+`enable_webaudio=True` keeps real-time graphs device-free.
+`enable_webaudio_output=True` also enables WebAudio and authorizes the system
+audio output device.
 
 See `SUPPORT.md` for the exact tested surface.
 

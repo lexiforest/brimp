@@ -12,8 +12,27 @@ cookie_store = "0.22.1"
 encoding_rs = "0.8.35"
 http = "1"
 jsc = { path = "../jsc" }
+khronos-egl = { version = "=6.0.0", default-features = false, features = ["1_5"] }
+libloading = "=0.8.9"
 network = { path = "../network" }
+pollster = "=1.0.1"
+rustybuzz = "=0.20.1"
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 selectors = "0.39.0"
+skia-safe = { version = "=0.99.0", default-features = false, features = ["binary-cache", "jpeg", "webp-encode"] }
 style = { package = "stylo", version = "0.19.0" }
 url = "2"
+unicode-bidi = "=0.3.18"
+unicode-segmentation = "=1.13.3"
+web-audio-api = { version = "=1.7.0", default-features = false, features = ["aac", "alac", "cpal", "flac", "m4a", "mp3", "ogg", "wav"] }
+glow = "=0.17.0"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+wgpu = { version = "=30.0.1", default-features = false, features = ["metal", "std", "wgpu-core", "wgsl"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+wgpu = { version = "=30.0.1", default-features = false, features = ["gles", "std", "vulkan", "wgpu-core", "wgsl"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+wgpu = { version = "=30.0.1", default-features = false, features = ["dx12", "std", "wgpu-core", "wgsl"] }

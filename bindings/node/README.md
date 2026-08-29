@@ -12,6 +12,10 @@ the exhaustive tested API and error-code surface.
 `launch({ personaJson })` accepts JSON text using the versioned schema and
 runtime-support matrix in [`../../persona/`](../../persona/README.md).
 
-Worker, streaming-networking, and persistent-storage APIs are page-scoped and
-disabled by default. Enable them through `browser.newPage({ enableWorker,
-enableStreamingNetworking, storagePath, storageQuotaBytes })`.
+Worker, streaming-networking, persistent-storage, Canvas 2D, WebGL, WebGPU, and
+WebAudio APIs are page-scoped and disabled by default. Enable only the required
+ones through `browser.newPage({ enableWorker, enableStreamingNetworking,
+enableCanvas, enableWebGL, enableWebGPU, enableWebAudio, enableWebAudioOutput, storagePath,
+storageQuotaBytes })`.
+`enableWebAudio` keeps real-time graphs device-free; `enableWebAudioOutput`
+also enables WebAudio and authorizes the system audio output device.

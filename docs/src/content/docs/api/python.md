@@ -29,6 +29,11 @@ brimp.Session(
     ca_bundle=None,
     enable_worker: bool = False,
     enable_streaming_networking: bool = False,
+    enable_canvas: bool = False,
+    enable_webgl: bool = False,
+    enable_webgpu: bool = False,
+    enable_webaudio: bool = False,
+    enable_webaudio_output: bool = False,
     storage_path=None,
     storage_quota_bytes: int | None = None,
 )
@@ -39,11 +44,16 @@ Brimp's versioned persona schema. `ca_bundle` is a PEM file used to trust
 private or enterprise certificate authorities without disabling certificate or
 hostname verification.
 
-The three browser subsystems are disabled by default. `enable_worker` enables
-the worker-family APIs. `enable_streaming_networking` enables WebSocket,
-EventSource, streaming Fetch, and the stream classes. Supplying `storage_path`
-enables origin-partitioned persistent storage at that directory; its default
-quota is 1 GiB and `storage_quota_bytes` overrides it.
+Every browser subsystem is disabled by default. `enable_worker` enables the
+worker-family APIs. `enable_streaming_networking` enables WebSocket, EventSource,
+streaming Fetch, and the stream classes. Canvas 2D, WebGL, WebGPU, and WebAudio
+are enabled independently by `enable_canvas`, `enable_webgl`, `enable_webgpu`,
+and `enable_webaudio`. Supplying `storage_path` enables origin-partitioned
+persistent storage at that directory; its default quota is 1 GiB and
+`storage_quota_bytes` overrides it.
+`enable_webaudio` retains the device-free sink. Setting
+`enable_webaudio_output=True` also enables WebAudio and authorizes playback
+through the system output device.
 
 Sessions expose mutable `headers` and `cookies` dictionaries and support the
 context-manager protocol.

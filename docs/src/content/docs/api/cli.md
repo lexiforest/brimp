@@ -47,10 +47,18 @@ All page-creating commands accept these opt-in page options:
 --enable-worker
 --enable-streaming-networking
 --storage-path PATH [--storage-quota-bytes N]
+--enable-canvas
+--enable-webgl
+--enable-webgpu
+--enable-webaudio
+--enable-webaudio-output
 ```
 
-They are disabled when omitted. For `brimp cdp`, they become the defaults for
-every target created by that server process.
+Every subsystem is disabled when its option is omitted. For `brimp cdp`, these
+options become the page options for every target created by that server process.
+`--enable-webaudio` uses a device-free real-time sink;
+`--enable-webaudio-output` also enables WebAudio and authorizes the system audio
+output device.
 
 ## Exit codes
 

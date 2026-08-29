@@ -64,6 +64,11 @@ pub struct Browser {
 pub struct NativePageOptions {
     pub enable_worker: Option<bool>,
     pub enable_streaming_networking: Option<bool>,
+    pub enable_canvas: Option<bool>,
+    pub enable_webgl: Option<bool>,
+    pub enable_webgpu: Option<bool>,
+    pub enable_webaudio: Option<bool>,
+    pub enable_webaudio_output: Option<bool>,
     pub storage_path: Option<String>,
     pub storage_quota_bytes: Option<f64>,
 }
@@ -72,12 +77,22 @@ fn page_options(options: Option<NativePageOptions>) -> Result<PageOptions> {
     let options = options.unwrap_or(NativePageOptions {
         enable_worker: None,
         enable_streaming_networking: None,
+        enable_canvas: None,
+        enable_webgl: None,
+        enable_webgpu: None,
+        enable_webaudio: None,
+        enable_webaudio_output: None,
         storage_path: None,
         storage_quota_bytes: None,
     });
     let mut builder = PageOptions::builder()
         .worker_system(options.enable_worker.unwrap_or(false))
-        .streaming_networking(options.enable_streaming_networking.unwrap_or(false));
+        .streaming_networking(options.enable_streaming_networking.unwrap_or(false))
+        .canvas(options.enable_canvas.unwrap_or(false))
+        .webgl(options.enable_webgl.unwrap_or(false))
+        .webgpu(options.enable_webgpu.unwrap_or(false))
+        .webaudio(options.enable_webaudio.unwrap_or(false))
+        .webaudio_output(options.enable_webaudio_output.unwrap_or(false));
     if options.storage_path.is_none() && options.storage_quota_bytes.is_some() {
         return Err(error(AutomationError::InvalidInput(
             "storageQuotaBytes requires storagePath".into(),

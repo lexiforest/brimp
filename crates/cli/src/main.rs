@@ -68,7 +68,13 @@ fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
                 })?;
             }
             "--allow-non-loopback" => allow_non_loopback = true,
-            "--enable-worker" | "--enable-streaming-networking" => {}
+            "--enable-worker"
+            | "--enable-streaming-networking"
+            | "--enable-canvas"
+            | "--enable-webgl"
+            | "--enable-webgpu"
+            | "--enable-webaudio"
+            | "--enable-webaudio-output" => {}
             "--storage-path" | "--storage-quota-bytes" => {
                 arguments.next().ok_or_else(|| {
                     AutomationError::InvalidInput(format!("{argument} requires a value"))
@@ -76,7 +82,7 @@ fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
             }
             "--help" | "-h" => {
                 println!(
-                    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]"
+                    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas\n  --enable-webgl\n  --enable-webgpu\n  --enable-webaudio\n  --enable-webaudio-output"
                 );
                 return Ok(());
             }
@@ -184,7 +190,12 @@ fn launch(
 fn page_options(arguments: &[String]) -> Result<PageOptions, AutomationError> {
     let mut builder = PageOptions::builder()
         .worker_system(flag(arguments, "--enable-worker"))
-        .streaming_networking(flag(arguments, "--enable-streaming-networking"));
+        .streaming_networking(flag(arguments, "--enable-streaming-networking"))
+        .canvas(flag(arguments, "--enable-canvas"))
+        .webgl(flag(arguments, "--enable-webgl"))
+        .webgpu(flag(arguments, "--enable-webgpu"))
+        .webaudio(flag(arguments, "--enable-webaudio"))
+        .webaudio_output(flag(arguments, "--enable-webaudio-output"));
     let storage_path = option(arguments, "--storage-path");
     if flag(arguments, "--storage-path") && storage_path.is_none() {
         return Err(AutomationError::InvalidInput(
@@ -293,5 +304,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] [PAGE OPTIONS] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]".into()
+    "usage: brimp doctor | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp eval URL --js EXPRESSION [--persona PATH] [--timeout-ms N] [PAGE OPTIONS] | brimp screenshot URL --output PATH [--persona PATH] [--full-page] [--overwrite] [--timeout-ms N] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas\n  --enable-webgl\n  --enable-webgpu\n  --enable-webaudio\n  --enable-webaudio-output".into()
 }

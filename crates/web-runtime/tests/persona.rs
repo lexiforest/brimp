@@ -532,6 +532,104 @@ fn structured_browser_apis_return_configured_persona_values() {
 }
 
 #[test]
+fn graphics_backends_report_configured_persona_identity_without_exceeding_native_limits() {
+    let loader = Arc::new(IdentityLoader::default());
+    let persona = persona::PersonaConfig::from_json(
+        r#"{
+            "schema_version": 1,
+            "graphics": {
+                "webgl_vendor": "Persona Unmasked Vendor",
+                "webgl_renderer": "Persona Unmasked Renderer",
+                "webgl_masked_vendor": "Persona Masked Vendor",
+                "webgl_masked_renderer": "Persona Masked Renderer",
+                "webgpu_adapter_vendor": "persona-webgpu-vendor",
+                "webgpu_adapter_architecture": "persona-architecture",
+                "webgpu_adapter_device": "persona-device",
+                "webgpu_adapter_description": "Persona WebGPU Adapter",
+                "webgpu_max_bind_groups_plus_vertex_buffers": 20
+            }
+        }"#,
+    )
+    .unwrap();
+    let browser = AutomationBrowser::with_persona_and_resource_loader(persona, loader).unwrap();
+    let page = browser
+        .new_page(
+            PageOptions::builder()
+                .canvas(true)
+                .webgl(true)
+                .webgpu(true)
+                .build(),
+        )
+        .unwrap();
+
+    page.evaluate(
+        r#"(() => {
+            const canvas = document.createElement("canvas");
+            const gl = canvas.getContext("webgl");
+            let webgl = null;
+            if (gl) {
+                const extension = gl.getExtension("WEBGL_debug_renderer_info");
+                webgl = [
+                    gl.getParameter(gl.VENDOR),
+                    gl.getParameter(gl.RENDERER),
+                    gl.getParameter(extension.UNMASKED_VENDOR_WEBGL),
+                    gl.getParameter(extension.UNMASKED_RENDERER_WEBGL),
+                ];
+            }
+            globalThis.graphicsPersonaResult = { webgl, webgpu: "pending" };
+            navigator.gpu.requestAdapter().then(adapter => {
+                if (!adapter) {
+                    graphicsPersonaResult.webgpu = "no-adapter";
+                    return;
+                }
+                graphicsPersonaResult.webgpu = {
+                    info: { ...adapter.info },
+                    limit: adapter.limits.maxBindGroupsPlusVertexBuffers,
+                    hiddenDriverFields: !("backend" in adapter.info) && !("deviceType" in adapter.info),
+                };
+            });
+            return true;
+        })()"#,
+    )
+    .unwrap();
+
+    let mut observed = page.evaluate("graphicsPersonaResult").unwrap();
+    for _ in 0..100 {
+        if observed["webgpu"] != "pending" {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(10));
+        observed = page.evaluate("graphicsPersonaResult").unwrap();
+    }
+    if !observed["webgl"].is_null() {
+        assert_eq!(
+            observed["webgl"],
+            serde_json::json!([
+                "Persona Masked Vendor",
+                "Persona Masked Renderer",
+                "Persona Unmasked Vendor",
+                "Persona Unmasked Renderer",
+            ])
+        );
+    }
+    if observed["webgpu"] != "no-adapter" {
+        assert_ne!(observed["webgpu"], "pending");
+        assert_eq!(
+            observed["webgpu"]["info"],
+            serde_json::json!({
+                "vendor": "persona-webgpu-vendor",
+                "architecture": "persona-architecture",
+                "device": "persona-device",
+                "description": "Persona WebGPU Adapter",
+            })
+        );
+        assert_eq!(observed["webgpu"]["hiddenDriverFields"], true);
+        let limit = observed["webgpu"]["limit"].as_u64().unwrap();
+        assert!(limit > 0 && limit <= 20);
+    }
+}
+
+#[test]
 fn feature_gates_hide_emulated_apis() {
     let loader = Arc::new(IdentityLoader::default());
     let persona = persona::PersonaConfig::from_json(

@@ -76,6 +76,8 @@ impl NetProvider for BlitzResourceProvider {
             Body::Form(form) => serde_json::to_vec(&form).ok(),
             Body::Empty => None,
         };
+        let credentials_sent = resource_request.headers.contains_key(http::header::COOKIE)
+            || self.shared.browsing_context.cookie_header(&url).is_some();
         self.shared.outstanding.fetch_add(1, Ordering::AcqRel);
         let provider = self.clone();
         let completion_provider = provider.clone();
@@ -84,6 +86,22 @@ impl NetProvider for BlitzResourceProvider {
             Arc::clone(&provider.shared.browsing_context),
             resource_request,
             Box::new(move |response| {
+                if let Ok(response) = &response {
+                    let effective_url = if response.effective_url.is_empty() {
+                        url.as_str()
+                    } else {
+                        response.effective_url.as_str()
+                    };
+                    completion_provider
+                        .shared
+                        .browsing_context
+                        .store_resource_cors(
+                            &url,
+                            effective_url,
+                            &response.headers,
+                            credentials_sent,
+                        );
+                }
                 match response.ok() {
                     Some(response) => {
                         let effective_url = if response.effective_url.is_empty() {

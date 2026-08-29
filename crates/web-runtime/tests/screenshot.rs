@@ -35,6 +35,29 @@ fn cpu_screenshot_reflects_post_javascript_style() {
 }
 
 #[test]
+fn canvas_raster_is_composited_into_document_screenshot() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser
+        .new_page(PageOptions::builder().viewport(16, 16).canvas(true).build())
+        .unwrap();
+    page.set_content(
+        "<style>html,body{margin:0;background:white}canvas{display:block;width:8px;height:8px}</style><canvas width='2' height='2'></canvas>",
+    )
+    .unwrap();
+    page.eval(
+        "const context = document.querySelector('canvas').getContext('2d'); context.fillStyle = 'rgba(255,0,0,.5)'; context.fillRect(0,0,2,2)",
+    )
+    .unwrap();
+
+    let bytes = page.screenshot_png(ScreenshotOptions::new(16, 16)).unwrap();
+    let (info, rgba) = decode(&bytes);
+    let inside = (4 * info.width as usize + 4) * 4;
+    let outside = (12 * info.width as usize + 12) * 4;
+    assert_eq!(&rgba[inside..inside + 4], &[255, 127, 127, 255]);
+    assert_eq!(&rgba[outside..outside + 4], &[255, 255, 255, 255]);
+}
+
+#[test]
 fn full_page_screenshot_extends_beyond_the_viewport() {
     let browser = Browser::new().unwrap();
     let mut page = browser

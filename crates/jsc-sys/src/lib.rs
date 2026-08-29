@@ -14,8 +14,12 @@ pub type JSObjectRef = *mut OpaqueJSValue;
 pub type JSStringRef = *mut OpaqueJSString;
 pub type JSClassRef = *mut OpaqueJSClass;
 pub type JSPropertyAttributes = c_uint;
+pub type JSTypedArrayType = c_uint;
 
 pub const K_JS_PROPERTY_ATTRIBUTE_NONE: JSPropertyAttributes = 0;
+pub const K_JS_TYPED_ARRAY_TYPE_INT32_ARRAY: JSTypedArrayType = 2;
+pub const K_JS_TYPED_ARRAY_TYPE_UINT8_CLAMPED_ARRAY: JSTypedArrayType = 4;
+pub const K_JS_TYPED_ARRAY_TYPE_FLOAT32_ARRAY: JSTypedArrayType = 7;
 
 /// Configures JavaScriptCore's Darwin exception-handler policy before initialization.
 ///
@@ -117,6 +121,27 @@ unsafe extern "C" {
         arguments: *const JSValueRef,
         exception: *mut JSValueRef,
     ) -> JSObjectRef;
+    pub fn JSObjectMakeTypedArray(
+        ctx: JSContextRef,
+        array_type: JSTypedArrayType,
+        length: usize,
+        exception: *mut JSValueRef,
+    ) -> JSObjectRef;
+    pub fn JSObjectGetTypedArrayBytesPtr(
+        ctx: JSContextRef,
+        object: JSObjectRef,
+        exception: *mut JSValueRef,
+    ) -> *mut c_void;
+    pub fn JSObjectGetTypedArrayByteLength(
+        ctx: JSContextRef,
+        object: JSObjectRef,
+        exception: *mut JSValueRef,
+    ) -> usize;
+    pub fn JSObjectGetTypedArrayByteOffset(
+        ctx: JSContextRef,
+        object: JSObjectRef,
+        exception: *mut JSValueRef,
+    ) -> usize;
     pub fn JSObjectMakeDeferredPromise(
         ctx: JSContextRef,
         resolve: *mut JSObjectRef,

@@ -1,10 +1,12 @@
 use std::{error::Error, fmt, marker::PhantomData, ptr, slice};
 
 use jsc_sys::{
-    JSContextRef, JSObjectIsFunction, JSObjectMakeArray, JSObjectRef, JSValueIsNull,
-    JSValueIsObject, JSValueIsUndefined, JSValueMakeBoolean, JSValueMakeNull, JSValueMakeNumber,
-    JSValueMakeString, JSValueMakeUndefined, JSValueRef, JSValueToBoolean, JSValueToNumber,
-    JSValueToObject,
+    JSContextRef, JSObjectGetTypedArrayByteLength, JSObjectGetTypedArrayByteOffset,
+    JSObjectGetTypedArrayBytesPtr, JSObjectIsFunction, JSObjectMakeArray, JSObjectMakeTypedArray,
+    JSObjectRef, JSValueIsNull, JSValueIsObject, JSValueIsUndefined, JSValueMakeBoolean,
+    JSValueMakeNull, JSValueMakeNumber, JSValueMakeString, JSValueMakeUndefined, JSValueRef,
+    JSValueToBoolean, JSValueToNumber, JSValueToObject, K_JS_TYPED_ARRAY_TYPE_FLOAT32_ARRAY,
+    K_JS_TYPED_ARRAY_TYPE_INT32_ARRAY, K_JS_TYPED_ARRAY_TYPE_UINT8_CLAMPED_ARRAY,
 };
 
 use crate::{
@@ -192,6 +194,50 @@ impl NativeArgument<'_> {
         // SAFETY: the object is live in this callback context and is protected for later use.
         Ok(unsafe { ProtectedJsObject::from_raw(self.context, object.raw) })
     }
+
+    pub fn to_bytes(&self) -> Result<Vec<u8>, NativeError> {
+        let object = self
+            .as_object()?
+            .ok_or_else(|| NativeError::new("value must be a typed array"))?;
+        let mut exception = ptr::null();
+        // SAFETY: the object and callback context remain live and no JSC calls occur while the
+        // temporary bytes pointer is being copied.
+        let length =
+            unsafe { JSObjectGetTypedArrayByteLength(self.context, object.raw, &mut exception) };
+        if !exception.is_null() {
+            return Err(NativeError::new(exception_from_raw(
+                self.context,
+                exception,
+            )));
+        }
+        // SAFETY: the object and callback context remain live for this operation.
+        let bytes =
+            unsafe { JSObjectGetTypedArrayBytesPtr(self.context, object.raw, &mut exception) };
+        if !exception.is_null() {
+            return Err(NativeError::new(exception_from_raw(
+                self.context,
+                exception,
+            )));
+        }
+        if length == 0 {
+            return Ok(Vec::new());
+        }
+        if bytes.is_null() {
+            return Err(NativeError::new("value must be a typed array"));
+        }
+        // SAFETY: the object and callback context remain live for this operation.
+        let offset =
+            unsafe { JSObjectGetTypedArrayByteOffset(self.context, object.raw, &mut exception) };
+        if !exception.is_null() {
+            return Err(NativeError::new(exception_from_raw(
+                self.context,
+                exception,
+            )));
+        }
+        // SAFETY: JSC returns the backing buffer start and guarantees the view's
+        // `offset..offset + length` range remains readable until the next JSC API call.
+        Ok(unsafe { slice::from_raw_parts(bytes.cast::<u8>().add(offset), length) }.to_vec())
+    }
 }
 
 pub enum NativeValue {
@@ -200,6 +246,9 @@ pub enum NativeValue {
     Boolean(bool),
     Number(f64),
     String(String),
+    Bytes(Vec<u8>),
+    Int32Array(Vec<i32>),
+    Float32Array(Vec<f32>),
     Object(JsObjectIdentity),
     ProtectedObject(ProtectedJsObject),
 }
@@ -216,6 +265,96 @@ impl NativeValue {
                 Self::String(value) => {
                     let value = JsString::new(&value).map_err(NativeError::new)?;
                     JSValueMakeString(context, value.as_raw())
+                }
+                Self::Bytes(value) => {
+                    let mut exception = ptr::null();
+                    let object = JSObjectMakeTypedArray(
+                        context,
+                        K_JS_TYPED_ARRAY_TYPE_UINT8_CLAMPED_ARRAY,
+                        value.len(),
+                        &mut exception,
+                    );
+                    if !exception.is_null() {
+                        return Err(NativeError::new(exception_from_raw(context, exception)));
+                    }
+                    if object.is_null() {
+                        return Err(NativeError::new(
+                            "JavaScriptCore failed to create a Uint8ClampedArray",
+                        ));
+                    }
+                    if !value.is_empty() {
+                        let bytes = JSObjectGetTypedArrayBytesPtr(context, object, &mut exception);
+                        if !exception.is_null() {
+                            return Err(NativeError::new(exception_from_raw(context, exception)));
+                        }
+                        if bytes.is_null() {
+                            return Err(NativeError::new(
+                                "JavaScriptCore returned no typed-array storage",
+                            ));
+                        }
+                        ptr::copy_nonoverlapping(value.as_ptr(), bytes.cast::<u8>(), value.len());
+                    }
+                    object
+                }
+                Self::Int32Array(value) => {
+                    let mut exception = ptr::null();
+                    let object = JSObjectMakeTypedArray(
+                        context,
+                        K_JS_TYPED_ARRAY_TYPE_INT32_ARRAY,
+                        value.len(),
+                        &mut exception,
+                    );
+                    if !exception.is_null() {
+                        return Err(NativeError::new(exception_from_raw(context, exception)));
+                    }
+                    if object.is_null() {
+                        return Err(NativeError::new(
+                            "JavaScriptCore failed to create an Int32Array",
+                        ));
+                    }
+                    if !value.is_empty() {
+                        let bytes = JSObjectGetTypedArrayBytesPtr(context, object, &mut exception);
+                        if !exception.is_null() {
+                            return Err(NativeError::new(exception_from_raw(context, exception)));
+                        }
+                        if bytes.is_null() {
+                            return Err(NativeError::new(
+                                "JavaScriptCore returned no typed-array storage",
+                            ));
+                        }
+                        ptr::copy_nonoverlapping(value.as_ptr(), bytes.cast::<i32>(), value.len());
+                    }
+                    object
+                }
+                Self::Float32Array(value) => {
+                    let mut exception = ptr::null();
+                    let object = JSObjectMakeTypedArray(
+                        context,
+                        K_JS_TYPED_ARRAY_TYPE_FLOAT32_ARRAY,
+                        value.len(),
+                        &mut exception,
+                    );
+                    if !exception.is_null() {
+                        return Err(NativeError::new(exception_from_raw(context, exception)));
+                    }
+                    if object.is_null() {
+                        return Err(NativeError::new(
+                            "JavaScriptCore failed to create a Float32Array",
+                        ));
+                    }
+                    if !value.is_empty() {
+                        let bytes = JSObjectGetTypedArrayBytesPtr(context, object, &mut exception);
+                        if !exception.is_null() {
+                            return Err(NativeError::new(exception_from_raw(context, exception)));
+                        }
+                        if bytes.is_null() {
+                            return Err(NativeError::new(
+                                "JavaScriptCore returned no typed-array storage",
+                            ));
+                        }
+                        ptr::copy_nonoverlapping(value.as_ptr(), bytes.cast::<f32>(), value.len());
+                    }
+                    object
                 }
                 Self::Object(object) => {
                     if object.context != context {

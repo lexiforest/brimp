@@ -16,6 +16,31 @@ fn independent_runtime_can_run_on_an_owner_thread() {
 }
 
 #[test]
+fn native_callbacks_exchange_typed_bytes_without_string_encoding() {
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_global_function("bytes", |call| {
+            if call.argument_count() == 0 {
+                return Ok(NativeValue::Bytes(vec![0, 127, 255]));
+            }
+            let bytes = call.argument(0).unwrap().to_bytes()?;
+            Ok(NativeValue::Bytes(bytes.into_iter().rev().collect()))
+        })
+        .unwrap();
+
+    assert_eq!(
+        runtime
+            .eval(
+                "(() => { const value = bytes(); const backing = new Uint8Array([9, 1, 2, 3, 8]); const view = backing.subarray(1, 4); return value instanceof Uint8ClampedArray && String(value) === '0,127,255' && String(bytes(value)) === '255,127,0' && String(bytes(view)) === '3,2,1'; })()",
+            )
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true",
+    );
+}
+
+#[test]
 fn evaluates_arithmetic() {
     let runtime = JsRuntime::new().unwrap();
     let result = runtime.eval("1 + 2").unwrap();

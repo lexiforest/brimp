@@ -2,6 +2,11 @@ export interface LaunchOptions { personaJson?: string }
 export interface PageOptions {
   enableWorker?: boolean
   enableStreamingNetworking?: boolean
+  enableCanvas?: boolean
+  enableWebGL?: boolean
+  enableWebGPU?: boolean
+  enableWebAudio?: boolean
+  enableWebAudioOutput?: boolean
   storagePath?: string
   storageQuotaBytes?: number
 }

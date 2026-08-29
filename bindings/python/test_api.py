@@ -109,9 +109,9 @@ class ApiTests(unittest.TestCase):
         with brimp.Session() as session:
             self.assertEqual(
                 session.evaluate(
-                    "[typeof Worker, typeof WebSocket, typeof indexedDB, typeof navigator.storage]"
+                    "[typeof Worker, typeof WebSocket, typeof indexedDB, typeof navigator.storage, typeof HTMLCanvasElement.prototype.getContext, 'gpu' in navigator, typeof AudioContext]"
                 ),
-                ["undefined", "undefined", "undefined", "undefined"],
+                ["undefined", "undefined", "undefined", "undefined", "undefined", False, "undefined"],
             )
 
         with tempfile.TemporaryDirectory() as directory:

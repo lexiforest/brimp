@@ -579,11 +579,37 @@ impl Page {
             options.height,
             original.device_pixel_ratio as f32,
         );
-        let result = screenshot::render_png(
-            self.document.borrow_mut().blitz_mut(),
-            options,
-            original.device_pixel_ratio,
-        );
+        self.document.borrow_mut().resolve();
+        let result = (|| {
+            let rasters = self
+                .bindings
+                .canvas_rasters()
+                .map_err(ScreenshotError::Render)?;
+            let layers = {
+                let document = self.document.borrow();
+                rasters
+                    .into_iter()
+                    .filter_map(|raster| {
+                        document
+                            .bounding_rect(raster.node)
+                            .map(|rect| (raster, rect))
+                    })
+                    .collect::<Vec<_>>()
+            };
+            let mut rendered = screenshot::render_rgba(
+                self.document.borrow_mut().blitz_mut(),
+                options,
+                original.device_pixel_ratio,
+            )?;
+            composite_canvas_rasters(
+                &mut rendered.pixels,
+                rendered.width,
+                rendered.height,
+                &layers,
+                original.device_pixel_ratio,
+            );
+            screenshot::encode_rgba(&rendered.pixels, rendered.width, rendered.height)
+        })();
         self.document.borrow_mut().set_viewport(
             original.width as u32,
             original.height as u32,
@@ -704,6 +730,8 @@ impl Page {
             let requested_url = request.url.clone();
             let loader = Arc::clone(&self.loader);
             let browsing_context = Arc::clone(&self.browsing_context);
+            let credentials_sent = request.headers.contains_key(http::header::COOKIE)
+                || browsing_context.cookie_header(&request.url).is_some();
             let sender = self.task_sender();
             let buffered_bytes = Arc::new(AtomicUsize::new(0));
             let callback_buffered_bytes = Arc::clone(&buffered_bytes);
@@ -784,11 +812,25 @@ impl Page {
                 }
                 continue;
             }
+            let cors_context = Arc::clone(&browsing_context);
             let result = crate::request::fetch_callback(
                 loader,
                 browsing_context,
                 request,
                 Box::new(move |result| {
+                    if let Ok(response) = &result {
+                        let effective_url = if response.effective_url.is_empty() {
+                            requested_url.as_str()
+                        } else {
+                            response.effective_url.as_str()
+                        };
+                        cors_context.store_resource_cors(
+                            &requested_url,
+                            effective_url,
+                            &response.headers,
+                            credentials_sent,
+                        );
+                    }
                     let result = result
                         .map_err(|error| error.to_string())
                         .map(|response| (requested_url, response));
@@ -1258,7 +1300,7 @@ impl Page {
                     })
                     .collect::<Vec<_>>();
                 let payload = serde_json::json!({
-                    "body": String::from_utf8_lossy(&response.body),
+                    "bytes": response.body,
                     "status": response.status.as_u16(),
                     "statusText": response.status.canonical_reason().unwrap_or_default(),
                     "headers": headers,
@@ -1457,6 +1499,37 @@ impl PageOptionsBuilder {
         self
     }
 
+    pub fn canvas(mut self, enabled: bool) -> Self {
+        self.options.subsystems.canvas = enabled;
+        self
+    }
+
+    pub fn webgl(mut self, enabled: bool) -> Self {
+        self.options.subsystems.webgl = enabled;
+        self
+    }
+
+    pub fn webgpu(mut self, enabled: bool) -> Self {
+        self.options.subsystems.webgpu = enabled;
+        self
+    }
+
+    pub fn webaudio(mut self, enabled: bool) -> Self {
+        self.options.subsystems.webaudio = enabled;
+        if !enabled {
+            self.options.subsystems.webaudio_output = false;
+        }
+        self
+    }
+
+    pub fn webaudio_output(mut self, enabled: bool) -> Self {
+        self.options.subsystems.webaudio_output = enabled;
+        if enabled {
+            self.options.subsystems.webaudio = true;
+        }
+        self
+    }
+
     pub fn viewport(mut self, width: u32, height: u32) -> Self {
         self.options.viewport.width = f64::from(width);
         self.options.viewport.height = f64::from(height);
@@ -1502,6 +1575,11 @@ pub struct BrowserSubsystemOptions {
     worker_system: bool,
     streaming_networking: bool,
     persistent_storage: Option<PersistentStorageOptions>,
+    canvas: bool,
+    webgl: bool,
+    webgpu: bool,
+    webaudio: bool,
+    webaudio_output: bool,
 }
 
 impl BrowserSubsystemOptions {
@@ -1517,11 +1595,36 @@ impl BrowserSubsystemOptions {
         self.persistent_storage.as_ref()
     }
 
+    pub fn canvas(&self) -> bool {
+        self.canvas
+    }
+
+    pub fn webgl(&self) -> bool {
+        self.webgl
+    }
+
+    pub fn webgpu(&self) -> bool {
+        self.webgpu
+    }
+
+    pub fn webaudio(&self) -> bool {
+        self.webaudio
+    }
+
+    pub fn webaudio_output(&self) -> bool {
+        self.webaudio_output
+    }
+
     fn web_features(&self) -> WebFeatureFlags {
         WebFeatureFlags {
             worker_system: self.worker_system,
             streaming_networking: self.streaming_networking,
             persistent_storage: self.persistent_storage.is_some(),
+            canvas: self.canvas,
+            webgl: self.webgl,
+            webgpu: self.webgpu,
+            webaudio: self.webaudio,
+            webaudio_output: self.webaudio_output,
         }
     }
 }
@@ -1584,4 +1687,55 @@ fn persona_request_headers(persona: &persona::ResolvedPersona) -> Vec<(String, S
     .filter(|(_, value)| !value.is_empty())
     .map(|(name, value)| (name.to_string(), value.to_string()))
     .collect()
+}
+
+fn composite_canvas_rasters(
+    target: &mut [u8],
+    target_width: u32,
+    target_height: u32,
+    layers: &[(web_bindings::CanvasRaster, [f64; 4])],
+    scale: f64,
+) {
+    for (raster, rect) in layers {
+        if raster.width == 0 || raster.height == 0 || rect[2] <= 0.0 || rect[3] <= 0.0 {
+            continue;
+        }
+        let left = (rect[0] * scale).floor() as i64;
+        let top = (rect[1] * scale).floor() as i64;
+        let width = (rect[2] * scale).ceil().max(1.0) as i64;
+        let height = (rect[3] * scale).ceil().max(1.0) as i64;
+        for destination_y in top.max(0)..(top + height).min(i64::from(target_height)) {
+            let source_y = (((destination_y - top) as u64 * u64::from(raster.height))
+                / height as u64)
+                .min(u64::from(raster.height - 1)) as usize;
+            for destination_x in left.max(0)..(left + width).min(i64::from(target_width)) {
+                let source_x = (((destination_x - left) as u64 * u64::from(raster.width))
+                    / width as u64)
+                    .min(u64::from(raster.width - 1)) as usize;
+                let source_index = (source_y * raster.width as usize + source_x) * 4;
+                let target_index =
+                    (destination_y as usize * target_width as usize + destination_x as usize) * 4;
+                blend_pixel(
+                    &mut target[target_index..target_index + 4],
+                    &raster.pixels[source_index..source_index + 4],
+                );
+            }
+        }
+    }
+}
+
+fn blend_pixel(destination: &mut [u8], source: &[u8]) {
+    let source_alpha = f32::from(source[3]) / 255.0;
+    if source_alpha == 0.0 {
+        return;
+    }
+    let destination_alpha = f32::from(destination[3]) / 255.0;
+    let output_alpha = source_alpha + destination_alpha * (1.0 - source_alpha);
+    for channel in 0..3 {
+        let value = (f32::from(source[channel]) * source_alpha
+            + f32::from(destination[channel]) * destination_alpha * (1.0 - source_alpha))
+            / output_alpha;
+        destination[channel] = value.round().clamp(0.0, 255.0) as u8;
+    }
+    destination[3] = (output_alpha * 255.0).round().clamp(0.0, 255.0) as u8;
 }
