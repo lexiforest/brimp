@@ -20,11 +20,17 @@ with brimp.Session() as session:
     response = session.get("https://example.com", timeout=30)
     response.raise_for_status()
     print(session.evaluate("document.title"))
+    article = session.extract(content_selector="main")
+    print(article["contentMarkdown"])
     session.hover("#menu")
     session.type("#name", "agent")
     session.click("#submit")
     session.screenshot("page.png", full_page=True)
 ```
+
+`Session.extract()` runs the vendored Defuddle browser bundle against the live,
+post-JavaScript document. It does not create a jsdom document or make another
+network request.
 
 Private test and enterprise roots can be trusted without disabling certificate
 or hostname verification:

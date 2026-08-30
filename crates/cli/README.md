@@ -9,17 +9,23 @@ runtimes, their licenses, and a separate SHA-256 checksum.
 ```text
 brimp doctor
 brimp cdp [--bind HOST:PORT] [--allow-non-loopback]
-brimp eval URL --js EXPRESSION [--timeout-ms N]
-brimp screenshot URL --output PATH [--full-page] [--overwrite] [--timeout-ms N]
+brimp get URL
+brimp get URL --output article.md
+brimp get URL --format json --output article.json
+brimp get URL --eval 'document.title'
+brimp get URL --output page.png [--full-page]
+brimp crawl URL --output-dir ./reference --depth 2 --workers 2
 ```
 
-Structured results are written to stdout, diagnostics to stderr, and PNG bytes
-directly to the requested file. Existing files are refused unless
+Results are written to stdout or `--output`, and diagnostics stay on stderr.
+Rendered HTML, raw response bytes, Defuddle Markdown/JSON, evaluation JSON, and
+PNG are supported. Existing files are refused unless
 `--overwrite` is explicit. Exit categories are stable: 2 input, 10 transport,
 11 HTTP status, 12 navigation, 13 JavaScript, 14 timeout, 15 cancellation, 16
-unsupported result, 17 closed object, and 18 screenshot/runtime failure.
+unsupported result, 17 closed object, and 18 extraction/screenshot/runtime failure.
 
-`fetch`, `extract`, `render`, and `batch` are intentionally absent until their
-canonical core semantics and bounded batch isolation are implemented.
+`crawl` writes Markdown by default and records one terminal JSON object per URL
+in `manifest.jsonl`. It obeys robots policy and remains on the final start
+origin unless explicitly expanded with `--allow-origin`.
 
 See `SUPPORT.md` for the exhaustive tested command surface.

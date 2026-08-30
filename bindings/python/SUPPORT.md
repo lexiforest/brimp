@@ -11,6 +11,7 @@
 | `Response.json()` / `raise_for_status()` | Decodes JSON and explicitly raises `HTTPError` for 4xx/5xx responses. |
 | `Session.evaluate(source)` | Returns JSON-compatible Python values and rejects unsupported JavaScript values. |
 | `Session.screenshot(path=None, full_page=False)` | Returns PNG bytes and optionally writes the same bytes to a path. |
+| `Session.extract(content_selector=None, remove_images=False, language=None, debug=False)` | Runs pinned Defuddle extraction against the live DOM and returns content, Markdown, and metadata. |
 | `Session.click(selector)` | Hit-tests and sends trusted pointer/mouse activation input. |
 | `Session.hover(selector)` | Moves the virtual mouse to the target and sends trusted pointer/mouse transition and move input. |
 | `Session.type(selector, text)` | Focuses the target and sends trusted keyboard/editing input. |

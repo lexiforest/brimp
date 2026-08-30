@@ -102,7 +102,7 @@ cycles, top-level `undefined`, and other non-JSON results return
 `AutomationError::Unsupported`. JavaScript exceptions remain a distinct
 `AutomationError::JavaScript` failure.
 
-Python `Session.evaluate()`, Node `page.evaluate()`, CLI `brimp eval`, and CDP
+Python `Session.evaluate()`, Node `session.evaluate()`, CLI `brimp get --eval`, and CDP
 `Runtime.evaluate` all delegate to this owner-thread machinery. CDP additionally
 supports page-owned remote object handles through `Runtime.callFunctionOn`,
 `Runtime.getProperties`, and the release methods.

@@ -9,6 +9,8 @@ const __cssRuleLists = new WeakSet();
 const __styleSheets = new WeakSet();
 const __styleSheetLists = new WeakSet();
 const __mediaLists = new WeakSet();
+const __mediaQueryLists = new WeakSet();
+const __mediaQueryListConstructionToken = {};
 
 function __requireCssRule(value) {
     if (!__cssRules.has(value)) throw new TypeError("receiver is not a CSSRule");
@@ -28,6 +30,10 @@ function __requireStyleSheetList(value) {
 
 function __requireMediaList(value) {
     if (!__mediaLists.has(value)) throw new TypeError("receiver is not a MediaList");
+}
+
+function __requireMediaQueryList(value) {
+    if (!__mediaQueryLists.has(value)) throw new TypeError("receiver is not a MediaQueryList");
 }
 
 function __cssomResult(serialized) {
@@ -483,14 +489,14 @@ class CSSRuleList {
     }
     get length() {
         __requireCssRuleList(this);
-        return this.__sheet.__rules().length;
+        return this.__sheet.__ruleObjects.length;
     }
     item(index) {
         __requireCssRuleList(this);
         if (arguments.length === 0) throw new TypeError("CSSRuleList.item requires an index");
-        return this.__sheet.__rules()[Number(index)] ?? null;
+        return this.__sheet.__ruleObjects[Number(index)] ?? null;
     }
-    [Symbol.iterator]() { return this.__sheet.__rules()[Symbol.iterator](); }
+    [Symbol.iterator]() { return this.__sheet.__ruleObjects[Symbol.iterator](); }
 }
 
 function __newCssRule(cssText, sheet, parentRule = null, forcedKind = null) {
@@ -597,6 +603,158 @@ class MediaList {
         return this.mediaText;
     }
     [Symbol.iterator]() { return this.__items[Symbol.iterator](); }
+}
+
+function __splitMediaQueries(value, separator) {
+    const parts = [];
+    let start = 0;
+    let depth = 0;
+    for (let index = 0; index < value.length; index++) {
+        const character = value[index];
+        if (character === "(") depth++;
+        else if (character === ")" && depth > 0) depth--;
+        else if (depth === 0 && separator(value, index)) {
+            parts.push(value.slice(start, index));
+            index += separator.width - 1;
+            start = index + 1;
+        }
+    }
+    parts.push(value.slice(start));
+    return parts;
+}
+
+function __mediaLength(value) {
+    const match = /^(-?(?:\d+\.?\d*|\.\d+))(px|em|rem)?$/i.exec(value.trim());
+    if (match === null) return null;
+    const number = Number(match[1]);
+    return /^(em|rem)$/i.test(match[2] ?? "") ? number * 16 : number;
+}
+
+function __mediaResolution(value) {
+    const match = /^(\d+\.?\d*|\.\d+)(dppx|dpi|dpcm)$/i.exec(value.trim());
+    if (match === null) return null;
+    const number = Number(match[1]);
+    if (match[2].toLowerCase() === "dpi") return number / 96;
+    if (match[2].toLowerCase() === "dpcm") return number * 2.54 / 96;
+    return number;
+}
+
+function __matchesMediaFeature(expression) {
+    const colon = expression.indexOf(":");
+    const name = (colon < 0 ? expression : expression.slice(0, colon)).trim().toLowerCase();
+    const value = colon < 0 ? "" : expression.slice(colon + 1).trim().toLowerCase();
+    const width = Number(globalThis.innerWidth);
+    const height = Number(globalThis.innerHeight);
+    const numericFeatures = {
+        width,
+        height,
+        "device-width": width,
+        "device-height": height,
+    };
+    const numericName = name.replace(/^(min|max)-/, "");
+    if (Object.hasOwn(numericFeatures, numericName)) {
+        if (value === "") return numericFeatures[numericName] > 0;
+        const expected = __mediaLength(value);
+        if (expected === null) return false;
+        if (name.startsWith("min-")) return numericFeatures[numericName] >= expected;
+        if (name.startsWith("max-")) return numericFeatures[numericName] <= expected;
+        return numericFeatures[numericName] === expected;
+    }
+    if (["resolution", "min-resolution", "max-resolution"].includes(name)) {
+        const expected = __mediaResolution(value);
+        if (expected === null) return false;
+        const actual = Number(globalThis.devicePixelRatio);
+        if (name === "min-resolution") return actual >= expected;
+        if (name === "max-resolution") return actual <= expected;
+        return actual === expected;
+    }
+    const defaults = {
+        "prefers-color-scheme": "light",
+        "prefers-reduced-motion": "no-preference",
+        "prefers-contrast": "no-preference",
+        "forced-colors": "none",
+        "inverted-colors": "none",
+        "color-gamut": "srgb",
+        "display-mode": "browser",
+        hover: "hover",
+        "any-hover": "hover",
+        pointer: "fine",
+        "any-pointer": "fine",
+        orientation: width >= height ? "landscape" : "portrait",
+        update: "fast",
+        scripting: "enabled",
+    };
+    if (Object.hasOwn(defaults, name)) return value === "" || value === defaults[name];
+    if (name === "color") return value === "" || Number(value) === 8;
+    if (name === "monochrome") return Number(value || 0) === 0;
+    return false;
+}
+
+function __matchesSingleMediaQuery(query) {
+    query = query.trim().toLowerCase().replace(/\s+/g, " ");
+    let negate = false;
+    if (query.startsWith("not ")) {
+        negate = true;
+        query = query.slice(4).trim();
+    }
+    if (query.startsWith("only ")) query = query.slice(5).trim();
+    const andSeparator = (value, index) => /^\s+and\s+/i.test(value.slice(index));
+    andSeparator.width = 5;
+    const parts = __splitMediaQueries(query, andSeparator).map(part => part.trim()).filter(Boolean);
+    let matches = true;
+    if (parts.length !== 0 && !parts[0].startsWith("(")) {
+        const mediaType = parts.shift();
+        matches = mediaType === "all" || mediaType === "screen";
+    }
+    matches &&= parts.every(part => part.startsWith("(") && part.endsWith(")") &&
+        __matchesMediaFeature(part.slice(1, -1)));
+    return negate ? !matches : matches;
+}
+
+function __matchesMediaQueryList(media) {
+    const commaSeparator = (value, index) => value[index] === ",";
+    commaSeparator.width = 1;
+    const queries = __splitMediaQueries(media, commaSeparator);
+    return queries.some(query => __matchesSingleMediaQuery(query));
+}
+
+class MediaQueryListEvent extends Event {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.media = String(options.media ?? "");
+        this.matches = Boolean(options.matches);
+    }
+}
+
+class MediaQueryList extends EventTarget {
+    constructor(token, media) {
+        if (token !== __mediaQueryListConstructionToken) throw new TypeError("Illegal constructor");
+        super();
+        __mediaQueryLists.add(this);
+        this.__media = String(media);
+        this.onchange = null;
+    }
+    get media() {
+        __requireMediaQueryList(this);
+        return this.__media;
+    }
+    get matches() {
+        __requireMediaQueryList(this);
+        return __matchesMediaQueryList(this.__media);
+    }
+    addListener(callback) {
+        __requireMediaQueryList(this);
+        this.addEventListener("change", callback);
+    }
+    removeListener(callback) {
+        __requireMediaQueryList(this);
+        this.removeEventListener("change", callback);
+    }
+}
+
+function matchMedia(query) {
+    if (arguments.length === 0) throw new TypeError("matchMedia requires a query");
+    return new MediaQueryList(__mediaQueryListConstructionToken, String(query));
 }
 
 function __parseSingleMediaQuery(value) {
@@ -972,4 +1130,3 @@ for (const method of ["copyWithin", "fill", "pop", "push", "reverse", "shift", "
         },
     });
 }
-

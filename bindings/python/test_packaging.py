@@ -21,6 +21,14 @@ class PackagingTests(unittest.TestCase):
             self.assertEqual(len(target.jsc.sha256), 64)
             self.assertEqual(len(target.curl.sha256), 64)
 
+    def test_defuddle_notices_are_available_to_wheel_packaging(self):
+        root = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "defuddle"
+            prepare_native.copy_defuddle_licenses(root, destination)
+            self.assertTrue((destination / "NOTICE.md").is_file())
+            self.assertTrue((destination / "licenses/defuddle-LICENSE").is_file())
+
     def test_expected_wheel_name_is_exact(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)

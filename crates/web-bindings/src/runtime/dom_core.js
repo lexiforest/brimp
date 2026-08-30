@@ -84,6 +84,24 @@ class Node extends EventTarget {
         return this.removeChild(child);
     }
     cloneNode(deep = false) { return __callHost("cloneNode", this, Boolean(deep)); }
+    normalize() {
+        let previousText = null;
+        for (const child of Array.from(this.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE) {
+                if (child.textContent === "") {
+                    this.removeChild(child);
+                } else if (previousText) {
+                    previousText.textContent += child.textContent;
+                    this.removeChild(child);
+                } else {
+                    previousText = child;
+                }
+            } else {
+                previousText = null;
+                child.normalize();
+            }
+        }
+    }
 }
 for (const [name, value] of Object.entries({
     ELEMENT_NODE: 1,
@@ -109,10 +127,151 @@ for (const [name, value] of Object.entries({
     Object.defineProperty(Node.prototype, name, { value, enumerable: true });
 }
 
+const NodeFilter = Object.freeze({
+    FILTER_ACCEPT: 1,
+    FILTER_REJECT: 2,
+    FILTER_SKIP: 3,
+    SHOW_ALL: 0xFFFFFFFF,
+    SHOW_ELEMENT: 0x1,
+    SHOW_ATTRIBUTE: 0x2,
+    SHOW_TEXT: 0x4,
+    SHOW_CDATA_SECTION: 0x8,
+    SHOW_ENTITY_REFERENCE: 0x10,
+    SHOW_ENTITY: 0x20,
+    SHOW_PROCESSING_INSTRUCTION: 0x40,
+    SHOW_COMMENT: 0x80,
+    SHOW_DOCUMENT: 0x100,
+    SHOW_DOCUMENT_TYPE: 0x200,
+    SHOW_DOCUMENT_FRAGMENT: 0x400,
+    SHOW_NOTATION: 0x800,
+});
+
+class TreeWalker {
+    constructor(root, whatToShow = NodeFilter.SHOW_ALL, filter = null) {
+        this.root = root;
+        this.whatToShow = Number(whatToShow) >>> 0;
+        this.filter = filter;
+        this.currentNode = root;
+    }
+    __decision(node) {
+        const shown = (this.whatToShow & (1 << (node.nodeType - 1))) !== 0;
+        if (!shown) return NodeFilter.FILTER_SKIP;
+        if (this.filter === null) return NodeFilter.FILTER_ACCEPT;
+        const decision = typeof this.filter === "function"
+            ? this.filter(node)
+            : this.filter.acceptNode(node);
+        return Number(decision);
+    }
+    nextNode() {
+        let node = this.currentNode;
+        let prune = false;
+        while (true) {
+            if (!prune && node.firstChild) {
+                node = node.firstChild;
+            } else {
+                while (node && node !== this.root && !node.nextSibling) node = node.parentNode;
+                if (!node || node === this.root) return null;
+                node = node.nextSibling;
+            }
+            prune = false;
+            const decision = this.__decision(node);
+            if (decision === NodeFilter.FILTER_ACCEPT) {
+                this.currentNode = node;
+                return node;
+            }
+            prune = decision === NodeFilter.FILTER_REJECT;
+        }
+    }
+}
+
 class DOMImplementation {
     hasFeature() { return true; }
 }
 const __domImplementation = new DOMImplementation();
+
+function __splitSelectorGroups(selector) {
+    const groups = [];
+    let start = 0;
+    let depth = 0;
+    let quote = "";
+    for (let index = 0; index < selector.length; index++) {
+        const character = selector[index];
+        if (quote) {
+            if (character === quote && selector[index - 1] !== "\\") quote = "";
+        } else if (character === '"' || character === "'") {
+            quote = character;
+        } else if (character === "(" || character === "[") {
+            depth++;
+        } else if (character === ")" || character === "]") {
+            depth--;
+        } else if (character === "," && depth === 0) {
+            groups.push(selector.slice(start, index).trim());
+            start = index + 1;
+        }
+    }
+    groups.push(selector.slice(start).trim());
+    return groups;
+}
+
+function __selectorGroupWithHas(group) {
+    const predicates = [];
+    let base = "";
+    let offset = 0;
+    while (offset < group.length) {
+        const direct = group.indexOf(":has(", offset);
+        const negated = group.indexOf(":not(:has(", offset);
+        let start = direct;
+        let isNegated = false;
+        if (negated !== -1 && (direct === -1 || negated <= direct)) {
+            start = negated;
+            isNegated = true;
+        }
+        if (start === -1) {
+            base += group.slice(offset);
+            break;
+        }
+        base += group.slice(offset, start);
+        const contentStart = start + (isNegated ? 10 : 5);
+        let depth = 1;
+        let end = contentStart;
+        for (; end < group.length && depth > 0; end++) {
+            if (group[end] === "(") depth++;
+            else if (group[end] === ")") depth--;
+        }
+        if (depth !== 0 || (isNegated && group[end] !== ")")) {
+            throw new DOMException("Invalid selector", "SyntaxError");
+        }
+        const relative = group.slice(contentStart, end - 1);
+        predicates.push({ relative, negated: isNegated });
+        offset = end + (isNegated ? 1 : 0);
+    }
+    return { base: base.trim() || "*", predicates };
+}
+
+function __matchesSelectorWithHas(element, selector) {
+    selector = String(selector);
+    if (!selector.includes(":has(")) return __callHost("matches", element, selector);
+    return __splitSelectorGroups(selector).some(group => {
+        const parsed = __selectorGroupWithHas(group);
+        if (!__callHost("matches", element, parsed.base)) return false;
+        return parsed.predicates.every(predicate => {
+            const found = __callHost("querySelector", element, predicate.relative) !== null;
+            return predicate.negated ? !found : found;
+        });
+    });
+}
+
+function __querySelectorAllWithHas(root, selector) {
+    selector = String(selector);
+    if (!selector.includes(":has(")) return __callHost("querySelectorAll", root, selector);
+    const candidates = __callHost("querySelectorAll", root, "*");
+    return candidates.filter(element => __matchesSelectorWithHas(element, selector));
+}
+
+function __querySelectorWithHas(root, selector) {
+    const results = __querySelectorAllWithHas(root, selector);
+    return results.length === 0 ? null : results[0];
+}
 
 const __validCustomElementLocalName = /^(?:[A-Za-z][^\0\t\n\f\r\u0020\/>]*|[:_\u0080-\u{10FFFF}][A-Za-z0-9-.:_\u0080-\u{10FFFF}]*)$/u;
 const __reservedCustomElementNames = new Set([
@@ -188,4 +347,3 @@ function __replaceChildren(parent, values) {
     while (parent.firstChild) parent.removeChild(parent.firstChild);
     for (const node of nodes) parent.appendChild(node);
 }
-

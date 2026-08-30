@@ -2,6 +2,15 @@ function __removeNode(node) {
     if (node.parentNode) node.parentNode.removeChild(node);
 }
 
+function __replaceNode(node, values) {
+    const parent = node.parentNode;
+    if (!parent) return;
+    for (const replacement of __nodesFromArguments(values)) {
+        parent.insertBefore(replacement, node);
+    }
+    parent.removeChild(node);
+}
+
 class Document extends Node {
     get title() { return __callHost("title", this); }
     get URL() { return this.__URL ?? location.href; }
@@ -46,6 +55,10 @@ class Document extends Node {
     createTextNode(text) { return __callHost("createTextNode", this, text); }
     createComment(data) { return __callHost("createComment", this, data); }
     createDocumentFragment() { return __callHost("createDocumentFragment", this); }
+    createTreeWalker(root, whatToShow = NodeFilter.SHOW_ALL, filter = null) {
+        if (!(root instanceof Node)) throw new TypeError("root must be a Node");
+        return new TreeWalker(root, whatToShow, filter);
+    }
     elementFromPoint(x, y) {
         if (arguments.length < 2) throw new TypeError("two coordinates are required");
         x = Number(x);
@@ -83,8 +96,8 @@ class Document extends Node {
     getElementsByName(name) {
         return new NodeList(() => __callHost("getElementsByName", this, name));
     }
-    querySelector(selector) { return __callHost("querySelector", this, selector); }
-    querySelectorAll(selector) { return new NodeList(__callHost("querySelectorAll", this, selector)); }
+    querySelector(selector) { return __querySelectorWithHas(this, selector); }
+    querySelectorAll(selector) { return new NodeList(__querySelectorAllWithHas(this, selector)); }
 }
 
 class XMLDocument extends Document {}
@@ -684,4 +697,3 @@ class NamedNodeMap {
         return __attributeRecords(this.__element).map(record => this.__attr(record))[Symbol.iterator]();
     }
 }
-

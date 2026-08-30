@@ -28,6 +28,8 @@ globalThis.NodeList = NodeList;
 globalThis.NamedNodeMap = NamedNodeMap;
 globalThis.Attr = Attr;
 globalThis.Node = Node;
+globalThis.NodeFilter = NodeFilter;
+globalThis.TreeWalker = TreeWalker;
 globalThis.Document = Document;
 globalThis.HTMLDocument = Document;
 globalThis.XMLDocument = XMLDocument;
@@ -114,6 +116,8 @@ globalThis.Window = Window;
 globalThis.Location = Location;
 globalThis.Navigator = Navigator;
 globalThis.DOMRect = DOMRect;
+globalThis.MediaQueryList = MediaQueryList;
+globalThis.MediaQueryListEvent = MediaQueryListEvent;
 
 function __makeWebIdlMembersEnumerable(prototype, names) {
     for (const name of names) {
@@ -143,6 +147,8 @@ function __exposeWebIdl(name, value) {
 }
 
 for (const [constructor, name, members] of [
+    [MediaQueryList, "MediaQueryList", ["media", "matches", "onchange", "addListener", "removeListener", "addEventListener", "removeEventListener", "dispatchEvent"]],
+    [MediaQueryListEvent, "MediaQueryListEvent", ["media", "matches"]],
     [MediaList, "MediaList", ["mediaText", "length", "item", "appendMedium", "deleteMedium", "toString"]],
     [StyleSheet, "StyleSheet", ["type", "href", "ownerNode", "parentStyleSheet", "title", "media", "disabled"]],
     [CSSStyleSheet, "CSSStyleSheet", ["ownerRule", "cssRules", "insertRule", "deleteRule", "replace", "replaceSync", "rules", "addRule", "removeRule"]],
@@ -203,6 +209,7 @@ globalThis.getComputedStyle = function getComputedStyle(element, pseudoElt = nul
     return __styleDeclarationProxy(__callHost("getComputedStyle", element));
 };
 globalThis.getSelection = () => __selection;
+globalThis.matchMedia = matchMedia;
 globalThis.setTimeout = (callback, delay = 0) => __callHost("setTimeout", window, callback, delay);
 globalThis.clearTimeout = id => __callHost("clearTimeout", window, id);
 globalThis.queueMicrotask = callback => __callHost("queueMicrotask", window, callback);
@@ -250,7 +257,7 @@ for (const name of Object.getOwnPropertyNames(globalThis)) {
 }
 for (const name of [
     "atob", "btoa", "fetch", "postMessage", "getComputedStyle", "getSelection",
-    "setTimeout", "clearTimeout", "queueMicrotask", "requestAnimationFrame",
+    "setTimeout", "clearTimeout", "queueMicrotask", "requestAnimationFrame", "matchMedia",
     "cancelAnimationFrame", "addEventListener", "removeEventListener", "dispatchEvent",
 ]) {
     __markWebBuiltin(globalThis[name], `function ${name}() { [native code] }`);

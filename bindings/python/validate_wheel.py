@@ -59,6 +59,9 @@ NATIVE_LIBRARY_PREFIX = {
 REQUIRED_LICENSES = (
     "brimp/licenses/curl-impersonate-LICENSE",
     "brimp/licenses/jsc-sdk/JavaScriptCore/COPYING.LIB",
+    "brimp/licenses/defuddle/NOTICE.md",
+    "brimp/licenses/defuddle/licenses/defuddle-LICENSE",
+    "brimp/licenses/defuddle/licenses/turndown-LICENSE",
 )
 
 

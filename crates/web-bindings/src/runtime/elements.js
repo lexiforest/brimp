@@ -54,6 +54,7 @@ class Element extends Node {
     set classList(value) { this.classList.value = value; }
     get innerHTML() { return __callHost("innerHTML", this); }
     set innerHTML(value) { __callHost("setInnerHTML", this, value); }
+    get outerHTML() { return __callHost("outerHTML", this); }
     get style() { return __styleDeclarationProxy(__callHost("style", this)); }
     set style(value) { this.style.cssText = value; }
     get clientWidth() { return __callHost("clientWidth", this); }
@@ -91,6 +92,7 @@ class Element extends Node {
     append(...nodes) { __appendNodes(this, nodes); }
     prepend(...nodes) { __prependNodes(this, nodes); }
     replaceChildren(...nodes) { __replaceChildren(this, nodes); }
+    replaceWith(...nodes) { __replaceNode(this, nodes); }
     remove() { __removeNode(this); }
     insertAdjacentElement(position, element) {
         if (!(element instanceof Element)) throw new TypeError("element must be an Element");
@@ -119,9 +121,9 @@ class Element extends Node {
     getElementsByClassName(names) {
         return new HTMLCollection(() => __callHost("getElementsByClassName", this, names));
     }
-    querySelector(selector) { return __callHost("querySelector", this, selector); }
-    querySelectorAll(selector) { return new NodeList(__callHost("querySelectorAll", this, selector)); }
-    matches(selector) { return __callHost("matches", this, selector); }
+    querySelector(selector) { return __querySelectorWithHas(this, selector); }
+    querySelectorAll(selector) { return new NodeList(__querySelectorAllWithHas(this, selector)); }
+    matches(selector) { return __matchesSelectorWithHas(this, selector); }
     closest(selector) {
         let element = this;
         while (element) {
@@ -238,4 +240,3 @@ class HTMLAnchorElement extends HTMLElement {
         this.href = url.href;
     }
 }
-

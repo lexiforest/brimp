@@ -6,7 +6,7 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use web_runtime::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken as CoreCancellationToken,
-    NavigationResponse, PageOptions, PersistentStorageOptions,
+    ExtractionOptions, NavigationResponse, PageOptions, PersistentStorageOptions,
 };
 
 #[napi]
@@ -214,6 +214,24 @@ impl Session {
         blocking(move || page.screenshot(full_page))
             .await
             .map(Buffer::from)
+    }
+
+    #[napi]
+    pub async fn extract(&self, options_json: String) -> Result<String> {
+        let options =
+            serde_json::from_str::<ExtractionOptions>(&options_json).map_err(|json_error| {
+                error(AutomationError::InvalidInput(format!(
+                    "invalid extraction options: {json_error}"
+                )))
+            })?;
+        let page = self.page.clone();
+        blocking(move || {
+            page.extract(options).and_then(|document| {
+                serde_json::to_string(&document)
+                    .map_err(|error| AutomationError::Internal(error.to_string()))
+            })
+        })
+        .await
     }
 
     #[napi]

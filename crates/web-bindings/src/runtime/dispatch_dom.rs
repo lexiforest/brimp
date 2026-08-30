@@ -377,14 +377,17 @@ pub(super) fn dispatch(
         "matches" => {
             let id = required_element_target(state, call)?;
             let selector = required_string(call, 2, "selector")?;
-            Ok(NativeValue::Boolean(
-                state
-                    .document
-                    .borrow()
-                    .query_selector_all(&selector)
-                    .map_err(err)?
-                    .contains(&id),
-            ))
+            let document = state.document.borrow();
+            let element = document.node(id).ok_or_else(stale_wrapper)?;
+            let selectors = document
+                .blitz()
+                .try_parse_selector_list(&selector)
+                .map_err(|error| NativeError::new(format!("{error:?}")))?;
+            Ok(NativeValue::Boolean(element_matches(
+                &element,
+                &selectors,
+                element.owner_doc().quirks_mode(),
+            )))
         }
         "ownerDocument" => {
             let id = required_node_target(state, call)?;
@@ -706,6 +709,14 @@ pub(super) fn dispatch(
                     .ok_or_else(stale_wrapper)?
                     .write_outer_html(&mut html);
             }
+            Ok(NativeValue::String(html))
+        }
+        "outerHTML" => {
+            let id = required_element_target(state, call)?;
+            let document = state.document.borrow();
+            let node = document.node(id).ok_or_else(stale_wrapper)?;
+            let mut html = String::new();
+            node.write_outer_html(&mut html);
             Ok(NativeValue::String(html))
         }
         "setInnerHTML" => {

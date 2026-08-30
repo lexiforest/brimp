@@ -27,6 +27,35 @@ export interface ScreenshotOptions {
   fullPage?: boolean
 }
 
+export interface ExtractionOptions {
+  contentSelector?: string
+  removeImages?: boolean
+  language?: string
+  debug?: boolean
+}
+
+export interface ExtractedDocument {
+  title: string
+  description: string
+  domain: string
+  favicon: string
+  image: string
+  language: string
+  parseTime: number
+  published: string
+  author: string
+  site: string
+  schemaOrgData: unknown
+  wordCount: number
+  content: string
+  contentMarkdown?: string
+  extractorType?: string
+  metaTags?: Array<{ name?: string; property?: string; content?: string }>
+  debug?: unknown
+  profile?: Record<string, number>
+  variables?: Record<string, string>
+}
+
 export declare class BrimpError extends Error { readonly code: string }
 export declare class ConnectionError extends BrimpError {}
 export declare class Timeout extends BrimpError {}
@@ -69,6 +98,7 @@ export declare class Session {
   get(url: string | URL, options?: GetOptions): Promise<Response>
   evaluate(expression: string): Promise<unknown>
   screenshot(options?: ScreenshotOptions): Promise<Buffer>
+  extract(options?: ExtractionOptions): Promise<ExtractedDocument>
   click(selector: string): Promise<void>
   hover(selector: string): Promise<void>
   type(selector: string, text: string): Promise<void>

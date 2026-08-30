@@ -4,10 +4,14 @@
 | --- | --- |
 | `doctor` | Validates JavaScriptCore, libcurl-impersonate, and the selected curl profile. |
 | `cdp` | Serves the supported Chrome DevTools Protocol subset over HTTP and WebSocket. |
-| `eval URL --js SOURCE` | Navigates to `Complete` and prints one structured JSON value on stdout. |
-| `screenshot URL --output PATH` | Writes viewport or full-page PNG bytes and refuses overwrite unless requested. |
+| `get URL` | Writes the post-JavaScript serialized DOM to stdout. |
+| `get URL --format raw|html|markdown|json|png` | Uses one navigation pipeline for response bytes, rendered DOM, live-DOM Defuddle extraction, and screenshots. |
+| `get URL --eval SOURCE` | Prints one structured JSON evaluation result on stdout. |
+| `get URL --script PATH` | Runs repeatable preparation scripts before capturing the selected result. |
+| `crawl URL` | Runs a bounded deterministic breadth-first crawl with per-worker pages, robots policy, same-origin scope, safe atomic outputs, and a JSONL manifest. |
 
-All commands support stable categorized exit codes. Navigation commands accept
-timeouts and translate Ctrl-C into the shared cancellation token. Interactive
-browsing, browser modes beyond the bounded CDP server, batch, fetch, extract, and
-render are unsupported and are not accepted as flags or commands.
+All commands support stable categorized exit codes. `get` has one overall
+timeout, cancellation-aware fixed/selector/network-idle waits, proxy and request
+state options, atomic output, and overwrite protection. `crawl` shares these
+controls and adds explicit depth, worker, page, origin, path, pacing, and failure
+bounds.

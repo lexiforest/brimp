@@ -17,35 +17,35 @@ Successful output is JSON suitable for scripts:
 
 ## Extract structured data
 
-`brimp eval` prints the evaluated JSON value to standard output and diagnostics
+`brimp get --eval` prints the evaluated JSON value to standard output and diagnostics
 to standard error:
 
 ```sh
-brimp eval https://example.com \
-  --js '({title: document.title, links: document.querySelectorAll("a").length})'
+brimp get https://example.com \
+  --eval '({title: document.title, links: document.querySelectorAll("a").length})'
 ```
 
-Set a navigation timeout in milliseconds when the 30-second default is not
+Set an operation timeout when the 30-second default is not
 appropriate:
 
 ```sh
-brimp eval https://example.com \
-  --timeout-ms 10000 \
-  --js 'document.body.textContent.trim()'
+brimp get https://example.com \
+  --timeout 10s \
+  --eval 'document.body.textContent.trim()'
 ```
 
 ## Use a persona
 
 ```sh
-brimp eval https://example.com \
+brimp get https://example.com \
   --persona persona/example.json \
-  --js '({ua: navigator.userAgent, platform: navigator.platform})'
+  --eval '({ua: navigator.userAgent, platform: navigator.platform})'
 ```
 
 ## Protect screenshot output
 
 ```sh
-brimp screenshot https://example.com \
+brimp get https://example.com \
   --output example.png \
   --full-page
 ```

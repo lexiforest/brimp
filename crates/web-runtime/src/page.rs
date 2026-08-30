@@ -23,7 +23,7 @@ use web_bindings::{
 };
 
 use crate::{
-    TaskQueue, TaskSender, Viewport,
+    ExtractedDocument, ExtractionError, ExtractionOptions, TaskQueue, TaskSender, Viewport,
     blitz_net::BlitzResourceProvider,
     worker::{ServiceWorkerResponse, WorkerCoordinator, WorkerRealm},
 };
@@ -32,6 +32,7 @@ pub struct Page {
     // Bindings must drop before `js`, because their objects are protected in that context.
     bindings: BindingRuntime,
     persona_identity_setter: ProtectedJsObject,
+    defuddle_extractor: Option<ProtectedJsObject>,
     timers: Rc<RefCell<TimerQueue>>,
     browsing_context: Arc<BrowsingContext>,
     blitz_network: Arc<BlitzResourceProvider>,
@@ -66,8 +67,23 @@ impl Page {
     ) -> Result<Self, JsException> {
         let js = JsRuntime::new()?;
         let browsing_context = Arc::new(BrowsingContext::default());
+        let mut request_headers = persona_request_headers(&options.persona);
+        let persona_header_names = request_headers
+            .iter()
+            .map(|(name, _)| name.to_ascii_lowercase())
+            .collect::<std::collections::HashSet<_>>();
+        if let Some((name, _)) = options
+            .request_headers
+            .iter()
+            .find(|(name, _)| persona_header_names.contains(&name.to_ascii_lowercase()))
+        {
+            return Err(JsException::from_message(format!(
+                "request header `{name}` is owned by the persona"
+            )));
+        }
+        request_headers.extend(options.request_headers.clone());
         browsing_context
-            .set_request_headers(persona_request_headers(&options.persona))
+            .set_request_headers(request_headers)
             .map_err(JsException::from_message)?;
         let blitz_network = Arc::new(BlitzResourceProvider::new(
             Arc::clone(&loader),
@@ -107,6 +123,7 @@ impl Page {
         Ok(Self {
             bindings,
             persona_identity_setter,
+            defuddle_extractor: None,
             timers,
             browsing_context,
             blitz_network,
@@ -194,6 +211,7 @@ impl Page {
 
         self.bindings = bindings;
         self.persona_identity_setter = persona_identity_setter;
+        self.defuddle_extractor = None;
         self.js = js;
         self.timers = timers;
         self.fetches = fetches;
@@ -528,6 +546,23 @@ impl Page {
         Ok(value)
     }
 
+    pub fn extract(
+        &mut self,
+        options: ExtractionOptions,
+    ) -> Result<ExtractedDocument, ExtractionError> {
+        if self.defuddle_extractor.is_none() {
+            self.defuddle_extractor = Some(crate::extraction::install(&self.js)?);
+        }
+        crate::extraction::extract(
+            &self.js,
+            self.defuddle_extractor
+                .as_ref()
+                .expect("Defuddle extractor was installed"),
+            &options,
+            Some(self.url.as_deref().unwrap_or("about:blank")),
+        )
+    }
+
     pub(crate) fn dispatch_input(&self, serialized_command: &str) -> Result<String, JsException> {
         let value = self.bindings.dispatch_input(&self.js, serialized_command)?;
         self.perform_microtask_checkpoint()?;
@@ -699,6 +734,10 @@ impl Page {
                 std::thread::sleep(Duration::from_millis(1));
             }
         }
+    }
+
+    pub(crate) fn is_network_idle(&mut self) -> bool {
+        self.fetches.borrow().is_empty() && self.tasks.is_empty() && self.blitz_network.is_idle()
     }
 
     fn perform_microtask_checkpoint(&self) -> Result<(), JsException> {
@@ -1449,6 +1488,7 @@ pub struct PageOptions {
     viewport: Viewport,
     persona: persona::ResolvedPersona,
     subsystems: BrowserSubsystemOptions,
+    request_headers: Vec<(String, String)>,
 }
 
 impl Default for PageOptions {
@@ -1464,6 +1504,7 @@ impl Default for PageOptions {
             },
             persona,
             subsystems: BrowserSubsystemOptions::default(),
+            request_headers: Vec::new(),
         }
     }
 }
@@ -1485,6 +1526,10 @@ impl PageOptions {
         &self.subsystems
     }
 
+    pub fn request_headers(&self) -> &[(String, String)] {
+        &self.request_headers
+    }
+
     pub(crate) fn with_persona(mut self, persona: persona::ResolvedPersona) -> Self {
         self.viewport = Viewport {
             width: f64::from(persona.viewport.width),
@@ -1504,6 +1549,11 @@ pub struct PageOptionsBuilder {
 }
 
 impl PageOptionsBuilder {
+    pub fn request_headers(mut self, headers: Vec<(String, String)>) -> Self {
+        self.options.request_headers = headers;
+        self
+    }
+
     pub fn worker_system(mut self, enabled: bool) -> Self {
         self.options.subsystems.worker_system = enabled;
         self

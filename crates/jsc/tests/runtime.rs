@@ -97,6 +97,26 @@ fn console_log_invokes_rust_callback() {
 }
 
 #[test]
+fn console_errors_include_the_javascript_stack() {
+    let messages = Rc::new(RefCell::new(Vec::new()));
+    let captured = Rc::clone(&messages);
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_console_callback(move |message| captured.borrow_mut().push(message.to_owned()))
+        .unwrap();
+
+    runtime
+        .eval(
+            "function failingFunction() { console.error(new Error('broken')); } failingFunction();",
+        )
+        .unwrap();
+
+    let message = &messages.borrow()[0];
+    assert!(message.contains("Error: broken"), "{message}");
+    assert!(message.contains("failingFunction"), "{message}");
+}
+
+#[test]
 fn safe_native_function_receives_arguments_and_returns_a_value() {
     let runtime = JsRuntime::new().unwrap();
     runtime

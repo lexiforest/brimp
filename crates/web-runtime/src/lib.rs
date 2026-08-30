@@ -1,6 +1,7 @@
 mod automation;
 mod blitz_net;
 mod browser;
+mod extraction;
 mod page;
 mod request;
 mod task;
@@ -12,6 +13,9 @@ pub use automation::{
     TouchPoint,
 };
 pub use browser::Browser;
+pub use extraction::{
+    DebugInfo, DebugRemoval, ExtractedDocument, ExtractionError, ExtractionOptions, MetaTagItem,
+};
 pub use page::{
     BrowserSubsystemOptions, LoadState, NavigationError, NavigationResponse, Page, PageOptions,
     PageOptionsBuilder, PersistentStorageOptions,

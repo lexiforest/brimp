@@ -14,7 +14,12 @@ use jsc::{
     JsException, JsObjectIdentity, JsRuntime, NativeCall, NativeError, NativeValue,
     PromiseSettlement, ProtectedJsObject,
 };
-use style::dom_apis::{MayUseInvalidation, QueryAll, QuerySelectorAllResult, query_selector};
+use selectors::matching::{
+    MatchingContext, MatchingForInvalidation, MatchingMode, NeedsSelectorFlags, SelectorCaches,
+    matches_selector_list,
+};
+use style::dom::{TDocument, TNode};
+use style::dom_apis::element_matches;
 
 use crate::{
     PersistentStorage, WrapperCache,
@@ -626,6 +631,7 @@ impl BindingRuntime {
             runtime.eval(include_str!("webgl.js"))?;
             runtime.eval("delete globalThis.__brimpWebGlHost")?;
         }
+        runtime.eval("delete globalThis.__brimpMarkTrustedEvent")?;
         runtime.eval(if cross_origin_isolated {
             include_str!("cross_origin_isolated.js")
         } else {
@@ -1745,18 +1751,42 @@ fn subtree_query_selector_all(
         .blitz()
         .try_parse_selector_list(selector)
         .map_err(|error| NativeError::new(format!("{error:?}")))?;
-    let mut results: QuerySelectorAllResult<&blitz_dom::Node> = Default::default();
-    query_selector::<&blitz_dom::Node, QueryAll>(
-        root,
-        &selectors,
-        &mut results,
-        MayUseInvalidation::Yes,
+    let mut selector_caches = SelectorCaches::default();
+    let mut context = MatchingContext::new(
+        MatchingMode::Normal,
+        None,
+        &mut selector_caches,
+        root.owner_doc().quirks_mode(),
+        NeedsSelectorFlags::No,
+        MatchingForInvalidation::No,
     );
-    Ok(results
-        .into_iter()
-        .map(|node| node.id)
-        .filter(|id| *id != root_id)
-        .collect())
+    context.scope_element = root
+        .as_element()
+        .map(|element| selectors::Element::opaque(&element));
+
+    fn collect(
+        document: &BrowserDocument,
+        node: &blitz_dom::Node,
+        selectors: &selectors::SelectorList<style::selector_parser::SelectorImpl>,
+        context: &mut MatchingContext<style::selector_parser::SelectorImpl>,
+        output: &mut Vec<NodeId>,
+    ) {
+        for child_id in &node.children {
+            let Some(child) = document.node(*child_id) else {
+                continue;
+            };
+            if let Some(element) = child.as_element()
+                && matches_selector_list(selectors, &element, context)
+            {
+                output.push(*child_id);
+            }
+            collect(document, child, selectors, context, output);
+        }
+    }
+
+    let mut results = Vec::new();
+    collect(document, root, &selectors, &mut context, &mut results);
+    Ok(results)
 }
 
 fn inline_style_property(state: &BindingState, node_id: NodeId, name: &str) -> String {

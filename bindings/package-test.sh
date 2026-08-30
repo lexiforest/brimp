@@ -36,6 +36,16 @@ node_package="$test_root/artifacts/$(basename "$node_package")"
 mkdir -p "$test_root/audit-python" "$test_root/audit-node"
 unzip -q "$python_wheel" -d "$test_root/audit-python"
 tar -xzf "$node_package" -C "$test_root/audit-node"
+for notice in \
+  "$test_root/audit-python/brimp/licenses/defuddle/NOTICE.md" \
+  "$test_root/audit-python/brimp/licenses/defuddle/licenses/defuddle-LICENSE" \
+  "$test_root/audit-node/package/licenses/defuddle/NOTICE.md" \
+  "$test_root/audit-node/package/licenses/defuddle/licenses/defuddle-LICENSE"; do
+  if [ ! -f "$notice" ]; then
+    echo "packaged binding is missing a Defuddle notice: $notice" >&2
+    exit 1
+  fi
+done
 python_extension=$(find "$test_root/audit-python" -name '_brimp*.so' -type f)
 node_extension="$test_root/audit-node/package/brimp_node.node"
 for extension in "$python_extension" "$node_extension"; do

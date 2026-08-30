@@ -6,8 +6,8 @@ use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use web_runtime::{
-    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, NavigationResponse,
-    PageOptions, PersistentStorageOptions,
+    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, ExtractionOptions,
+    NavigationResponse, PageOptions, PersistentStorageOptions,
 };
 
 // Keep Mach-O's LINKEDIT string table eight-byte aligned on current macOS.
@@ -174,6 +174,24 @@ impl PySession {
         let page = self.page.clone();
         let bytes = py.detach(move || page.screenshot(full_page).map_err(error))?;
         Ok(PyBytes::new(py, &bytes))
+    }
+
+    fn extract(&self, py: Python<'_>, options_json: String) -> PyResult<String> {
+        let options =
+            serde_json::from_str::<ExtractionOptions>(&options_json).map_err(|json_error| {
+                error(AutomationError::InvalidInput(format!(
+                    "invalid extraction options: {json_error}"
+                )))
+            })?;
+        let page = self.page.clone();
+        py.detach(move || {
+            page.extract(options)
+                .and_then(|document| {
+                    serde_json::to_string(&document)
+                        .map_err(|error| AutomationError::Internal(error.to_string()))
+                })
+                .map_err(error)
+        })
     }
 
     fn click(&self, py: Python<'_>, selector: String) -> PyResult<()> {

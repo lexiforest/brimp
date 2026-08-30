@@ -77,6 +77,40 @@ fn geometry_uses_the_configured_viewport() {
 }
 
 #[test]
+fn match_media_exposes_viewport_and_default_preference_queries() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser
+        .new_page(PageOptions::builder().viewport(640, 480).build())
+        .unwrap();
+    page.set_content("<html><body></body></html>").unwrap();
+
+    let result = page
+        .eval(
+            r#"(() => {
+                const dark = matchMedia("(prefers-color-scheme: dark)");
+                const light = matchMedia("(prefers-color-scheme: light)");
+                const wide = matchMedia("screen and (min-width: 600px) and (orientation: landscape)");
+                const print = matchMedia("print");
+                if (!(dark instanceof MediaQueryList) || dark.media !== "(prefers-color-scheme: dark)") return "shape";
+                if (dark.matches || !light.matches || !wide.matches || print.matches) return "matches";
+                if (typeof dark.addListener !== "function" || typeof dark.removeListener !== "function" || dark.onchange !== null) return "events";
+                const event = new MediaQueryListEvent("change", { media: dark.media, matches: true });
+                if (!(event instanceof Event) || event.media !== dark.media || !event.matches) return "event";
+                try { new MediaQueryList(); return "constructible"; } catch (error) {
+                    if (!(error instanceof TypeError)) return "constructor error";
+                }
+                if (!Function.prototype.toString.call(matchMedia).includes("[native code]")) return "native";
+                return "ok";
+            })()"#,
+        )
+        .unwrap()
+        .to_string()
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn computed_style_exposes_stylo_color_serialization() {
     let browser = Browser::new().unwrap();
     let mut page = browser.new_page(PageOptions::default()).unwrap();
@@ -511,6 +545,38 @@ fn cssom_preserves_rule_identity_and_exposes_stylesheet_metadata() {
                 if (sheet.cssRules.length !== 2) return "removeRule";
                 return "ok";
             })()"##,
+        )
+        .unwrap()
+        .to_string()
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn css_rule_list_reads_the_retained_rules_without_reparsing_the_stylesheet() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    let rules = (0..2_000)
+        .map(|index| format!(".rule-{index} {{ color: red; }}"))
+        .collect::<String>();
+    page.set_content(&format!(
+        "<html><head><style>{rules}</style></head><body></body></html>"
+    ))
+    .unwrap();
+
+    let result = page
+        .eval(
+            r#"(() => {
+                const rules = document.styleSheets[0].cssRules;
+                if (rules.length !== 2000) return `length: ${rules.length}`;
+                for (let pass = 0; pass < 3; pass++) {
+                    for (let index = 0; index < rules.length; index++) {
+                        if (rules[index] !== rules.item(index)) return `identity: ${index}`;
+                    }
+                }
+                return Array.from(rules).length === 2000 ? "ok" : "iteration";
+            })()"#,
         )
         .unwrap()
         .to_string()

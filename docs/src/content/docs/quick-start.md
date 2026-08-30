@@ -27,6 +27,7 @@ import brimp
 with brimp.Session() as session:
     response = session.get("https://example.com", timeout=30)
     print(session.evaluate("document.title"))
+    print(session.extract()["contentMarkdown"])
     session.hover("#menu")
     session.type("#name", "agent")
     session.click("#submit")
@@ -44,6 +45,7 @@ async function main() {
     const response = await session.get('https://example.com')
     console.log(response.statusCode, response.html)
     console.log(await session.evaluate('document.title'))
+    console.log((await session.extract()).contentMarkdown)
     await session.hover('#menu')
     await session.type('#name', 'agent')
     await session.click('#submit')
@@ -60,16 +62,17 @@ main().catch(error => {
 
 ## CLI
 
-Evaluate JavaScript after navigation:
+Extract Markdown from the live page or evaluate JavaScript after navigation:
 
 ```sh
-brimp eval https://example.com --js 'document.title'
+brimp get https://example.com --output example.md
+brimp get https://example.com --eval 'document.title'
 ```
 
 Capture a full-page screenshot:
 
 ```sh
-brimp screenshot https://example.com \
+brimp get https://example.com \
   --output example.png \
   --full-page
 ```

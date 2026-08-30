@@ -98,6 +98,22 @@ session.screenshot(path=None, *, full_page: bool = False) -> bytes
 Returns PNG bytes. When `path` is supplied, it writes the same bytes to that
 path.
 
+### `Session.extract()`
+
+```python
+session.extract(
+    *,
+    content_selector: str | None = None,
+    remove_images: bool = False,
+    language: str | None = None,
+    debug: bool = False,
+) -> dict
+```
+
+Runs the pinned Defuddle browser bundle against the current live DOM and
+returns extracted content, Markdown, and metadata. It does not reparse the page
+with jsdom or make another network request.
+
 ### Session input
 
 ```python

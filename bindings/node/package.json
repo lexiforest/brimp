@@ -14,6 +14,6 @@
   "types": "index.d.ts",
   "os": ["darwin"],
   "cpu": ["arm64"],
-  "files": ["index.js", "index.d.ts", "brimp_node.node", "libcurl-impersonate.4.dylib", "README.md", "SUPPORT.md"],
+  "files": ["index.js", "index.d.ts", "brimp_node.node", "libcurl-impersonate.4.dylib", "licenses", "README.md", "SUPPORT.md"],
   "engines": { "node": ">=18" }
 }

@@ -2,6 +2,7 @@
 "use strict";
 
 const host = globalThis.__brimpAudioHost;
+const markTrustedEvent = globalThis.__brimpMarkTrustedEvent;
 const call = (operation, ...arguments_) => host(operation, globalThis, ...arguments_);
 const construct = Symbol("WebAudio construction");
 const listenerNode = 9007199254740991;
@@ -234,7 +235,7 @@ class AudioScheduledSourceNode extends AudioNode {
         if (this.__ended) return;
         this.__ended = true;
         const event = new Event("ended");
-        event.isTrusted = true;
+        markTrustedEvent(event);
         this.dispatchEvent(event);
     }
 }
@@ -294,12 +295,12 @@ class AudioWorkletMessagePort extends EventTarget {
             data = JSON.parse(encoded);
         } catch {
             const error = new MessageEvent("messageerror", { data: null });
-            error.isTrusted = true;
+            markTrustedEvent(error);
             this.dispatchEvent(error);
             return;
         }
         const event = new MessageEvent("message", { data });
-        event.isTrusted = true;
+        markTrustedEvent(event);
         this.dispatchEvent(event);
     }
 }
@@ -513,7 +514,7 @@ class MediaElementController {
                     : this.context.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
                 this.loading = null;
                 const event = new Event("canplaythrough");
-                event.isTrusted = true;
+                markTrustedEvent(event);
                 this.element.dispatchEvent(event);
                 return this.buffer;
             }, error => {
@@ -541,7 +542,7 @@ class MediaElementController {
             this.offset = this.buffer.duration;
             this.endedFlag = true;
             const event = new Event("ended");
-            event.isTrusted = true;
+            markTrustedEvent(event);
             this.element.dispatchEvent(event);
         };
         call("audioSetParam", this.context.__id, this.node.__id, "gain",
@@ -1121,7 +1122,7 @@ class BaseAudioContext extends EventTarget {
                             outputBuffer,
                             bubbles: true,
                         });
-                        event.isTrusted = true;
+                        markTrustedEvent(event);
                         node.dispatchEvent(event);
                     }
                 } finally {
@@ -1167,7 +1168,7 @@ class BaseAudioContext extends EventTarget {
             if (!node) continue;
             if (message.kind === "processorerror") {
                 const event = new Event("processorerror");
-                event.isTrusted = true;
+                markTrustedEvent(event);
                 node.dispatchEvent(event);
             } else {
                 node.port.__deliver(message.data);
@@ -1176,7 +1177,7 @@ class BaseAudioContext extends EventTarget {
     }
     __dispatchStateChange() {
         const event = new Event("statechange");
-        event.isTrusted = true;
+        markTrustedEvent(event);
         this.dispatchEvent(event);
     }
     createOscillator() { return new OscillatorNode(construct, this, call("audioCreateNode", this.__id, "oscillator", 0)); }
@@ -1295,7 +1296,7 @@ class OfflineAudioContext extends BaseAudioContext {
                     queueMicrotask(() => this.__dispatchStateChange());
                     queueMicrotask(() => {
                         const event = new OfflineAudioCompletionEvent("complete", { renderedBuffer: buffer });
-                        event.isTrusted = true;
+                        markTrustedEvent(event);
                         this.dispatchEvent(event);
                     });
                     resolve(buffer);

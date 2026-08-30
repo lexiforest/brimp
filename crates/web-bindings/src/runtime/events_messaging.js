@@ -42,6 +42,12 @@ function __markTrustedEvent(event) {
     __trustedEvents.add(event);
     return event;
 }
+Object.defineProperty(globalThis, "__brimpMarkTrustedEvent", {
+    value: __markTrustedEvent,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+});
 
 class Event {
     constructor(type, options = {}) {

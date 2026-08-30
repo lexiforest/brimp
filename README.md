@@ -81,14 +81,15 @@ checksums for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and Windows x86-64.
 
 ### CLI
 
-Check the native runtime, evaluate JavaScript after navigation, or capture a
+Check the native runtime, extract a live page, evaluate JavaScript, or capture a
 PNG from the command line:
 
 ```sh
 brimp doctor
-brimp eval https://example.com --js 'document.title'
-brimp screenshot https://example.com --output example.png --full-page
-brimp eval https://example.com --persona persona/example.json --js 'navigator.userAgent'
+brimp get https://example.com --output example.md
+brimp get https://example.com --eval 'document.title'
+brimp get https://example.com --output example.png --full-page
+brimp get https://example.com --persona persona/example.json --eval 'navigator.userAgent'
 ```
 
 ### Python

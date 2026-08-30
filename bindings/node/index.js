@@ -190,6 +190,11 @@ class Session {
     return content
   }
 
+  async extract(options = {}) {
+    this._ensureOpen()
+    return JSON.parse(await call(() => this._inner.extract(JSON.stringify(options))))
+  }
+
   async click(selector) {
     this._ensureOpen()
     await call(() => this._inner.click(String(selector)))

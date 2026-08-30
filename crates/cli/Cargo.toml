@@ -10,8 +10,14 @@ path = "src/main.rs"
 
 [dependencies]
 brimp-cdp = { path = "../cdp" }
+http = "1"
+glob = "0.3"
 network = { path = "../network" }
 persona = { path = "../persona" }
+pico-args = "0.5"
+robotstxt = "0.3"
 serde_json = "1"
+tempfile = "3"
 tokio = { version = "1", features = ["rt-multi-thread"] }
 web-runtime = { path = "../web-runtime" }
+url = "2"

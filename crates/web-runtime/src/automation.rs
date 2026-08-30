@@ -11,8 +11,8 @@ use serde::Serialize;
 use serde_json::Value;
 
 use crate::{
-    NavigationError, NavigationResponse, Page, PageOptions, ScreenshotOptions, Viewport,
-    worker::WorkerCoordinator,
+    ExtractedDocument, ExtractionOptions, NavigationError, NavigationResponse, Page, PageOptions,
+    ScreenshotOptions, Viewport, worker::WorkerCoordinator,
 };
 
 fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
@@ -57,6 +57,8 @@ pub enum AutomationError {
     Closed,
     #[error("screenshot failure: {0}")]
     Screenshot(String),
+    #[error("extraction failure: {0}")]
+    Extraction(String),
     #[error("runtime failure: {0}")]
     Internal(String),
 }
@@ -86,6 +88,7 @@ impl AutomationError {
             Self::Unsupported(_) => "unsupported",
             Self::Closed => "closed",
             Self::Screenshot(_) => "screenshot",
+            Self::Extraction(_) => "extraction",
             Self::Internal(_) => "internal",
         }
     }
@@ -445,6 +448,38 @@ impl AutomationPage {
             response,
         })?
     }
+    pub fn extract(
+        &self,
+        options: ExtractionOptions,
+    ) -> Result<ExtractedDocument, AutomationError> {
+        self.request(|response| Command::Extract { options, response })?
+    }
+    pub fn wait_for_selector(
+        &self,
+        selector: impl Into<String>,
+        timeout: Duration,
+        cancellation: CancellationToken,
+    ) -> Result<(), AutomationError> {
+        self.request(|response| Command::WaitForSelector {
+            selector: selector.into(),
+            timeout,
+            cancellation,
+            response,
+        })?
+    }
+    pub fn wait_for_network_idle(
+        &self,
+        quiet_window: Duration,
+        timeout: Duration,
+        cancellation: CancellationToken,
+    ) -> Result<(), AutomationError> {
+        self.request(|response| Command::WaitForNetworkIdle {
+            quiet_window,
+            timeout,
+            cancellation,
+            response,
+        })?
+    }
     #[allow(clippy::too_many_arguments)]
     pub fn dispatch_mouse_event(
         &self,
@@ -709,6 +744,22 @@ enum Command {
         full_page: bool,
         response: mpsc::SyncSender<Result<Vec<u8>, AutomationError>>,
     },
+    Extract {
+        options: ExtractionOptions,
+        response: mpsc::SyncSender<Result<ExtractedDocument, AutomationError>>,
+    },
+    WaitForSelector {
+        selector: String,
+        timeout: Duration,
+        cancellation: CancellationToken,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
+    },
+    WaitForNetworkIdle {
+        quiet_window: Duration,
+        timeout: Duration,
+        cancellation: CancellationToken,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
+    },
     Input {
         command: String,
         response: mpsc::SyncSender<Result<(), AutomationError>>,
@@ -909,6 +960,73 @@ fn run_page(
                 let result = page
                     .screenshot_png(options)
                     .map_err(|error| AutomationError::Screenshot(error.to_string()));
+                let _ = response.send(result);
+            }
+            Command::Extract { options, response } => {
+                let result = page
+                    .extract(options)
+                    .map_err(|error| AutomationError::Extraction(error.to_string()));
+                let _ = response.send(result);
+            }
+            Command::WaitForSelector {
+                selector,
+                timeout,
+                cancellation,
+                response,
+            } => {
+                let started = Instant::now();
+                let encoded = serde_json::to_string(&selector)
+                    .map_err(|error| AutomationError::InvalidInput(error.to_string()));
+                let result = encoded.and_then(|encoded| {
+                    loop {
+                        if cancellation.is_cancelled() {
+                            break Err(AutomationError::Cancellation);
+                        }
+                        if started.elapsed() >= timeout {
+                            break Err(AutomationError::Timeout(timeout));
+                        }
+                        if evaluate(
+                            &page,
+                            &format!("document.querySelector({encoded}) !== null"),
+                        )? == Value::Bool(true)
+                        {
+                            break Ok(());
+                        }
+                        page.run_pending_tasks()
+                            .map_err(|error| AutomationError::JavaScript(error.to_string()))?;
+                        std::thread::sleep(Duration::from_millis(5));
+                    }
+                });
+                let _ = response.send(result);
+            }
+            Command::WaitForNetworkIdle {
+                quiet_window,
+                timeout,
+                cancellation,
+                response,
+            } => {
+                let started = Instant::now();
+                let mut idle_since = None;
+                let result = loop {
+                    if cancellation.is_cancelled() {
+                        break Err(AutomationError::Cancellation);
+                    }
+                    if started.elapsed() >= timeout {
+                        break Err(AutomationError::Timeout(timeout));
+                    }
+                    if let Err(error) = page.run_pending_tasks() {
+                        break Err(AutomationError::JavaScript(error.to_string()));
+                    }
+                    if page.is_network_idle() {
+                        let since = idle_since.get_or_insert_with(Instant::now);
+                        if since.elapsed() >= quiet_window {
+                            break Ok(());
+                        }
+                    } else {
+                        idle_since = None;
+                    }
+                    std::thread::sleep(Duration::from_millis(5));
+                };
                 let _ = response.send(result);
             }
             Command::Input { command, response } => {

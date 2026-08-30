@@ -24,6 +24,8 @@ async function main() {
     const response = await session.get('https://example.com', { timeoutMs: 30_000 })
     response.raiseForStatus()
     console.log(await session.evaluate('document.title'))
+    const article = await session.extract({ contentSelector: 'main' })
+    console.log(article.contentMarkdown)
     await session.hover('#menu')
     await session.type('#name', 'agent')
     await session.click('#submit')
@@ -33,6 +35,10 @@ async function main() {
   }
 }
 ```
+
+`session.extract()` runs the vendored Defuddle browser bundle against the live,
+post-JavaScript document. It does not create a jsdom document or make another
+network request.
 
 Worker, streaming-networking, persistent-storage, Canvas 2D, WebGL, WebGPU,
 and WebAudio APIs are disabled by default. Enable only the required surfaces

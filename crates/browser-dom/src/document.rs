@@ -232,6 +232,9 @@ impl BrowserDocument {
         if self.document_fragments.contains(&source) {
             self.document_fragments.insert(clone);
         }
+        if self.documents.contains(&source) {
+            self.documents.insert(clone);
+        }
         if let Some(document) = self.node_documents.get(&source).copied() {
             self.node_documents.insert(clone, document);
         }

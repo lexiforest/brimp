@@ -61,6 +61,9 @@ def copy_licenses(root: Path, package: Path, jsc_library_dir: Path) -> None:
         root / "bindings/python/python/brimp/licenses/curl-impersonate-LICENSE",
         licenses,
     )
+    defuddle = root / "crates/web-runtime/vendor/defuddle/0.19.3"
+    shutil.copytree(defuddle / "licenses", licenses / "defuddle")
+    shutil.copy2(defuddle / "NOTICE.md", licenses / "defuddle-NOTICE.md")
     jsc_licenses = jsc_library_dir.parent / "share/licenses"
     if not jsc_licenses.is_dir():
         raise RuntimeError(f"JavaScriptCore licenses are missing: {jsc_licenses}")

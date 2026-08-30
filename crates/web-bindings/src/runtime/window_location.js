@@ -17,6 +17,7 @@ class CharacterData extends Node {
         if (offset > this.length) throw new DOMException("offset is outside the data", "IndexSizeError");
         this.data = this.data.slice(0, offset) + String(data) + this.data.slice(offset + count);
     }
+    replaceWith(...nodes) { __replaceNode(this, nodes); }
     remove() { __removeNode(this); }
 }
 
@@ -38,8 +39,8 @@ class DocumentFragment extends Node {
         if (id === "") return null;
         return [...this.querySelectorAll("[id]")].find(element => element.id === id) ?? null;
     }
-    querySelector(selector) { return __callHost("querySelector", this, selector); }
-    querySelectorAll(selector) { return new NodeList(__callHost("querySelectorAll", this, selector)); }
+    querySelector(selector) { return __querySelectorWithHas(this, selector); }
+    querySelectorAll(selector) { return new NodeList(__querySelectorAllWithHas(this, selector)); }
     append(...nodes) { __appendNodes(this, nodes); }
     prepend(...nodes) { __prependNodes(this, nodes); }
     replaceChildren(...nodes) { __replaceChildren(this, nodes); }
@@ -73,4 +74,3 @@ class Navigator {
     get language() { return "en-US"; }
     get languages() { return ["en-US", "en"]; }
 }
-

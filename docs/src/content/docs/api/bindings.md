@@ -16,6 +16,7 @@ commands and errors into the conventions of the host language.
 | Native page | Session owns one page | Session owns one page |
 | Navigate | `session.get(url, ...)` | `await session.get(url, ...)` |
 | Evaluate JavaScript | `session.evaluate(source)` | `await session.evaluate(source)` |
+| Extract live DOM | `session.extract(...)` | `await session.extract(...)` |
 | Click | `session.click(selector)` | `await session.click(selector)` |
 | Hover | `session.hover(selector)` | `await session.hover(selector)` |
 | Type | `session.type(selector, text)` | `await session.type(selector, text)` |

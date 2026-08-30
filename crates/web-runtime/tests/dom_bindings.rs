@@ -432,6 +432,31 @@ fn element_queries_and_html_collections_are_scoped_and_live() {
 }
 
 #[test]
+fn selectors_scan_wide_subtrees_without_quadratic_sibling_traversal() {
+    let children = (0..5_000)
+        .map(|index| {
+            let class = if index % 1_000 == 0 { "hit" } else { "miss" };
+            format!("<span class='{class}' data-index='{index}'></span>")
+        })
+        .collect::<String>();
+    let page = page_with(&format!(
+        "<html><body><main>{children}</main></body></html>"
+    ));
+
+    assert_js(
+        &page,
+        r#"(() => {
+            const main = document.querySelector("main");
+            const hits = main.querySelectorAll(":scope > span.hit[data-index]");
+            return hits.length === 5 && hits[0].getAttribute("data-index") === "0" &&
+                hits[4].getAttribute("data-index") === "4000" &&
+                Array.from(main.children).every(element =>
+                    element.matches("span.hit") === element.classList.contains("hit"));
+        })()"#,
+    );
+}
+
+#[test]
 fn exposes_traversal_text_attributes_and_selectors() {
     let page =
         page_with("<html><head></head><body><div id='box' class='item'>Hello</div></body></html>");

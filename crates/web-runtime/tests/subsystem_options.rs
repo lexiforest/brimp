@@ -269,6 +269,23 @@ fn browser_subsystems_require_explicit_options() {
 }
 
 #[test]
+fn subsystem_event_trust_capability_is_not_exposed_to_page_scripts() {
+    let browser = Browser::with_resource_loader(Arc::new(UnusedLoader));
+    let page = browser
+        .new_page(PageOptions::builder().worker_system(true).build())
+        .unwrap();
+    assert_eq!(
+        page.eval(
+            "[typeof globalThis.__brimpMarkTrustedEvent, new Event('synthetic').isTrusted].join(',')"
+        )
+        .unwrap()
+        .to_string()
+        .unwrap(),
+        "undefined,false"
+    );
+}
+
+#[test]
 fn graphics_and_audio_options_are_independent() {
     let observed = |options: PageOptions| {
         let features = options.subsystems();
@@ -513,8 +530,9 @@ fn enabled_worker_uses_an_isolated_runtime_and_posts_messages() {
         r#"
         globalThis.workerResult = "pending";
         globalThis.workerNative = false;
+        globalThis.workerTrusted = false;
         const worker = new Worker("/worker.js");
-        worker.onmessage = event => { workerResult = String(event.data.doubled); workerNative = event.data.native; };
+        worker.onmessage = event => { workerResult = String(event.data.doubled); workerNative = event.data.native; workerTrusted = event.isTrusted; };
         worker.onerror = event => workerResult = "error:" + event.message;
         worker.postMessage(21);
         "#,
@@ -533,6 +551,13 @@ fn enabled_worker_uses_an_isolated_runtime_and_posts_messages() {
     );
     assert_eq!(
         page.eval("String(workerNative)")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true"
+    );
+    assert_eq!(
+        page.eval("String(workerTrusted)")
             .unwrap()
             .to_string()
             .unwrap(),

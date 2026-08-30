@@ -105,6 +105,12 @@ class ApiTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), content)
             self.assertTrue(content.startswith(b"\x89PNG\r\n\x1a\n"))
 
+    def test_extract_uses_the_live_document(self):
+        with brimp.Session() as session:
+            session.get(self.url + "/missing")
+            article = session.extract(content_selector="#value")
+            self.assertIn("rendered", article["contentMarkdown"])
+
     def test_page_subsystems_are_opt_in(self):
         with brimp.Session() as session:
             self.assertEqual(

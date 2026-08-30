@@ -12,8 +12,9 @@ use std::{
 use jsc_sys::{
     JSContextGetGlobalObject, JSContextRef, JSEvaluateScript, JSGarbageCollect,
     JSGlobalContextCreate, JSGlobalContextRef, JSGlobalContextRelease, JSObjectCallAsFunction,
-    JSObjectMake, JSObjectMakeDeferredPromise, JSObjectMakeFunctionWithCallback,
-    JSObjectSetProperty, JSValueMakeString, JSValueMakeUndefined, JSValueRef,
+    JSObjectGetProperty, JSObjectMake, JSObjectMakeDeferredPromise,
+    JSObjectMakeFunctionWithCallback, JSObjectSetProperty, JSValueIsNull, JSValueIsObject,
+    JSValueIsUndefined, JSValueMakeString, JSValueMakeUndefined, JSValueRef, JSValueToObject,
     K_JS_PROPERTY_ATTRIBUTE_NONE,
 };
 
@@ -65,7 +66,7 @@ impl JsRuntime {
             context,
             _thread_bound: PhantomData,
         };
-        runtime.set_console_callback(|message| println!("{message}"))?;
+        runtime.set_console_callback(|message| eprintln!("{message}"))?;
         Ok(runtime)
     }
 
@@ -305,20 +306,27 @@ impl JsRuntime {
 
     fn install_console_object(&self) -> Result<(), JsException> {
         let console_name = JsString::new("console")?;
-        let log_name = JsString::new("log")?;
         // SAFETY: the context is live and null class/data creates a plain object.
         let console = unsafe { JSObjectMake(self.as_raw(), ptr::null_mut(), ptr::null_mut()) };
-        // SAFETY: the context and function name are live and the callback has C ABI.
-        let log = unsafe {
-            JSObjectMakeFunctionWithCallback(self.as_raw(), log_name.as_raw(), Some(console_log))
-        };
-        if console.is_null() || log.is_null() {
+        if console.is_null() {
             return Err(JsException::new(
-                "JavaScriptCore failed to create console.log",
+                "JavaScriptCore failed to create the console object",
             ));
         }
 
-        set_property(self.as_raw(), console, &log_name, log)?;
+        for method in ["debug", "error", "info", "log", "warn"] {
+            let name = JsString::new(method)?;
+            // SAFETY: the context and function name are live and the callback has C ABI.
+            let function = unsafe {
+                JSObjectMakeFunctionWithCallback(self.as_raw(), name.as_raw(), Some(console_log))
+            };
+            if function.is_null() {
+                return Err(JsException::new(format!(
+                    "JavaScriptCore failed to create console.{method}"
+                )));
+            }
+            set_property(self.as_raw(), console, &name, function)?;
+        }
         // SAFETY: the context has a live standard global object.
         let global = unsafe { JSContextGetGlobalObject(self.as_raw()) };
         set_property(self.as_raw(), global, &console_name, console)
@@ -381,7 +389,9 @@ unsafe extern "C" fn console_log(
     };
     let message = arguments
         .iter()
-        .map(|value| value_to_string(context, *value).unwrap_or_else(|error| error.to_string()))
+        .map(|value| {
+            console_value_to_string(context, *value).unwrap_or_else(|error| error.to_string())
+        })
         .collect::<Vec<_>>()
         .join(" ");
     let callback =
@@ -391,6 +401,38 @@ unsafe extern "C" fn console_log(
     }
     // SAFETY: the callback's context remains live throughout the invocation.
     unsafe { JSValueMakeUndefined(context) }
+}
+
+fn console_value_to_string(
+    context: JSContextRef,
+    value: JSValueRef,
+) -> Result<String, JsException> {
+    // Browser consoles render Error objects with their stack. Preserve that diagnostic across
+    // the native callback instead of reducing errors to only `name: message`.
+    if unsafe { JSValueIsObject(context, value) } {
+        let mut exception = ptr::null();
+        let object = unsafe { JSValueToObject(context, value, &mut exception) };
+        if exception.is_null() && !object.is_null() {
+            let name = JsString::new("stack")?;
+            let stack =
+                unsafe { JSObjectGetProperty(context, object, name.as_raw(), &mut exception) };
+            if exception.is_null()
+                && !stack.is_null()
+                && !unsafe { JSValueIsNull(context, stack) || JSValueIsUndefined(context, stack) }
+            {
+                let stack = value_to_string(context, stack)?;
+                if !stack.is_empty() {
+                    let summary = value_to_string(context, value)?;
+                    return Ok(if stack.starts_with(&summary) {
+                        stack
+                    } else {
+                        format!("{summary}\n{stack}")
+                    });
+                }
+            }
+        }
+    }
+    value_to_string(context, value)
 }
 
 unsafe extern "C" fn native_dispatch(

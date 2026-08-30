@@ -2,6 +2,7 @@
 "use strict";
 
 const host = globalThis.__brimpWorkerHost;
+const markTrustedEvent = globalThis.__brimpMarkTrustedEvent;
 const call = (operation, ...arguments_) => host(operation, globalThis, ...arguments_);
 const clone = value => JSON.parse(JSON.stringify(value));
 const workers = new Map();
@@ -23,13 +24,13 @@ class Worker extends EventTarget {
             const envelope = JSON.parse(serialized);
             if (envelope.type === "message") {
                 const event = new MessageEvent("message", { data: envelope.data });
-                event.isTrusted = true;
+                markTrustedEvent(event);
                 this.dispatchEvent(event);
             } else if (envelope.type === "ready") {
-                this.dispatchEvent(new Event("load"));
+                this.dispatchEvent(markTrustedEvent(new Event("load")));
             } else {
                 const event = new ErrorEvent("error", { message: envelope.message });
-                event.isTrusted = true;
+                markTrustedEvent(event);
                 this.dispatchEvent(event);
             }
         });
@@ -118,7 +119,7 @@ class ServiceWorkerContainer extends EventTarget {
         const worker = new ServiceWorker(dedicated, url);
         const registration = new ServiceWorkerRegistration(worker, scope);
         this.__registrations.set(scope, registration);
-        dedicated.addEventListener("message", event => this.dispatchEvent(new MessageEvent("message", { data: event.data, source: worker })));
+        dedicated.addEventListener("message", event => this.dispatchEvent(markTrustedEvent(new MessageEvent("message", { data: event.data, source: worker }))));
         return new Promise((resolve, reject) => {
             dedicated.addEventListener("load", () => {
                 this.controller = worker;

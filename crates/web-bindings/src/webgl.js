@@ -2,6 +2,7 @@
 "use strict";
 
 const host = globalThis.__brimpWebGlHost;
+const markTrustedEvent = globalThis.__brimpMarkTrustedEvent;
 const construct = Symbol("WebGL construction");
 let graphicsPersona = null;
 const contextsByCanvas = new WeakMap();
@@ -689,7 +690,7 @@ function loseContext(context) {
             cancelable: true,
             statusMessage: "Context lost through WEBGL_lose_context",
         });
-        event.isTrusted = true;
+        markTrustedEvent(event);
         context.canvas.dispatchEvent(event);
         context.__restoreAllowed = event.defaultPrevented;
     }, 0);
@@ -712,7 +713,7 @@ function restoreContext(context) {
             }
         }
         const event = new WebGLContextEvent("webglcontextrestored");
-        event.isTrusted = true;
+        markTrustedEvent(event);
         context.canvas.dispatchEvent(event);
     }, 0);
 }

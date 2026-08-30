@@ -14,9 +14,9 @@ not alter browsing behavior.
 ## Loading
 
 - Rust: `PersonaConfig::from_json`, `from_json_file`, or `load_default_json`.
-- CLI: pass `--persona PATH` to `brimp eval` or `brimp screenshot`.
+- CLI: pass `--persona PATH` to `brimp get` or `brimp crawl`.
 - Python: pass the JSON text as `persona_json=`.
-- Node: pass the JSON text as `launch({ personaJson })`.
+- Node: pass the JSON text as `createSession({ personaJson })`.
 - `BRIMP_PERSONA_JSON` selects the opt-in default JSON path used by
   `load_default_json`; creating a browser does not implicitly read a file.
 

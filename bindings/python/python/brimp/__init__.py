@@ -232,6 +232,25 @@ class Session:
             Path(path).write_bytes(content)
         return content
 
+    def extract(
+        self,
+        *,
+        content_selector: str | None = None,
+        remove_images: bool = False,
+        language: str | None = None,
+        debug: bool = False,
+    ):
+        self._ensure_open()
+        options = {"removeImages": bool(remove_images), "debug": bool(debug)}
+        if content_selector is not None:
+            options["contentSelector"] = str(content_selector)
+        if language is not None:
+            options["language"] = str(language)
+        try:
+            return _json.loads(self._inner.extract(_json.dumps(options)))
+        except RuntimeError as error:
+            raise _translate(error) from error
+
     def click(self, selector: str):
         self._ensure_open()
         try:

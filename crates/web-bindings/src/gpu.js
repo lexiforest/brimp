@@ -2,6 +2,7 @@
 "use strict";
 
 const host = globalThis.__brimpGpuHost;
+const markTrustedEvent = globalThis.__brimpMarkTrustedEvent;
 let graphicsPersona = null;
 const devicesById = new Map();
 const call = (operation, ...arguments_) => {
@@ -1292,7 +1293,7 @@ class GPUDevice extends EventTarget {
             const records = JSON.parse(host("gpuTakeUncapturedErrors", globalThis, this.__id));
             for (const record of records) {
                 const event = new GPUUncapturedErrorEvent("uncapturederror", { error: gpuErrorFromRecord(record) });
-                event.isTrusted = true;
+                markTrustedEvent(event);
                 this.dispatchEvent(event);
             }
         });
