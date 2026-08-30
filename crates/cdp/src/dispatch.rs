@@ -6,7 +6,7 @@ use base64::Engine;
 use serde_json::{Value, json};
 use web_runtime::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken, PageOptions,
-    RemoteArgument,
+    RemoteArgument, TouchPoint,
 };
 
 use crate::protocol::{Event, Request, Response};
@@ -161,6 +161,7 @@ impl ConnectionState {
             "Emulation.setEmulatedMedia" => self.set_emulated_media(request),
             "Input.dispatchMouseEvent" => self.dispatch_mouse_event(request).await,
             "Input.dispatchKeyEvent" => self.dispatch_key_event(request).await,
+            "Input.dispatchTouchEvent" => self.dispatch_touch_event(request).await,
             "Input.insertText" => self.insert_text(request).await,
             "Log.enable"
             | "Log.disable"
@@ -1006,7 +1007,16 @@ impl ConnectionState {
     }
 
     async fn focus_node(&self, request: &Request) -> Result<Value, DispatchError> {
-        self.invoke_node_method(request, "focus").await
+        let session = self.session(request)?;
+        let node = remote_node_expression(&request.params)?;
+        let node = format!(
+            "(() => {{ const state = globalThis.__brimpCdpRemoteObjects; return {node}; }})()"
+        );
+        let page = self.page_for_session(session)?.clone();
+        tokio::task::spawn_blocking(move || page.focus_remote_node(node))
+            .await
+            .map_err(internal_join)??;
+        Ok(json!({}))
     }
 
     async fn invoke_node_method(
@@ -1226,10 +1236,16 @@ impl ConnectionState {
 
     fn set_touch_emulation(&self, request: &Request) -> Result<Value, DispatchError> {
         self.session(request)?;
-        if bool_param(&request.params, "enabled")? {
-            return Err(DispatchError::invalid_params(
-                "touch emulation is not supported",
-            ));
+        bool_param(&request.params, "enabled")?;
+        if let Some(max_touch_points) = request.params.get("maxTouchPoints") {
+            let max_touch_points = max_touch_points.as_u64().ok_or_else(|| {
+                DispatchError::invalid_params("maxTouchPoints must be a non-negative integer")
+            })?;
+            if max_touch_points > u32::MAX as u64 {
+                return Err(DispatchError::invalid_params(
+                    "maxTouchPoints exceeds the supported range",
+                ));
+            }
         }
         Ok(json!({}))
     }
@@ -1269,16 +1285,11 @@ impl ConnectionState {
     async fn dispatch_mouse_event(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let event_type = string_param(&request.params, "type")?;
-        let dom_event = match event_type {
-            "mouseMoved" => "mousemove",
-            "mousePressed" => "mousedown",
-            "mouseReleased" => "mouseup",
-            _ => {
-                return Err(DispatchError::invalid_params(
-                    "supported mouse event types are mouseMoved, mousePressed, and mouseReleased",
-                ));
-            }
-        };
+        if !matches!(event_type, "mouseMoved" | "mousePressed" | "mouseReleased") {
+            return Err(DispatchError::invalid_params(
+                "supported mouse event types are mouseMoved, mousePressed, and mouseReleased",
+            ));
+        }
         let x = finite_number_param(&request.params, "x")?;
         let y = finite_number_param(&request.params, "y")?;
         let button = match request
@@ -1309,43 +1320,22 @@ impl ConnectionState {
             .get("modifiers")
             .and_then(Value::as_u64)
             .unwrap_or(0);
-        let x = x.to_string();
-        let y = y.to_string();
-        let button = button.to_string();
-        let buttons = buttons.to_string();
-        let click_count = click_count.to_string();
-        let modifiers = modifiers.to_string();
-        let dom_event = serde_json::to_string(dom_event).map_err(internal_json)?;
-        let event_type = serde_json::to_string(event_type).map_err(internal_json)?;
-        let source = render_script(
-            include_str!("scripts/dispatch_mouse_event.js"),
-            &[
-                ("__X__", &x),
-                ("__Y__", &y),
-                ("__BUTTON__", &button),
-                ("__BUTTONS__", &buttons),
-                ("__CLICK_COUNT__", &click_count),
-                ("__MODIFIERS__", &modifiers),
-                ("__DOM_EVENT__", &dom_event),
-                ("__EVENT_TYPE__", &event_type),
-            ],
-        );
         let page = self.page_for_session(session)?.clone();
-        tokio::task::spawn_blocking(move || page.evaluate(source))
-            .await
-            .map_err(internal_join)??;
+        let event_type = event_type.to_owned();
+        tokio::task::spawn_blocking(move || {
+            page.dispatch_mouse_event(event_type, x, y, button, buttons, click_count, modifiers)
+        })
+        .await
+        .map_err(internal_join)??;
         Ok(json!({}))
     }
 
     async fn dispatch_key_event(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
         let event_type = string_param(&request.params, "type")?;
-        let dom_event = match event_type {
-            "keyDown" | "rawKeyDown" => "keydown",
-            "keyUp" => "keyup",
-            "char" => "keypress",
-            _ => return Err(DispatchError::invalid_params("unsupported key event type")),
-        };
+        if !matches!(event_type, "keyDown" | "rawKeyDown" | "keyUp" | "char") {
+            return Err(DispatchError::invalid_params("unsupported key event type"));
+        }
         let key = request
             .params
             .get("key")
@@ -1366,54 +1356,118 @@ impl ConnectionState {
             .get("modifiers")
             .and_then(Value::as_u64)
             .unwrap_or(0);
-        let key = serde_json::to_string(key).map_err(internal_json)?;
-        let code = serde_json::to_string(code).map_err(internal_json)?;
-        let text = serde_json::to_string(text).map_err(internal_json)?;
         let repeat = request
             .params
             .get("autoRepeat")
             .and_then(Value::as_bool)
-            .unwrap_or(false)
-            .to_string();
-        let modifiers = modifiers.to_string();
-        let dom_event = serde_json::to_string(dom_event).map_err(internal_json)?;
-        let event_type = serde_json::to_string(event_type).map_err(internal_json)?;
-        let source = render_script(
-            include_str!("scripts/dispatch_key_event.js"),
-            &[
-                ("__DOM_EVENT__", &dom_event),
-                ("__EVENT_TYPE__", &event_type),
-                ("__KEY__", &key),
-                ("__CODE__", &code),
-                ("__TEXT__", &text),
-                ("__REPEAT__", &repeat),
-                ("__MODIFIERS__", &modifiers),
-            ],
-        );
+            .unwrap_or(false);
+        let event_type = event_type.to_owned();
+        let key = key.to_owned();
+        let code = code.to_owned();
+        let text = text.to_owned();
         let page = self.page_for_session(session)?.clone();
-        tokio::task::spawn_blocking(move || page.evaluate(source))
-            .await
-            .map_err(internal_join)??;
+        tokio::task::spawn_blocking(move || {
+            page.dispatch_key_event(event_type, key, code, text, repeat, modifiers)
+        })
+        .await
+        .map_err(internal_join)??;
+        Ok(json!({}))
+    }
+
+    async fn dispatch_touch_event(&self, request: &Request) -> Result<Value, DispatchError> {
+        let session = self.session(request)?;
+        let event_type = string_param(&request.params, "type")?;
+        if !matches!(
+            event_type,
+            "touchStart" | "touchMove" | "touchEnd" | "touchCancel"
+        ) {
+            return Err(DispatchError::invalid_params(
+                "unsupported touch event type",
+            ));
+        }
+        let points = request
+            .params
+            .get("touchPoints")
+            .and_then(Value::as_array)
+            .ok_or_else(|| DispatchError::invalid_params("touchPoints must be an array"))?;
+        if matches!(event_type, "touchEnd" | "touchCancel") && !points.is_empty() {
+            return Err(DispatchError::invalid_params(
+                "touchPoints must be empty for touchEnd and touchCancel",
+            ));
+        }
+        if matches!(event_type, "touchStart" | "touchMove") && points.is_empty() {
+            return Err(DispatchError::invalid_params(
+                "touchPoints must not be empty for touchStart and touchMove",
+            ));
+        }
+        let mut touch_points = Vec::with_capacity(points.len());
+        let mut touch_ids = HashSet::new();
+        for point in points {
+            let x = finite_number_param(point, "x")?;
+            let y = finite_number_param(point, "y")?;
+            let finite_optional = |name: &str, default: f64| {
+                point.get(name).map_or(Ok(default), |value| {
+                    value
+                        .as_f64()
+                        .filter(|number| number.is_finite())
+                        .ok_or_else(|| {
+                            DispatchError::invalid_params(format!(
+                                "touch point {name} must be finite"
+                            ))
+                        })
+                })
+            };
+            let id = point.get("id").and_then(Value::as_u64).unwrap_or(0);
+            let id = u32::try_from(id)
+                .map_err(|_| DispatchError::invalid_params("touch point id is too large"))?;
+            if !touch_ids.insert(id) {
+                return Err(DispatchError::invalid_params(
+                    "touch point ids must be unique",
+                ));
+            }
+            let touch_point = TouchPoint {
+                id,
+                x,
+                y,
+                radius_x: finite_optional("radiusX", 1.0)?,
+                radius_y: finite_optional("radiusY", 1.0)?,
+                rotation_angle: finite_optional("rotationAngle", 0.0)?,
+                force: finite_optional("force", 1.0)?,
+                tangential_pressure: finite_optional("tangentialPressure", 0.0)?,
+            };
+            if touch_point.radius_x < 0.0
+                || touch_point.radius_y < 0.0
+                || !(0.0..=1.0).contains(&touch_point.force)
+                || !(-1.0..=1.0).contains(&touch_point.tangential_pressure)
+            {
+                return Err(DispatchError::invalid_params(
+                    "touch point radius, force, or tangentialPressure is outside its supported range",
+                ));
+            }
+            touch_points.push(touch_point);
+        }
+        let modifiers = request
+            .params
+            .get("modifiers")
+            .and_then(Value::as_u64)
+            .unwrap_or(0);
+        let event_type = event_type.to_owned();
+        let page = self.page_for_session(session)?.clone();
+        tokio::task::spawn_blocking(move || {
+            page.dispatch_touch_event(event_type, touch_points, modifiers)
+        })
+        .await
+        .map_err(internal_join)??;
         Ok(json!({}))
     }
 
     async fn insert_text(&self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?;
-        let text = string_param(&request.params, "text")?;
-        let text = serde_json::to_string(text).map_err(internal_json)?;
-        let source = render_script(
-            include_str!("scripts/insert_text.js"),
-            &[("__TEXT__", &text)],
-        );
+        let text = string_param(&request.params, "text")?.to_owned();
         let page = self.page_for_session(session)?.clone();
-        let inserted = tokio::task::spawn_blocking(move || page.evaluate(source))
+        tokio::task::spawn_blocking(move || page.insert_text(text))
             .await
             .map_err(internal_join)??;
-        if inserted != Value::Bool(true) {
-            return Err(DispatchError::invalid_request(
-                "there is no focused text control",
-            ));
-        }
         Ok(json!({}))
     }
 

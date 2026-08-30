@@ -195,6 +195,42 @@ impl JsRuntime {
         Ok(unsafe { JsValue::from_raw(self, result) })
     }
 
+    pub fn call_function_with_string_and_object(
+        &self,
+        function: &ProtectedJsObject,
+        value: &str,
+        object: &ProtectedJsObject,
+    ) -> Result<JsValue<'_>, JsException> {
+        let function = function.handle(self);
+        let object = object.handle(self);
+        let value = JsString::new(value)?;
+        // SAFETY: the temporary string and context are live for this conversion.
+        let string_argument = unsafe { JSValueMakeString(self.as_raw(), value.as_raw()) };
+        let arguments = [string_argument, object.as_raw(self).cast_const()];
+        let mut exception = ptr::null();
+        // SAFETY: the function and both arguments belong to this live context.
+        let result = unsafe {
+            JSObjectCallAsFunction(
+                self.as_raw(),
+                function.as_raw(self),
+                ptr::null_mut(),
+                arguments.len(),
+                arguments.as_ptr(),
+                &mut exception,
+            )
+        };
+        if !exception.is_null() {
+            return Err(exception_from_raw(self.as_raw(), exception));
+        }
+        if result.is_null() {
+            return Err(JsException::new(
+                "JavaScriptCore returned no value from function call",
+            ));
+        }
+        // SAFETY: the call result is live in this runtime.
+        Ok(unsafe { JsValue::from_raw(self, result) })
+    }
+
     pub fn make_object_with_prototype(
         &self,
         prototype: crate::JsObjectIdentity,

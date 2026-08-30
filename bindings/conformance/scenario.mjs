@@ -12,6 +12,11 @@ session.cookies.manual = 'yes'
 const response = await session.get(url, { params: { q: ['one', 'two'] } })
 const title = await session.evaluate('document.title')
 const value = await session.evaluate('({answer: 42, values: [true, null]})')
+await session.hover('#submit')
+await session.click('#submit')
+await session.type('#name', 'agent')
+await session.tap('#tap')
+const inputResult = await session.evaluate("({value: document.querySelector('#name').value, events: inputEvents})")
 const evaluationErrors = {}
 for (const [name, expression] of Object.entries({javascript: "throw new Error('boom')", unsupported: 'undefined'})) {
   try { await session.evaluate(expression) }
@@ -30,6 +35,9 @@ const result = {
   headers: response.headers.get('CONTENT-TYPE') === 'text/html; charset=utf-8',
   state: inspection.header === 'node' && inspection.cookie.includes('manual=yes') && inspection.cookie.includes('server=ready'),
   value,
+  input: inputResult.value === 'agent' && inputResult.events.every(event => event.trusted),
+  hover: inputResult.events.some(event => event.id === 'submit' && event.type === 'pointermove'),
+  touch: inputResult.events.some(event => event.id === 'tap' && event.type === 'click' && event.pointerType === 'touch'),
   png: screenshot.subarray(0, 8).equals(Buffer.from('\x89PNG\r\n\x1a\n', 'binary')) && (await fs.readFile(screenshotPath)).equals(screenshot),
   oneShot: (await brimp.get(url)).statusCode === 200,
 }

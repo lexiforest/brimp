@@ -20,6 +20,9 @@ with brimp.Session() as session:
     response = session.get("https://example.com", timeout=30)
     response.raise_for_status()
     print(session.evaluate("document.title"))
+    session.hover("#menu")
+    session.type("#name", "agent")
+    session.click("#submit")
     session.screenshot("page.png", full_page=True)
 ```
 

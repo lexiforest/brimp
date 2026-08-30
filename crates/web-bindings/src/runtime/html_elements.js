@@ -331,7 +331,7 @@ class HTMLIFrameElement extends HTMLElement {
                         origin: document.location?.origin ?? location.origin,
                         source: window,
                     });
-                    event.isTrusted = true;
+                    __markTrustedEvent(event);
                     childWindow.dispatchEvent(event);
                 }, 0);
             };
@@ -384,7 +384,7 @@ function __mediaElementController(element) {
 }
 function __trustedMediaEvent(element, type) {
     const event = new Event(type);
-    event.isTrusted = true;
+    __markTrustedEvent(event);
     element.dispatchEvent(event);
 }
 class HTMLMediaElement extends HTMLElement {
@@ -853,4 +853,3 @@ __defineNullAsEmptyStringReflection(HTMLFrameElement.prototype, "marginWidth", "
 __defineBooleanReflections(HTMLDirectoryElement.prototype, [["compact"]]);
 __defineStringReflections(HTMLFontElement.prototype, [["color"], ["face"], ["size"]]);
 __defineNullAsEmptyStringReflection(HTMLFontElement.prototype, "color", "color");
-

@@ -98,6 +98,20 @@ session.screenshot(path=None, *, full_page: bool = False) -> bytes
 Returns PNG bytes. When `path` is supplied, it writes the same bytes to that
 path.
 
+### Session input
+
+```python
+session.click(selector: str) -> None
+session.hover(selector: str) -> None
+session.type(selector: str, text: str) -> None
+session.tap(selector: str) -> None
+```
+
+These methods hit-test and send trusted browser input events. `hover()` moves
+without pressing, while `type()` focuses
+the matched control before sending keyboard/editing input. A missing selector
+raises `InvalidRequest` with code `invalid_input`.
+
 ### `Session.close()`
 
 Closes native resources. Closing more than once is safe. Operations after close

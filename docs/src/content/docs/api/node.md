@@ -64,12 +64,18 @@ persona-owned. An `AbortSignal` cancels the core operation and network request.
 ```ts
 session.evaluate(source): Promise<unknown>
 session.screenshot({ path?, fullPage? }): Promise<Buffer>
+session.click(selector): Promise<void>
+session.hover(selector): Promise<void>
+session.type(selector, text): Promise<void>
+session.tap(selector): Promise<void>
 session.close(): Promise<void>
 ```
 
 Evaluation returns JSON-compatible values. Screenshots return PNG bytes and
-write the same bytes when `path` is provided. Closing is idempotent; operations
-after close fail with code `closed`.
+write the same bytes when `path` is provided. Input methods hit-test and send
+trusted browser input events; `hover` moves without pressing and `type` focuses the matched control first. A
+missing selector rejects with code `invalid_input`. Closing is idempotent;
+operations after close fail with code `closed`.
 
 ## `Response`
 

@@ -16,6 +16,10 @@ commands and errors into the conventions of the host language.
 | Native page | Session owns one page | Session owns one page |
 | Navigate | `session.get(url, ...)` | `await session.get(url, ...)` |
 | Evaluate JavaScript | `session.evaluate(source)` | `await session.evaluate(source)` |
+| Click | `session.click(selector)` | `await session.click(selector)` |
+| Hover | `session.hover(selector)` | `await session.hover(selector)` |
+| Type | `session.type(selector, text)` | `await session.type(selector, text)` |
+| Tap | `session.tap(selector)` | `await session.tap(selector)` |
 | Read response | `response.content`, `text`, `html` | `response.content`, `text`, `html` |
 | Capture PNG | `session.screenshot(...)` | `await session.screenshot(...)` |
 | Close | `session.close()` or context manager | `await session.close()` |

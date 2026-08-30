@@ -232,6 +232,34 @@ class Session:
             Path(path).write_bytes(content)
         return content
 
+    def click(self, selector: str):
+        self._ensure_open()
+        try:
+            self._inner.click(str(selector))
+        except RuntimeError as error:
+            raise _translate(error) from error
+
+    def hover(self, selector: str):
+        self._ensure_open()
+        try:
+            self._inner.hover(str(selector))
+        except RuntimeError as error:
+            raise _translate(error) from error
+
+    def type(self, selector: str, text: str):
+        self._ensure_open()
+        try:
+            self._inner.type_text(str(selector), str(text))
+        except RuntimeError as error:
+            raise _translate(error) from error
+
+    def tap(self, selector: str):
+        self._ensure_open()
+        try:
+            self._inner.tap(str(selector))
+        except RuntimeError as error:
+            raise _translate(error) from error
+
     def close(self):
         if not self._closed:
             self._inner.close()

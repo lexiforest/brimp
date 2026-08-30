@@ -27,6 +27,9 @@ import brimp
 with brimp.Session() as session:
     response = session.get("https://example.com", timeout=30)
     print(session.evaluate("document.title"))
+    session.hover("#menu")
+    session.type("#name", "agent")
+    session.click("#submit")
     session.screenshot("example.png", full_page=True)
 ```
 
@@ -41,6 +44,9 @@ async function main() {
     const response = await session.get('https://example.com')
     console.log(response.statusCode, response.html)
     console.log(await session.evaluate('document.title'))
+    await session.hover('#menu')
+    await session.type('#name', 'agent')
+    await session.click('#submit')
   } finally {
     await session.close()
   }

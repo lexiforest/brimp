@@ -217,6 +217,30 @@ impl Session {
     }
 
     #[napi]
+    pub async fn click(&self, selector: String) -> Result<()> {
+        let page = self.page.clone();
+        blocking(move || page.click(selector)).await
+    }
+
+    #[napi]
+    pub async fn hover(&self, selector: String) -> Result<()> {
+        let page = self.page.clone();
+        blocking(move || page.hover(selector)).await
+    }
+
+    #[napi]
+    pub async fn type_text(&self, selector: String, text: String) -> Result<()> {
+        let page = self.page.clone();
+        blocking(move || page.type_text(selector, text)).await
+    }
+
+    #[napi]
+    pub async fn tap(&self, selector: String) -> Result<()> {
+        let page = self.page.clone();
+        blocking(move || page.tap(selector)).await
+    }
+
+    #[napi]
     pub async fn close(&self) -> Result<()> {
         let browser = Arc::clone(&self.browser);
         blocking(move || {

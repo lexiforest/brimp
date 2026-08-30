@@ -69,6 +69,10 @@ export declare class Session {
   get(url: string | URL, options?: GetOptions): Promise<Response>
   evaluate(expression: string): Promise<unknown>
   screenshot(options?: ScreenshotOptions): Promise<Buffer>
+  click(selector: string): Promise<void>
+  hover(selector: string): Promise<void>
+  type(selector: string, text: string): Promise<void>
+  tap(selector: string): Promise<void>
   close(): Promise<void>
 }
 

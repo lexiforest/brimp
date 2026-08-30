@@ -37,6 +37,12 @@ for (const [name, code] of Object.entries(DOMException.__codes)) {
     Object.defineProperty(DOMException.prototype, constant, { value: code, enumerable: true });
 }
 
+const __trustedEvents = new WeakSet();
+function __markTrustedEvent(event) {
+    __trustedEvents.add(event);
+    return event;
+}
+
 class Event {
     constructor(type, options = {}) {
         if (arguments.length === 0) throw new TypeError("Event type is required");
@@ -49,7 +55,6 @@ class Event {
         this.eventPhase = 0;
         this.defaultPrevented = false;
         this.composed = Boolean(options.composed);
-        this.isTrusted = false;
         this.timeStamp = Date.now();
         this.__stopped = false;
         this.__immediateStopped = false;
@@ -79,11 +84,17 @@ class Event {
     set cancelBubble(value) { if (value) this.stopPropagation(); }
     get returnValue() { return !this.defaultPrevented; }
     set returnValue(value) { if (!value) this.preventDefault(); }
+    get isTrusted() { return __trustedEvents.has(this); }
 }
 Event.NONE = 0;
 Event.CAPTURING_PHASE = 1;
 Event.AT_TARGET = 2;
 Event.BUBBLING_PHASE = 3;
+Object.defineProperty(Event.prototype, "isTrusted", {
+    ...Object.getOwnPropertyDescriptor(Event.prototype, "isTrusted"),
+    enumerable: true,
+    configurable: false,
+});
 
 class CustomEvent extends Event {
     constructor(type, options = {}) {
@@ -190,6 +201,50 @@ KeyboardEvent.DOM_KEY_LOCATION_STANDARD = 0;
 KeyboardEvent.DOM_KEY_LOCATION_LEFT = 1;
 KeyboardEvent.DOM_KEY_LOCATION_RIGHT = 2;
 KeyboardEvent.DOM_KEY_LOCATION_NUMPAD = 3;
+
+class PointerEvent extends MouseEvent {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.pointerId = Number(options.pointerId ?? 0);
+        this.width = Number(options.width ?? 1);
+        this.height = Number(options.height ?? 1);
+        this.pressure = Number(options.pressure ?? 0);
+        this.tangentialPressure = Number(options.tangentialPressure ?? 0);
+        this.tiltX = Number(options.tiltX ?? 0);
+        this.tiltY = Number(options.tiltY ?? 0);
+        this.twist = Number(options.twist ?? 0);
+        this.pointerType = String(options.pointerType ?? "");
+        this.isPrimary = Boolean(options.isPrimary);
+    }
+}
+
+class Touch {
+    constructor(options = {}) {
+        if (options.target === undefined) throw new TypeError("Touch target is required");
+        this.identifier = Number(options.identifier ?? 0);
+        this.target = options.target;
+        this.clientX = Number(options.clientX ?? 0);
+        this.clientY = Number(options.clientY ?? 0);
+        this.screenX = Number(options.screenX ?? this.clientX);
+        this.screenY = Number(options.screenY ?? this.clientY);
+        this.pageX = Number(options.pageX ?? this.clientX);
+        this.pageY = Number(options.pageY ?? this.clientY);
+        this.radiusX = Number(options.radiusX ?? 0);
+        this.radiusY = Number(options.radiusY ?? 0);
+        this.rotationAngle = Number(options.rotationAngle ?? 0);
+        this.force = Number(options.force ?? 0);
+    }
+}
+
+class TouchEvent extends UIEvent {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.touches = Object.freeze(Array.from(options.touches ?? []));
+        this.targetTouches = Object.freeze(Array.from(options.targetTouches ?? []));
+        this.changedTouches = Object.freeze(Array.from(options.changedTouches ?? []));
+        __initializeModifiers(this, options);
+    }
+}
 
 class MessageEvent extends Event {
     constructor(type, options = {}) {
@@ -400,7 +455,7 @@ class MessagePort extends EventTarget {
             const data = this.__queue.shift();
             if (hasMessage) {
                 const event = new MessageEvent("message", { data });
-                event.isTrusted = true;
+                __markTrustedEvent(event);
                 this.dispatchEvent(event);
             }
             this.__schedule();
@@ -431,7 +486,7 @@ function postMessage(message, targetOrigin = "/", transfer = []) {
             origin: location.origin,
             source: window,
         });
-        event.isTrusted = true;
+        __markTrustedEvent(event);
         window.dispatchEvent(event);
     }, 0);
 }
@@ -492,7 +547,7 @@ class AbortSignal extends EventTarget {
         }
         for (const signal of aborted) {
             const event = new Event("abort");
-            event.isTrusted = true;
+            __markTrustedEvent(event);
             signal.dispatchEvent(event);
         }
     }
@@ -502,4 +557,3 @@ class AbortController {
     constructor() { this.signal = new AbortSignal(); }
     abort(reason = undefined) { this.signal.__abort(reason); }
 }
-

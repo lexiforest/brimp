@@ -24,6 +24,9 @@ async function main() {
     const response = await session.get('https://example.com', { timeoutMs: 30_000 })
     response.raiseForStatus()
     console.log(await session.evaluate('document.title'))
+    await session.hover('#menu')
+    await session.type('#name', 'agent')
+    await session.click('#submit')
     await session.screenshot({ path: 'page.png', fullPage: true })
   } finally {
     await session.close()

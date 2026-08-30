@@ -44,8 +44,28 @@ published.
 
 ## CLI and CDP server
 
-The `brimp` executable, including the `brimp cdp` subcommand, is currently
-produced by a source build:
+Each tagged GitHub Release includes standalone CLI archives for every supported
+native target:
+
+| Operating system | Architecture | Archive target |
+| --- | --- | --- |
+| Linux | x86-64 | `x86_64-unknown-linux-gnu` |
+| Linux | ARM64 | `aarch64-unknown-linux-gnu` |
+| macOS 11+ | ARM64 | `aarch64-apple-darwin` |
+| Windows | x86-64 | `x86_64-pc-windows-msvc` |
+
+Unix archives use `.tar.gz`; Windows uses `.zip`. Every archive has a matching
+`.sha256` file and bundles JavaScriptCore, curl-impersonate, required non-system
+runtime libraries, and licenses. For example, on macOS:
+
+```sh
+shasum -a 256 -c brimp-vVERSION-aarch64-apple-darwin.tar.gz.sha256
+tar -xzf brimp-vVERSION-aarch64-apple-darwin.tar.gz
+./brimp-vVERSION-aarch64-apple-darwin/brimp doctor
+```
+
+Other targets build the `brimp` executable, including the `brimp cdp`
+subcommand, from source:
 
 ```sh
 git clone https://github.com/lexiforest/brimp.git

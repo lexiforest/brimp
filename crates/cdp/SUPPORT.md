@@ -61,13 +61,14 @@ error `-32601` rather than a success stub.
 | `Network.setUserAgentOverride` | Applies coherent request-header and `navigator` identity overrides; client-hint metadata is not implemented. |
 | `Emulation.setDeviceMetricsOverride` | Applies width, height, and device-pixel ratio to the page viewport. Mobile emulation is not implemented. |
 | `Emulation.clearDeviceMetricsOverride` | Restores Brimp's default page viewport. |
-| `Emulation.setTouchEmulationEnabled` | Accepts the disabled state and rejects enabling unsupported touch emulation. |
+| `Emulation.setTouchEmulationEnabled` | Enables or disables touch-mode compatibility for CDP clients. |
 | `Emulation.setFocusEmulationEnabled` | Accepted because Brimp's single headless page remains focused. |
 | `Emulation.setEmulatedMedia` | Accepts Brimp's existing default media values and rejects unsupported overrides. |
 | `Emulation.setUserAgentOverride` | Alias of the coherent Network user-agent, language, and platform override. |
-| `Input.dispatchMouseEvent` | Hit-tests and dispatches move, press, release, click, and double-click mouse events for the supported buttons and modifiers. |
-| `Input.dispatchKeyEvent` | Dispatches keyboard events and applies text insertion or backspace editing to the focused text control. |
-| `Input.insertText` | Inserts text into the focused input or textarea and emits an input event. |
+| `Input.dispatchMouseEvent` | Sends trusted pointer/mouse move, press, release, click, and double-click input through the browser input state machine. |
+| `Input.dispatchKeyEvent` | Sends trusted keyboard input and applies supported editing and focus defaults. |
+| `Input.dispatchTouchEvent` | Sends trusted touch and touch-pointer start, move, end, or cancel input, including tap compatibility clicks. |
+| `Input.insertText` | Inserts text into the focused input or textarea and emits a trusted input event. |
 | `Audits.enable`, `Audits.disable` | Accepted subscription state for client initialization; no audit events are emitted. |
 | `CSS.enable`, `CSS.disable` | Accepted subscription state for client initialization; no CSS domain events are emitted. |
 | `Log.enable`, `Log.disable` | Accepted subscription state for client initialization; no Log domain events are emitted. |

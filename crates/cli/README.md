@@ -2,6 +2,10 @@
 
 Thin command-line interface over `web-runtime`'s canonical automation page.
 
+Tagged releases publish relocatable archives for manylinux 2.28 x86-64/ARM64,
+macOS 11+ ARM64, and Windows x86-64. Each archive includes the required native
+runtimes, their licenses, and a separate SHA-256 checksum.
+
 ```text
 brimp doctor
 brimp cdp [--bind HOST:PORT] [--allow-non-loopback]

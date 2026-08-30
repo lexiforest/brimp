@@ -54,6 +54,7 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("runtime/storage_fetch.js"),
     include_str!("runtime/css_style.js"),
     include_str!("runtime/observers.js"),
+    include_str!("runtime/input.js"),
     include_str!("runtime/install.js"),
 );
 
@@ -268,6 +269,7 @@ impl TimerQueue {
 
 pub struct BindingRuntime {
     state: Rc<BindingState>,
+    input_controller: ProtectedJsObject,
 }
 
 pub struct BindingQueues {
@@ -726,9 +728,42 @@ impl BindingRuntime {
             document_fragment: runtime.eval("DocumentFragment.prototype")?.to_object()?,
             css_style: runtime.eval("CSSStyleProperties.prototype")?.to_object()?,
         });
-        let bindings = Self { state };
+        let input_controller = runtime
+            .eval("globalThis.__brimpInputController")?
+            .to_object()?;
+        runtime.eval("delete globalThis.__brimpInputController")?;
+        let bindings = Self {
+            state,
+            input_controller,
+        };
         bindings.reset_document(runtime)?;
         Ok(bindings)
+    }
+
+    pub fn dispatch_input(
+        &self,
+        runtime: &JsRuntime,
+        serialized_command: &str,
+    ) -> Result<String, JsException> {
+        runtime
+            .call_function_with_string(&self.input_controller, serialized_command)?
+            .to_string()
+    }
+
+    pub fn dispatch_input_on(
+        &self,
+        runtime: &JsRuntime,
+        serialized_command: &str,
+        target_expression: &str,
+    ) -> Result<String, JsException> {
+        let target = runtime.eval(target_expression)?.to_object()?;
+        runtime
+            .call_function_with_string_and_object(
+                &self.input_controller,
+                serialized_command,
+                &target,
+            )?
+            .to_string()
     }
 
     pub fn reset_document(&self, runtime: &JsRuntime) -> Result<(), JsException> {

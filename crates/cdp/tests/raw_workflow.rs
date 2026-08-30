@@ -429,7 +429,31 @@ async fn discovery_and_raw_websocket_workflow() {
         &mut socket,
         54,
         "Runtime.evaluate",
-        json!({"expression": "(() => { const input = document.createElement('input'); document.body.prepend(input); return input; })()"}),
+        json!({"expression": r#"(() => {
+            globalThis.inputEvents = [];
+            const input = document.createElement('input');
+            input.id = 'input';
+            input.style.cssText = 'position:fixed;left:20px;top:20px;width:120px;height:30px';
+            const button = document.createElement('button');
+            button.id = 'button';
+            button.textContent = 'click';
+            button.style.cssText = 'position:fixed;left:20px;top:70px;width:120px;height:30px';
+            const tap = document.createElement('button');
+            tap.id = 'tap';
+            tap.textContent = 'tap';
+            tap.style.cssText = 'position:fixed;left:20px;top:120px;width:120px;height:30px';
+            document.body.append(input, button, tap);
+            for (const target of [input, button, tap]) {
+                for (const type of ['input', 'keydown', 'keyup', 'pointerdown', 'mousedown',
+                    'touchstart', 'touchend', 'pointerup', 'mouseup', 'click']) {
+                    target.addEventListener(type, event => inputEvents.push({
+                        id: target.id, type, trusted: event.isTrusted,
+                        pointerType: event.pointerType || ''
+                    }));
+                }
+            }
+            return input;
+        })()"#}),
         Some(&session),
     )
     .await["result"]["result"]["objectId"]
@@ -469,6 +493,87 @@ async fn discovery_and_raw_websocket_workflow() {
     )
     .await;
     assert_eq!(input_value["result"]["result"]["value"], "typed");
+    command(
+        &mut socket,
+        90,
+        "Input.dispatchKeyEvent",
+        json!({"type": "keyDown", "key": "x", "text": "x"}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        91,
+        "Input.dispatchKeyEvent",
+        json!({"type": "keyUp", "key": "x"}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        92,
+        "Input.dispatchMouseEvent",
+        json!({"type": "mousePressed", "x": 40, "y": 80, "button": "left", "buttons": 1, "clickCount": 1}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        93,
+        "Input.dispatchMouseEvent",
+        json!({"type": "mouseReleased", "x": 40, "y": 80, "button": "left", "buttons": 0, "clickCount": 1}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        94,
+        "Emulation.setTouchEmulationEnabled",
+        json!({"enabled": true, "maxTouchPoints": 1}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        95,
+        "Input.dispatchTouchEvent",
+        json!({"type": "touchStart", "touchPoints": [{"id": 0, "x": 40, "y": 130}]}),
+        Some(&session),
+    )
+    .await;
+    command(
+        &mut socket,
+        96,
+        "Input.dispatchTouchEvent",
+        json!({"type": "touchEnd", "touchPoints": []}),
+        Some(&session),
+    )
+    .await;
+    let input_audit = command(
+        &mut socket,
+        97,
+        "Runtime.evaluate",
+        json!({"expression": "({value: document.querySelector('#input').value, events: inputEvents})", "returnByValue": true}),
+        Some(&session),
+    )
+    .await;
+    let audit = &input_audit["result"]["result"]["value"];
+    assert_eq!(audit["value"], "typedx");
+    let input_events = audit["events"].as_array().unwrap();
+    assert!(input_events.iter().all(|event| event["trusted"] == true));
+    assert!(
+        input_events
+            .iter()
+            .any(|event| event["id"] == "button" && event["type"] == "click")
+    );
+    assert!(
+        input_events
+            .iter()
+            .any(|event| event["id"] == "tap" && event["type"] == "touchstart")
+    );
+    assert!(input_events.iter().any(|event| event["id"] == "tap"
+        && event["type"] == "click"
+        && event["pointerType"] == "touch"));
     let properties = command(
         &mut socket,
         36,

@@ -9,6 +9,7 @@ mod worker;
 
 pub use automation::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken, RemoteArgument,
+    TouchPoint,
 };
 pub use browser::Browser;
 pub use page::{

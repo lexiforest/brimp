@@ -107,6 +107,19 @@ Python `Session.evaluate()`, Node `page.evaluate()`, CLI `brimp eval`, and CDP
 supports page-owned remote object handles through `Runtime.callFunctionOn`,
 `Runtime.getProperties`, and the release methods.
 
+## Browser input boundary
+
+Mouse, pointer, keyboard, text, focus, and touch commands enter one private
+owner-thread input state machine. It owns hover, pressed-button, active-touch,
+and focus state; performs hit testing and supported default actions; and emits
+browser-trusted event sequences. Page JavaScript cannot call this controller.
+Script-created events and calls such as `element.dispatchEvent(...)` remain
+untrusted, as they are in a browser.
+
+The Python and Node selector methods and CDP `Input` commands use this same
+boundary, so their targeting, ordering, cancellation, editing, and activation
+semantics do not diverge by interface.
+
 ## Native-looking Web APIs
 
 Browser API constructors and methods are implemented partly in JavaScript and

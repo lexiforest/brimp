@@ -13,6 +13,11 @@ def main(url):
     response = session.get(url, params={"q": ["one", "two"]})
     title = session.evaluate("document.title")
     value = session.evaluate("({answer: 42, values: [true, null]})")
+    session.hover("#submit")
+    session.click("#submit")
+    session.type("#name", "agent")
+    session.tap("#tap")
+    input_result = session.evaluate("({value: document.querySelector('#name').value, events: inputEvents})")
     evaluation_errors = {}
     for name, expression in {
         "javascript": "throw new Error('boom')",
@@ -35,6 +40,9 @@ def main(url):
         "headers": response.headers["CONTENT-TYPE"] == "text/html; charset=utf-8",
         "state": inspection["header"] == "python" and "manual=yes" in inspection["cookie"] and "server=ready" in inspection["cookie"],
         "value": value,
+        "input": input_result["value"] == "agent" and all(event["trusted"] for event in input_result["events"]),
+        "hover": any(event["id"] == "submit" and event["type"] == "pointermove" for event in input_result["events"]),
+        "touch": any(event["id"] == "tap" and event["type"] == "click" and event["pointerType"] == "touch" for event in input_result["events"]),
         "png": png,
         "oneShot": brimp.get(url).status_code == 200,
     }

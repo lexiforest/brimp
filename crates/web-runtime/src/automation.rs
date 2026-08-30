@@ -7,6 +7,7 @@ use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use network::{HeaderList, ResourceLoader};
+use serde::Serialize;
 use serde_json::Value;
 
 use crate::{
@@ -58,6 +59,19 @@ pub enum AutomationError {
     Screenshot(String),
     #[error("runtime failure: {0}")]
     Internal(String),
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TouchPoint {
+    pub id: u32,
+    pub x: f64,
+    pub y: f64,
+    pub radius_x: f64,
+    pub radius_y: f64,
+    pub rotation_angle: f64,
+    pub force: f64,
+    pub tangential_pressure: f64,
 }
 impl AutomationError {
     pub fn code(&self) -> &'static str {
@@ -413,6 +427,119 @@ impl AutomationPage {
             response,
         })?
     }
+    #[allow(clippy::too_many_arguments)]
+    pub fn dispatch_mouse_event(
+        &self,
+        event_type: impl Into<String>,
+        x: f64,
+        y: f64,
+        button: u8,
+        buttons: u64,
+        click_count: u64,
+        modifiers: u64,
+    ) -> Result<(), AutomationError> {
+        if !x.is_finite() || !y.is_finite() {
+            return Err(AutomationError::InvalidInput(
+                "mouse coordinates must be finite".into(),
+            ));
+        }
+        self.input(serde_json::json!({
+            "action": "mouse",
+            "eventType": event_type.into(),
+            "x": x,
+            "y": y,
+            "button": button,
+            "buttons": buttons,
+            "clickCount": click_count,
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn dispatch_key_event(
+        &self,
+        event_type: impl Into<String>,
+        key: impl Into<String>,
+        code: impl Into<String>,
+        text: impl Into<String>,
+        auto_repeat: bool,
+        modifiers: u64,
+    ) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({
+            "action": "key",
+            "eventType": event_type.into(),
+            "key": key.into(),
+            "code": code.into(),
+            "text": text.into(),
+            "autoRepeat": auto_repeat,
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn insert_text(&self, text: impl Into<String>) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({"action": "insertText", "text": text.into()}))
+    }
+    pub fn dispatch_touch_event(
+        &self,
+        event_type: impl Into<String>,
+        touch_points: Vec<TouchPoint>,
+        modifiers: u64,
+    ) -> Result<(), AutomationError> {
+        if touch_points.iter().any(|point| {
+            !point.x.is_finite()
+                || !point.y.is_finite()
+                || !point.radius_x.is_finite()
+                || !point.radius_y.is_finite()
+                || !point.rotation_angle.is_finite()
+                || !point.force.is_finite()
+                || !point.tangential_pressure.is_finite()
+                || point.radius_x < 0.0
+                || point.radius_y < 0.0
+                || !(0.0..=1.0).contains(&point.force)
+                || !(-1.0..=1.0).contains(&point.tangential_pressure)
+        }) {
+            return Err(AutomationError::InvalidInput(
+                "touch point values are outside their supported ranges".into(),
+            ));
+        }
+        self.input(serde_json::json!({
+            "action": "touch",
+            "eventType": event_type.into(),
+            "touchPoints": touch_points,
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn click(&self, selector: impl Into<String>) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({"action": "click", "selector": selector.into()}))
+    }
+    pub fn hover(&self, selector: impl Into<String>) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({"action": "hover", "selector": selector.into()}))
+    }
+    pub fn type_text(
+        &self,
+        selector: impl Into<String>,
+        text: impl Into<String>,
+    ) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({
+            "action": "type",
+            "selector": selector.into(),
+            "text": text.into(),
+        }))
+    }
+    pub fn tap(&self, selector: impl Into<String>) -> Result<(), AutomationError> {
+        self.input(serde_json::json!({"action": "tap", "selector": selector.into()}))
+    }
+    pub fn focus_remote_node(
+        &self,
+        target_expression: impl Into<String>,
+    ) -> Result<(), AutomationError> {
+        self.request(|response| Command::FocusRemoteNode {
+            target_expression: target_expression.into(),
+            response,
+        })?
+    }
+    fn input(&self, command: Value) -> Result<(), AutomationError> {
+        let command = serde_json::to_string(&command)
+            .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+        self.request(|response| Command::Input { command, response })?
+    }
     pub fn close(&self) {
         self.control.close();
     }
@@ -563,6 +690,14 @@ enum Command {
     Screenshot {
         full_page: bool,
         response: mpsc::SyncSender<Result<Vec<u8>, AutomationError>>,
+    },
+    Input {
+        command: String,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
+    },
+    FocusRemoteNode {
+        target_expression: String,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
     },
     Close(mpsc::SyncSender<()>),
 }
@@ -756,6 +891,34 @@ fn run_page(
                 let result = page
                     .screenshot_png(options)
                     .map_err(|error| AutomationError::Screenshot(error.to_string()));
+                let _ = response.send(result);
+            }
+            Command::Input { command, response } => {
+                let result = page.dispatch_input(&command).map(|_| ()).map_err(|error| {
+                    let message = error.to_string();
+                    if let Some((_, selector)) = message.split_once("BRIMP_INPUT_NOT_FOUND:") {
+                        AutomationError::InvalidInput(format!(
+                            "selector did not match an element: {}",
+                            selector.trim_end_matches(']')
+                        ))
+                    } else if message.contains("BRIMP_INPUT_NO_FOCUS") {
+                        AutomationError::InvalidInput(
+                            "text input requires a focused editable control".into(),
+                        )
+                    } else {
+                        AutomationError::JavaScript(message)
+                    }
+                });
+                let _ = response.send(result);
+            }
+            Command::FocusRemoteNode {
+                target_expression,
+                response,
+            } => {
+                let result = page
+                    .dispatch_input_on(r#"{"action":"focusTarget"}"#, &target_expression)
+                    .map(|_| ())
+                    .map_err(|error| AutomationError::JavaScript(error.to_string()));
                 let _ = response.send(result);
             }
             Command::Close(done) => {

@@ -7,7 +7,16 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-HTML = b"<!doctype html><title>Bindings</title><main>Hello bindings</main>"
+HTML = b"""<!doctype html><title>Bindings</title><main>Hello bindings</main>
+<button id='submit'>Submit</button><input id='name'><button id='tap'>Tap</button>
+<script>
+globalThis.inputEvents = [];
+for (const target of document.querySelectorAll('button,input')) {
+  for (const type of ['pointerover','pointerenter','pointermove','pointerdown','mousedown','focus','keydown','input','keyup','touchstart','touchend','pointerup','mouseup','click']) {
+    target.addEventListener(type, event => inputEvents.push({id: target.id, type, trusted: event.isTrusted, pointerType: event.pointerType || ''}));
+  }
+}
+</script>"""
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):

@@ -176,6 +176,26 @@ impl PySession {
         Ok(PyBytes::new(py, &bytes))
     }
 
+    fn click(&self, py: Python<'_>, selector: String) -> PyResult<()> {
+        let page = self.page.clone();
+        py.detach(move || page.click(selector).map_err(error))
+    }
+
+    fn hover(&self, py: Python<'_>, selector: String) -> PyResult<()> {
+        let page = self.page.clone();
+        py.detach(move || page.hover(selector).map_err(error))
+    }
+
+    fn type_text(&self, py: Python<'_>, selector: String, text: String) -> PyResult<()> {
+        let page = self.page.clone();
+        py.detach(move || page.type_text(selector, text).map_err(error))
+    }
+
+    fn tap(&self, py: Python<'_>, selector: String) -> PyResult<()> {
+        let page = self.page.clone();
+        py.detach(move || page.tap(selector).map_err(error))
+    }
+
     fn close(&self, py: Python<'_>) {
         let browser = Arc::clone(&self.browser);
         py.detach(move || browser.close());

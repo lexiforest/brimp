@@ -190,6 +190,26 @@ class Session {
     return content
   }
 
+  async click(selector) {
+    this._ensureOpen()
+    await call(() => this._inner.click(String(selector)))
+  }
+
+  async hover(selector) {
+    this._ensureOpen()
+    await call(() => this._inner.hover(String(selector)))
+  }
+
+  async type(selector, text) {
+    this._ensureOpen()
+    await call(() => this._inner.typeText(String(selector), String(text)))
+  }
+
+  async tap(selector) {
+    this._ensureOpen()
+    await call(() => this._inner.tap(String(selector)))
+  }
+
   async close() {
     if (!this._closed) {
       await call(() => this._inner.close())

@@ -528,6 +528,26 @@ impl Page {
         Ok(value)
     }
 
+    pub(crate) fn dispatch_input(&self, serialized_command: &str) -> Result<String, JsException> {
+        let value = self.bindings.dispatch_input(&self.js, serialized_command)?;
+        self.perform_microtask_checkpoint()?;
+        self.start_pending_fetches()?;
+        Ok(value)
+    }
+
+    pub(crate) fn dispatch_input_on(
+        &self,
+        serialized_command: &str,
+        target_expression: &str,
+    ) -> Result<String, JsException> {
+        let value =
+            self.bindings
+                .dispatch_input_on(&self.js, serialized_command, target_expression)?;
+        self.perform_microtask_checkpoint()?;
+        self.start_pending_fetches()?;
+        Ok(value)
+    }
+
     pub fn set_console_callback<F>(&self, callback: F) -> Result<(), JsException>
     where
         F: Fn(&str) + 'static,

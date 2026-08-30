@@ -74,7 +74,8 @@ The Node package remains macOS ARM64:
 npm install @brimp/brimp
 ```
 
-The standalone `brimp` executable is produced by the source build below.
+Tagged GitHub Releases include self-contained `brimp` archives and SHA-256
+checksums for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and Windows x86-64.
 
 ## Usage
 
@@ -114,6 +115,9 @@ with brimp.Session() as session:
     response = session.get("https://example.com", params={"q": "browser"})
     response.raise_for_status()
     print(session.evaluate("document.title"))
+    session.hover("#menu")
+    session.type("#name", "agent")
+    session.click("#submit")
     session.screenshot("example.png", full_page=True)
 ```
 
@@ -128,6 +132,9 @@ async function main() {
     const response = await session.get('https://example.com')
     console.log(response.statusCode, response.html)
     console.log(await session.evaluate('document.title'))
+    await session.hover('#menu')
+    await session.type('#name', 'agent')
+    await session.click('#submit')
   } finally {
     await session.close()
   }
