@@ -12,25 +12,24 @@ commands and errors into the conventions of the host language.
 
 | Operation | Python | Node.js |
 | --- | --- | --- |
-| Create browser/session | `brimp.Session(...)` | `await launch(...)` |
-| Create page | Session owns one page | `await browser.newPage(...)` |
-| Navigate | `session.get(url, ...)` | `await page.goto(url, ...)` |
-| Evaluate JavaScript | `session.evaluate(source)` | `await page.evaluate(source)` |
-| Read title | Evaluate `document.title` | `await page.title()` |
-| Read document text | Evaluate `document.documentElement.textContent` | `await page.textContent()` |
-| Capture PNG | `session.screenshot(...)` | `await page.screenshot(...)` |
-| Close | `session.close()` or context manager | `await page.close(); await browser.close()` |
+| Create session | `brimp.Session(...)` | `await createSession(...)` |
+| Native page | Session owns one page | Session owns one page |
+| Navigate | `session.get(url, ...)` | `await session.get(url, ...)` |
+| Evaluate JavaScript | `session.evaluate(source)` | `await session.evaluate(source)` |
+| Read response | `response.content`, `text`, `html` | `response.content`, `text`, `html` |
+| Capture PNG | `session.screenshot(...)` | `await session.screenshot(...)` |
+| Close | `session.close()` or context manager | `await session.close()` |
 
-Python follows a synchronous Requests-style session/response model. Node uses
-an asynchronous browser/page model and supports `AbortSignal` cancellation for
-navigation. Use the dedicated [Python reference](/api/python/) and [Node.js
-reference](/api/node/) for complete signatures.
+Both bindings use a session/response model. Python is synchronous; Node returns
+Promises and supports `AbortSignal` cancellation for navigation. Use the
+dedicated [Python reference](/api/python/) and [Node.js reference](/api/node/)
+for complete signatures.
 
 ## Page options
 
 Heavy browser subsystems are page-scoped and absent by default.
 
-| Surface | Python `Session` | Node `browser.newPage()` |
+| Surface | Python `Session` | Node `createSession()` |
 | --- | --- | --- |
 | Workers and worklets | `enable_worker=True` | `enableWorker: true` |
 | Streaming networking | `enable_streaming_networking=True` | `enableStreamingNetworking: true` |
@@ -63,16 +62,15 @@ when code needs a JavaScriptCore value handle instead of JSON serialization.
 
 ## Resource lifetime
 
-Close bindings explicitly. Python sessions support `with`; Node pages and
-browsers expose idempotent asynchronous `close()` methods. Closing the browser
-closes its child pages and joins their owner threads. Operations after close
-fail with the binding's stable `closed` error category.
+Close bindings explicitly. Python sessions support `with`; Node sessions expose
+an idempotent asynchronous `close()` method. Closing a session closes its page
+and joins the owner thread. Operations after close fail with the binding's
+stable `closed` error category.
 
 ## Choosing a binding or CDP
 
-- Choose Python for synchronous request/response extraction and persistent
-  cookies/connections.
-- Choose Node for asynchronous in-process navigation and cancellation.
+- Choose Python for synchronous request/response extraction.
+- Choose Node for asynchronous request/response extraction and cancellation.
 - Choose CDP when an existing Playwright or Puppeteer workflow only needs
   Brimp's documented protocol subset.
 - Choose Rust when embedding the page/runtime directly or supplying a custom

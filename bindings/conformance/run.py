@@ -11,14 +11,30 @@ HTML = b"<!doctype html><title>Bindings</title><main>Hello bindings</main>"
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == "/hang":
+        if self.path.startswith("/hang"):
             time.sleep(5)
             return
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
-        self.send_header("Content-Length", str(len(HTML)))
+        if self.path.startswith("/inspect"):
+            body = json.dumps({
+                "header": self.headers.get("X-Binding"),
+                "cookie": self.headers.get("Cookie"),
+            }).encode()
+            status = 200
+            content_type = "application/json; charset=utf-8"
+        elif self.path.startswith("/missing"):
+            body = HTML
+            status = 404
+            content_type = "text/html; charset=utf-8"
+        else:
+            body = HTML
+            status = 200
+            content_type = "text/html; charset=utf-8"
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Set-Cookie", "server=ready; Path=/")
         self.end_headers()
-        self.wfile.write(HTML)
+        self.wfile.write(body)
     def log_message(self, *_): pass
 
 def run(command, env=None):
@@ -44,6 +60,8 @@ def main():
         node = run(["node", os.path.join(os.path.dirname(__file__), "scenario.mjs"), url, sys.argv[2]])
     finally:
         server.shutdown(); thread.join()
+    if node.pop("cancelled", None) is not True:
+        raise RuntimeError("Node AbortSignal did not cancel navigation")
     if python != node:
         raise RuntimeError(f"binding results differ:\npython={python}\nnode={node}")
     print(json.dumps(python, sort_keys=True))

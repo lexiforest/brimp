@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -5,24 +6,18 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use web_runtime::{
     AutomationBrowser, AutomationError, AutomationPage, CancellationToken as CoreCancellationToken,
-    PageOptions, PersistentStorageOptions,
+    NavigationResponse, PageOptions, PersistentStorageOptions,
 };
-
-#[cfg(target_os = "macos")]
-unsafe extern "C" {
-    static NSApp: *mut std::ffi::c_void;
-}
 
 #[napi]
 pub fn native_ready() -> bool {
-    #[cfg(target_os = "macos")]
-    let _alignment = unsafe { std::ptr::read_volatile(&raw const NSApp) };
     true
 }
 
 fn error(error: AutomationError) -> napi::Error {
     napi::Error::from_reason(format!("brimp {}: {error}", error.code()))
 }
+
 async fn blocking<T: Send + 'static>(
     operation: impl FnOnce() -> std::result::Result<T, AutomationError> + Send + 'static,
 ) -> Result<T> {
@@ -36,6 +31,7 @@ async fn blocking<T: Send + 'static>(
 pub struct CancellationToken {
     inner: CoreCancellationToken,
 }
+
 #[napi]
 impl CancellationToken {
     #[napi(constructor)]
@@ -44,24 +40,23 @@ impl CancellationToken {
             inner: CoreCancellationToken::new(),
         }
     }
+
     #[napi]
     pub fn cancel(&self) {
         self.inner.cancel();
     }
 }
+
 impl Default for CancellationToken {
     fn default() -> Self {
         Self::new()
     }
 }
 
-#[napi(js_name = "NativeBrowser")]
-pub struct Browser {
-    inner: Arc<AutomationBrowser>,
-}
-
 #[napi(object)]
-pub struct NativePageOptions {
+pub struct NativeSessionOptions {
+    pub persona_json: Option<String>,
+    pub ca_bundle: Option<String>,
     pub enable_worker: Option<bool>,
     pub enable_streaming_networking: Option<bool>,
     pub enable_canvas: Option<bool>,
@@ -73,18 +68,7 @@ pub struct NativePageOptions {
     pub storage_quota_bytes: Option<f64>,
 }
 
-fn page_options(options: Option<NativePageOptions>) -> Result<PageOptions> {
-    let options = options.unwrap_or(NativePageOptions {
-        enable_worker: None,
-        enable_streaming_networking: None,
-        enable_canvas: None,
-        enable_webgl: None,
-        enable_webgpu: None,
-        enable_webaudio: None,
-        enable_webaudio_output: None,
-        storage_path: None,
-        storage_quota_bytes: None,
-    });
+fn page_options(options: &NativeSessionOptions) -> Result<PageOptions> {
     let mut builder = PageOptions::builder()
         .worker_system(options.enable_worker.unwrap_or(false))
         .streaming_networking(options.enable_streaming_networking.unwrap_or(false))
@@ -98,7 +82,7 @@ fn page_options(options: Option<NativePageOptions>) -> Result<PageOptions> {
             "storageQuotaBytes requires storagePath".into(),
         )));
     }
-    if let Some(path) = options.storage_path {
+    if let Some(path) = options.storage_path.as_ref() {
         let quota = options
             .storage_quota_bytes
             .unwrap_or(1024.0 * 1024.0 * 1024.0);
@@ -113,68 +97,108 @@ fn page_options(options: Option<NativePageOptions>) -> Result<PageOptions> {
     Ok(builder.build())
 }
 
-#[napi]
-impl Browser {
-    #[napi(factory)]
-    pub async fn launch(persona_json: Option<String>) -> Result<Self> {
-        let persona = persona_json
-            .map(|json| persona::PersonaConfig::from_json(&json))
-            .transpose()
-            .map_err(|persona_error| {
-                error(AutomationError::InvalidInput(persona_error.to_string()))
-            })?;
-        blocking(move || match persona {
-            Some(persona) => AutomationBrowser::with_persona(persona),
-            None => AutomationBrowser::new(),
-        })
-        .await
-        .map(|browser| Self {
-            inner: Arc::new(browser),
-        })
-    }
-    #[napi]
-    pub async fn new_page(&self, options: Option<NativePageOptions>) -> Result<NativePage> {
-        let browser = Arc::clone(&self.inner);
-        let options = page_options(options)?;
-        blocking(move || browser.new_page(options))
-            .await
-            .map(|inner| NativePage { inner })
-    }
-    #[napi]
-    pub async fn close(&self) -> Result<()> {
-        let browser = Arc::clone(&self.inner);
-        blocking(move || {
-            browser.close();
-            Ok(())
-        })
-        .await
+fn pairs(values: Vec<(String, String)>) -> Vec<Vec<String>> {
+    values
+        .into_iter()
+        .map(|(name, value)| vec![name, value])
+        .collect()
+}
+
+#[napi(object)]
+pub struct NativeResponse {
+    pub status_code: u32,
+    pub reason: String,
+    pub url: String,
+    pub headers: Vec<Vec<String>>,
+    pub content: Buffer,
+    pub html: Option<String>,
+    pub cookies: Vec<Vec<String>>,
+    pub elapsed: f64,
+}
+
+impl From<NavigationResponse> for NativeResponse {
+    fn from(response: NavigationResponse) -> Self {
+        Self {
+            status_code: u32::from(response.status_code),
+            reason: response.reason,
+            url: response.url,
+            headers: pairs(response.headers),
+            content: Buffer::from(response.content),
+            html: response.html,
+            cookies: pairs(response.cookies),
+            elapsed: response.elapsed.as_secs_f64(),
+        }
     }
 }
 
-#[napi]
-pub struct NativePage {
-    inner: AutomationPage,
+#[napi(js_name = "NativeSession")]
+pub struct Session {
+    browser: Arc<AutomationBrowser>,
+    page: AutomationPage,
 }
+
 #[napi]
-impl NativePage {
+impl Session {
+    #[napi(factory)]
+    pub async fn create(options: NativeSessionOptions) -> Result<Self> {
+        let persona = options
+            .persona_json
+            .as_deref()
+            .map(persona::PersonaConfig::from_json)
+            .transpose()
+            .map_err(|persona_error| {
+                error(AutomationError::InvalidInput(persona_error.to_string()))
+            })?
+            .unwrap_or_default();
+        let page_options = page_options(&options)?;
+        let config = network::CurlConfig {
+            ca_bundle: options.ca_bundle.map(PathBuf::from),
+            ..network::CurlConfig::default()
+        };
+        blocking(move || {
+            let browser = Arc::new(AutomationBrowser::with_persona_and_network_config(
+                persona, config,
+            )?);
+            let page = browser.new_page(page_options)?;
+            Ok(Self { browser, page })
+        })
+        .await
+    }
+
     #[napi]
-    pub async fn goto(
+    pub async fn get(
         &self,
         url: String,
         timeout_ms: u32,
         token: &CancellationToken,
-    ) -> Result<()> {
-        let page = self.inner.clone();
+        headers: Vec<Vec<String>>,
+    ) -> Result<NativeResponse> {
+        let mut request_headers = Vec::with_capacity(headers.len());
+        for entry in headers {
+            if entry.len() != 2 {
+                return Err(error(AutomationError::InvalidInput(
+                    "headers must contain name/value pairs".into(),
+                )));
+            }
+            request_headers.push((entry[0].clone(), entry[1].clone()));
+        }
+        let page = self.page.clone();
         let token = token.inner.clone();
         blocking(move || {
-            page.navigate_cancellable(url, Duration::from_millis(u64::from(timeout_ms)), token)
-                .map(|_| ())
+            page.navigate_with_headers(
+                url,
+                Duration::from_millis(u64::from(timeout_ms)),
+                token,
+                request_headers,
+            )
+            .map(NativeResponse::from)
         })
         .await
     }
+
     #[napi]
     pub async fn evaluate(&self, expression: String) -> Result<String> {
-        let page = self.inner.clone();
+        let page = self.page.clone();
         blocking(move || {
             page.evaluate(expression).and_then(|value| {
                 serde_json::to_string(&value)
@@ -183,28 +207,20 @@ impl NativePage {
         })
         .await
     }
-    #[napi]
-    pub async fn title(&self) -> Result<String> {
-        let page = self.inner.clone();
-        blocking(move || page.title()).await
-    }
-    #[napi]
-    pub async fn text_content(&self) -> Result<String> {
-        let page = self.inner.clone();
-        blocking(move || page.text_content()).await
-    }
+
     #[napi]
     pub async fn screenshot(&self, full_page: bool) -> Result<Buffer> {
-        let page = self.inner.clone();
+        let page = self.page.clone();
         blocking(move || page.screenshot(full_page))
             .await
             .map(Buffer::from)
     }
+
     #[napi]
     pub async fn close(&self) -> Result<()> {
-        let page = self.inner.clone();
+        let browser = Arc::clone(&self.browser);
         blocking(move || {
-            page.close();
+            browser.close();
             Ok(())
         })
         .await

@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 [dependencies]
 napi = { version = "2.16", features = ["napi4", "tokio_rt"] }
 napi-derive = "2.16"
+network = { path = "../../crates/network" }
 persona = { path = "../../crates/persona" }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread"] }

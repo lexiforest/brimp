@@ -1,5 +1,6 @@
-export interface LaunchOptions { personaJson?: string }
-export interface PageOptions {
+export interface SessionOptions {
+  personaJson?: string
+  caBundle?: string
   enableWorker?: boolean
   enableStreamingNetworking?: boolean
   enableCanvas?: boolean
@@ -10,21 +11,66 @@ export interface PageOptions {
   storagePath?: string
   storageQuotaBytes?: number
 }
-export interface GotoOptions { timeoutMs?: number; signal?: AbortSignal }
-export interface ScreenshotOptions { fullPage?: boolean }
-export declare class BrimpError extends Error {
-  readonly code: 'invalid_input' | 'transport' | 'http_status' | 'navigation' | 'javascript' | 'timeout' | 'cancelled' | 'unsupported' | 'closed' | 'screenshot' | 'internal'
+
+export type QueryValue = string | number | boolean | readonly (string | number | boolean)[]
+
+export interface GetOptions {
+  params?: URLSearchParams | Record<string, QueryValue>
+  headers?: Record<string, string | number | boolean>
+  cookies?: Record<string, string | number | boolean>
+  timeoutMs?: number
+  signal?: AbortSignal
 }
-export declare class Page {
-  goto(url: string, options?: GotoOptions): Promise<void>
+
+export interface ScreenshotOptions {
+  path?: string | Buffer | URL
+  fullPage?: boolean
+}
+
+export declare class BrimpError extends Error { readonly code: string }
+export declare class ConnectionError extends BrimpError {}
+export declare class Timeout extends BrimpError {}
+export declare class TooManyRedirects extends ConnectionError {}
+export declare class InvalidRequest extends BrimpError {}
+export declare class InvalidURL extends InvalidRequest {}
+export declare class JavaScriptError extends BrimpError {}
+export declare class HTTPError extends BrimpError { readonly response: Response }
+
+export declare class Headers implements Iterable<[string, string]> {
+  get(name: string): string | undefined
+  getAll(name: string): string[]
+  has(name: string): boolean
+  entries(): Iterator<[string, string]>
+  keys(): Iterator<string>
+  values(): Iterator<string | undefined>
+  readonly raw: string[][]
+  [Symbol.iterator](): Iterator<[string, string]>
+}
+
+export declare class Response {
+  readonly statusCode: number
+  readonly reason: string
+  readonly url: string
+  readonly headers: Headers
+  readonly content: Buffer
+  readonly html: string | null
+  readonly cookies: Record<string, string>
+  readonly elapsed: number
+  readonly ok: boolean
+  readonly encoding: string
+  readonly text: string
+  json(): unknown
+  raiseForStatus(): void
+}
+
+export declare class Session {
+  headers: Record<string, string | number | boolean>
+  cookies: Record<string, string | number | boolean>
+  get(url: string | URL, options?: GetOptions): Promise<Response>
   evaluate(expression: string): Promise<unknown>
-  title(): Promise<string>
-  textContent(): Promise<string>
   screenshot(options?: ScreenshotOptions): Promise<Buffer>
   close(): Promise<void>
 }
-export declare class Browser {
-  newPage(options?: PageOptions): Promise<Page>
-  close(): Promise<void>
-}
-export declare function launch(options?: LaunchOptions): Promise<Browser>
+
+export declare function createSession(options?: SessionOptions): Promise<Session>
+export declare function get(url: string | URL, options?: SessionOptions & GetOptions): Promise<Response>

@@ -33,17 +33,17 @@ with brimp.Session() as session:
 ## Node.js
 
 ```js
-const { launch } = require('@brimp/brimp')
+const { createSession } = require('@brimp/brimp')
 
 async function main() {
-  const browser = await launch()
-  const page = await browser.newPage()
-
-  await page.goto('https://example.com')
-  console.log(await page.title())
-
-  await page.close()
-  await browser.close()
+  const session = await createSession()
+  try {
+    const response = await session.get('https://example.com')
+    console.log(response.statusCode, response.html)
+    console.log(await session.evaluate('document.title'))
+  } finally {
+    await session.close()
+  }
 }
 
 main().catch(error => {

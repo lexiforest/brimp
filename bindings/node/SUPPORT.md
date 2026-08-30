@@ -2,15 +2,20 @@
 
 | API | Tested behavior |
 | --- | --- |
-| `launch({personaJson})` | Creates the shared in-process automation browser and validates an optional persona. |
-| `Browser.newPage(options)` | Creates an owner-thread Brimp page with disabled-by-default worker, streaming-networking, and persistent-storage options. |
-| `Page.goto(url, {timeoutMs, signal})` | Navigates asynchronously; `AbortSignal` reaches the core token. |
-| `Page.evaluate(source)` | Returns JSON-compatible JavaScript values and rejects unsupported values. |
-| `Page.title()` / `Page.textContent()` | Returns canonical document output. |
-| `Page.screenshot({fullPage})` | Returns a PNG `Buffer` without text conversion. |
-| `Page.close()` / `Browser.close()` | Closes children in order and is idempotent. |
+| `get(url, options)` | Creates a temporary session, returns a detached Response, and closes native resources. |
+| `createSession(options)` | Creates one asynchronous native page session; heavy browser subsystems are absent unless explicitly enabled. |
+| `Session.get(url, options)` | Performs a GET navigation with query parameters, merged headers/cookies, timeout, and `AbortSignal` cancellation. |
+| `Response.statusCode`, `reason`, `url`, `headers` | Exposes final main-response metadata without throwing for HTTP error statuses. |
+| `Response.content` / `text` / `html` | Exposes original bytes, decoded response text, and the post-JavaScript DOM. |
+| `Response.json()` / `raiseForStatus()` | Decodes JSON and explicitly throws `HTTPError` for 4xx/5xx responses. |
+| `Session.evaluate(source)` | Returns JSON-compatible JavaScript values and rejects unsupported values. |
+| `Session.screenshot(options)` | Returns a PNG `Buffer` and optionally writes it to a path. |
+| `Session.close()` | Closes resources and is idempotent. |
 
-Failures use `BrimpError.code`: `invalid_input`, `transport`, `http_status`,
-`navigation`, `javascript`, `timeout`, `cancelled`, `unsupported`, `closed`,
-`screenshot`, or `internal`. Locators, browser modes, and raw protocol dispatch
-are not exposed.
+Session headers and method headers are merged, with method values taking
+precedence. `User-Agent` and `Accept-Language` remain persona-owned. Session and
+method cookies are sent together; response cookies update the Session mapping.
+
+Failures derive from `BrimpError`: `ConnectionError`, `Timeout`,
+`TooManyRedirects`, `InvalidRequest`, `InvalidURL`, `HTTPError`, and
+`JavaScriptError`. The initial API supports GET only.

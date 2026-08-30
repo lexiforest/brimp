@@ -414,6 +414,7 @@ dependencies = [
  "napi",
  "napi-build",
  "napi-derive",
+ "network",
  "persona",
  "serde_json",
  "tokio",

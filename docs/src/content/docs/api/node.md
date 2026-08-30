@@ -4,26 +4,27 @@ description: Reference for the asynchronous @brimp/brimp package.
 ---
 
 ```js
-const { launch, BrimpError } = require('@brimp/brimp')
+const brimp = require('@brimp/brimp')
 ```
 
-The Node binding is an asynchronous, in-process native addon.
+The Node binding is asynchronous and in process. Sessions are sequential; use
+separate sessions for concurrent browsing.
 
-## `launch()`
+## `brimp.get()`
 
 ```ts
-launch(options?: { personaJson?: string }): Promise<Browser>
+get(url: string | URL, options?: SessionOptions & GetOptions): Promise<Response>
 ```
 
-Creates a browser backed by the shared runtime. `personaJson` is JSON text using
-Brimp's versioned persona schema.
+Creates a temporary session, performs one GET navigation, closes the native
+session, and returns a detached response.
 
-## `Browser`
-
-### `browser.newPage()`
+## `createSession()`
 
 ```ts
-newPage(options?: {
+createSession(options?: {
+  personaJson?: string
+  caBundle?: string
   enableWorker?: boolean
   enableStreamingNetworking?: boolean
   enableCanvas?: boolean
@@ -33,83 +34,61 @@ newPage(options?: {
   enableWebAudioOutput?: boolean
   storagePath?: string
   storageQuotaBytes?: number
-}): Promise<Page>
+}): Promise<Session>
 ```
 
-Creates an `about:blank` page with its own owner thread. Worker, streaming
-networking, Canvas 2D, WebGL, WebGPU, WebAudio, and persistent-storage APIs are
-all absent unless their independent page options enable them. `storagePath`
-enables persistence with a 1 GiB default quota.
-`enableWebAudio` uses a device-free sink. `enableWebAudioOutput` also enables
-WebAudio and authorizes the system output device.
+Creates one persistent browsing session. `caBundle` trusts private certificate
+authorities without disabling verification. Browser subsystems are disabled by
+default. Supplying `storagePath` enables persistent storage with a 1 GiB default
+quota.
 
-### `browser.close()`
+## `Session.get()`
 
 ```ts
-close(): Promise<void>
+session.get(url, {
+  params,
+  headers,
+  cookies,
+  timeoutMs: 30_000,
+  signal,
+}): Promise<Response>
 ```
 
-Closes child pages and then the browser. Closing more than once is safe.
+Performs a GET navigation with a fresh JavaScript realm. Query values may be
+scalars or arrays. Session headers/cookies are merged with request values;
+request values take precedence. `User-Agent` and `Accept-Language` are
+persona-owned. An `AbortSignal` cancels the core operation and network request.
 
-## `Page`
-
-### `page.goto()`
+## Session utilities
 
 ```ts
-goto(
-  url: string,
-  options?: { timeoutMs?: number; signal?: AbortSignal },
-): Promise<void>
+session.evaluate(source): Promise<unknown>
+session.screenshot({ path?, fullPage? }): Promise<Buffer>
+session.close(): Promise<void>
 ```
 
-Navigates the page. The default timeout is 30,000 milliseconds. Aborting the
-signal cancels the core operation and its network request.
+Evaluation returns JSON-compatible values. Screenshots return PNG bytes and
+write the same bytes when `path` is provided. Closing is idempotent; operations
+after close fail with code `closed`.
 
-### `page.evaluate()`
+## `Response`
 
-```ts
-evaluate(expression: string): Promise<unknown>
-```
+| Member | Meaning |
+| --- | --- |
+| `statusCode`, `reason`, `url` | Final response status and URL. |
+| `headers` | Case-insensitive `Headers` collection with `get()`, `getAll()`, and `raw`. |
+| `content`, `text` | Original response `Buffer` and decoded text. |
+| `html` | Post-JavaScript serialized DOM for HTML, otherwise `null`. |
+| `cookies`, `elapsed`, `ok` | Response cookies, elapsed seconds, and status below 400. |
 
-Evaluates JavaScript and returns a JSON-compatible value.
-
-### Document output
-
-```ts
-title(): Promise<string>
-textContent(): Promise<string>
-```
-
-`title()` returns the current document title. `textContent()` returns the
-canonical document text output.
-
-### `page.screenshot()`
-
-```ts
-screenshot(options?: { fullPage?: boolean }): Promise<Buffer>
-```
-
-Returns a PNG `Buffer` for the viewport or full page.
-
-### `page.close()`
-
-```ts
-close(): Promise<void>
-```
-
-Closes page resources. Closing more than once is safe.
+`response.json()` decodes the response text. `response.raiseForStatus()` throws
+`HTTPError` for 4xx and 5xx responses.
 
 ## Errors
 
-Operations reject with `BrimpError`. Its `code` is one of:
+All errors derive from `BrimpError` and carry a stable `code`. Specialized
+classes include `ConnectionError`, `Timeout`, `TooManyRedirects`,
+`InvalidRequest`, `InvalidURL`, `HTTPError`, and `JavaScriptError`.
 
-```text
-invalid_input  transport  http_status  navigation  javascript
-timeout        cancelled  unsupported  closed      screenshot  internal
-```
-
-## Current boundary
-
-The native Node API does not expose locators, browser modes, raw CDP dispatch,
-or a request/response object. Use [`brimp cdp`](/api/cdp/) when the supported
-Puppeteer interface is the better fit.
+The initial API supports GET only. Use [`brimp cdp`](/api/cdp/) when a
+Puppeteer or Playwright browser/page interface is required.

@@ -1,81 +1,60 @@
 ---
 title: Node.js examples
-description: Navigate, evaluate, capture screenshots, cancel work, and load personas.
+description: Requests-style navigation, extraction, state, screenshots, and cancellation.
 ---
 
-## Page lifecycle
+## One request
 
 ```js
-const { launch } = require('@brimp/brimp')
+const brimp = require('@brimp/brimp')
 
 async function main() {
-  const browser = await launch()
-  try {
-    const page = await browser.newPage()
-    try {
-      await page.goto('https://example.com', { timeoutMs: 30_000 })
-      console.log(await page.title())
-      console.log(await page.textContent())
-    } finally {
-      await page.close()
-    }
-  } finally {
-    await browser.close()
-  }
+  const response = await brimp.get('https://example.com', {
+    params: { q: ['browser', 'runtime'] },
+  })
+  response.raiseForStatus()
+  console.log(response.text)
+  console.log(response.html)
 }
-
-main().catch(error => {
-  console.error(error)
-  process.exitCode = 1
-})
 ```
 
-Closing pages and browsers is idempotent.
-
-## Structured evaluation and screenshots
+## Persistent session
 
 ```js
-const fs = require('node:fs/promises')
-const { launch } = require('@brimp/brimp')
+const { createSession } = require('@brimp/brimp')
 
-const browser = await launch()
-const page = await browser.newPage()
-
-await page.goto('https://example.com')
-const result = await page.evaluate(`({
-  title: document.title,
-  links: document.querySelectorAll('a').length
-})`)
-const png = await page.screenshot({ fullPage: true })
-
-console.log(result)
-await fs.writeFile('example.png', png)
-await page.close()
-await browser.close()
+async function main() {
+  const session = await createSession()
+  try {
+    session.headers['X-Client'] = 'brimp'
+    const response = await session.get('https://example.com')
+    console.log(response.statusCode)
+    console.log(await session.evaluate('document.title'))
+    await session.screenshot({ path: 'example.png', fullPage: true })
+  } finally {
+    await session.close()
+  }
+}
 ```
-
-`evaluate()` returns JSON-compatible values. Screenshots are Node `Buffer`
-objects.
 
 ## Cancel navigation
 
 ```js
-const { launch } = require('@brimp/brimp')
+const { createSession } = require('@brimp/brimp')
 
-const browser = await launch()
-const page = await browser.newPage()
-const controller = new AbortController()
-
-const timer = setTimeout(() => controller.abort(), 2_000)
-try {
-  await page.goto('https://example.com/slow', {
-    timeoutMs: 30_000,
-    signal: controller.signal,
-  })
-} finally {
-  clearTimeout(timer)
-  await page.close()
-  await browser.close()
+async function main() {
+  const session = await createSession()
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 2_000)
+  try {
+    await session.get('https://example.com/slow', {
+      timeoutMs: 30_000,
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timer)
+    await session.close()
+  }
 }
 ```
 
@@ -85,11 +64,13 @@ Cancellation errors have `error.code === 'cancelled'`.
 
 ```js
 const fs = require('node:fs')
-const { launch } = require('@brimp/brimp')
+const { createSession } = require('@brimp/brimp')
 
-const browser = await launch({
-  personaJson: fs.readFileSync('persona/example.json', 'utf8'),
-})
+async function main() {
+  return createSession({
+    personaJson: fs.readFileSync('persona/example.json', 'utf8'),
+  })
+}
 ```
 
 See the [Node API](/api/node/) for the complete public surface.

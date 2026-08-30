@@ -1,21 +1,42 @@
 # Brimp Node binding
 
-napi-rs addon plus a small idiomatic asynchronous JavaScript adapter over the
-shared `web-runtime` automation surface. It supports launch, page lifetime,
-navigation, structured evaluation, document output, PNG `Buffer` values, and
-idempotent close. `Page.goto` accepts an `AbortSignal`, which cancels the core
-operation and network request.
+Brimp exposes an asynchronous request/response API backed by the shared native
+browser runtime. It runs in process and does not start a CDP server.
 
-This is an in-process native extension, not a CDP client. See `SUPPORT.md` for
-the exhaustive tested API and error-code surface.
+```js
+const brimp = require('@brimp/brimp')
 
-`launch({ personaJson })` accepts JSON text using the versioned schema and
-runtime-support matrix in [`../../persona/`](../../persona/README.md).
+async function main() {
+  const response = await brimp.get('https://example.com')
+  console.log(response.statusCode)
+  console.log(response.text) // original HTTP response
+  console.log(response.html) // DOM after JavaScript
+}
+```
 
-Worker, streaming-networking, persistent-storage, Canvas 2D, WebGL, WebGPU, and
-WebAudio APIs are page-scoped and disabled by default. Enable only the required
-ones through `browser.newPage({ enableWorker, enableStreamingNetworking,
-enableCanvas, enableWebGL, enableWebGPU, enableWebAudio, enableWebAudioOutput, storagePath,
-storageQuotaBytes })`.
-`enableWebAudio` keeps real-time graphs device-free; `enableWebAudioOutput`
-also enables WebAudio and authorizes the system audio output device.
+Persistent cookies, connections, JavaScript evaluation, screenshots, and
+`AbortSignal` cancellation are available through a session:
+
+```js
+async function main() {
+  const session = await brimp.createSession()
+  try {
+    const response = await session.get('https://example.com', { timeoutMs: 30_000 })
+    response.raiseForStatus()
+    console.log(await session.evaluate('document.title'))
+    await session.screenshot({ path: 'page.png', fullPage: true })
+  } finally {
+    await session.close()
+  }
+}
+```
+
+Worker, streaming-networking, persistent-storage, Canvas 2D, WebGL, WebGPU,
+and WebAudio APIs are disabled by default. Enable only the required surfaces
+through `createSession(options)`. `enableWebAudio` uses a device-free sink;
+`enableWebAudioOutput` also enables WebAudio and authorizes the system output
+device.
+
+This API is for asynchronous rendered-page extraction. Use `brimp cdp` when a
+Puppeteer or Playwright browser/page interface is required. See `SUPPORT.md`
+for the exact tested surface.

@@ -18,12 +18,13 @@ Brimp exposes four automation interfaces backed by the same runtime:
 - Navigation loads the main response, scripts, stylesheets, and common image resources.
 - JavaScript evaluation returns JSON-compatible values.
 - Screenshots are PNG and can cover the viewport or full page where exposed.
-- Browser/page/session objects own native resources and should be closed explicitly.
+- Session and browser/page objects own native resources and should be closed explicitly.
 - Personas apply a coherent transport, header, navigator, screen, and viewport identity.
 
-The interfaces intentionally differ in shape. Python follows a request/response
-model, Node follows browser/page automation, the CLI is process-oriented, and
-CDP serializes values across a remote boundary.
+The native bindings share a request/response model: Python is synchronous and
+Node is asynchronous with `AbortSignal` cancellation. The CLI is
+process-oriented, while CDP provides browser/page automation across a remote
+boundary.
 
 See [Language bindings](/api/bindings/) for a side-by-side lifecycle and option
 mapping, [JavaScriptCore integration](/architecture/javascript-runtime/) for

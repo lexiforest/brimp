@@ -123,12 +123,14 @@ with brimp.Session() as session:
 const brimp = require('@brimp/brimp')
 
 async function main() {
-  const browser = await brimp.launch()
-  const page = await browser.newPage()
-  await page.goto('https://example.com')
-  console.log(await page.evaluate('document.title'))
-  await page.close()
-  await browser.close()
+  const session = await brimp.createSession()
+  try {
+    const response = await session.get('https://example.com')
+    console.log(response.statusCode, response.html)
+    console.log(await session.evaluate('document.title'))
+  } finally {
+    await session.close()
+  }
 }
 
 main().catch(error => {
@@ -185,7 +187,7 @@ The implemented runtime supports:
 The canonical owner-thread automation API is exposed through:
 
 - the `brimp` CLI for evaluation and screenshots;
-- a synchronous Requests-style Python binding and asynchronous Node binding; and
+- synchronous Python and asynchronous Node request/response bindings; and
 - a bounded loopback CDP server for the checked Playwright and Puppeteer workflows.
 
 All four interfaces delegate navigation, JavaScript, lifecycle, and screenshots
