@@ -7,14 +7,15 @@ license.workspace = true
 [dependencies]
 base64 = "0.22"
 futures-util = "0.3"
+http = "1"
+network = { path = "../network" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
 tokio-tungstenite = "0.30"
+url = "2"
 web-runtime = { path = "../web-runtime" }
 
 [dev-dependencies]
 async-trait = "0.1"
-http = "1"
-network = { path = "../network" }

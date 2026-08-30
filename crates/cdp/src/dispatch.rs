@@ -9,6 +9,7 @@ use web_runtime::{
     RemoteArgument, TouchPoint,
 };
 
+use crate::interception::{InterceptionMode, InterceptionRegistry};
 use crate::protocol::{Event, Request, Response};
 
 const MAX_EVENTS: usize = 256;
@@ -58,10 +59,15 @@ pub(crate) struct ConnectionState {
     lifecycle_events: HashSet<String>,
     waiting_for_debugger: HashSet<String>,
     auto_attach: HashMap<Option<String>, AutoAttach>,
+    interception: InterceptionRegistry,
 }
 
 impl ConnectionState {
-    pub(crate) fn new(browser: Arc<AutomationBrowser>, page_options: PageOptions) -> Self {
+    pub(crate) fn new(
+        browser: Arc<AutomationBrowser>,
+        page_options: PageOptions,
+        interception: InterceptionRegistry,
+    ) -> Self {
         Self {
             browser,
             page_options,
@@ -85,10 +91,14 @@ impl ConnectionState {
             lifecycle_events: HashSet::new(),
             waiting_for_debugger: HashSet::new(),
             auto_attach: HashMap::new(),
+            interception,
         }
     }
 
     pub(crate) async fn dispatch(&mut self, request: &Request) -> Response {
+        if let Some(response) = self.interception.handle_control(request) {
+            return response;
+        }
         let result = match request.method.as_str() {
             "Browser.getVersion" => Ok(json!({
                 "protocolVersion": "1.3",
@@ -150,7 +160,10 @@ impl ConnectionState {
             "Network.disable" => self.disable_network(request),
             "Network.setCacheDisabled" => self.acknowledge_session(request),
             "Network.setExtraHTTPHeaders" => self.set_extra_http_headers(request),
+            "Network.setRequestInterception" => self.set_request_interception(request),
             "Network.getResponseBody" => self.get_response_body(request),
+            "Fetch.enable" => self.enable_fetch(request),
+            "Fetch.disable" => self.disable_fetch(request),
             "Network.setUserAgentOverride" | "Emulation.setUserAgentOverride" => {
                 self.set_user_agent_override(request).await
             }
@@ -282,14 +295,17 @@ impl ConnectionState {
         if browser_context_id != "default" && !self.browser_contexts.contains(&browser_context_id) {
             return Err(DispatchError::invalid_params("unknown browserContextId"));
         }
+        let target_id = format!("page-{}", self.next_page_id);
+        self.next_page_id += 1;
+        let interceptor = self.interception.target_interceptor(target_id.clone());
         let browser = Arc::clone(&self.browser);
         let options = self.page_options.clone();
         let viewport = options.viewport();
-        let page = tokio::task::spawn_blocking(move || browser.new_page(options))
-            .await
-            .map_err(internal_join)??;
-        let target_id = format!("page-{}", self.next_page_id);
-        self.next_page_id += 1;
+        let page = tokio::task::spawn_blocking(move || {
+            browser.new_page_with_request_interceptor(options, interceptor)
+        })
+        .await
+        .map_err(internal_join)??;
         let history_entry_id = self.next_history_entry_id;
         self.next_history_entry_id += 1;
         self.pages.insert(
@@ -419,6 +435,7 @@ impl ConnectionState {
             .sessions
             .remove(&session_id)
             .ok_or_else(|| DispatchError::invalid_params("unknown sessionId"))?;
+        self.interception.remove_session(&target_id, &session_id);
         self.enabled_pages.remove(&session_id);
         self.enabled_runtimes.remove(&session_id);
         self.enabled_networks.remove(&session_id);
@@ -441,6 +458,7 @@ impl ConnectionState {
     }
 
     fn close_target_id(&mut self, target_id: &str) -> Result<(), DispatchError> {
+        self.interception.remove_target(target_id);
         let target = self
             .pages
             .remove(target_id)
@@ -1062,6 +1080,36 @@ impl ConnectionState {
     fn disable_network(&mut self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?.to_owned();
         self.enabled_networks.remove(&session);
+        Ok(json!({}))
+    }
+
+    fn enable_fetch(&mut self, request: &Request) -> Result<Value, DispatchError> {
+        let session = self.session(request)?.to_owned();
+        let patterns = interception_patterns(&request.params, false)?;
+        let target = self.target_for_session(&session)?.to_owned();
+        self.interception
+            .enable(target, session, InterceptionMode::Fetch, patterns);
+        Ok(json!({}))
+    }
+
+    fn disable_fetch(&mut self, request: &Request) -> Result<Value, DispatchError> {
+        let session = self.session(request)?;
+        let target = self.target_for_session(session)?.to_owned();
+        self.interception.disable(&target, InterceptionMode::Fetch);
+        Ok(json!({}))
+    }
+
+    fn set_request_interception(&mut self, request: &Request) -> Result<Value, DispatchError> {
+        let session = self.session(request)?.to_owned();
+        let patterns = interception_patterns(&request.params, true)?;
+        let target = self.target_for_session(&session)?.to_owned();
+        if patterns.is_empty() {
+            self.interception
+                .disable(&target, InterceptionMode::Network);
+        } else {
+            self.interception
+                .enable(target, session, InterceptionMode::Network, patterns);
+        }
         Ok(json!({}))
     }
 
@@ -1821,6 +1869,45 @@ fn finite_number_param(params: &Value, name: &str) -> Result<f64, DispatchError>
         .and_then(Value::as_f64)
         .filter(|value| value.is_finite())
         .ok_or_else(|| DispatchError::invalid_params(format!("{name} must be a finite number")))
+}
+
+fn interception_patterns(params: &Value, legacy: bool) -> Result<Vec<String>, DispatchError> {
+    let Some(patterns) = params.get("patterns") else {
+        return Ok(if legacy { Vec::new() } else { vec!["*".into()] });
+    };
+    let patterns = patterns
+        .as_array()
+        .ok_or_else(|| DispatchError::invalid_params("patterns must be an array"))?;
+    patterns
+        .iter()
+        .map(|pattern| {
+            if pattern.get("resourceType").is_some() {
+                return Err(DispatchError::invalid_params(
+                    "resourceType interception filters are not supported",
+                ));
+            }
+            let stage_name = if legacy {
+                "interceptionStage"
+            } else {
+                "requestStage"
+            };
+            if pattern
+                .get(stage_name)
+                .and_then(Value::as_str)
+                .is_some_and(|stage| stage != "Request")
+            {
+                return Err(DispatchError::invalid_params(
+                    "only request-stage interception is supported",
+                ));
+            }
+            Ok(pattern
+                .get("urlPattern")
+                .and_then(Value::as_str)
+                .filter(|pattern| !pattern.is_empty())
+                .unwrap_or("*")
+                .to_owned())
+        })
+        .collect()
 }
 fn remote_node_expression(params: &Value) -> Result<String, DispatchError> {
     if let Some(object_id) = params.get("objectId").and_then(Value::as_str) {

@@ -57,8 +57,15 @@ error `-32601` rather than a success stub.
 | `Network.disable` | Disables network events for a session. |
 | `Network.setCacheDisabled` | Accepted for client initialization; Brimp does not expose a configurable page cache. |
 | `Network.setExtraHTTPHeaders` | Applies string-valued headers to subsequent main-document navigation requests. |
+| `Network.setRequestInterception` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Empty patterns disable interception. |
+| `Network.continueInterceptedRequest` | Continues, modifies, fails, or fulfills a paused legacy request. Fulfillment accepts a base64 raw HTTP response. Authentication challenges are not implemented. |
 | `Network.getResponseBody` | Returns the latest main-document response body by loader/request ID. |
 | `Network.setUserAgentOverride` | Applies coherent request-header and `navigator` identity overrides; client-hint metadata is not implemented. |
+| `Fetch.enable` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Response-stage and authentication interception are not implemented. |
+| `Fetch.disable` | Disables Fetch interception and continues requests currently paused by it. |
+| `Fetch.continueRequest` | Continues a paused request, optionally replacing its URL, method, body, or headers. |
+| `Fetch.failRequest` | Fails a paused request with the requested network error reason. |
+| `Fetch.fulfillRequest` | Fulfills a paused request with a status, headers, and optional base64 body. |
 | `Emulation.setDeviceMetricsOverride` | Applies width, height, and device-pixel ratio to the page viewport. Mobile emulation is not implemented. |
 | `Emulation.clearDeviceMetricsOverride` | Restores Brimp's default page viewport. |
 | `Emulation.setTouchEmulationEnabled` | Enables or disables touch-mode compatibility for CDP clients. |

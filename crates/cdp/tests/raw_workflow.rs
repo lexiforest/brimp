@@ -766,6 +766,160 @@ async fn discovery_and_raw_websocket_workflow() {
 }
 
 #[tokio::test]
+async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
+    let server = start_with_browser(ServerConfig::default(), browser())
+        .await
+        .unwrap();
+    let (mut socket, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
+        .await
+        .unwrap();
+    let target = command(
+        &mut socket,
+        1,
+        "Target.createTarget",
+        json!({"url": "about:blank"}),
+        None,
+    )
+    .await["result"]["targetId"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    socket
+        .send(Message::Text(
+            json!({"id": 2, "method": "Target.attachToTarget", "params": {"targetId": target, "flatten": true}})
+                .to_string()
+                .into(),
+        ))
+        .await
+        .unwrap();
+    let attached = event(&mut socket).await;
+    assert_eq!(attached["method"], "Target.attachedToTarget");
+    let session = attached["params"]["sessionId"].as_str().unwrap().to_owned();
+    assert_eq!(event(&mut socket).await["id"], 2);
+    command(&mut socket, 12, "Page.enable", json!({}), Some(&session)).await;
+    command(&mut socket, 13, "Runtime.enable", json!({}), Some(&session)).await;
+    assert_eq!(
+        event(&mut socket).await["method"],
+        "Runtime.executionContextCreated"
+    );
+
+    command(
+        &mut socket,
+        3,
+        "Fetch.enable",
+        json!({"patterns": [{"urlPattern": "https://fixture.test/*", "requestStage": "Request"}]}),
+        Some(&session),
+    )
+    .await;
+    socket
+        .send(Message::Text(
+            json!({"id": 4, "method": "Page.navigate", "params": {"url": "https://fixture.test/fetch"}, "sessionId": session})
+                .to_string()
+                .into(),
+        ))
+        .await
+        .unwrap();
+    let paused = event(&mut socket).await;
+    assert_eq!(paused["method"], "Fetch.requestPaused", "{paused}");
+    assert_eq!(
+        paused["params"]["request"]["url"],
+        "https://fixture.test/fetch"
+    );
+    let request_id = paused["params"]["requestId"].as_str().unwrap();
+    command(
+        &mut socket,
+        5,
+        "Fetch.fulfillRequest",
+        json!({
+            "requestId": request_id,
+            "responseCode": 201,
+            "responseHeaders": [{"name": "content-type", "value": "text/html"}],
+            "body": base64::engine::general_purpose::STANDARD.encode("<!doctype html><title>intercepted fetch</title>")
+        }),
+        Some(&session),
+    )
+    .await;
+    assert_eq!(event(&mut socket).await["id"], 4);
+    for expected in [
+        "Runtime.executionContextsCleared",
+        "Page.frameNavigated",
+        "Runtime.executionContextCreated",
+        "Page.domContentEventFired",
+        "Page.loadEventFired",
+    ] {
+        assert_eq!(event(&mut socket).await["method"], expected);
+    }
+    let evaluated = command(
+        &mut socket,
+        6,
+        "Runtime.evaluate",
+        json!({"expression": "document.title", "returnByValue": true}),
+        Some(&session),
+    )
+    .await;
+    assert_eq!(
+        evaluated["result"]["result"]["value"], "intercepted fetch",
+        "{evaluated}"
+    );
+
+    command(&mut socket, 7, "Fetch.disable", json!({}), Some(&session)).await;
+    command(
+        &mut socket,
+        8,
+        "Network.setRequestInterception",
+        json!({"patterns": [{"urlPattern": "*", "interceptionStage": "Request"}]}),
+        Some(&session),
+    )
+    .await;
+    socket
+        .send(Message::Text(
+            json!({"id": 9, "method": "Page.navigate", "params": {"url": "https://fixture.test/legacy"}, "sessionId": session})
+                .to_string()
+                .into(),
+        ))
+        .await
+        .unwrap();
+    let intercepted = event(&mut socket).await;
+    assert_eq!(intercepted["method"], "Network.requestIntercepted");
+    let interception_id = intercepted["params"]["interceptionId"].as_str().unwrap();
+    let raw_response = base64::engine::general_purpose::STANDARD.encode(
+        "HTTP/1.1 202 Accepted\r\nContent-Type: text/html\r\n\r\n<title>legacy response</title>",
+    );
+    command(
+        &mut socket,
+        10,
+        "Network.continueInterceptedRequest",
+        json!({"interceptionId": interception_id, "rawResponse": raw_response}),
+        Some(&session),
+    )
+    .await;
+    assert_eq!(event(&mut socket).await["id"], 9);
+    for expected in [
+        "Runtime.executionContextsCleared",
+        "Page.frameNavigated",
+        "Runtime.executionContextCreated",
+        "Page.domContentEventFired",
+        "Page.loadEventFired",
+    ] {
+        assert_eq!(event(&mut socket).await["method"], expected);
+    }
+    assert_eq!(
+        command(
+            &mut socket,
+            11,
+            "Runtime.evaluate",
+            json!({"expression": "document.title", "returnByValue": true}),
+            Some(&session),
+        )
+        .await["result"]["result"]["value"],
+        "legacy response"
+    );
+
+    socket.close(None).await.unwrap();
+    server.shutdown().await.unwrap();
+}
+
+#[tokio::test]
 async fn malformed_and_oversized_messages_are_rejected() {
     let server = start_with_browser(ServerConfig::default(), browser())
         .await

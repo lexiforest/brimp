@@ -70,6 +70,35 @@ available. See Playwright's official
 | Raw CDP | Discovery HTTP plus flattened WebSocket sessions | Tested by the Rust protocol workflow. |
 | Chrome DevTools UI and arbitrary CDP tooling | Varies | Not a compatibility target; unsupported methods fail explicitly. |
 
+## Request interception
+
+Puppeteer's public interception API works over the CDP connection. A handler
+must resolve every request by continuing, responding, or aborting it:
+
+```js
+await page.setRequestInterception(true)
+page.on('request', request => {
+  if (request.url().endsWith('/agent-data')) {
+    void request.respond({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ source: 'agent' }),
+    })
+  } else {
+    void request.continue()
+  }
+})
+```
+
+Raw clients can use modern `Fetch.enable` plus `Fetch.requestPaused`, followed
+by `Fetch.continueRequest`, `Fetch.fulfillRequest`, or `Fetch.failRequest`.
+Legacy `Network.setRequestInterception` and
+`Network.continueInterceptedRequest` are also supported. Interception applies at
+the request stage to navigations, parser subresources, redirects, and JavaScript
+Fetch requests. Brimp supports URL patterns but not resource-type filters,
+response-stage interception, or authentication challenges. A target may have
+at most 256 paused requests, and a fulfilled body may be at most 32 MiB.
+
 ## Supported methods
 
 The following list is exhaustive. An absent method returns CDP error `-32601`.
@@ -128,8 +157,15 @@ The following list is exhaustive. An absent method returns CDP error `-32601`.
 | `Network.disable` | Disables network events for a session. |
 | `Network.setCacheDisabled` | Accepted during client initialization; Brimp has no configurable page cache. |
 | `Network.setExtraHTTPHeaders` | Applies string-valued headers to subsequent main-document navigation requests. |
+| `Network.setRequestInterception` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Empty patterns disable interception. |
+| `Network.continueInterceptedRequest` | Continues, modifies, fails, or fulfills a paused legacy request. Fulfillment accepts a base64 raw HTTP response. Authentication challenges are not implemented. |
 | `Network.getResponseBody` | Returns the latest main-document response body by loader/request ID. |
 | `Network.setUserAgentOverride` | Applies coherent request-header and `navigator` identity overrides; client-hint metadata is not implemented. |
+| `Fetch.enable` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Response-stage and authentication interception are not implemented. |
+| `Fetch.disable` | Disables Fetch interception and continues requests currently paused by it. |
+| `Fetch.continueRequest` | Continues a paused request, optionally replacing its URL, method, body, or headers. |
+| `Fetch.failRequest` | Fails a paused request with the requested network error reason. |
+| `Fetch.fulfillRequest` | Fulfills a paused request with a status, headers, and optional base64 body. |
 | `Emulation.setDeviceMetricsOverride` | Applies viewport width, height, and device-pixel ratio. |
 | `Emulation.clearDeviceMetricsOverride` | Restores the default viewport. |
 | `Emulation.setTouchEmulationEnabled` | Enables or disables touch-mode compatibility for CDP clients. |

@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -12,6 +13,7 @@ use tokio_tungstenite::tungstenite::{Error as WebSocketError, Message};
 use web_runtime::{AutomationBrowser, PageOptions};
 
 use crate::dispatch::ConnectionState;
+use crate::interception::{InterceptionRegistry, PausedRequest};
 use crate::protocol::{Request, Response};
 
 const MAX_HTTP_HEADER: usize = 16 * 1024;
@@ -223,8 +225,24 @@ async fn serve_websocket(
     browser: Arc<AutomationBrowser>,
     page_options: PageOptions,
 ) -> Result<(), WebSocketError> {
-    let mut state = ConnectionState::new(browser, page_options);
-    while let Some(message) = socket.next().await {
+    let (interception, mut paused_requests) = InterceptionRegistry::new();
+    let mut state = ConnectionState::new(browser, page_options, interception.clone());
+    let mut queued_messages = VecDeque::new();
+    loop {
+        let message = if let Some(message) = queued_messages.pop_front() {
+            Some(Ok(message))
+        } else {
+            tokio::select! {
+                message = socket.next() => message,
+                Some(paused) = paused_requests.recv() => {
+                    send_paused_event(&mut socket, paused).await?;
+                    continue;
+                }
+            }
+        };
+        let Some(message) = message else {
+            break;
+        };
         match message? {
             Message::Text(text) => {
                 let (response, events_before_response) =
@@ -236,7 +254,20 @@ async fn serve_websocket(
                                     | "Target.attachToBrowserTarget"
                                     | "Target.createTarget"
                             );
-                            (state.dispatch(&request).await, events_before_response)
+                            let Some(response) = dispatch_while_accepting_interception(
+                                &mut state,
+                                &request,
+                                &interception,
+                                &mut paused_requests,
+                                &mut socket,
+                                &mut queued_messages,
+                            )
+                            .await?
+                            else {
+                                interception.shutdown();
+                                return Ok(());
+                            };
+                            (response, events_before_response)
                         }
                         Err(error) => (
                             Response {
@@ -271,17 +302,94 @@ async fn serve_websocket(
             }
             Message::Ping(payload) => socket.send(Message::Pong(payload)).await?,
             Message::Close(frame) => {
+                interception.shutdown();
                 socket.close(frame).await?;
                 break;
             }
             Message::Binary(_) => {
+                interception.shutdown();
                 socket.close(Some(tokio_tungstenite::tungstenite::protocol::CloseFrame { code: tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode::Unsupported, reason: "CDP requires JSON text messages".into() })).await?;
                 break;
             }
             _ => {}
         }
     }
+    interception.shutdown();
     Ok(())
+}
+
+async fn dispatch_while_accepting_interception(
+    state: &mut ConnectionState,
+    request: &Request,
+    interception: &InterceptionRegistry,
+    paused_requests: &mut tokio::sync::mpsc::UnboundedReceiver<PausedRequest>,
+    socket: &mut tokio_tungstenite::WebSocketStream<TcpStream>,
+    queued_messages: &mut VecDeque<Message>,
+) -> Result<Option<Response>, WebSocketError> {
+    let dispatch = state.dispatch(request);
+    tokio::pin!(dispatch);
+    loop {
+        tokio::select! {
+            response = &mut dispatch => return Ok(Some(response)),
+            Some(paused) = paused_requests.recv() => send_paused_event(socket, paused).await?,
+            message = socket.next() => {
+                let Some(message) = message else {
+                    return Ok(None);
+                };
+                match message? {
+                    Message::Text(text) => {
+                        let parsed = serde_json::from_str::<Request>(&text).ok();
+                        let control = parsed
+                            .as_ref()
+                            .and_then(|request| interception.handle_control(request));
+                        if let Some(response) = control {
+                            send_response(socket, &response).await?;
+                        } else {
+                            if let Some(request) = parsed.as_ref() {
+                                interception.prepare_queued_command(request);
+                            }
+                            queued_messages.push_back(Message::Text(text));
+                        }
+                    }
+                    Message::Ping(payload) => socket.send(Message::Pong(payload)).await?,
+                    Message::Close(frame) => {
+                        socket.close(frame).await?;
+                        return Ok(None);
+                    }
+                    Message::Binary(_) => {
+                        socket.close(Some(tokio_tungstenite::tungstenite::protocol::CloseFrame {
+                            code: tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode::Unsupported,
+                            reason: "CDP requires JSON text messages".into(),
+                        })).await?;
+                        return Ok(None);
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+}
+
+async fn send_paused_event(
+    socket: &mut tokio_tungstenite::WebSocketStream<TcpStream>,
+    paused: PausedRequest,
+) -> Result<(), WebSocketError> {
+    socket
+        .send(Message::Text(
+            serde_json::to_string(&paused.event()).unwrap().into(),
+        ))
+        .await
+}
+
+async fn send_response(
+    socket: &mut tokio_tungstenite::WebSocketStream<TcpStream>,
+    response: &Response,
+) -> Result<(), WebSocketError> {
+    socket
+        .send(Message::Text(
+            serde_json::to_string(response).unwrap().into(),
+        ))
+        .await
 }
 
 pub fn parse_bind(value: &str) -> Result<SocketAddr, String> {

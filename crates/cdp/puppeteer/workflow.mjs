@@ -19,9 +19,22 @@ const browser = await puppeteer.connect({
 try {
   const page = await browser.newPage();
   await page.setViewport({width: 640, height: 480, deviceScaleFactor: 1});
+  await page.setRequestInterception(true);
+  page.on('request', request => {
+    if (request.url().endsWith('/agent-data')) {
+      void request.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({source: 'interception'}),
+      });
+    } else {
+      void request.continue();
+    }
+  });
   await page.goto(`http://127.0.0.1:${fixture.address().port}/`, {waitUntil: 'load'});
   const evaluated = await page.evaluate(() => ({title: document.title, answer: 6 * 7}));
   assert.deepEqual(evaluated, {title: 'Puppeteer CDP', answer: 42});
+  assert.deepEqual(await page.evaluate(() => fetch('/agent-data').then(response => response.json())), {source: 'interception'});
   const main = await page.$('main');
   assert.ok(main);
   assert.equal(await page.evaluate(element => element.textContent, main), 'Hello Puppeteer');

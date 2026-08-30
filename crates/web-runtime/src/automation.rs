@@ -169,6 +169,24 @@ impl AutomationBrowser {
         })
     }
     pub fn new_page(&self, options: PageOptions) -> Result<AutomationPage, AutomationError> {
+        self.new_page_with_loader(options, Arc::clone(&self.loader))
+    }
+    pub fn new_page_with_request_interceptor(
+        &self,
+        options: PageOptions,
+        interceptor: Arc<dyn network::ResourceInterceptor>,
+    ) -> Result<AutomationPage, AutomationError> {
+        let loader = Arc::new(network::InterceptingResourceLoader::new(
+            Arc::clone(&self.loader),
+            interceptor,
+        ));
+        self.new_page_with_loader(options, loader)
+    }
+    fn new_page_with_loader(
+        &self,
+        options: PageOptions,
+        loader: Arc<dyn ResourceLoader>,
+    ) -> Result<AutomationPage, AutomationError> {
         if self.closed.load(Ordering::Acquire) {
             return Err(AutomationError::Closed);
         }
@@ -176,7 +194,7 @@ impl AutomationBrowser {
             .persona
             .clone()
             .map_or(options.clone(), |persona| options.with_persona(persona));
-        let page = AutomationPage::launch(options, Arc::clone(&self.loader), self.workers.clone())?;
+        let page = AutomationPage::launch(options, loader, self.workers.clone())?;
         self.pages
             .lock()
             .expect("automation page list poisoned")
