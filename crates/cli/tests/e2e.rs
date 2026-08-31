@@ -147,6 +147,51 @@ fn get_evaluation_keeps_structured_data_on_stdout() {
 }
 
 #[test]
+fn get_inserts_cookie_option_into_the_browser_jar() {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let address = listener.local_addr().unwrap();
+    let (observed, request) = std::sync::mpsc::sync_channel(1);
+    let worker = std::thread::spawn(move || {
+        let (mut stream, _) = listener.accept().unwrap();
+        let mut bytes = [0; 4096];
+        let read = stream.read(&mut bytes).unwrap();
+        observed
+            .send(String::from_utf8_lossy(&bytes[..read]).into_owned())
+            .unwrap();
+        let body = b"<!doctype html><title>Cookie</title>";
+        let head = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: {}\r\n\r\n",
+            body.len()
+        );
+        stream.write_all(head.as_bytes()).unwrap();
+        stream.write_all(body).unwrap();
+    });
+    let output = binary()
+        .args([
+            "get",
+            &format!("http://{address}/"),
+            "--cookie",
+            "agent=ready",
+            "--eval",
+            "document.cookie",
+        ])
+        .output()
+        .unwrap();
+    worker.join().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        serde_json::from_slice::<String>(&output.stdout).unwrap(),
+        "agent=ready"
+    );
+    let request = request.recv_timeout(Duration::from_secs(1)).unwrap();
+    assert!(request.to_ascii_lowercase().contains("cookie: agent=ready"));
+}
+
+#[test]
 fn get_page_options_enable_opt_in_subsystems() {
     let unique = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)

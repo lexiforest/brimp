@@ -67,7 +67,9 @@ Preparation, extraction, and wait controls include:
 
 Network and identity controls include repeatable `--header 'NAME: VALUE'` and
 `--cookie 'NAME=VALUE'`, plus `--proxy URL`, `--persona PATH`, and
-`--ca-bundle PATH`. Persona-owned identity headers cannot be overridden
+`--ca-bundle PATH`. Cookie options are inserted once into the browser-context
+cookie jar and then follow normal domain, path, redirect, and expiry rules;
+they are not replayed as static headers. Persona-owned identity headers cannot be overridden
 independently. Existing output files are refused unless `--overwrite` is
 explicit. Ctrl-C and the operation timeout cover navigation, waits, scripts,
 extraction, rendering, and output.

@@ -106,20 +106,21 @@ print(response.status_code)
 print(response.html)
 ```
 
-Use a Session to retain cookies and connections and to access the current
-rendered document:
+Use a Session to share cookies across independently concurrent pages. Each page
+owns its document, connections, and optional immutable proxy:
 
 ```python
 import brimp
 
 with brimp.Session() as session:
-    response = session.get("https://example.com", params={"q": "browser"})
+    page = session.new_page()
+    response = page.get("https://example.com", params={"q": "browser"})
     response.raise_for_status()
-    print(session.evaluate("document.title"))
-    session.hover("#menu")
-    session.type("#name", "agent")
-    session.click("#submit")
-    session.screenshot("example.png", full_page=True)
+    print(page.evaluate("document.title"))
+    page.hover("#menu")
+    page.type("#name", "agent")
+    page.click("#submit")
+    page.screenshot("example.png", full_page=True)
 ```
 
 ### Node.js
@@ -130,12 +131,13 @@ const brimp = require('@brimp/brimp')
 async function main() {
   const session = await brimp.createSession()
   try {
-    const response = await session.get('https://example.com')
+    const page = await session.newPage()
+    const response = await page.get('https://example.com')
     console.log(response.statusCode, response.html)
-    console.log(await session.evaluate('document.title'))
-    await session.hover('#menu')
-    await session.type('#name', 'agent')
-    await session.click('#submit')
+    console.log(await page.evaluate('document.title'))
+    await page.hover('#menu')
+    await page.type('#name', 'agent')
+    await page.click('#submit')
   } finally {
     await session.close()
   }

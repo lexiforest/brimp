@@ -259,6 +259,10 @@ fn get_command(arguments: &[String]) -> Result<(), AutomationError> {
         shared.persona.clone(),
         shared.network.clone(),
     )?;
+    let context = browser.default_context();
+    for (name, value) in &shared.cookies {
+        context.set_cookie(&options.url, name, value)?;
+    }
     let page = browser.new_page(shared.page.clone())?;
     let navigation = page.navigate_cancellable(
         options.url.clone(),

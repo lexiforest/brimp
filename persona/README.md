@@ -41,8 +41,11 @@ migrated.
 | `plugins` | `pdf_enabled` feeds `navigator.pdfViewerEnabled`; `entries` supply array-like `navigator.plugins` and `navigator.mimeTypes` snapshots with numeric, `item()`, and `namedItem()` lookup. | `block_system_entries` has no additional effect because Brimp has no system plugin inventory to merge. |
 | `chrome` | `exposed`, `enumerable`, `runtime`, `app`, `load_times`, and `csi` control the basic `window.chrome` shape. | `window_key_strategy` and Chrome method return payloads are not applied. |
 | `navigator` | All fields except `offscreen_canvas_enabled`. Notification permission, permission exposure, Bluetooth availability, and media-device exposure feed the emulated APIs described below. | Permission queries other than notifications return `granted`; media-device counts produce deterministic synthetic identifiers and labels. |
-| `automation` | `webdriver` controls `navigator.webdriver`. | `expose_webdriver_helpers` is resolved only; Brimp does not install automation globals. |
 | Top-level locale fields | `locale` and `languages` control Navigator values; `accept_language` controls the HTTP header and participates in locale resolution. | `locale` does not alter JavaScriptCore's Intl locale. `timezone` is resolved but cannot alter JavaScriptCore's Intl/Date timezone without a JSC change. |
+
+Automation exposure is not a persona option. `navigator.webdriver` is always
+present with the value `false`, regardless of agent control, CDP attachment,
+language bindings, headless execution, request interception, or trusted input.
 
 ## Emulated structured APIs
 

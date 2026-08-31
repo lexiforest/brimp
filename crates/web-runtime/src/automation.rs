@@ -9,10 +9,11 @@ use std::time::{Duration, Instant};
 use network::{HeaderList, ResourceLoader};
 use serde::Serialize;
 use serde_json::Value;
+use web_bindings::{CookieJar, StoredCookie};
 
 use crate::{
     ExtractedDocument, ExtractionOptions, NavigationError, NavigationResponse, Page, PageOptions,
-    ScreenshotOptions, Viewport, worker::WorkerCoordinator,
+    ScreenshotOptions, Viewport, page::DocumentNetworkScope, worker::WorkerCoordinator,
 };
 
 fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
@@ -114,6 +115,49 @@ pub struct AutomationBrowser {
     pages: Mutex<Vec<Weak<PageControl>>>,
     closed: AtomicBool,
     workers: WorkerCoordinator,
+    default_context: AutomationBrowserContext,
+    network_config: Option<network::CurlConfig>,
+}
+
+#[derive(Clone, Default)]
+pub struct AutomationBrowserContext {
+    cookies: Arc<CookieJar>,
+}
+
+impl AutomationBrowserContext {
+    pub fn set_cookie(&self, url: &str, name: &str, value: &str) -> Result<(), AutomationError> {
+        self.cookies
+            .set(url, name, value)
+            .map_err(AutomationError::InvalidInput)
+    }
+
+    pub fn store_cookie(&self, url: &str, header: &str) -> Result<(), AutomationError> {
+        self.cookies
+            .store(url, header)
+            .map_err(AutomationError::InvalidInput)
+    }
+
+    pub fn cookies(&self) -> Vec<StoredCookie> {
+        self.cookies.all()
+    }
+
+    pub fn cookies_for_url(&self, url: &str) -> Vec<StoredCookie> {
+        self.cookies.matching(url)
+    }
+
+    pub fn delete_cookies(
+        &self,
+        name: &str,
+        url: Option<&str>,
+        domain: Option<&str>,
+        path: Option<&str>,
+    ) {
+        self.cookies.delete(name, url, domain, path);
+    }
+
+    pub fn clear_cookies(&self) {
+        self.cookies.clear();
+    }
 }
 impl AutomationBrowser {
     pub fn new() -> Result<Self, AutomationError> {
@@ -127,6 +171,8 @@ impl AutomationBrowser {
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
             workers: WorkerCoordinator::new().expect("shared worker coordinator must start"),
+            default_context: AutomationBrowserContext::default(),
+            network_config: None,
         }
     }
     pub fn with_persona_and_resource_loader(
@@ -142,6 +188,8 @@ impl AutomationBrowser {
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
             workers: WorkerCoordinator::new().map_err(AutomationError::Internal)?,
+            default_context: AutomationBrowserContext::default(),
+            network_config: None,
         })
     }
     pub fn with_persona(persona: persona::PersonaConfig) -> Result<Self, AutomationError> {
@@ -160,7 +208,7 @@ impl AutomationBrowser {
         network::CurlResourceLoader::check_profile(&config)
             .map_err(|error| AutomationError::Transport(error.to_string()))?;
         let loader = Arc::new(
-            network::CurlResourceLoader::new(config)
+            network::CurlResourceLoader::new(config.clone())
                 .map_err(|error| AutomationError::Transport(error.to_string()))?,
         );
         Ok(Self {
@@ -169,10 +217,49 @@ impl AutomationBrowser {
             pages: Mutex::new(Vec::new()),
             closed: AtomicBool::new(false),
             workers: WorkerCoordinator::new().map_err(AutomationError::Internal)?,
+            default_context: AutomationBrowserContext::default(),
+            network_config: Some(config),
         })
     }
     pub fn new_page(&self, options: PageOptions) -> Result<AutomationPage, AutomationError> {
-        self.new_page_with_loader(options, Arc::clone(&self.loader))
+        self.new_page_in_context(options, &self.default_context)
+    }
+    pub fn default_context(&self) -> AutomationBrowserContext {
+        self.default_context.clone()
+    }
+    pub fn create_context(&self) -> AutomationBrowserContext {
+        AutomationBrowserContext::default()
+    }
+    pub fn new_page_in_context(
+        &self,
+        options: PageOptions,
+        context: &AutomationBrowserContext,
+    ) -> Result<AutomationPage, AutomationError> {
+        self.new_page_with_loader(options, Arc::clone(&self.loader), context)
+    }
+    pub fn new_page_in_context_with_proxy(
+        &self,
+        options: PageOptions,
+        context: &AutomationBrowserContext,
+        proxy: Option<&str>,
+    ) -> Result<AutomationPage, AutomationError> {
+        let Some(proxy) = proxy else {
+            return self.new_page_in_context(options, context);
+        };
+        let mut config = self.network_config.clone().ok_or_else(|| {
+            AutomationError::Unsupported(
+                "proxy pages require a browser created with CurlConfig".into(),
+            )
+        })?;
+        config.proxy = Some(
+            network::Proxy::parse(proxy)
+                .map_err(|error| AutomationError::InvalidInput(error.to_string()))?,
+        );
+        let loader = Arc::new(
+            network::CurlResourceLoader::new(config)
+                .map_err(|error| AutomationError::Transport(error.to_string()))?,
+        );
+        self.new_page_with_loader(options, loader, context)
     }
     pub fn new_page_with_request_interceptor(
         &self,
@@ -183,12 +270,25 @@ impl AutomationBrowser {
             Arc::clone(&self.loader),
             interceptor,
         ));
-        self.new_page_with_loader(options, loader)
+        self.new_page_with_loader(options, loader, &self.default_context)
+    }
+    pub fn new_page_in_context_with_request_interceptor(
+        &self,
+        options: PageOptions,
+        context: &AutomationBrowserContext,
+        interceptor: Arc<dyn network::ResourceInterceptor>,
+    ) -> Result<AutomationPage, AutomationError> {
+        let loader = Arc::new(network::InterceptingResourceLoader::new(
+            Arc::clone(&self.loader),
+            interceptor,
+        ));
+        self.new_page_with_loader(options, loader, context)
     }
     fn new_page_with_loader(
         &self,
         options: PageOptions,
         loader: Arc<dyn ResourceLoader>,
+        context: &AutomationBrowserContext,
     ) -> Result<AutomationPage, AutomationError> {
         if self.closed.load(Ordering::Acquire) {
             return Err(AutomationError::Closed);
@@ -197,7 +297,12 @@ impl AutomationBrowser {
             .persona
             .clone()
             .map_or(options.clone(), |persona| options.with_persona(persona));
-        let page = AutomationPage::launch(options, loader, self.workers.clone())?;
+        let page = AutomationPage::launch(
+            options,
+            DocumentNetworkScope::new(loader),
+            self.workers.clone(),
+            Arc::clone(&context.cookies),
+        )?;
         self.pages
             .lock()
             .expect("automation page list poisoned")
@@ -230,14 +335,24 @@ pub struct AutomationPage {
 impl AutomationPage {
     fn launch(
         options: PageOptions,
-        loader: Arc<dyn ResourceLoader>,
+        network_scope: DocumentNetworkScope,
         workers: WorkerCoordinator,
+        cookies: Arc<CookieJar>,
     ) -> Result<Self, AutomationError> {
         let (commands, receiver) = mpsc::channel();
         let (ready_sender, ready_receiver) = mpsc::sync_channel(1);
         let worker = std::thread::Builder::new()
             .name("brimp-page-owner".into())
-            .spawn(move || run_page(options, loader, workers, receiver, ready_sender))
+            .spawn(move || {
+                run_page(
+                    options,
+                    network_scope,
+                    workers,
+                    cookies,
+                    receiver,
+                    ready_sender,
+                )
+            })
             .map_err(|error| AutomationError::Internal(error.to_string()))?;
         ready_receiver
             .recv()
@@ -773,12 +888,13 @@ enum Command {
 
 fn run_page(
     options: PageOptions,
-    loader: Arc<dyn ResourceLoader>,
+    network_scope: DocumentNetworkScope,
     workers: WorkerCoordinator,
+    cookies: Arc<CookieJar>,
     commands: mpsc::Receiver<Command>,
     ready: mpsc::SyncSender<Result<(), AutomationError>>,
 ) {
-    let mut page = match Page::new(options, loader, workers) {
+    let mut page = match Page::new(options, network_scope, workers, cookies) {
         Ok(page) => page,
         Err(error) => {
             let _ = ready.send(Err(AutomationError::Internal(error.to_string())));

@@ -110,7 +110,7 @@ The following list is exhaustive. An absent method returns CDP error `-32601`.
 | `Browser.getWindowBounds` | Returns the single headless window's bounds. |
 | `Browser.setDownloadBehavior` | Accepted for Playwright initialization; downloads are not implemented. |
 | `Target.getBrowserContexts` | Lists live non-default logical browser contexts. |
-| `Target.createBrowserContext` | Creates a logical page group without cookie/storage isolation. |
+| `Target.createBrowserContext` | Creates a page group with an isolated cookie jar. DOM storage isolation is not implemented. |
 | `Target.disposeBrowserContext` | Closes pages in and removes a logical context. |
 | `Target.setDiscoverTargets` | Controls target discovery events. |
 | `Target.setAutoAttach` | Stores flattened auto-attach policy and applies it to new pages. |
@@ -158,6 +158,12 @@ The following list is exhaustive. An absent method returns CDP error `-32601`.
 | `Network.setCacheDisabled` | Accepted during client initialization; Brimp has no configurable page cache. |
 | `Network.setExtraHTTPHeaders` | Applies string-valued headers to subsequent main-document navigation requests. |
 | `Network.setRequestInterception` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Empty patterns disable interception. |
+| `Network.getCookies` | Returns cookies applicable to URLs in the target's browser context. |
+| `Network.getAllCookies` | Returns every cookie in the target's browser context; deprecated by CDP in favor of `Storage.getCookies`. |
+| `Network.setCookie`, `Network.setCookies` | Insert scoped cookies into the target's browser-context jar. Partitioned cookies are not implemented. |
+| `Network.deleteCookies` | Deletes matching cookies by name and optional URL, domain, and path. |
+| `Network.clearBrowserCookies` | Clears the target's browser-context cookie jar. |
+| `Storage.getCookies`, `Storage.setCookies`, `Storage.clearCookies` | Inspect, update, or clear the selected browser-context cookie jar. |
 | `Network.continueInterceptedRequest` | Continues, modifies, fails, or fulfills a paused legacy request. Fulfillment accepts a base64 raw HTTP response. Authentication challenges are not implemented. |
 | `Network.getResponseBody` | Returns the latest main-document response body by loader/request ID. |
 | `Network.setUserAgentOverride` | Applies coherent request-header and `navigator` identity overrides; client-hint metadata is not implemented. |

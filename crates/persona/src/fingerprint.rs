@@ -23,14 +23,6 @@ pub struct NetworkFingerprint {
     pub sec_ch_ua_model: String,
 }
 
-/// Automation exposure policy for WebDriver-related JS surfaces.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-pub struct AutomationPolicy {
-    pub webdriver: bool,
-    pub expose_webdriver_helpers: bool,
-    pub expose_automation_globals: bool,
-}
-
 /// Resolved screen fingerprint values.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ScreenFingerprint {
@@ -323,7 +315,6 @@ pub struct ResolvedPersona {
     pub media: MediaFingerprint,
     pub battery: BatteryFingerprint,
     pub storage: StorageFingerprint,
-    pub automation: AutomationPolicy,
     pub features: FeaturesConfig,
     pub plugins: PluginsConfig,
     pub chrome: ChromeConfig,
@@ -647,7 +638,6 @@ impl ResolvedPersona {
                 legacy_temporary_quota_bytes: None,
                 legacy_persistent_quota_bytes: None,
             },
-            automation: AutomationPolicy::default(),
             features: FeaturesConfig::default(),
             plugins: chrome_pdf_plugins(),
             chrome: ChromeConfig {

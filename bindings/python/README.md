@@ -12,23 +12,24 @@ print(response.text)  # original HTTP response
 print(response.html)  # DOM after JavaScript
 ```
 
-Persistent cookies, connection reuse, JavaScript evaluation, and screenshots
-are available through a context-managed Session:
+Sessions own shared cookies while pages own documents, connections, and an
+optional immutable proxy:
 
 ```python
 with brimp.Session() as session:
-    response = session.get("https://example.com", timeout=30)
+    page = session.new_page(proxy="socks5h://127.0.0.1:1080")
+    response = page.get("https://example.com", timeout=30)
     response.raise_for_status()
-    print(session.evaluate("document.title"))
-    article = session.extract(content_selector="main")
+    print(page.evaluate("document.title"))
+    article = page.extract(content_selector="main")
     print(article["contentMarkdown"])
-    session.hover("#menu")
-    session.type("#name", "agent")
-    session.click("#submit")
-    session.screenshot("page.png", full_page=True)
+    page.hover("#menu")
+    page.type("#name", "agent")
+    page.click("#submit")
+    page.screenshot("page.png", full_page=True)
 ```
 
-`Session.extract()` runs the vendored Defuddle browser bundle against the live,
+`Page.extract()` runs the vendored Defuddle browser bundle against the live,
 post-JavaScript document. It does not create a jsdom document or make another
 network request.
 
@@ -37,7 +38,7 @@ or hostname verification:
 
 ```python
 with brimp.Session(ca_bundle="path/to/cacert.pem") as session:
-    response = session.get("https://internal.example")
+    response = session.new_page().get("https://internal.example")
 ```
 
 Persona JSON uses the versioned schema in [`../../persona/`](../../persona/README.md):
@@ -45,7 +46,7 @@ Persona JSON uses the versioned schema in [`../../persona/`](../../persona/READM
 ```python
 persona_json = open("persona/example.json").read()
 with brimp.Session(persona_json=persona_json) as session:
-    print(session.get("https://example.com").status_code)
+    print(session.new_page().get("https://example.com").status_code)
 ```
 
 Heavy browser subsystems are page-scoped and disabled by default:
@@ -61,7 +62,7 @@ with brimp.Session(
     enable_webaudio_output=True,
     storage_path="profile/storage",
 ) as session:
-    session.get("https://example.com")
+    session.new_page().get("https://example.com")
 ```
 
 `enable_webaudio=True` keeps real-time graphs device-free.

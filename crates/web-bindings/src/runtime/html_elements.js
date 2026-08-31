@@ -522,12 +522,22 @@ class HTMLInputElement extends HTMLElement {
         return __inputValues.has(this) ? __inputValues.get(this) : (this.getAttribute("value") ?? "");
     }
     set value(value) { __inputValues.set(this, String(value)); }
+    get checked() {
+        return __inputCheckedStates.has(this) ? __inputCheckedStates.get(this) : this.defaultChecked;
+    }
+    set checked(value) { __inputCheckedStates.set(this, Boolean(value)); }
 }
 class HTMLButtonElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
 class HTMLSelectElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
 class HTMLDataListElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
 class HTMLOptGroupElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLOptionElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLOptionElement extends HTMLElement {
+    constructor() { __illegalHtmlElementConstructor(); }
+    get selected() {
+        return __optionSelectedStates.has(this) ? __optionSelectedStates.get(this) : this.defaultSelected;
+    }
+    set selected(value) { __optionSelectedStates.set(this, Boolean(value)); }
+}
 class HTMLTextAreaElement extends HTMLElement {
     constructor() { __illegalHtmlElementConstructor(); }
     get value() { return __inputValues.has(this) ? __inputValues.get(this) : this.textContent; }

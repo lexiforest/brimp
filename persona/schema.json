@@ -36,7 +36,6 @@
     "svg": { "$ref": "#/$defs/svg" },
     "native_functions": { "$ref": "#/$defs/native_functions" },
     "noise": { "$ref": "#/$defs/noise" },
-    "automation": { "$ref": "#/$defs/automation" },
     "locale": { "type": "string", "minLength": 1 },
     "languages": {
       "type": "array",
@@ -497,14 +496,6 @@
       "properties": {
         "enabled": { "type": "boolean" }, "canvas": { "type": "boolean" }, "webgl": { "type": "boolean" }, "audio": { "type": "boolean" },
         "fonts": { "type": "boolean" }, "domrect": { "type": "boolean" }, "svg": { "type": "boolean" }
-      }
-    },
-    "automation": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "webdriver": { "type": "boolean" },
-        "expose_webdriver_helpers": { "type": "boolean" }
       }
     }
   }

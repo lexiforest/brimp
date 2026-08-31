@@ -8,30 +8,31 @@ import brimp
 
 def main(url):
     session = brimp.Session()
+    page = session.new_page()
     session.headers["X-Binding"] = "python"
     session.cookies["manual"] = "yes"
-    response = session.get(url, params={"q": ["one", "two"]})
-    title = session.evaluate("document.title")
-    value = session.evaluate("({answer: 42, values: [true, null]})")
-    session.hover("#submit")
-    session.click("#submit")
-    session.type("#name", "agent")
-    session.tap("#tap")
-    input_result = session.evaluate("({value: document.querySelector('#name').value, events: inputEvents})")
+    response = page.get(url, params={"q": ["one", "two"]})
+    title = page.evaluate("document.title")
+    value = page.evaluate("({answer: 42, values: [true, null]})")
+    page.hover("#submit")
+    page.click("#submit")
+    page.type("#name", "agent")
+    page.tap("#tap")
+    input_result = page.evaluate("({value: document.querySelector('#name').value, events: inputEvents})")
     evaluation_errors = {}
     for name, expression in {
         "javascript": "throw new Error('boom')",
         "unsupported": "undefined",
     }.items():
         try:
-            session.evaluate(expression)
+            page.evaluate(expression)
         except brimp.BrimpError as error:
             evaluation_errors[name] = error.code
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "page.png"
-        screenshot = session.screenshot(path)
+        screenshot = page.screenshot(path)
         png = path.read_bytes() == screenshot and screenshot.startswith(b"\x89PNG\r\n\x1a\n")
-    inspection = session.get(url + "/inspect").json()
+    inspection = page.get(url + "/inspect").json()
     result = {
         "title": title,
         "text": "Hello bindings" in response.html,
@@ -47,19 +48,19 @@ def main(url):
         "oneShot": brimp.get(url).status_code == 200,
     }
     result.update(evaluation_errors)
-    missing = session.get(url + "/missing")
+    missing = page.get(url + "/missing")
     try:
         missing.raise_for_status()
     except brimp.HTTPError as error:
         result["http"] = error.response is missing
     try:
-        session.get(url + "/hang", timeout=0.05)
+        page.get(url + "/hang", timeout=0.05)
     except brimp.Timeout as error:
         result["timeout"] = error.code == "timeout"
     session.close()
     session.close()
     try:
-        session.evaluate("document.title")
+        page.evaluate("document.title")
     except brimp.BrimpError as error:
         result["closed"] = error.code
     print(json.dumps(result, sort_keys=True))

@@ -316,16 +316,6 @@ pub struct NetworkConfig {
     pub sec_ch_ua_model: Option<String>,
 }
 
-/// Optional automation exposure overrides represented by the persona schema.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-pub struct AutomationConfig {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webdriver: Option<bool>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub expose_webdriver_helpers: Option<bool>,
-}
-
 /// CSS viewport dimensions and device scale factor.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -702,17 +692,6 @@ impl NetworkConfig {
         );
         if let Some(value) = &self.sec_ch_ua_model {
             network.sec_ch_ua_model = value.clone();
-        }
-    }
-}
-
-impl AutomationConfig {
-    pub(crate) fn apply_to(&self, automation: &mut AutomationPolicy) {
-        if let Some(webdriver) = self.webdriver {
-            automation.webdriver = webdriver;
-        }
-        if let Some(expose_webdriver_helpers) = self.expose_webdriver_helpers {
-            automation.expose_webdriver_helpers = expose_webdriver_helpers;
         }
     }
 }

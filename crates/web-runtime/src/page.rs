@@ -16,7 +16,7 @@ use jsc::{JsException, JsRuntime, JsValue, ProtectedJsObject};
 use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest};
 use screenshot::{ScreenshotError, ScreenshotOptions};
 use web_bindings::{
-    BindingQueues, BindingRuntime, BrowsingContext, FetchQueue, PendingFetch,
+    BindingQueues, BindingRuntime, BrowsingContext, CookieJar, FetchQueue, PendingFetch,
     PendingWebSocketOperation, PendingWorkerOperation,
     PersistentStorage as BindingPersistentStorage, StreamingQueue, TimerQueue, WebFeatureFlags,
     WorkerQueue, WrapperCache,
@@ -41,9 +41,8 @@ pub struct Page {
     document: Rc<RefCell<BrowserDocument>>,
     tasks: TaskQueue,
     viewport: Viewport,
-    loader: Arc<dyn ResourceLoader>,
+    network_scope: DocumentNetworkScope,
     load_state: LoadState,
-    url: Option<String>,
     document_ready: bool,
     async_error: Option<JsException>,
     persona: persona::ResolvedPersona,
@@ -59,14 +58,26 @@ pub struct Page {
     service_worker: Option<(u64, String)>,
 }
 
+#[derive(Clone)]
+pub(crate) struct DocumentNetworkScope {
+    loader: Arc<dyn ResourceLoader>,
+}
+
+impl DocumentNetworkScope {
+    pub(crate) fn new(loader: Arc<dyn ResourceLoader>) -> Self {
+        Self { loader }
+    }
+}
+
 impl Page {
     pub(crate) fn new(
         options: PageOptions,
-        loader: Arc<dyn ResourceLoader>,
+        network_scope: DocumentNetworkScope,
         worker_coordinator: WorkerCoordinator,
+        cookies: Arc<CookieJar>,
     ) -> Result<Self, JsException> {
         let js = JsRuntime::new()?;
-        let browsing_context = Arc::new(BrowsingContext::default());
+        let browsing_context = Arc::new(BrowsingContext::with_cookie_jar(cookies));
         let mut request_headers = persona_request_headers(&options.persona);
         let persona_header_names = request_headers
             .iter()
@@ -86,7 +97,7 @@ impl Page {
             .set_request_headers(request_headers)
             .map_err(JsException::from_message)?;
         let blitz_network = Arc::new(BlitzResourceProvider::new(
-            Arc::clone(&loader),
+            Arc::clone(&network_scope.loader),
             Arc::clone(&browsing_context),
         ));
         let net_provider: Arc<dyn NetProvider> = blitz_network.clone();
@@ -132,9 +143,8 @@ impl Page {
             document,
             tasks: TaskQueue::default(),
             viewport: options.viewport,
-            loader,
+            network_scope,
             load_state: LoadState::Idle,
-            url: None,
             document_ready: false,
             async_error: None,
             persona: options.persona,
@@ -237,7 +247,7 @@ impl Page {
         let mut request = self.resource_request(url)?;
         request.headers = headers;
         let response = match crate::request::fetch(
-            self.loader.as_ref(),
+            self.network_scope.loader.as_ref(),
             &self.browsing_context,
             request,
         )
@@ -278,7 +288,6 @@ impl Page {
         let effective_url = response.effective_url;
         let content = response.body;
         self.browsing_context.set_url(&effective_url);
-        self.url = Some(effective_url.clone());
         if let Err(error) = self.reset_page_at(&effective_url, cross_origin_isolated) {
             self.load_state = LoadState::Failed;
             return Err(error.into());
@@ -332,8 +341,8 @@ impl Page {
         self.load_state
     }
 
-    pub fn url(&self) -> Option<&str> {
-        self.url.as_deref()
+    pub fn url(&self) -> Option<String> {
+        self.browsing_context.current_url()
     }
 
     pub fn add_preload_script(&mut self, identifier: String, source: String) {
@@ -406,7 +415,7 @@ impl Page {
                     }
                     let script_url = base_url.join(&src)?.to_string();
                     let request = self.resource_request(&script_url)?;
-                    let loader = Arc::clone(&self.loader);
+                    let loader = Arc::clone(&self.network_scope.loader);
                     let browsing_context = Arc::clone(&self.browsing_context);
                     pending_loads.spawn(async move {
                         let result =
@@ -519,8 +528,12 @@ impl Page {
 
     async fn fetch_success(&self, url: &str) -> Result<network::ResourceResponse, NavigationError> {
         let request = self.resource_request(url)?;
-        let response =
-            crate::request::fetch(self.loader.as_ref(), &self.browsing_context, request).await?;
+        let response = crate::request::fetch(
+            self.network_scope.loader.as_ref(),
+            &self.browsing_context,
+            request,
+        )
+        .await?;
         self.accept_success_response(response)
     }
 
@@ -559,7 +572,12 @@ impl Page {
                 .as_ref()
                 .expect("Defuddle extractor was installed"),
             &options,
-            Some(self.url.as_deref().unwrap_or("about:blank")),
+            Some(
+                self.browsing_context
+                    .current_url()
+                    .as_deref()
+                    .unwrap_or("about:blank"),
+            ),
         )
     }
 
@@ -787,7 +805,7 @@ impl Page {
                 continue;
             }
             let requested_url = request.url.clone();
-            let loader = Arc::clone(&self.loader);
+            let loader = Arc::clone(&self.network_scope.loader);
             let browsing_context = Arc::clone(&self.browsing_context);
             let credentials_sent = request.headers.contains_key(http::header::COOKIE)
                 || browsing_context.cookie_header(&request.url).is_some();
@@ -1058,7 +1076,7 @@ impl Page {
                     };
                     self.workers
                         .insert(id, WorkerInstance::Starting(Vec::new()));
-                    let loader = Arc::clone(&self.loader);
+                    let loader = Arc::clone(&self.network_scope.loader);
                     let context = Arc::clone(&self.browsing_context);
                     let sender = self.task_sender();
                     let result = crate::request::fetch_callback(
@@ -1242,7 +1260,7 @@ impl Page {
                     let mut headers = HeaderList::new();
                     self.browsing_context.apply_request_identity(&mut headers);
                     let sender = self.task_sender();
-                    let handle = self.loader.open_websocket(
+                    let handle = self.network_scope.loader.open_websocket(
                         url,
                         headers,
                         Box::new(move |event| {
@@ -1310,8 +1328,8 @@ impl Page {
         let url = match url::Url::parse(&pending.url) {
             Ok(url) => url,
             Err(url::ParseError::RelativeUrlWithoutBase) => self
-                .url
-                .as_deref()
+                .browsing_context
+                .current_url()
                 .ok_or_else(|| "relative fetch URL has no document base URL".to_string())?
                 .parse::<url::Url>()
                 .and_then(|base| base.join(&pending.url))
@@ -1332,7 +1350,7 @@ impl Page {
             let value = http::HeaderValue::from_str(&value).map_err(|error| error.to_string())?;
             request.headers.append(name, value);
         }
-        request.body = pending.body.map(String::into_bytes);
+        request.body = pending.body;
         Ok(request)
     }
 

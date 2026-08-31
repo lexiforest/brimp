@@ -71,7 +71,7 @@ impl PyResponse {
 #[pyclass(name = "_Session", module = "brimp._brimp")]
 struct PySession {
     browser: Arc<AutomationBrowser>,
-    page: AutomationPage,
+    page_options: PageOptions,
 }
 
 #[pymethods]
@@ -132,21 +132,55 @@ impl PySession {
                     .quota_bytes(storage_quota_bytes.unwrap_or(1024 * 1024 * 1024));
                 page_options = page_options.persistent_storage(storage);
             }
-            let page = browser.new_page(page_options.build()).map_err(error)?;
-            Ok(Self { browser, page })
+            Ok(Self {
+                browser,
+                page_options: page_options.build(),
+            })
         })
     }
 
-    #[pyo3(signature = (url, timeout_ms, headers = None))]
+    #[pyo3(signature = (proxy = None))]
+    fn new_page(&self, py: Python<'_>, proxy: Option<String>) -> PyResult<PyPage> {
+        let browser = Arc::clone(&self.browser);
+        let page_options = self.page_options.clone();
+        py.detach(move || {
+            let context = browser.default_context();
+            let page = browser
+                .new_page_in_context_with_proxy(page_options, &context, proxy.as_deref())
+                .map_err(error)?;
+            Ok(PyPage { browser, page })
+        })
+    }
+
+    fn close(&self, py: Python<'_>) {
+        let browser = Arc::clone(&self.browser);
+        py.detach(move || browser.close());
+    }
+}
+
+#[pyclass(name = "_Page", module = "brimp._brimp")]
+struct PyPage {
+    browser: Arc<AutomationBrowser>,
+    page: AutomationPage,
+}
+
+#[pymethods]
+impl PyPage {
+    #[pyo3(signature = (url, timeout_ms, headers = None, cookies = None))]
     fn get(
         &self,
         py: Python<'_>,
         url: String,
         timeout_ms: u64,
         headers: Option<Vec<(String, String)>>,
+        cookies: Option<Vec<(String, String)>>,
     ) -> PyResult<PyResponse> {
         let page = self.page.clone();
+        let context = self.browser.default_context();
         py.detach(move || {
+            for (name, value) in cookies.unwrap_or_default() {
+                context.set_cookie(&url, &name, &value).map_err(error)?;
+            }
             page.navigate_with_headers(
                 url,
                 Duration::from_millis(timeout_ms),
@@ -215,8 +249,8 @@ impl PySession {
     }
 
     fn close(&self, py: Python<'_>) {
-        let browser = Arc::clone(&self.browser);
-        py.detach(move || browser.close());
+        let page = self.page.clone();
+        py.detach(move || page.close());
     }
 }
 
@@ -225,6 +259,7 @@ fn _brimp(module: &Bound<'_, PyModule>) -> PyResult<()> {
     #[cfg(target_os = "macos")]
     let _alignment = unsafe { std::ptr::read_volatile(&raw const NSApp) };
     module.add_class::<PySession>()?;
+    module.add_class::<PyPage>()?;
     module.add_class::<PyResponse>()?;
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())

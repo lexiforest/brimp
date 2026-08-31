@@ -55,6 +55,7 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("runtime/elements.js"),
     include_str!("runtime/html_elements.js"),
     include_str!("runtime/window_location.js"),
+    include_str!("runtime/navigator_services.js"),
     include_str!("runtime/url_encoding_files.js"),
     include_str!("runtime/storage_fetch.js"),
     include_str!("runtime/css_style.js"),
@@ -108,7 +109,7 @@ pub struct PendingFetch {
     pub url: String,
     pub method: String,
     pub headers_json: String,
-    pub body: Option<String>,
+    pub body: Option<Vec<u8>>,
     pub streaming: bool,
 }
 
@@ -284,12 +285,185 @@ pub struct BindingQueues {
     pub streaming: Rc<RefCell<StreamingQueue>>,
 }
 
+#[derive(Clone, Debug)]
+pub struct StoredCookie {
+    pub name: String,
+    pub value: String,
+    pub domain: String,
+    pub host_only: bool,
+    pub path: String,
+    pub expires: Option<i64>,
+    pub http_only: bool,
+    pub secure: bool,
+    pub same_site: Option<String>,
+}
+
 #[derive(Default)]
+pub struct CookieJar(Mutex<cookie_store::CookieStore>);
+
+impl CookieJar {
+    pub fn store(&self, url: &str, header: &str) -> Result<(), String> {
+        let url = url::Url::parse(url).map_err(|error| error.to_string())?;
+        let cookie =
+            cookie_store::RawCookie::parse(header.to_owned()).map_err(|error| error.to_string())?;
+        let result = self
+            .0
+            .lock()
+            .expect("cookie store lock poisoned")
+            .insert_raw(&cookie, &url);
+        match result {
+            Ok(_) | Err(cookie_store::CookieError::Expired) => Ok(()),
+            Err(error) => Err(error.to_string()),
+        }
+    }
+
+    pub fn set(&self, url: &str, name: &str, value: &str) -> Result<(), String> {
+        if name.is_empty()
+            || name.contains([';', '=', '\r', '\n'])
+            || value.contains([';', '\r', '\n'])
+        {
+            return Err("invalid cookie name or value".into());
+        }
+        self.store(url, &format!("{name}={value}; Path=/"))
+    }
+
+    fn store_document(&self, url: &str, header: &str) -> Result<(), String> {
+        let url = url::Url::parse(url).map_err(|error| error.to_string())?;
+        let raw =
+            cookie_store::RawCookie::parse(header.to_owned()).map_err(|error| error.to_string())?;
+        if raw.http_only() == Some(true) || (raw.secure() == Some(true) && url.scheme() != "https")
+        {
+            return Ok(());
+        }
+        let cookie = cookie_store::Cookie::try_from_raw_cookie(&raw, &url)
+            .map_err(|error| error.to_string())?
+            .into_owned();
+        let domain = cookie.domain.as_cow().unwrap_or_default().into_owned();
+        let path = cookie.path.as_ref().to_owned();
+        let mut store = self.0.lock().expect("cookie store lock poisoned");
+        if store
+            .get_any(&domain, &path, cookie.name())
+            .is_some_and(|existing| existing.http_only() == Some(true))
+        {
+            return Ok(());
+        }
+        match store.insert(cookie, &url) {
+            Ok(_) | Err(cookie_store::CookieError::Expired) => Ok(()),
+            Err(error) => Err(error.to_string()),
+        }
+    }
+
+    pub fn header(&self, url: &str) -> Option<String> {
+        let url = url::Url::parse(url).ok()?;
+        let value = self
+            .0
+            .lock()
+            .expect("cookie store lock poisoned")
+            .get_request_values(&url)
+            .map(|(name, value)| format!("{name}={value}"))
+            .collect::<Vec<_>>()
+            .join("; ");
+        (!value.is_empty()).then_some(value)
+    }
+
+    pub fn for_url(&self, url: &str) -> Vec<(String, String)> {
+        let Ok(url) = url::Url::parse(url) else {
+            return Vec::new();
+        };
+        self.0
+            .lock()
+            .expect("cookie store lock poisoned")
+            .get_request_values(&url)
+            .map(|(name, value)| (name.to_owned(), value.to_owned()))
+            .collect()
+    }
+
+    pub fn matching(&self, url: &str) -> Vec<StoredCookie> {
+        let Ok(url) = url::Url::parse(url) else {
+            return Vec::new();
+        };
+        self.0
+            .lock()
+            .expect("cookie store lock poisoned")
+            .matches(&url)
+            .into_iter()
+            .map(stored_cookie)
+            .collect()
+    }
+
+    pub fn all(&self) -> Vec<StoredCookie> {
+        self.0
+            .lock()
+            .expect("cookie store lock poisoned")
+            .iter_unexpired()
+            .map(stored_cookie)
+            .collect()
+    }
+
+    pub fn delete(&self, name: &str, url: Option<&str>, domain: Option<&str>, path: Option<&str>) {
+        let parsed_url = url.and_then(|value| url::Url::parse(value).ok());
+        let mut store = self.0.lock().expect("cookie store lock poisoned");
+        let keys = store
+            .iter_unexpired()
+            .filter(|cookie| cookie.name() == name)
+            .filter(|cookie| parsed_url.as_ref().is_none_or(|url| cookie.matches(url)))
+            .filter(|cookie| {
+                domain.is_none_or(|domain| {
+                    cookie.domain.as_cow().as_deref() == Some(domain.trim_start_matches('.'))
+                })
+            })
+            .filter(|cookie| path.is_none_or(|path| cookie.path.as_ref() == path))
+            .filter_map(|cookie| {
+                Some((
+                    cookie.domain.as_cow()?.into_owned(),
+                    cookie.path.as_ref().to_owned(),
+                    cookie.name().to_owned(),
+                ))
+            })
+            .collect::<Vec<_>>();
+        for (domain, path, name) in keys {
+            store.remove(&domain, &path, &name);
+        }
+    }
+
+    pub fn clear(&self) {
+        *self.0.lock().expect("cookie store lock poisoned") = cookie_store::CookieStore::default();
+    }
+}
+
+fn stored_cookie(cookie: &cookie_store::Cookie<'static>) -> StoredCookie {
+    let (domain, host_only) = match &cookie.domain {
+        cookie_store::CookieDomain::HostOnly(domain) => (domain.clone(), true),
+        cookie_store::CookieDomain::Suffix(domain) => (format!(".{domain}"), false),
+        domain => (domain.as_cow().unwrap_or_default().into_owned(), false),
+    };
+    StoredCookie {
+        name: cookie.name().to_owned(),
+        value: cookie.value().to_owned(),
+        domain,
+        host_only,
+        path: cookie.path.as_ref().to_owned(),
+        expires: match cookie.expires {
+            cookie_store::CookieExpiration::AtUtc(value) => Some(value.unix_timestamp()),
+            cookie_store::CookieExpiration::SessionEnd => None,
+        },
+        http_only: cookie.http_only() == Some(true),
+        secure: cookie.secure() == Some(true),
+        same_site: cookie.same_site().map(|value| format!("{value:?}")),
+    }
+}
+
 pub struct BrowsingContext {
     url: Mutex<Option<String>>,
-    cookies: Mutex<cookie_store::CookieStore>,
+    cookies: Arc<CookieJar>,
     request_headers: Mutex<Vec<(http::HeaderName, http::HeaderValue)>>,
     resource_cors: Mutex<HashMap<String, ResourceCorsPolicy>>,
+}
+
+impl Default for BrowsingContext {
+    fn default() -> Self {
+        Self::with_cookie_jar(Arc::new(CookieJar::default()))
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -300,6 +474,14 @@ struct ResourceCorsPolicy {
 }
 
 impl BrowsingContext {
+    pub fn with_cookie_jar(cookies: Arc<CookieJar>) -> Self {
+        Self {
+            url: Mutex::new(None),
+            cookies,
+            request_headers: Mutex::new(Vec::new()),
+            resource_cors: Mutex::new(HashMap::new()),
+        }
+    }
     pub fn store_resource_cors(
         &self,
         requested_url: &str,
@@ -403,46 +585,20 @@ impl BrowsingContext {
         *self.url.lock().expect("browsing URL lock poisoned") = Some(url.into());
     }
 
-    fn current_url(&self) -> Option<String> {
+    pub fn current_url(&self) -> Option<String> {
         self.url.lock().expect("browsing URL lock poisoned").clone()
     }
 
     pub fn store_response_cookie(&self, url: &str, header: &str) {
-        let (Ok(url), Ok(cookie)) = (
-            url::Url::parse(url),
-            cookie_store::RawCookie::parse(header.to_owned()),
-        ) else {
-            return;
-        };
-        self.cookies
-            .lock()
-            .expect("cookie store lock poisoned")
-            .store_response_cookies(std::iter::once(cookie), &url);
+        let _ = self.cookies.store(url, header);
     }
 
     pub fn cookie_header(&self, url: &str) -> Option<String> {
-        let url = url::Url::parse(url).ok()?;
-        let value = self
-            .cookies
-            .lock()
-            .expect("cookie store lock poisoned")
-            .get_request_values(&url)
-            .map(|(name, value)| format!("{name}={value}"))
-            .collect::<Vec<_>>()
-            .join("; ");
-        (!value.is_empty()).then_some(value)
+        self.cookies.header(url)
     }
 
     pub fn cookies_for_url(&self, url: &str) -> Vec<(String, String)> {
-        let Ok(url) = url::Url::parse(url) else {
-            return Vec::new();
-        };
-        self.cookies
-            .lock()
-            .expect("cookie store lock poisoned")
-            .get_request_values(&url)
-            .map(|(name, value)| (name.to_owned(), value.to_owned()))
-            .collect()
+        self.cookies.for_url(url)
     }
 
     fn document_cookies(&self) -> String {
@@ -451,6 +607,7 @@ impl BrowsingContext {
             return String::new();
         };
         self.cookies
+            .0
             .lock()
             .expect("cookie store lock poisoned")
             .matches(&url)
@@ -464,7 +621,7 @@ impl BrowsingContext {
     fn set_document_cookie(&self, header: &str) {
         let url = self.url.lock().expect("browsing URL lock poisoned").clone();
         if let Some(url) = url {
-            self.store_response_cookie(&url, header);
+            let _ = self.cookies.store_document(&url, header);
         }
     }
 }
@@ -901,6 +1058,7 @@ fn is_platform_operation(operation: &str) -> bool {
                 | "clearTimeout"
                 | "queueMicrotask"
                 | "location"
+                | "historyUpdateUrl"
                 | "formUrlEncode"
                 | "decodeBytes"
                 | "encodeUtf8"
@@ -1897,7 +2055,7 @@ fn storage_origin(state: &BindingState) -> Result<String, NativeError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{flip_rows, premultiply_rgba};
+    use super::{CookieJar, flip_rows, premultiply_rgba};
 
     #[test]
     fn webgl_source_unpack_flips_and_premultiplies_rgba() {
@@ -1905,5 +2063,20 @@ mod tests {
         flip_rows(&mut pixels, 1, 2);
         premultiply_rgba(&mut pixels);
         assert_eq!(pixels, [10, 20, 30, 255, 100, 50, 25, 128]);
+    }
+
+    #[test]
+    fn document_cookie_cannot_create_or_overwrite_http_only_cookies() {
+        let jar = CookieJar::default();
+        jar.store("https://example.test/", "session=secret; Path=/; HttpOnly")
+            .unwrap();
+        jar.store_document("https://example.test/", "session=visible; Path=/")
+            .unwrap();
+        jar.store_document("https://example.test/", "created=hidden; Path=/; HttpOnly")
+            .unwrap();
+        assert_eq!(
+            jar.header("https://example.test/").as_deref(),
+            Some("session=secret")
+        );
     }
 }

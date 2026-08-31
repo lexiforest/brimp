@@ -136,8 +136,6 @@ class Response:
 
 
 class Session:
-    _PROTECTED_HEADERS = {"user-agent", "accept-language"}
-
     def __init__(
         self,
         *,
@@ -173,6 +171,38 @@ class Session:
         self.cookies = {}
         self._closed = False
 
+    def new_page(self, *, proxy: str | None = None):
+        self._ensure_open()
+        try:
+            return Page(self._inner.new_page(proxy), self)
+        except RuntimeError as error:
+            raise _translate(error) from error
+
+    def close(self):
+        if not self._closed:
+            self._inner.close()
+            self._closed = True
+
+    def _ensure_open(self):
+        if self._closed:
+            raise BrimpError("session is closed", code="closed")
+
+    def __enter__(self):
+        self._ensure_open()
+        return self
+
+    def __exit__(self, _type, _value, _traceback):
+        self.close()
+
+
+class Page:
+    _PROTECTED_HEADERS = {"user-agent", "accept-language"}
+
+    def __init__(self, inner, session: Session):
+        self._inner = inner
+        self._session = session
+        self._closed = False
+
     def get(
         self,
         url: str,
@@ -187,7 +217,7 @@ class Session:
         if timeout <= 0:
             raise InvalidRequest("timeout must be positive")
         url = _add_params(str(url), params)
-        merged_headers = dict(self.headers)
+        merged_headers = dict(self._session.headers)
         if headers:
             merged_headers.update(headers)
         protected = self._PROTECTED_HEADERS.intersection(
@@ -198,21 +228,21 @@ class Session:
             raise InvalidRequest(
                 f"persona-owned headers cannot be overridden: {names}; configure a persona instead"
             )
-        merged_cookies = dict(self.cookies)
+        merged_cookies = dict(self._session.cookies)
         if cookies:
             merged_cookies.update(cookies)
-        if merged_cookies:
-            merged_headers["Cookie"] = "; ".join(
-                f"{name}={value}" for name, value in merged_cookies.items()
-            )
         native_headers = [(str(name), str(value)) for name, value in merged_headers.items()]
         try:
             timeout_ms = max(1, round(timeout * 1000))
-            native = self._inner.get(url, timeout_ms, native_headers)
+            native = self._inner.get(
+                url,
+                timeout_ms,
+                native_headers,
+                [(str(name), str(value)) for name, value in merged_cookies.items()],
+            )
         except RuntimeError as error:
             raise _translate(error) from error
         response = Response(native)
-        self.cookies.update(response.cookies)
         return response
 
     def evaluate(self, expression: str):
@@ -285,8 +315,9 @@ class Session:
             self._closed = True
 
     def _ensure_open(self):
+        self._session._ensure_open()
         if self._closed:
-            raise BrimpError("session is closed", code="closed")
+            raise BrimpError("page is closed", code="closed")
 
     def __enter__(self):
         self._ensure_open()
@@ -323,7 +354,9 @@ def get(url: str, **kwargs) -> Response:
         if name in kwargs
     }
     with Session(**session_options) as session:
-        return session.get(url, **kwargs)
+        proxy = kwargs.pop("proxy", None)
+        with session.new_page(proxy=proxy) as page:
+            return page.get(url, **kwargs)
 
 
 __all__ = [
@@ -334,6 +367,7 @@ __all__ = [
     "InvalidRequest",
     "InvalidURL",
     "JavaScriptError",
+    "Page",
     "Response",
     "Session",
     "Timeout",

@@ -101,7 +101,6 @@ fn request_and_javascript_observe_one_coherent_identity() {
                 "load_times": false,
                 "csi": true
             },
-            "automation": { "webdriver": true },
             "locale": "fr-CA",
             "languages": ["fr-CA", "fr"]
         }"#,
@@ -155,7 +154,7 @@ fn request_and_javascript_observe_one_coherent_identity() {
     assert_eq!(observed["vendor"], "Persona Vendor");
     assert_eq!(observed["productSub"], "20260827");
     assert_eq!(observed["pdfViewerEnabled"], false);
-    assert_eq!(observed["webdriver"], true);
+    assert_eq!(observed["webdriver"], false);
     assert_eq!(
         observed["uaData"],
         serde_json::json!(["PersonaOS", "Persona Chrome"])

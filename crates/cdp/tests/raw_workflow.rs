@@ -30,6 +30,12 @@ impl ResourceLoader for FixtureLoader {
             request.headers.get(http::header::ACCEPT_LANGUAGE),
             Some(&HeaderValue::from_static("zh-TW, en;q=0.8"))
         );
+        if request.url.starts_with("https://fixture.test/") {
+            assert_eq!(
+                request.headers.get(http::header::COOKIE),
+                Some(&HeaderValue::from_static("agent=ready")),
+            );
+        }
         let mut headers = HeaderList::new();
         headers.append("content-type", HeaderValue::from_static("text/html"));
         Ok(ResourceResponse {
@@ -171,6 +177,89 @@ async fn discovery_and_raw_websocket_workflow() {
         "about:blank"
     );
     command(&mut socket, 30, "Network.enable", json!({}), Some(&session)).await;
+    assert_eq!(
+        command(
+            &mut socket,
+            60,
+            "Network.setCookie",
+            json!({"name": "agent", "value": "ready", "url": "https://fixture.test/"}),
+            Some(&session),
+        )
+        .await["result"]["success"],
+        true
+    );
+    let cookies = command(
+        &mut socket,
+        61,
+        "Network.getCookies",
+        json!({"urls": ["https://fixture.test/"]}),
+        Some(&session),
+    )
+    .await;
+    assert_eq!(cookies["result"]["cookies"][0]["name"], "agent");
+    assert_eq!(cookies["result"]["cookies"][0]["value"], "ready");
+    let context_id = command(
+        &mut socket,
+        62,
+        "Target.createBrowserContext",
+        json!({}),
+        None,
+    )
+    .await["result"]["browserContextId"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    command(
+        &mut socket,
+        63,
+        "Storage.setCookies",
+        json!({
+            "browserContextId": context_id,
+            "cookies": [{"name": "isolated", "value": "yes", "url": "https://fixture.test/"}]
+        }),
+        None,
+    )
+    .await;
+    let isolated_cookies = command(
+        &mut socket,
+        64,
+        "Storage.getCookies",
+        json!({"browserContextId": context_id}),
+        None,
+    )
+    .await;
+    assert_eq!(isolated_cookies["result"]["cookies"][0]["name"], "isolated");
+    let default_cookies = command(&mut socket, 65, "Storage.getCookies", json!({}), None).await;
+    assert_eq!(default_cookies["result"]["cookies"][0]["name"], "agent");
+    command(
+        &mut socket,
+        66,
+        "Storage.clearCookies",
+        json!({"browserContextId": context_id}),
+        None,
+    )
+    .await;
+    assert!(
+        command(
+            &mut socket,
+            67,
+            "Storage.getCookies",
+            json!({"browserContextId": context_id}),
+            None,
+        )
+        .await["result"]["cookies"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+    command(
+        &mut socket,
+        68,
+        "Target.disposeBrowserContext",
+        json!({"browserContextId": context_id}),
+        None,
+    )
+    .await;
     command(
         &mut socket,
         59,
@@ -265,7 +354,7 @@ async fn discovery_and_raw_websocket_workflow() {
         &mut socket,
         60,
         "Runtime.evaluate",
-        json!({"expression": "[navigator.userAgent, navigator.platform, navigator.language, navigator.languages, Object.hasOwn(navigator, 'userAgent'), Function.prototype.toString.call(Object.getOwnPropertyDescriptor(Navigator.prototype, 'userAgent').get)]", "returnByValue": true}),
+        json!({"expression": "[navigator.userAgent, navigator.platform, navigator.language, navigator.languages, navigator.webdriver, Object.hasOwn(navigator, 'userAgent'), Function.prototype.toString.call(Object.getOwnPropertyDescriptor(Navigator.prototype, 'userAgent').get)]", "returnByValue": true}),
         Some(&session),
     )
     .await;
@@ -276,6 +365,7 @@ async fn discovery_and_raw_websocket_workflow() {
             "TestOS",
             "zh-TW",
             ["zh-TW", "en"],
+            false,
             false,
             "function get userAgent() { [native code] }"
         ])

@@ -5,8 +5,8 @@ use std::time::Duration;
 use base64::Engine;
 use serde_json::{Value, json};
 use web_runtime::{
-    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, PageOptions,
-    RemoteArgument, TouchPoint,
+    AutomationBrowser, AutomationBrowserContext, AutomationError, AutomationPage,
+    CancellationToken, PageOptions, RemoteArgument, StoredCookie, TouchPoint,
 };
 
 use crate::interception::{InterceptionMode, InterceptionRegistry};
@@ -42,7 +42,7 @@ pub(crate) struct ConnectionState {
     pages: HashMap<String, PageTarget>,
     sessions: HashMap<String, String>,
     browser_sessions: HashSet<String>,
-    browser_contexts: HashSet<String>,
+    browser_contexts: HashMap<String, AutomationBrowserContext>,
     events: EventQueue,
     next_page_id: u64,
     next_session_id: u64,
@@ -74,7 +74,7 @@ impl ConnectionState {
             pages: HashMap::new(),
             sessions: HashMap::new(),
             browser_sessions: HashSet::new(),
-            browser_contexts: HashSet::new(),
+            browser_contexts: HashMap::new(),
             events: EventQueue::default(),
             next_page_id: 1,
             next_session_id: 1,
@@ -111,7 +111,7 @@ impl ConnectionState {
             "Browser.getWindowBounds" => Ok(default_window_bounds()),
             "Browser.setDownloadBehavior" => Ok(json!({})),
             "Target.getBrowserContexts" => {
-                Ok(json!({"browserContextIds": self.browser_contexts.iter().collect::<Vec<_>>()}))
+                Ok(json!({"browserContextIds": self.browser_contexts.keys().collect::<Vec<_>>()}))
             }
             "Target.createBrowserContext" => self.create_browser_context(),
             "Target.disposeBrowserContext" => self.dispose_browser_context(request),
@@ -162,6 +162,15 @@ impl ConnectionState {
             "Network.setExtraHTTPHeaders" => self.set_extra_http_headers(request),
             "Network.setRequestInterception" => self.set_request_interception(request),
             "Network.getResponseBody" => self.get_response_body(request),
+            "Network.getAllCookies" => self.get_all_cookies(request),
+            "Network.getCookies" => self.get_cookies(request),
+            "Network.setCookie" => self.set_cookie(request),
+            "Network.setCookies" => self.set_cookies(request),
+            "Network.deleteCookies" => self.delete_cookies(request),
+            "Network.clearBrowserCookies" => self.clear_browser_cookies(request),
+            "Storage.getCookies" => self.storage_get_cookies(request),
+            "Storage.setCookies" => self.storage_set_cookies(request),
+            "Storage.clearCookies" => self.storage_clear_cookies(request),
             "Fetch.enable" => self.enable_fetch(request),
             "Fetch.disable" => self.disable_fetch(request),
             "Network.setUserAgentOverride" | "Emulation.setUserAgentOverride" => {
@@ -232,13 +241,14 @@ impl ConnectionState {
     fn create_browser_context(&mut self) -> Result<Value, DispatchError> {
         let context_id = format!("context-{}", self.next_browser_context_id);
         self.next_browser_context_id += 1;
-        self.browser_contexts.insert(context_id.clone());
+        self.browser_contexts
+            .insert(context_id.clone(), self.browser.create_context());
         Ok(json!({"browserContextId": context_id}))
     }
 
     fn dispose_browser_context(&mut self, request: &Request) -> Result<Value, DispatchError> {
         let context_id = string_param(&request.params, "browserContextId")?.to_owned();
-        if !self.browser_contexts.remove(&context_id) {
+        if self.browser_contexts.remove(&context_id).is_none() {
             return Err(DispatchError::invalid_params("unknown browserContextId"));
         }
         let targets: Vec<_> = self
@@ -292,7 +302,9 @@ impl ConnectionState {
             .and_then(Value::as_str)
             .unwrap_or("default")
             .to_owned();
-        if browser_context_id != "default" && !self.browser_contexts.contains(&browser_context_id) {
+        if browser_context_id != "default"
+            && !self.browser_contexts.contains_key(&browser_context_id)
+        {
             return Err(DispatchError::invalid_params("unknown browserContextId"));
         }
         let target_id = format!("page-{}", self.next_page_id);
@@ -301,8 +313,9 @@ impl ConnectionState {
         let browser = Arc::clone(&self.browser);
         let options = self.page_options.clone();
         let viewport = options.viewport();
+        let context = self.context_owned(&browser_context_id)?;
         let page = tokio::task::spawn_blocking(move || {
-            browser.new_page_with_request_interceptor(options, interceptor)
+            browser.new_page_in_context_with_request_interceptor(options, &context, interceptor)
         })
         .await
         .map_err(internal_join)??;
@@ -1152,6 +1165,85 @@ impl ConnectionState {
         }
     }
 
+    fn get_all_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.context_for_page_request(request)?;
+        Ok(json!({"cookies": context.cookies().iter().map(cookie_value).collect::<Vec<_>>() }))
+    }
+
+    fn get_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let target = self.page_target_for_session(self.session(request)?)?;
+        let urls = match request.params.get("urls") {
+            None => vec![target.url.clone()],
+            Some(Value::Array(urls)) => urls
+                .iter()
+                .map(|url| {
+                    url.as_str()
+                        .map(str::to_owned)
+                        .ok_or_else(|| DispatchError::invalid_params("urls must contain strings"))
+                })
+                .collect::<Result<Vec<_>, _>>()?,
+            Some(_) => return Err(DispatchError::invalid_params("urls must be an array")),
+        };
+        let context = self.context_owned(&target.browser_context_id)?;
+        let mut cookies = HashMap::new();
+        for url in urls {
+            for cookie in context.cookies_for_url(&url) {
+                cookies.insert(
+                    (
+                        cookie.name.clone(),
+                        cookie.domain.clone(),
+                        cookie.path.clone(),
+                    ),
+                    cookie,
+                );
+            }
+        }
+        Ok(json!({"cookies": cookies.values().map(cookie_value).collect::<Vec<_>>() }))
+    }
+
+    fn set_cookie(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.context_for_page_request(request)?;
+        set_cookie_param(context, &request.params)?;
+        Ok(json!({"success": true}))
+    }
+
+    fn set_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.context_for_page_request(request)?;
+        set_cookie_params(context, &request.params)?;
+        Ok(json!({}))
+    }
+
+    fn delete_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.context_for_page_request(request)?;
+        let name = string_param(&request.params, "name")?;
+        let url = optional_string_param(&request.params, "url")?;
+        let domain = optional_string_param(&request.params, "domain")?;
+        let path = optional_string_param(&request.params, "path")?;
+        context.delete_cookies(name, url.as_deref(), domain.as_deref(), path.as_deref());
+        Ok(json!({}))
+    }
+
+    fn clear_browser_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        self.context_for_page_request(request)?.clear_cookies();
+        Ok(json!({}))
+    }
+
+    fn storage_get_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.storage_context(request)?;
+        Ok(json!({"cookies": context.cookies().iter().map(cookie_value).collect::<Vec<_>>() }))
+    }
+
+    fn storage_set_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        let context = self.storage_context(request)?;
+        set_cookie_params(context, &request.params)?;
+        Ok(json!({}))
+    }
+
+    fn storage_clear_cookies(&self, request: &Request) -> Result<Value, DispatchError> {
+        self.storage_context(request)?.clear_cookies();
+        Ok(json!({}))
+    }
+
     async fn set_user_agent_override(&mut self, request: &Request) -> Result<Value, DispatchError> {
         let session = self.session(request)?.to_owned();
         let user_agent = string_param(&request.params, "userAgent")?.to_owned();
@@ -1699,6 +1791,50 @@ impl ConnectionState {
         Ok(session)
     }
 
+    fn context_owned(&self, context_id: &str) -> Result<AutomationBrowserContext, DispatchError> {
+        if context_id == "default" {
+            Ok(self.browser.default_context())
+        } else {
+            self.browser_contexts
+                .get(context_id)
+                .cloned()
+                .ok_or_else(|| DispatchError::invalid_params("unknown browserContextId"))
+        }
+    }
+
+    fn context_for_page_request(
+        &self,
+        request: &Request,
+    ) -> Result<AutomationBrowserContext, DispatchError> {
+        let target = self.page_target_for_session(self.session(request)?)?;
+        self.context_owned(&target.browser_context_id)
+    }
+
+    fn storage_context(
+        &self,
+        request: &Request,
+    ) -> Result<AutomationBrowserContext, DispatchError> {
+        if let Some(session) = request.session_id.as_deref()
+            && !self.browser_sessions.contains(session)
+            && !self.sessions.contains_key(session)
+        {
+            return Err(DispatchError::invalid_request("unknown sessionId"));
+        }
+        if let Some(context_id) = request
+            .params
+            .get("browserContextId")
+            .and_then(Value::as_str)
+        {
+            return self.context_owned(context_id);
+        }
+        if let Some(session) = request.session_id.as_deref()
+            && self.sessions.contains_key(session)
+        {
+            return self.context_owned(&self.page_target_for_session(session)?.browser_context_id);
+        }
+        self.context_owned("default")
+    }
+
     fn target_for_session(&self, session: &str) -> Result<&str, DispatchError> {
         self.sessions
             .get(session)
@@ -1839,6 +1975,124 @@ fn internal_join(error: tokio::task::JoinError) -> DispatchError {
 fn internal_json(error: serde_json::Error) -> DispatchError {
     DispatchError::internal(error.to_string())
 }
+
+fn cookie_value(cookie: &StoredCookie) -> Value {
+    let mut value = json!({
+        "name": cookie.name,
+        "value": cookie.value,
+        "domain": cookie.domain,
+        "path": cookie.path,
+        "expires": cookie.expires.map_or(-1.0, |value| value as f64),
+        "size": cookie.name.len() + cookie.value.len(),
+        "httpOnly": cookie.http_only,
+        "secure": cookie.secure,
+        "session": cookie.expires.is_none(),
+        "priority": "Medium",
+        "sameParty": false,
+        "sourceScheme": if cookie.secure { "Secure" } else { "NonSecure" },
+        "sourcePort": -1,
+    });
+    if let Some(same_site) = &cookie.same_site {
+        value["sameSite"] = json!(same_site);
+    }
+    value
+}
+
+fn set_cookie_params(
+    context: AutomationBrowserContext,
+    params: &Value,
+) -> Result<(), DispatchError> {
+    let cookies = params
+        .get("cookies")
+        .and_then(Value::as_array)
+        .ok_or_else(|| DispatchError::invalid_params("cookies must be an array"))?;
+    for cookie in cookies {
+        set_cookie_param(context.clone(), cookie)?;
+    }
+    Ok(())
+}
+
+fn set_cookie_param(
+    context: AutomationBrowserContext,
+    cookie: &Value,
+) -> Result<(), DispatchError> {
+    if cookie.get("partitionKey").is_some() {
+        return Err(DispatchError::invalid_params(
+            "partitioned cookies are not supported",
+        ));
+    }
+    let name = string_param(cookie, "name")?;
+    let value = string_param(cookie, "value")?;
+    if name.contains([';', '=', '\r', '\n']) || value.contains([';', '\r', '\n']) {
+        return Err(DispatchError::invalid_params(
+            "invalid cookie name or value",
+        ));
+    }
+    let requested_url = optional_string_param(cookie, "url")?;
+    let domain = optional_string_param(cookie, "domain")?;
+    let secure = optional_bool_param(cookie, "secure")?.unwrap_or(false);
+    let url = match requested_url {
+        Some(url) => {
+            url::Url::parse(&url)
+                .map_err(|_| DispatchError::invalid_params("url must be an absolute URL"))?;
+            url
+        }
+        None => {
+            let domain = domain
+                .as_deref()
+                .ok_or_else(|| DispatchError::invalid_params("url or domain is required"))?
+                .trim_start_matches('.');
+            if domain.is_empty() || domain.contains('/') {
+                return Err(DispatchError::invalid_params("invalid cookie domain"));
+            }
+            format!("{}://{domain}/", if secure { "https" } else { "http" })
+        }
+    };
+    let mut header = format!("{name}={value}");
+    if let Some(domain) = domain {
+        header.push_str("; Domain=");
+        header.push_str(&domain);
+    }
+    if let Some(path) = optional_string_param(cookie, "path")? {
+        if !path.starts_with('/') || path.contains([';', '\r', '\n']) {
+            return Err(DispatchError::invalid_params("invalid cookie path"));
+        }
+        header.push_str("; Path=");
+        header.push_str(&path);
+    }
+    if secure {
+        header.push_str("; Secure");
+    }
+    if optional_bool_param(cookie, "httpOnly")?.unwrap_or(false) {
+        header.push_str("; HttpOnly");
+    }
+    if let Some(same_site) = optional_string_param(cookie, "sameSite")? {
+        if !matches!(same_site.as_str(), "Strict" | "Lax" | "None") {
+            return Err(DispatchError::invalid_params(
+                "sameSite must be Strict, Lax, or None",
+            ));
+        }
+        header.push_str("; SameSite=");
+        header.push_str(&same_site);
+    }
+    if let Some(expires) = cookie.get("expires") {
+        let expires = expires
+            .as_f64()
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| DispatchError::invalid_params("expires must be a finite number"))?;
+        if expires >= 0.0 {
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .as_secs_f64();
+            header.push_str(&format!("; Max-Age={}", (expires - now).floor() as i64));
+        }
+    }
+    context
+        .store_cookie(&url, &header)
+        .map_err(|error| DispatchError::invalid_params(error.to_string()))
+}
+
 fn string_param<'a>(params: &'a Value, name: &str) -> Result<&'a str, DispatchError> {
     params
         .get(name)

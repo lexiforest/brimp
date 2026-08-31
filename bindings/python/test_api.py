@@ -57,7 +57,8 @@ class ApiTests(unittest.TestCase):
         with brimp.Session() as session:
             session.headers["X-Test"] = "session"
             session.cookies["manual"] = "yes"
-            response = session.get(
+            page = session.new_page()
+            response = page.get(
                 self.url + "/missing",
                 params={"q": ["one", "two"]},
             )
@@ -72,26 +73,26 @@ class ApiTests(unittest.TestCase):
             with self.assertRaises(brimp.HTTPError) as raised:
                 response.raise_for_status()
             self.assertIs(raised.exception.response, response)
-            self.assertEqual(session.cookies["server"], "ready")
+            self.assertEqual(response.cookies["server"], "ready")
             path, _, _ = Handler.observed[-1]
             self.assertEqual(path, "/missing?q=one&q=two")
 
-            next_response = session.get(self.url + "/next")
+            next_response = page.get(self.url + "/next")
             self.assertIn(">undefined<", next_response.html)
             _, header, cookie = Handler.observed[-1]
             self.assertEqual(header, "session")
             self.assertIn("manual=yes", cookie)
             self.assertIn("server=ready", cookie)
 
-            data = session.get(self.url + "/json")
+            data = page.get(self.url + "/json")
             self.assertEqual(data.json(), {"answer": 42})
             self.assertIsNone(data.html)
 
             with self.assertRaises(brimp.InvalidRequest):
-                session.get(self.url, headers={"User-Agent": "incoherent"})
+                page.get(self.url, headers={"User-Agent": "incoherent"})
 
         with self.assertRaises(brimp.BrimpError):
-            session.evaluate("document.title")
+            page.evaluate("document.title")
 
     def test_top_level_get_and_screenshot_path(self):
         response = brimp.get(self.url)
@@ -99,22 +100,25 @@ class ApiTests(unittest.TestCase):
         self.assertIn("Top level", response.html)
 
         with brimp.Session() as session, tempfile.TemporaryDirectory() as directory:
-            session.get(self.url)
+            page = session.new_page()
+            page.get(self.url)
             path = Path(directory) / "page.png"
-            content = session.screenshot(path)
+            content = page.screenshot(path)
             self.assertEqual(path.read_bytes(), content)
             self.assertTrue(content.startswith(b"\x89PNG\r\n\x1a\n"))
 
     def test_extract_uses_the_live_document(self):
         with brimp.Session() as session:
-            session.get(self.url + "/missing")
-            article = session.extract(content_selector="#value")
+            page = session.new_page()
+            page.get(self.url + "/missing")
+            article = page.extract(content_selector="#value")
             self.assertIn("rendered", article["contentMarkdown"])
 
     def test_page_subsystems_are_opt_in(self):
         with brimp.Session() as session:
+            page = session.new_page()
             self.assertEqual(
-                session.evaluate(
+                page.evaluate(
                     "[typeof Worker, typeof WebSocket, typeof indexedDB, typeof navigator.storage, typeof HTMLCanvasElement.prototype.getContext, 'gpu' in navigator, typeof AudioContext]"
                 ),
                 ["undefined", "undefined", "undefined", "undefined", "undefined", False, "undefined"],
@@ -126,8 +130,9 @@ class ApiTests(unittest.TestCase):
                 enable_streaming_networking=True,
                 storage_path=directory,
             ) as session:
+                page = session.new_page()
                 self.assertEqual(
-                    session.evaluate("typeof navigator.storage"),
+                    page.evaluate("typeof navigator.storage"),
                     "object",
                 )
 

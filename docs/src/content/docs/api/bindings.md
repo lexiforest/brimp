@@ -5,7 +5,8 @@ description: Public Python and Node.js APIs, lifecycle, options, and result mapp
 
 The Python and Node.js packages are in-process adapters over the same
 `web-runtime` automation API. Neither starts a CDP server or implements a second
-browser. Both create a native page on its owner thread and translate typed
+browser. Sessions own a browser context and shared cookie jar; each page has an
+owner thread and immutable document network scope. Both translate typed
 commands and errors into the conventions of the host language.
 
 ## API mapping
@@ -13,19 +14,19 @@ commands and errors into the conventions of the host language.
 | Operation | Python | Node.js |
 | --- | --- | --- |
 | Create session | `brimp.Session(...)` | `await createSession(...)` |
-| Native page | Session owns one page | Session owns one page |
-| Navigate | `session.get(url, ...)` | `await session.get(url, ...)` |
-| Evaluate JavaScript | `session.evaluate(source)` | `await session.evaluate(source)` |
-| Extract live DOM | `session.extract(...)` | `await session.extract(...)` |
-| Click | `session.click(selector)` | `await session.click(selector)` |
-| Hover | `session.hover(selector)` | `await session.hover(selector)` |
-| Type | `session.type(selector, text)` | `await session.type(selector, text)` |
-| Tap | `session.tap(selector)` | `await session.tap(selector)` |
+| Create page | `session.new_page(proxy=...)` | `await session.newPage({ proxy })` |
+| Navigate | `page.get(url, ...)` | `await page.get(url, ...)` |
+| Evaluate JavaScript | `page.evaluate(source)` | `await page.evaluate(source)` |
+| Extract live DOM | `page.extract(...)` | `await page.extract(...)` |
+| Click | `page.click(selector)` | `await page.click(selector)` |
+| Hover | `page.hover(selector)` | `await page.hover(selector)` |
+| Type | `page.type(selector, text)` | `await page.type(selector, text)` |
+| Tap | `page.tap(selector)` | `await page.tap(selector)` |
 | Read response | `response.content`, `text`, `html` | `response.content`, `text`, `html` |
-| Capture PNG | `session.screenshot(...)` | `await session.screenshot(...)` |
-| Close | `session.close()` or context manager | `await session.close()` |
+| Capture PNG | `page.screenshot(...)` | `await page.screenshot(...)` |
+| Close | page/session `close()` or context manager | `await page.close()` / `await session.close()` |
 
-Both bindings use a session/response model. Python is synchronous; Node returns
+Both bindings use a session/page/response model. Python is synchronous; Node returns
 Promises and supports `AbortSignal` cancellation for navigation. Use the
 dedicated [Python reference](/api/python/) and [Node.js reference](/api/node/)
 for complete signatures.
@@ -67,9 +68,9 @@ when code needs a JavaScriptCore value handle instead of JSON serialization.
 
 ## Resource lifetime
 
-Close bindings explicitly. Python sessions support `with`; Node sessions expose
-an idempotent asynchronous `close()` method. Closing a session closes its page
-and joins the owner thread. Operations after close fail with the binding's
+Close bindings explicitly. Python sessions and pages support `with`; Node
+sessions and pages expose idempotent asynchronous `close()` methods. Closing a
+session closes all its pages and joins their owner threads. Operations after close fail with the binding's
 stable `closed` error category.
 
 ## Choosing a binding or CDP

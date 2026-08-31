@@ -17,6 +17,8 @@ globalThis.Touch = Touch;
 globalThis.TouchEvent = TouchEvent;
 globalThis.MessageEvent = MessageEvent;
 globalThis.StorageEvent = StorageEvent;
+globalThis.PopStateEvent = PopStateEvent;
+globalThis.HashChangeEvent = HashChangeEvent;
 globalThis.MessagePort = MessagePort;
 globalThis.MessageChannel = MessageChannel;
 globalThis.postMessage = postMessage.bind(globalThis);
@@ -112,9 +114,14 @@ globalThis.Comment = Comment;
 globalThis.DocumentFragment = DocumentFragment;
 globalThis.Range = Range;
 globalThis.Selection = Selection;
+globalThis.WindowProperties = WindowProperties;
 globalThis.Window = Window;
 globalThis.Location = Location;
 globalThis.Navigator = Navigator;
+globalThis.History = History;
+globalThis.UserActivation = UserActivation;
+globalThis.Lock = Lock;
+globalThis.LockManager = LockManager;
 globalThis.DOMRect = DOMRect;
 globalThis.MediaQueryList = MediaQueryList;
 globalThis.MediaQueryListEvent = MediaQueryListEvent;
@@ -147,6 +154,10 @@ function __exposeWebIdl(name, value) {
 }
 
 for (const [constructor, name, members] of [
+    [FormData, "FormData", ["append", "delete", "get", "getAll", "has", "set", "entries", "keys", "values", "forEach"]],
+    [History, "History", ["length", "state", "scrollRestoration", "pushState", "replaceState", "go", "back", "forward"]],
+    [PopStateEvent, "PopStateEvent", ["state", "hasUAVisualTransition"]],
+    [HashChangeEvent, "HashChangeEvent", ["oldURL", "newURL"]],
     [MediaQueryList, "MediaQueryList", ["media", "matches", "onchange", "addListener", "removeListener", "addEventListener", "removeEventListener", "dispatchEvent"]],
     [MediaQueryListEvent, "MediaQueryListEvent", ["media", "matches"]],
     [MediaList, "MediaList", ["mediaText", "length", "item", "appendMedium", "deleteMedium", "toString"]],
@@ -201,8 +212,10 @@ Object.defineProperties(globalThis, {
 window.fetch = globalThis.fetch;
 globalThis.location = Object.create(Location.prototype);
 globalThis.navigator = Object.create(Navigator.prototype);
+globalThis.history = new History(__historyConstructorToken);
 window.location = globalThis.location;
 window.navigator = globalThis.navigator;
+window.history = globalThis.history;
 globalThis.getComputedStyle = function getComputedStyle(element, pseudoElt = null) {
     if (arguments.length === 0) throw new TypeError("getComputedStyle requires an element");
     if (pseudoElt !== null) String(pseudoElt);

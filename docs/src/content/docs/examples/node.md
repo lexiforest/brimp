@@ -27,10 +27,11 @@ async function main() {
   const session = await createSession()
   try {
     session.headers['X-Client'] = 'brimp'
-    const response = await session.get('https://example.com')
+    const page = await session.newPage()
+    const response = await page.get('https://example.com')
     console.log(response.statusCode)
-    console.log(await session.evaluate('document.title'))
-    await session.screenshot({ path: 'example.png', fullPage: true })
+    console.log(await page.evaluate('document.title'))
+    await page.screenshot({ path: 'example.png', fullPage: true })
   } finally {
     await session.close()
   }
@@ -44,10 +45,11 @@ const { createSession } = require('@brimp/brimp')
 
 async function main() {
   const session = await createSession()
+  const page = await session.newPage()
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 2_000)
   try {
-    await session.get('https://example.com/slow', {
+    await page.get('https://example.com/slow', {
       timeoutMs: 30_000,
       signal: controller.signal,
     })

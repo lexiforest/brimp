@@ -97,7 +97,6 @@ function installPersona(persona, runtimeFeatures) {
         vendor: navigatorValues.vendor,
         productSub: navigatorValues.product_sub,
         pdfViewerEnabled: navigatorValues.pdf_viewer_enabled,
-        webdriver: persona.automation.webdriver,
         cookieEnabled: true,
         onLine: true,
     })) defineNavigatorValue(name, value);
@@ -548,6 +547,8 @@ function installPersona(persona, runtimeFeatures) {
         }
         return true;
     };
+    globalThis.__brimpFinalizeWebIdl();
+    delete globalThis.__brimpFinalizeWebIdl;
     delete globalThis.__brimpMarkWebBuiltin;
     return applyIdentityOverride;
 }

@@ -14,29 +14,30 @@ async function main() {
 }
 ```
 
-Persistent cookies, connections, JavaScript evaluation, screenshots, and
-`AbortSignal` cancellation are available through a session:
+Sessions own shared cookies while pages own documents, connections, an optional
+immutable proxy, and `AbortSignal`-cancellable navigation:
 
 ```js
 async function main() {
   const session = await brimp.createSession()
   try {
-    const response = await session.get('https://example.com', { timeoutMs: 30_000 })
+    const page = await session.newPage({ proxy: 'socks5h://127.0.0.1:1080' })
+    const response = await page.get('https://example.com', { timeoutMs: 30_000 })
     response.raiseForStatus()
-    console.log(await session.evaluate('document.title'))
-    const article = await session.extract({ contentSelector: 'main' })
+    console.log(await page.evaluate('document.title'))
+    const article = await page.extract({ contentSelector: 'main' })
     console.log(article.contentMarkdown)
-    await session.hover('#menu')
-    await session.type('#name', 'agent')
-    await session.click('#submit')
-    await session.screenshot({ path: 'page.png', fullPage: true })
+    await page.hover('#menu')
+    await page.type('#name', 'agent')
+    await page.click('#submit')
+    await page.screenshot({ path: 'page.png', fullPage: true })
   } finally {
     await session.close()
   }
 }
 ```
 
-`session.extract()` runs the vendored Defuddle browser bundle against the live,
+`page.extract()` runs the vendored Defuddle browser bundle against the live,
 post-JavaScript document. It does not create a jsdom document or make another
 network request.
 

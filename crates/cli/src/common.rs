@@ -81,6 +81,7 @@ pub(crate) struct NavigationOptions {
     pub(crate) persona: persona::PersonaConfig,
     pub(crate) network: network::CurlConfig,
     pub(crate) page: PageOptions,
+    pub(crate) cookies: Vec<(String, String)>,
 }
 
 impl NavigationOptions {
@@ -154,7 +155,7 @@ impl NavigationOptions {
                 Ok::<_, pico_args::Error>(PathBuf::from(value))
             })
             .map_err(argument_error)?;
-        let mut request_headers = parser
+        let request_headers = parser
             .values_from_str::<_, String>("--header")
             .map_err(argument_error)?
             .into_iter()
@@ -162,14 +163,20 @@ impl NavigationOptions {
             .collect::<Result<Vec<_>, _>>()?;
         let cookies = parser
             .values_from_str::<_, String>("--cookie")
-            .map_err(argument_error)?;
-        if !cookies.is_empty() {
-            let cookie = cookies.join("; ");
-            http::HeaderValue::from_str(&cookie).map_err(|error| {
-                AutomationError::InvalidInput(format!("invalid cookie header: {error}"))
-            })?;
-            request_headers.push(("cookie".into(), cookie));
-        }
+            .map_err(argument_error)?
+            .into_iter()
+            .map(|cookie| {
+                let (name, value) = cookie.split_once('=').ok_or_else(|| {
+                    AutomationError::InvalidInput("--cookie must use the form NAME=VALUE".into())
+                })?;
+                if name.is_empty() {
+                    return Err(AutomationError::InvalidInput(
+                        "--cookie name must not be empty".into(),
+                    ));
+                }
+                Ok((name.to_owned(), value.to_owned()))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
         let page = PageFeatures::parse(parser)?.build(request_headers)?;
         Ok(Self {
             timeout,
@@ -185,6 +192,7 @@ impl NavigationOptions {
                 ..network::CurlConfig::default()
             },
             page,
+            cookies,
         })
     }
 }

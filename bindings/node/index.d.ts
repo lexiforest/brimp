@@ -14,6 +14,10 @@ export interface SessionOptions {
 
 export type QueryValue = string | number | boolean | readonly (string | number | boolean)[]
 
+export interface PageOptions {
+  proxy?: string
+}
+
 export interface GetOptions {
   params?: URLSearchParams | Record<string, QueryValue>
   headers?: Record<string, string | number | boolean>
@@ -92,9 +96,7 @@ export declare class Response {
   raiseForStatus(): void
 }
 
-export declare class Session {
-  headers: Record<string, string | number | boolean>
-  cookies: Record<string, string | number | boolean>
+export declare class Page {
   get(url: string | URL, options?: GetOptions): Promise<Response>
   evaluate(expression: string): Promise<unknown>
   screenshot(options?: ScreenshotOptions): Promise<Buffer>
@@ -106,5 +108,12 @@ export declare class Session {
   close(): Promise<void>
 }
 
+export declare class Session {
+  headers: Record<string, string | number | boolean>
+  cookies: Record<string, string | number | boolean>
+  newPage(options?: PageOptions): Promise<Page>
+  close(): Promise<void>
+}
+
 export declare function createSession(options?: SessionOptions): Promise<Session>
-export declare function get(url: string | URL, options?: SessionOptions & GetOptions): Promise<Response>
+export declare function get(url: string | URL, options?: SessionOptions & PageOptions & GetOptions): Promise<Response>

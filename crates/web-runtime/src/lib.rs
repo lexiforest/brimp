@@ -9,8 +9,8 @@ mod viewport;
 mod worker;
 
 pub use automation::{
-    AutomationBrowser, AutomationError, AutomationPage, CancellationToken, RemoteArgument,
-    TouchPoint,
+    AutomationBrowser, AutomationBrowserContext, AutomationError, AutomationPage,
+    CancellationToken, RemoteArgument, TouchPoint,
 };
 pub use browser::Browser;
 pub use extraction::{
@@ -23,3 +23,4 @@ pub use page::{
 pub use screenshot::{ScreenshotError, ScreenshotOptions};
 pub use task::{TaskQueue, TaskSendError, TaskSender};
 pub use viewport::Viewport;
+pub use web_bindings::StoredCookie;

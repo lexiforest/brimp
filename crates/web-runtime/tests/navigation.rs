@@ -93,7 +93,7 @@ fn goto_fetches_and_installs_the_main_html_document() {
     runtime.block_on(page.wait_for_load()).unwrap();
 
     assert_eq!(page.load_state(), LoadState::Complete);
-    assert_eq!(page.url(), Some("https://example.test/page"));
+    assert_eq!(page.url().as_deref(), Some("https://example.test/page"));
     assert!(page.document().get_element_by_id("ready").is_some());
     assert_eq!(
         page.eval("document.title").unwrap().to_string().unwrap(),
@@ -220,5 +220,96 @@ fn navigation_updates_location_and_exposes_a_navigator_subset() {
             .to_string()
             .unwrap(),
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36|MacIntel|en-US"
+    );
+}
+
+#[test]
+fn history_api_updates_same_document_entries_and_dispatches_traversal_events() {
+    let browser = Browser::with_resource_loader(Arc::new(StaticLoader));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
+    runtime
+        .block_on(page.goto("https://example.test/app?start#initial"))
+        .unwrap();
+
+    let initialized = page
+        .eval(
+            r#"Number(Boolean((() => {
+                globalThis.historyEvents = [];
+                window.addEventListener("popstate", event => historyEvents.push([
+                    event.type, event.state.step, event.isTrusted, location.href,
+                ].join("|")));
+                window.addEventListener("hashchange", event => historyEvents.push([
+                    event.type, event.oldURL, event.newURL, event.isTrusted,
+                ].join("|")));
+                history.scrollRestoration = "manual";
+                history.replaceState({ step: 0 }, "ignored", "/app?base#zero");
+                const first = { step: 1 };
+                history.pushState(first, "ignored", "?first#one");
+                first.step = 99;
+                history.pushState({ step: 2 }, "ignored", "?second#two");
+                history.back();
+                return history.length === 3 && history.state.step === 2 &&
+                    history.scrollRestoration === "manual" &&
+                    Object.prototype.toString.call(history) === "[object History]" &&
+                    window.history === history && Object.keys(history).length === 0 &&
+                    History.prototype.pushState.length === 2 &&
+                    Object.getOwnPropertyDescriptor(History.prototype, "state").enumerable &&
+                    Function.prototype.toString.call(History.prototype.back) ===
+                        "function back() { [native code] }";
+            })()))"#,
+        )
+        .unwrap()
+        .to_number()
+        .unwrap();
+    assert_eq!(initialized, 1.0);
+    page.run_pending_tasks().unwrap();
+
+    assert_eq!(
+        page.eval("`${history.state.step}|${location.pathname}${location.search}${location.hash}|${document.URL}`")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "1|/app?first#one|https://example.test/app?first#one"
+    );
+    assert_eq!(
+        page.url().as_deref(),
+        Some("https://example.test/app?first#one")
+    );
+    assert_eq!(
+        page.eval("historyEvents.join('\\n')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "popstate|1|true|https://example.test/app?first#one\n\
+         hashchange|https://example.test/app?second#two|https://example.test/app?first#one|true"
+    );
+
+    page.eval("history.forward()").unwrap();
+    page.run_pending_tasks().unwrap();
+    assert_eq!(
+        page.eval("history.state.step")
+            .unwrap()
+            .to_number()
+            .unwrap(),
+        2.0
+    );
+    assert!(
+        page.eval(
+            r#"Number(Boolean((() => {
+                try { history.pushState({}, "", "https://other.test/"); return false; }
+                catch (error) { if (!(error instanceof DOMException) || error.name !== "SecurityError") return false; }
+                try { history.pushState(() => {}, ""); return false; }
+                catch (error) { if (!(error instanceof DOMException) || error.name !== "DataCloneError") return false; }
+                try { History.prototype.back.call({}); return false; }
+                catch (error) { return error instanceof TypeError; }
+            })()))"#,
+        )
+        .unwrap()
+        .to_number()
+        .unwrap()
+            == 1.0
     );
 }

@@ -28,7 +28,6 @@ fn chrome_preset_exposes_expected_identity() {
         persona.engine.error_messages["fetch.network"],
         "Failed to fetch"
     );
-    assert!(!persona.automation.webdriver);
 }
 
 #[test]
@@ -182,7 +181,7 @@ fn persona_config_resolves_seed_and_viewport() {
 }
 
 #[test]
-fn persona_config_applies_v1_identity_network_transport_and_automation() {
+fn persona_config_applies_v1_identity_network_and_transport() {
     let persona = PersonaConfig {
         identity: Some(IdentityConfig {
             family: Some("chromium".to_string()),
@@ -213,10 +212,6 @@ fn persona_config_applies_v1_identity_network_transport_and_automation() {
             sec_ch_ua_model: Some("\"\"".to_string()),
             ..Default::default()
         }),
-        automation: Some(AutomationConfig {
-            webdriver: Some(true),
-            expose_webdriver_helpers: Some(true),
-        }),
         ..Default::default()
     }
     .resolve();
@@ -236,8 +231,6 @@ fn persona_config_applies_v1_identity_network_transport_and_automation() {
         "\"Chromium\";v=\"150.0.1.2\""
     );
     assert_eq!(persona.network.sec_ch_ua_platform_version, "\"10.0.0\"");
-    assert!(persona.automation.webdriver);
-    assert!(persona.automation.expose_webdriver_helpers);
 }
 
 #[test]
@@ -252,6 +245,12 @@ fn persona_config_rejects_unknown_and_unsupported_fields() {
     )
     .unwrap_err();
     assert!(nested_error.to_string().contains("webgpu_enabled"));
+
+    let automation_error = serde_json::from_str::<PersonaConfig>(
+        r#"{"schema_version":1,"automation":{"webdriver":true}}"#,
+    )
+    .unwrap_err();
+    assert!(automation_error.to_string().contains("automation"));
 }
 
 #[test]

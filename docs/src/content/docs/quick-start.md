@@ -25,13 +25,14 @@ screenshot:
 import brimp
 
 with brimp.Session() as session:
-    response = session.get("https://example.com", timeout=30)
-    print(session.evaluate("document.title"))
-    print(session.extract()["contentMarkdown"])
-    session.hover("#menu")
-    session.type("#name", "agent")
-    session.click("#submit")
-    session.screenshot("example.png", full_page=True)
+    page = session.new_page()
+    response = page.get("https://example.com", timeout=30)
+    print(page.evaluate("document.title"))
+    print(page.extract()["contentMarkdown"])
+    page.hover("#menu")
+    page.type("#name", "agent")
+    page.click("#submit")
+    page.screenshot("example.png", full_page=True)
 ```
 
 ## Node.js
@@ -42,13 +43,14 @@ const { createSession } = require('@brimp/brimp')
 async function main() {
   const session = await createSession()
   try {
-    const response = await session.get('https://example.com')
+    const page = await session.newPage()
+    const response = await page.get('https://example.com')
     console.log(response.statusCode, response.html)
-    console.log(await session.evaluate('document.title'))
-    console.log((await session.extract()).contentMarkdown)
-    await session.hover('#menu')
-    await session.type('#name', 'agent')
-    await session.click('#submit')
+    console.log(await page.evaluate('document.title'))
+    console.log((await page.extract()).contentMarkdown)
+    await page.hover('#menu')
+    await page.type('#name', 'agent')
+    await page.click('#submit')
   } finally {
     await session.close()
   }

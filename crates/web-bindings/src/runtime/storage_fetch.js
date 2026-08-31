@@ -254,11 +254,30 @@ class Request {
         }
         this.method = method;
         this.headers = new Headers(init.headers ?? (source ? source.headers : undefined));
-        this.__body = init.body === undefined ? (source ? source.__body : null) : init.body;
-        if ((this.method === "GET" || this.method === "HEAD") && this.__body != null) {
+        const body = init.body === undefined ? (source ? source.__bodyBytes : null) : init.body;
+        if ((this.method === "GET" || this.method === "HEAD") && body != null) {
             throw new TypeError("GET and HEAD requests cannot have a body");
         }
-        if (this.__body != null) this.__body = String(this.__body);
+        if (body == null) {
+            this.__bodyBytes = null;
+        } else if (body instanceof FormData) {
+            const serialized = __serializeFormData(body);
+            this.__bodyBytes = serialized.bytes;
+            if (!this.headers.has("content-type")) this.headers.set("content-type", serialized.type);
+        } else if (body instanceof Blob) {
+            this.__bodyBytes = body.__bytes.slice();
+            if (body.type && !this.headers.has("content-type")) this.headers.set("content-type", body.type);
+        } else if (body instanceof URLSearchParams) {
+            this.__bodyBytes = new TextEncoder().encode(body.toString());
+            if (!this.headers.has("content-type")) {
+                this.headers.set("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+            }
+        } else if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
+            this.__bodyBytes = Uint8Array.from(__blobPartBytes(body, "transparent"));
+        } else {
+            this.__bodyBytes = new TextEncoder().encode(__toUSVString(body));
+            if (!this.headers.has("content-type")) this.headers.set("content-type", "text/plain;charset=UTF-8");
+        }
         this.bodyUsed = false;
         this.destination = source ? source.destination : "";
         this.referrer = String(init.referrer ?? (source ? source.referrer : "about:client"));
@@ -284,13 +303,19 @@ class Request {
     text() {
         if (this.bodyUsed) return Promise.reject(new TypeError("body has already been consumed"));
         this.bodyUsed = true;
-        return Promise.resolve(this.__body == null ? "" : this.__body);
+        return Promise.resolve(this.__bodyBytes == null ? "" : new TextDecoder().decode(this.__bodyBytes));
     }
     json() { return this.text().then(JSON.parse); }
-    arrayBuffer() { return this.text().then(text => new TextEncoder().encode(text).buffer); }
+    arrayBuffer() {
+        if (this.bodyUsed) return Promise.reject(new TypeError("body has already been consumed"));
+        this.bodyUsed = true;
+        return Promise.resolve((this.__bodyBytes ?? new Uint8Array()).slice().buffer);
+    }
     blob() {
+        if (this.bodyUsed) return Promise.reject(new TypeError("body has already been consumed"));
+        this.bodyUsed = true;
         const type = this.headers.get("content-type") || "";
-        return this.text().then(text => new Blob([text], { type }));
+        return Promise.resolve(new Blob([this.__bodyBytes ?? new Uint8Array()], { type }));
     }
 }
 
@@ -311,11 +336,10 @@ globalThis.fetch = (input, init = {}) => {
         request.url,
         request.method,
         JSON.stringify([...request.headers]),
-        request.__body,
+        request.__bodyBytes === null ? null : JSON.stringify(Array.from(request.__bodyBytes)),
     )
         .then(serialized => {
             const payload = JSON.parse(serialized);
             return new Response(payload.bytes ?? payload.body, payload);
         }, reason => { throw new TypeError(String(reason)); });
 };
-

@@ -16,6 +16,27 @@ pub type JSClassRef = *mut OpaqueJSClass;
 pub type JSPropertyAttributes = c_uint;
 pub type JSTypedArrayType = c_uint;
 
+#[repr(C)]
+pub struct JSClassDefinition {
+    pub version: c_int,
+    pub attributes: c_uint,
+    pub class_name: *const c_char,
+    pub parent_class: JSClassRef,
+    pub static_values: *const c_void,
+    pub static_functions: *const c_void,
+    pub initialize: *const c_void,
+    pub finalize: *const c_void,
+    pub has_property: *const c_void,
+    pub get_property: *const c_void,
+    pub set_property: *const c_void,
+    pub delete_property: *const c_void,
+    pub get_property_names: *const c_void,
+    pub call_as_function: *const c_void,
+    pub call_as_constructor: *const c_void,
+    pub has_instance: *const c_void,
+    pub convert_to_type: *const c_void,
+}
+
 pub const K_JS_PROPERTY_ATTRIBUTE_NONE: JSPropertyAttributes = 0;
 pub const K_JS_TYPED_ARRAY_TYPE_INT32_ARRAY: JSTypedArrayType = 2;
 pub const K_JS_TYPED_ARRAY_TYPE_UINT8_CLAMPED_ARRAY: JSTypedArrayType = 4;
@@ -70,6 +91,8 @@ unsafe extern "C" {
 
     pub fn JSGlobalContextCreate(global_object_class: JSClassRef) -> JSGlobalContextRef;
     pub fn JSGlobalContextRelease(ctx: JSGlobalContextRef);
+    pub fn JSClassCreate(definition: *const JSClassDefinition) -> JSClassRef;
+    pub fn JSClassRelease(class: JSClassRef);
     pub fn JSContextGetGlobalObject(ctx: JSContextRef) -> JSObjectRef;
     pub fn JSGarbageCollect(ctx: JSContextRef);
 

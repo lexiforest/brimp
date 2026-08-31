@@ -85,8 +85,6 @@ pub struct PersonaConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub noise: Option<NoiseConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub automation: Option<AutomationConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub locale: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub languages: Option<Vec<String>>,
@@ -128,7 +126,6 @@ impl Default for PersonaConfig {
             svg: None,
             native_functions: None,
             noise: None,
-            automation: None,
             locale: None,
             languages: None,
             accept_language: None,
@@ -320,9 +317,6 @@ impl PersonaConfig {
         }
         if let Some(native_functions) = &self.native_functions {
             persona.native_functions = native_functions.clone();
-        }
-        if let Some(automation) = &self.automation {
-            automation.apply_to(&mut persona.automation);
         }
         if let Some(noise) = &self.noise {
             persona.noise = noise.clone();

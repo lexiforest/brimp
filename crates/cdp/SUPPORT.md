@@ -10,7 +10,7 @@ error `-32601` rather than a success stub.
 | `Browser.getWindowBounds` | Returns the single headless window's bounds. |
 | `Browser.setDownloadBehavior` | Accepted for Playwright initialization; downloads are not implemented. |
 | `Target.getBrowserContexts` | Lists live non-default logical browser contexts. |
-| `Target.createBrowserContext` | Creates a logical page-group context. Cookie and storage isolation are not implemented. |
+| `Target.createBrowserContext` | Creates a page-group context with an isolated cookie jar. DOM storage isolation is not implemented. |
 | `Target.disposeBrowserContext` | Closes pages in and removes a logical context. |
 | `Target.setDiscoverTargets` | Enables/disables target discovery events. |
 | `Target.setAutoAttach` | Stores flattened auto-attach policy and applies it to new page targets. |
@@ -60,6 +60,15 @@ error `-32601` rather than a success stub.
 | `Network.setRequestInterception` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Empty patterns disable interception. |
 | `Network.continueInterceptedRequest` | Continues, modifies, fails, or fulfills a paused legacy request. Fulfillment accepts a base64 raw HTTP response. Authentication challenges are not implemented. |
 | `Network.getResponseBody` | Returns the latest main-document response body by loader/request ID. |
+| `Network.getCookies` | Returns cookies applicable to the requested URLs in the target's browser context. |
+| `Network.getAllCookies` | Returns all cookies in the target's browser context. Deprecated by CDP in favor of `Storage.getCookies`. |
+| `Network.setCookie` | Inserts one scoped cookie into the target's browser-context jar. Partitioned cookies are not implemented. |
+| `Network.setCookies` | Inserts scoped cookies into the target's browser-context jar. Partitioned cookies are not implemented. |
+| `Network.deleteCookies` | Deletes matching cookies by name and optional URL, domain, and path. Partition keys are not implemented. |
+| `Network.clearBrowserCookies` | Clears the target's browser-context cookie jar. |
+| `Storage.getCookies` | Returns all cookies in the selected browser context. |
+| `Storage.setCookies` | Inserts cookies into the selected browser context. Partitioned cookies are not implemented. |
+| `Storage.clearCookies` | Clears the selected browser-context cookie jar. |
 | `Network.setUserAgentOverride` | Applies coherent request-header and `navigator` identity overrides; client-hint metadata is not implemented. |
 | `Fetch.enable` | Pauses matching navigation, subresource, and JavaScript Fetch requests at the request stage. Response-stage and authentication interception are not implemented. |
 | `Fetch.disable` | Disables Fetch interception and continues requests currently paused by it. |

@@ -325,10 +325,6 @@
     "domrect": true,
     "svg": true
   },
-  "automation": {
-    "webdriver": false,
-    "expose_webdriver_helpers": false
-  },
   "locale": "en-US",
   "languages": ["en-US", "en"],
   "timezone": "America/Los_Angeles"

@@ -147,7 +147,7 @@ globalThis.fetch = (input, init = {}) => {
         request.url,
         request.method,
         JSON.stringify([...request.headers]),
-        request.__body,
+        request.__bodyBytes === null ? null : JSON.stringify(Array.from(request.__bodyBytes)),
     ).then(serialized => {
         const payload = JSON.parse(serialized);
         const state = fetchStreams.get(payload.streamId) || { events: [] };

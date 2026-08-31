@@ -134,7 +134,7 @@ impl From<NavigationResponse> for NativeResponse {
 #[napi(js_name = "NativeSession")]
 pub struct Session {
     browser: Arc<AutomationBrowser>,
-    page: AutomationPage,
+    page_options: PageOptions,
 }
 
 #[napi]
@@ -159,12 +159,46 @@ impl Session {
             let browser = Arc::new(AutomationBrowser::with_persona_and_network_config(
                 persona, config,
             )?);
-            let page = browser.new_page(page_options)?;
-            Ok(Self { browser, page })
+            Ok(Self {
+                browser,
+                page_options,
+            })
         })
         .await
     }
 
+    #[napi]
+    pub async fn new_page(&self, proxy: Option<String>) -> Result<NativePage> {
+        let browser = Arc::clone(&self.browser);
+        let page_options = self.page_options.clone();
+        blocking(move || {
+            let context = browser.default_context();
+            let page =
+                browser.new_page_in_context_with_proxy(page_options, &context, proxy.as_deref())?;
+            Ok(NativePage { browser, page })
+        })
+        .await
+    }
+
+    #[napi]
+    pub async fn close(&self) -> Result<()> {
+        let browser = Arc::clone(&self.browser);
+        blocking(move || {
+            browser.close();
+            Ok(())
+        })
+        .await
+    }
+}
+
+#[napi(js_name = "NativePage")]
+pub struct NativePage {
+    browser: Arc<AutomationBrowser>,
+    page: AutomationPage,
+}
+
+#[napi]
+impl NativePage {
     #[napi]
     pub async fn get(
         &self,
@@ -172,6 +206,7 @@ impl Session {
         timeout_ms: u32,
         token: &CancellationToken,
         headers: Vec<Vec<String>>,
+        cookies: Vec<Vec<String>>,
     ) -> Result<NativeResponse> {
         let mut request_headers = Vec::with_capacity(headers.len());
         for entry in headers {
@@ -182,9 +217,22 @@ impl Session {
             }
             request_headers.push((entry[0].clone(), entry[1].clone()));
         }
+        let mut cookie_pairs = Vec::with_capacity(cookies.len());
+        for entry in cookies {
+            if entry.len() != 2 {
+                return Err(error(AutomationError::InvalidInput(
+                    "cookies must contain name/value pairs".into(),
+                )));
+            }
+            cookie_pairs.push((entry[0].clone(), entry[1].clone()));
+        }
         let page = self.page.clone();
+        let context = self.browser.default_context();
         let token = token.inner.clone();
         blocking(move || {
+            for (name, value) in cookie_pairs {
+                context.set_cookie(&url, &name, &value)?;
+            }
             page.navigate_with_headers(
                 url,
                 Duration::from_millis(u64::from(timeout_ms)),
@@ -260,9 +308,9 @@ impl Session {
 
     #[napi]
     pub async fn close(&self) -> Result<()> {
-        let browser = Arc::clone(&self.browser);
+        let page = self.page.clone();
         blocking(move || {
-            browser.close();
+            page.close();
             Ok(())
         })
         .await

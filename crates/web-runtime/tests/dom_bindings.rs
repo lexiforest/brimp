@@ -7,6 +7,52 @@ fn page_with(html: &str) -> web_runtime::Page {
     page
 }
 
+#[test]
+fn installs_the_window_chain_and_enforces_web_idl_invocation_shape() {
+    let page = page_with("<html><body><div></div></body></html>");
+
+    assert_js(
+        &page,
+        r#"(() => {
+            if (Object.getPrototypeOf(window) !== Window.prototype) return false;
+            if (Object.getPrototypeOf(Window.prototype) !== WindowProperties.prototype) return false;
+            if (Object.getPrototypeOf(WindowProperties.prototype) !== EventTarget.prototype) return false;
+            if (!(window instanceof Window) || !(window instanceof WindowProperties) ||
+                !(window instanceof EventTarget)) return false;
+            if (window.constructor !== Window || Object.prototype.toString.call(window) !== "[object Window]") {
+                return false;
+            }
+
+            for (const constructor of [Window, WindowProperties, Navigator, History]) {
+                try { new constructor(); return false; }
+                catch (error) { if (!(error instanceof TypeError) || error.message !== "Illegal constructor") return false; }
+                try { constructor(); return false; }
+                catch (error) { if (!(error instanceof TypeError)) return false; }
+            }
+
+            const calls = [
+                () => Document.prototype.querySelector.call({}, "div"),
+                () => EventTarget.prototype.addEventListener.call({}, "probe", () => {}),
+                () => Object.getOwnPropertyDescriptor(Navigator.prototype, "userAgent").get.call({}),
+                () => Object.getOwnPropertyDescriptor(Window.prototype, "innerWidth").get.call({}),
+                () => Object.getOwnPropertyDescriptor(Storage.prototype, "length").get.call({}),
+                () => Object.getOwnPropertyDescriptor(Event.prototype, "isTrusted").get.call({}),
+            ];
+            for (const call of calls) {
+                try { call(); return false; }
+                catch (error) { if (!(error instanceof TypeError) || error.message !== "Illegal invocation") return false; }
+            }
+
+            const querySelector = Document.prototype.querySelector;
+            const userAgent = Object.getOwnPropertyDescriptor(Navigator.prototype, "userAgent").get;
+            return querySelector.name === "querySelector" && querySelector.length === 1 &&
+                userAgent.name === "get userAgent" && userAgent.length === 0 &&
+                Function.prototype.toString.call(querySelector) === "function querySelector() { [native code] }" &&
+                Function.prototype.toString.call(userAgent) === "function get userAgent() { [native code] }";
+        })()"#,
+    );
+}
+
 fn assert_js(page: &web_runtime::Page, expression: &str) {
     let result = page
         .eval(&format!("Number(Boolean({expression}))"))
@@ -975,6 +1021,71 @@ fn exposes_blob_api() {
             }
             return true;
         })()"#,
+    );
+}
+
+#[test]
+fn exposes_form_data_api_and_constructs_successful_form_controls() {
+    let page = page_with(
+        "<form id='form'>\
+           <input name='title' value='hello'>\
+           <input name='enabled' type='checkbox' checked>\
+           <input name='ignored' type='checkbox'>\
+           <select name='choice'><option value='a'>A</option><option value='b' selected>B</option></select>\
+           <textarea name='notes'>line one</textarea>\
+           <button id='submit' name='action' value='save'>Save</button>\
+         </form>\
+         <input name='external' value='yes' form='form'>",
+    );
+
+    let entries = page
+        .eval(
+            r#"(() => {
+            const form = document.getElementById("form");
+            const submit = document.getElementById("submit");
+            form.addEventListener("formdata", event => event.formData.append("event", "seen"));
+            const data = new FormData(form, submit);
+            globalThis.__testedFormData = data;
+            return JSON.stringify([...data]);
+        })()"#,
+        )
+        .unwrap()
+        .to_string()
+        .unwrap();
+    assert_eq!(
+        entries,
+        r#"[["title","hello"],["enabled","on"],["choice","b"],["notes","line one"],["action","save"],["external","yes"],["event","seen"]]"#
+    );
+    assert_js(
+        &page,
+        "Object.prototype.toString.call(__testedFormData) === '[object FormData]' && Object.getOwnPropertyDescriptor(FormData.prototype, 'append').enumerable",
+    );
+    assert_js(
+        &page,
+        r#"(() => {
+            const data = new FormData();
+            data.append("name", "first");
+            data.append("name", "second");
+            data.append("file", new Blob([Uint8Array.of(0, 255)], { type: "application/x-test" }), "data.bin");
+            if (data.get("name") !== "first" || data.getAll("name").join(",") !== "first,second") return false;
+            const file = data.get("file");
+            const request = new Request("https://example.test/upload", { method: "POST", body: data });
+            const clone = request.clone();
+            const binary = new Request("https://example.test/binary", { method: "POST", body: Uint8Array.of(0, 255) });
+            data.set("name", "replacement");
+            data.delete("file");
+            return file instanceof File && file.name === "data.bin" && file.size === 2 &&
+                file.type === "application/x-test" && data.getAll("name").join(",") === "replacement" &&
+                !data.has("file") && [...data.keys()].join(",") === "name" &&
+                clone.headers.get("content-type") === request.headers.get("content-type") &&
+                clone.__bodyBytes !== request.__bodyBytes &&
+                clone.__bodyBytes.length === request.__bodyBytes.length &&
+                binary.__bodyBytes[0] === 0 && binary.__bodyBytes[1] === 255;
+        })()"#,
+    );
+    assert_js(
+        &page,
+        "(() => { try { FormData.prototype.append.call({}, 'x', 'y'); return false; } catch (error) { return error instanceof TypeError; } })()",
     );
 }
 

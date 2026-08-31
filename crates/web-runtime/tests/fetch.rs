@@ -94,3 +94,45 @@ fn fetch_rejects_transport_and_invalid_request_failures() {
         "true,true"
     );
 }
+
+#[test]
+fn fetch_serializes_form_data_as_multipart_bytes() {
+    let loader = Arc::new(FetchLoader::default());
+    let browser = Browser::with_resource_loader(loader.clone());
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+
+    page.eval(
+        r#"
+        const data = new FormData();
+        data.append("message", "hello\nworld");
+        data.append("upload", new Blob([Uint8Array.of(0, 255, 65)], { type: "application/octet-stream" }), "raw.bin");
+        globalThis.formDataFetch = "waiting";
+        fetch("https://example.test/form", { method: "POST", body: data })
+            .then(() => formDataFetch = "done");
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    assert_eq!(
+        page.eval("formDataFetch").unwrap().to_string().unwrap(),
+        "done"
+    );
+
+    let requests = loader.requests.lock().unwrap();
+    let request = &requests[0];
+    let content_type = request.headers["content-type"].to_str().unwrap();
+    let boundary = content_type
+        .strip_prefix("multipart/form-data; boundary=")
+        .expect("FormData supplies a multipart boundary");
+    assert!(boundary.starts_with("----WebKitFormBoundary"));
+    let body = request.body.as_deref().expect("FormData supplies a body");
+    let body_text = String::from_utf8_lossy(body);
+    assert!(body_text.contains(&format!("--{boundary}\r\n")));
+    assert!(body_text.contains("name=\"message\"\r\n\r\nhello\r\nworld\r\n"));
+    assert!(body_text.contains(
+        "name=\"upload\"; filename=\"raw.bin\"\r\nContent-Type: application/octet-stream\r\n\r\n"
+    ));
+    assert!(body.windows(3).any(|bytes| bytes == [0, 255, 65]));
+    assert!(body.ends_with(format!("--{boundary}--\r\n").as_bytes()));
+}

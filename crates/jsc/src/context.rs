@@ -10,12 +10,12 @@ use std::{
 };
 
 use jsc_sys::{
-    JSContextGetGlobalObject, JSContextRef, JSEvaluateScript, JSGarbageCollect,
-    JSGlobalContextCreate, JSGlobalContextRef, JSGlobalContextRelease, JSObjectCallAsFunction,
-    JSObjectGetProperty, JSObjectMake, JSObjectMakeDeferredPromise,
-    JSObjectMakeFunctionWithCallback, JSObjectSetProperty, JSValueIsNull, JSValueIsObject,
-    JSValueIsUndefined, JSValueMakeString, JSValueMakeUndefined, JSValueRef, JSValueToObject,
-    K_JS_PROPERTY_ATTRIBUTE_NONE,
+    JSClassCreate, JSClassDefinition, JSClassRelease, JSContextGetGlobalObject, JSContextRef,
+    JSEvaluateScript, JSGarbageCollect, JSGlobalContextCreate, JSGlobalContextRef,
+    JSGlobalContextRelease, JSObjectCallAsFunction, JSObjectGetProperty, JSObjectMake,
+    JSObjectMakeDeferredPromise, JSObjectMakeFunctionWithCallback, JSObjectSetProperty,
+    JSValueIsNull, JSValueIsObject, JSValueIsUndefined, JSValueMakeString, JSValueMakeUndefined,
+    JSValueRef, JSValueToObject, K_JS_PROPERTY_ATTRIBUTE_NONE,
 };
 
 use crate::{
@@ -58,8 +58,37 @@ impl JsRuntime {
                 "JavaScriptCore rejected the SharedArrayBuffer runtime option",
             ));
         }
-        // SAFETY: a null class requests JSC's standard global object.
-        let context = unsafe { JSGlobalContextCreate(ptr::null_mut()) };
+        let global_definition = JSClassDefinition {
+            version: 0,
+            attributes: 0,
+            class_name: c"Window".as_ptr(),
+            parent_class: ptr::null_mut(),
+            static_values: ptr::null(),
+            static_functions: ptr::null(),
+            initialize: ptr::null(),
+            finalize: ptr::null(),
+            has_property: ptr::null(),
+            get_property: ptr::null(),
+            set_property: ptr::null(),
+            delete_property: ptr::null(),
+            get_property_names: ptr::null(),
+            call_as_function: ptr::null(),
+            call_as_constructor: ptr::null(),
+            has_instance: ptr::null(),
+            convert_to_type: ptr::null(),
+        };
+        // SAFETY: the definition contains only null callbacks and static data. The
+        // context retains the class, so the caller's reference can be released.
+        let global_class = unsafe { JSClassCreate(&global_definition) };
+        if global_class.is_null() {
+            return Err(JsException::new(
+                "JavaScriptCore failed to create the global object class",
+            ));
+        }
+        // SAFETY: `global_class` is live and describes a callback-free global object.
+        let context = unsafe { JSGlobalContextCreate(global_class) };
+        // SAFETY: the context retained its own reference during creation.
+        unsafe { JSClassRelease(global_class) };
         let context = NonNull::new(context.cast_mut())
             .ok_or_else(|| JsException::new("JavaScriptCore failed to create a global context"))?;
         let runtime = Self {

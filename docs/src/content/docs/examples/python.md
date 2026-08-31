@@ -32,7 +32,8 @@ import brimp
 
 with brimp.Session() as session:
     session.headers["X-Client"] = "brimp-example"
-    response = session.get(
+    page = session.new_page()
+    response = page.get(
         "https://example.com/search",
         params={"q": "headless browser", "tag": ["agents", "javascript"]},
         headers={"X-Request-ID": "example-1"},
@@ -50,9 +51,9 @@ import brimp
 
 with brimp.Session() as session:
     session.cookies["experiment"] = "rendered"
-    session.get("https://example.com/first")
-    second = session.get("https://example.com/second")
-    print(session.cookies)
+    page = session.new_page()
+    page.get("https://example.com/first")
+    second = page.get("https://example.com/second")
     print(second.cookies)
 ```
 
@@ -63,15 +64,16 @@ from pathlib import Path
 import brimp
 
 with brimp.Session() as session:
-    session.get("https://example.com")
-    summary = session.evaluate("""
+    page = session.new_page()
+    page.get("https://example.com")
+    summary = page.evaluate("""
       ({
         title: document.title,
         links: document.querySelectorAll('a').length,
         text: document.body.textContent.trim()
       })
     """)
-    png = session.screenshot(full_page=True)
+    png = page.screenshot(full_page=True)
 
 print(summary)
 Path("example.png").write_bytes(png)
@@ -88,8 +90,9 @@ import brimp
 persona_json = Path("persona/example.json").read_text()
 
 with brimp.Session(persona_json=persona_json) as session:
-    session.get("https://example.com")
-    print(session.evaluate("navigator.userAgent"))
+    page = session.new_page()
+    page.get("https://example.com")
+    print(page.evaluate("navigator.userAgent"))
 ```
 
 See the [Python API](/api/python/) for the complete public surface.

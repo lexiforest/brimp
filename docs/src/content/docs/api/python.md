@@ -7,8 +7,8 @@ description: Reference for the synchronous brimp Python package.
 import brimp
 ```
 
-The Python binding is synchronous and in process. Sessions are sequential and
-are not thread-safe.
+The Python binding is synchronous and in process. Pages in one session can run
+concurrently from separate threads while sharing the session cookie jar.
 
 ## `brimp.get()`
 
@@ -18,7 +18,7 @@ brimp.get(url, **options) -> Response
 
 Creates a temporary [`Session`](#session), performs one GET navigation, closes
 the native session, and returns a detached response. It accepts the same options
-as `Session.get()` plus `persona_json` and `ca_bundle` for session creation.
+as `Page.get()` plus `proxy`, `persona_json`, and `ca_bundle` for page/session creation.
 
 ## `Session`
 
@@ -55,13 +55,23 @@ persistent storage at that directory; its default quota is 1 GiB and
 `enable_webaudio_output=True` also enables WebAudio and authorizes playback
 through the system output device.
 
-Sessions expose mutable `headers` and `cookies` dictionaries and support the
-context-manager protocol.
+Sessions expose mutable request seed `headers` and `cookies` dictionaries and
+support the context-manager protocol.
 
-### `Session.get()`
+### `Session.new_page()`
 
 ```python
-session.get(
+session.new_page(proxy: str | None = None) -> Page
+```
+
+Creates an independently concurrent page. Its direct, HTTP, SOCKS5, or SOCKS5H
+proxy is immutable and applies to the main request, redirects, subresources,
+Fetch, workers, streaming requests, and WebSockets for the page's lifetime.
+
+### `Page.get()`
+
+```python
+page.get(
     url,
     *,
     params=None,
@@ -76,32 +86,33 @@ standard URL encoding and support repeated values. Session headers are merged
 with call headers; call values take precedence. `User-Agent` and
 `Accept-Language` are persona-owned and cannot be overridden here.
 
-Session cookies, call cookies, and browser-managed cookies are sent together.
-Response cookies update `session.cookies`.
+Session and call cookies are inserted into the browser-managed cookie jar before
+navigation, so normal domain, path, redirect, and expiry rules apply. Response
+cookies persist in the native shared jar and are exposed on the response.
 
-### `Session.evaluate()`
+### `Page.evaluate()`
 
 ```python
-session.evaluate(expression: str) -> object
+page.evaluate(expression: str) -> object
 ```
 
 Evaluates JavaScript in the current page and returns a JSON-compatible Python
 value. JavaScript exceptions raise `JavaScriptError`; unsupported result values
 raise a `BrimpError` with the corresponding native code.
 
-### `Session.screenshot()`
+### `Page.screenshot()`
 
 ```python
-session.screenshot(path=None, *, full_page: bool = False) -> bytes
+page.screenshot(path=None, *, full_page: bool = False) -> bytes
 ```
 
 Returns PNG bytes. When `path` is supplied, it writes the same bytes to that
 path.
 
-### `Session.extract()`
+### `Page.extract()`
 
 ```python
-session.extract(
+page.extract(
     *,
     content_selector: str | None = None,
     remove_images: bool = False,
@@ -114,13 +125,13 @@ Runs the pinned Defuddle browser bundle against the current live DOM and
 returns extracted content, Markdown, and metadata. It does not reparse the page
 with jsdom or make another network request.
 
-### Session input
+### Page input
 
 ```python
-session.click(selector: str) -> None
-session.hover(selector: str) -> None
-session.type(selector: str, text: str) -> None
-session.tap(selector: str) -> None
+page.click(selector: str) -> None
+page.hover(selector: str) -> None
+page.type(selector: str, text: str) -> None
+page.tap(selector: str) -> None
 ```
 
 These methods hit-test and send trusted browser input events. `hover()` moves
@@ -130,7 +141,8 @@ raises `InvalidRequest` with code `invalid_input`.
 
 ### `Session.close()`
 
-Closes native resources. Closing more than once is safe. Operations after close
+Closes every page and native resource. `Page.close()` closes only that page.
+Closing more than once is safe. Operations after close
 raise a `BrimpError` with code `closed`.
 
 ## `Response`

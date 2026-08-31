@@ -90,7 +90,10 @@ class Event {
     set cancelBubble(value) { if (value) this.stopPropagation(); }
     get returnValue() { return !this.defaultPrevented; }
     set returnValue(value) { if (!value) this.preventDefault(); }
-    get isTrusted() { return __trustedEvents.has(this); }
+    get isTrusted() {
+        if (!Event.prototype.isPrototypeOf(this)) throw new TypeError("Illegal invocation");
+        return __trustedEvents.has(this);
+    }
 }
 Event.NONE = 0;
 Event.CAPTURING_PHASE = 1;
@@ -283,6 +286,24 @@ class StorageEvent extends Event {
         this.newValue = newValue == null ? null : String(newValue);
         this.url = String(url);
         this.storageArea = storageArea;
+    }
+}
+
+class PopStateEvent extends Event {
+    constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError("PopStateEvent type is required");
+        super(type, options);
+        this.state = options.state === undefined ? null : options.state;
+        this.hasUAVisualTransition = Boolean(options.hasUAVisualTransition);
+    }
+}
+
+class HashChangeEvent extends Event {
+    constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError("HashChangeEvent type is required");
+        super(type, options);
+        this.oldURL = String(options.oldURL ?? "");
+        this.newURL = String(options.newURL ?? "");
     }
 }
 

@@ -130,11 +130,10 @@ function addParams(url, params) {
   return parsed.toString()
 }
 
-class Session {
-  constructor(inner) {
+class Page {
+  constructor(inner, session) {
     this._inner = inner
-    this.headers = {}
-    this.cookies = {}
+    this._session = session
     this._closed = false
   }
 
@@ -144,7 +143,7 @@ class Session {
     if (!Number.isInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 0xffff_ffff) {
       throw new InvalidRequest('timeoutMs must be a positive 32-bit integer', { code: 'invalid_input' })
     }
-    const headers = { ...this.headers, ...(options.headers ?? {}) }
+    const headers = { ...this._session.headers, ...(options.headers ?? {}) }
     const protectedHeaders = Object.keys(headers)
       .map(name => name.toLowerCase())
       .filter(name => name === 'user-agent' || name === 'accept-language')
@@ -154,10 +153,7 @@ class Session {
         { code: 'invalid_input' },
       )
     }
-    const cookies = { ...this.cookies, ...(options.cookies ?? {}) }
-    if (Object.keys(cookies).length) {
-      headers.Cookie = Object.entries(cookies).map(([name, value]) => `${name}=${value}`).join('; ')
-    }
+    const cookies = { ...this._session.cookies, ...(options.cookies ?? {}) }
     const token = new native.NativeCancellationToken()
     const signal = options.signal
     const cancel = () => token.cancel()
@@ -169,9 +165,9 @@ class Session {
         timeoutMs,
         token,
         Object.entries(headers).map(([name, value]) => [String(name), String(value)]),
+        Object.entries(cookies).map(([name, value]) => [String(name), String(value)]),
       ))
       const response = new Response(inner)
-      Object.assign(this.cookies, response.cookies)
       return response
     } finally {
       signal?.removeEventListener('abort', cancel)
@@ -223,6 +219,33 @@ class Session {
   }
 
   _ensureOpen() {
+    this._session._ensureOpen()
+    if (this._closed) throw new BrimpError('page is closed', { code: 'closed' })
+  }
+}
+
+class Session {
+  constructor(inner) {
+    this._inner = inner
+    this.headers = {}
+    this.cookies = {}
+    this._closed = false
+  }
+
+  async newPage(options = {}) {
+    this._ensureOpen()
+    const proxy = options.proxy == null ? undefined : String(options.proxy)
+    return new Page(await call(() => this._inner.newPage(proxy)), this)
+  }
+
+  async close() {
+    if (!this._closed) {
+      await call(() => this._inner.close())
+      this._closed = true
+    }
+  }
+
+  _ensureOpen() {
     if (this._closed) throw new BrimpError('session is closed', { code: 'closed' })
   }
 }
@@ -246,7 +269,13 @@ async function get(url, options = {}) {
     }
   }
   const session = await createSession(sessionOptions)
-  try { return await session.get(url, requestOptions) }
+  const proxy = requestOptions.proxy
+  delete requestOptions.proxy
+  try {
+    const page = await session.newPage({ proxy })
+    try { return await page.get(url, requestOptions) }
+    finally { await page.close() }
+  }
   finally { await session.close() }
 }
 
@@ -258,6 +287,7 @@ module.exports = {
   InvalidRequest,
   InvalidURL,
   JavaScriptError,
+  Page,
   Response,
   Session,
   Timeout,

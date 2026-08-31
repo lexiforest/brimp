@@ -3,23 +3,21 @@
 | API | Tested behavior |
 | --- | --- |
 | `get(url, options)` | Creates a temporary session, returns a detached Response, and closes native resources. |
-| `createSession(options)` | Creates one asynchronous native page session; heavy browser subsystems are absent unless explicitly enabled. |
-| `Session.get(url, options)` | Performs a GET navigation with query parameters, merged headers/cookies, timeout, and `AbortSignal` cancellation. |
+| `createSession(options)` | Creates a browser context whose pages share cookies. |
+| `Session.newPage({ proxy })` | Creates an independently concurrent page with a direct, HTTP, SOCKS5, or SOCKS5H document network scope. |
+| `Page.get(url, options)` | Performs a GET navigation with query parameters, merged headers/cookies, timeout, and `AbortSignal` cancellation. |
 | `Response.statusCode`, `reason`, `url`, `headers` | Exposes final main-response metadata without throwing for HTTP error statuses. |
 | `Response.content` / `text` / `html` | Exposes original bytes, decoded response text, and the post-JavaScript DOM. |
 | `Response.json()` / `raiseForStatus()` | Decodes JSON and explicitly throws `HTTPError` for 4xx/5xx responses. |
-| `Session.evaluate(source)` | Returns JSON-compatible JavaScript values and rejects unsupported values. |
-| `Session.screenshot(options)` | Returns a PNG `Buffer` and optionally writes it to a path. |
-| `Session.extract(options)` | Runs pinned Defuddle extraction against the live DOM and returns content, Markdown, and metadata. |
-| `Session.click(selector)` | Hit-tests and sends trusted pointer/mouse activation input. |
-| `Session.hover(selector)` | Moves the virtual mouse to the target and sends trusted pointer/mouse transition and move input. |
-| `Session.type(selector, text)` | Focuses the target and sends trusted keyboard/editing input. |
-| `Session.tap(selector)` | Hit-tests and sends trusted touch/pointer input with a compatibility click. |
+| `Page.evaluate`, `screenshot`, `extract` | Operates on that page's live document. |
+| `Page.click`, `hover`, `type`, `tap` | Sends trusted human input to that page. |
+| `Page.close()` | Closes one page and its transport scope. |
 | `Session.close()` | Closes resources and is idempotent. |
 
 Session headers and method headers are merged, with method values taking
 precedence. `User-Agent` and `Accept-Language` remain persona-owned. Session and
-method cookies are sent together; response cookies update the Session mapping.
+method cookies are inserted into the shared browser-managed jar before
+navigation. Response cookies remain on `Response.cookies` and persist natively.
 
 Failures derive from `BrimpError`: `ConnectionError`, `Timeout`,
 `TooManyRedirects`, `InvalidRequest`, `InvalidURL`, `HTTPError`, and

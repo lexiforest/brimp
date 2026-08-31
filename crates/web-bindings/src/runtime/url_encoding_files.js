@@ -405,3 +405,212 @@ class File extends Blob {
 }
 globalThis.File = File;
 
+const __formDataEntries = new WeakMap();
+let __nextFormDataBoundary = 1;
+
+function __formDataList(receiver) {
+    const entries = __formDataEntries.get(receiver);
+    if (entries === undefined) throw new TypeError("FormData method called on an incompatible receiver");
+    return entries;
+}
+
+function __formDataEntry(name, value, filename = undefined) {
+    name = __toUSVString(name);
+    if (!(value instanceof Blob)) {
+        if (filename !== undefined) throw new TypeError("FormData filename requires a Blob value");
+        return [name, __toUSVString(value)];
+    }
+    if (value instanceof File && filename === undefined) return [name, value];
+    return [name, new File([value], filename === undefined ? "blob" : __toUSVString(filename), {
+        type: value.type,
+        lastModified: value instanceof File ? value.lastModified : Date.now(),
+    })];
+}
+
+function __formOwner(control) {
+    const formId = control.getAttribute("form");
+    if (formId !== null) {
+        const owner = control.ownerDocument?.getElementById(formId);
+        return owner instanceof HTMLFormElement ? owner : null;
+    }
+    return control.closest("form");
+}
+
+function __isDisabledFormControl(control) {
+    if (control.disabled) return true;
+    const fieldset = control.closest("fieldset[disabled]");
+    if (fieldset === null) return false;
+    const legend = fieldset.querySelector("legend");
+    return legend === null || !legend.contains(control);
+}
+
+function __appendFormControl(entries, control, submitter) {
+    if (__isDisabledFormControl(control) || control.closest("datalist")) return;
+    const name = control.getAttribute("name");
+    if (name === null || name === "") return;
+
+    if (control instanceof HTMLButtonElement) {
+        if (control !== submitter || control.type !== "submit") return;
+        entries.push(__formDataEntry(name, control.value));
+        return;
+    }
+    if (control instanceof HTMLInputElement) {
+        if (["button", "reset"].includes(control.type)) return;
+        if (["submit", "image"].includes(control.type)) {
+            if (control !== submitter) return;
+            if (control.type === "image") {
+                entries.push(__formDataEntry(`${name}.x`, "0"), __formDataEntry(`${name}.y`, "0"));
+                return;
+            }
+        }
+        if (["checkbox", "radio"].includes(control.type) && !control.checked) return;
+        if (control.type === "file") {
+            entries.push(__formDataEntry(name, new File([], "", { type: "application/octet-stream" })));
+            return;
+        }
+        let value = control.type === "hidden" && name.toLowerCase() === "_charset_"
+            ? "UTF-8"
+            : control.value;
+        if (["checkbox", "radio"].includes(control.type) && !control.hasAttribute("value")) value = "on";
+        entries.push(__formDataEntry(name, value));
+    } else if (control instanceof HTMLSelectElement) {
+        const options = Array.from(control.querySelectorAll("option"));
+        let selected = options.filter(option => option.selected && !option.disabled);
+        if (!control.multiple && selected.length === 0) {
+            const fallback = options.find(option => !option.disabled);
+            if (fallback) selected = [fallback];
+        }
+        for (const option of selected) {
+            entries.push(__formDataEntry(name, option.hasAttribute("value") ? option.value : option.textContent));
+        }
+    } else if (control instanceof HTMLTextAreaElement) {
+        entries.push(__formDataEntry(name, control.value));
+    }
+    const dirname = control.getAttribute("dirname");
+    if (dirname) entries.push(__formDataEntry(dirname, control.dir === "rtl" ? "rtl" : "ltr"));
+}
+
+function __populateFormData(formData, form, submitter) {
+    if (!(form instanceof HTMLFormElement)) throw new TypeError("FormData form must be an HTMLFormElement");
+    if (submitter !== null) {
+        const submitButton = (submitter instanceof HTMLButtonElement && submitter.type === "submit") ||
+            (submitter instanceof HTMLInputElement && ["submit", "image"].includes(submitter.type));
+        if (!submitButton) throw new TypeError("FormData submitter must be a submit button");
+        if (__formOwner(submitter) !== form) {
+            throw new DOMException("The submitter is not owned by this form", "NotFoundError");
+        }
+    }
+    const documentControls = form.ownerDocument?.querySelectorAll("button,input,select,textarea") ?? [];
+    const controls = form.isConnected
+        ? Array.from(documentControls).filter(control => __formOwner(control) === form)
+        : Array.from(form.querySelectorAll("button,input,select,textarea"));
+    const entries = __formDataList(formData);
+    for (const control of controls) __appendFormControl(entries, control, submitter);
+    const event = new Event("formdata", { bubbles: true });
+    Object.defineProperty(event, "formData", { value: formData, enumerable: true });
+    form.dispatchEvent(event);
+}
+
+class FormData {
+    constructor(form = undefined, submitter = null) {
+        __formDataEntries.set(this, []);
+        if (form !== undefined) __populateFormData(this, form, submitter);
+    }
+    append(name, value, filename = undefined) {
+        if (arguments.length < 2) throw new TypeError("FormData.append requires a name and value");
+        __formDataList(this).push(__formDataEntry(name, value, filename));
+    }
+    delete(name) {
+        if (arguments.length === 0) throw new TypeError("FormData.delete requires a name");
+        name = __toUSVString(name);
+        const entries = __formDataList(this);
+        for (let index = entries.length - 1; index >= 0; index--) {
+            if (entries[index][0] === name) entries.splice(index, 1);
+        }
+    }
+    get(name) {
+        if (arguments.length === 0) throw new TypeError("FormData.get requires a name");
+        name = __toUSVString(name);
+        return __formDataList(this).find(entry => entry[0] === name)?.[1] ?? null;
+    }
+    getAll(name) {
+        if (arguments.length === 0) throw new TypeError("FormData.getAll requires a name");
+        name = __toUSVString(name);
+        return __formDataList(this).filter(entry => entry[0] === name).map(entry => entry[1]);
+    }
+    has(name) {
+        if (arguments.length === 0) throw new TypeError("FormData.has requires a name");
+        name = __toUSVString(name);
+        return __formDataList(this).some(entry => entry[0] === name);
+    }
+    set(name, value, filename = undefined) {
+        if (arguments.length < 2) throw new TypeError("FormData.set requires a name and value");
+        const entry = __formDataEntry(name, value, filename);
+        const entries = __formDataList(this);
+        const index = entries.findIndex(item => item[0] === entry[0]);
+        if (index === -1) entries.push(entry);
+        else {
+            entries[index] = entry;
+            for (let item = entries.length - 1; item > index; item--) {
+                if (entries[item][0] === entry[0]) entries.splice(item, 1);
+            }
+        }
+    }
+    *entries() {
+        const entries = __formDataList(this);
+        for (let index = 0; index < entries.length; index++) yield entries[index].slice();
+    }
+    *keys() {
+        for (const [name] of this.entries()) yield name;
+    }
+    *values() {
+        for (const [, value] of this.entries()) yield value;
+    }
+    forEach(callback, thisArg = undefined) {
+        if (arguments.length === 0) throw new TypeError("FormData.forEach requires a callback");
+        const entries = __formDataList(this);
+        for (let index = 0; index < entries.length; index++) {
+            callback.call(thisArg, entries[index][1], entries[index][0], this);
+        }
+    }
+    [Symbol.iterator]() { return this.entries(); }
+}
+globalThis.FormData = FormData;
+
+function __normalizeFormDataNewlines(value) {
+    return value.replace(/\r\n|\r|\n/g, "\r\n");
+}
+
+function __escapeMultipartName(value) {
+    return __normalizeFormDataNewlines(value).replace(/\r/g, "%0D").replace(/\n/g, "%0A").replace(/"/g, "%22");
+}
+
+function __concatBytes(chunks) {
+    const length = chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+    const bytes = new Uint8Array(length);
+    let offset = 0;
+    for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+    }
+    return bytes;
+}
+
+function __serializeFormData(formData) {
+    const random = Array.from({ length: 4 }, () => Math.random().toString(36).slice(2)).join("");
+    const boundary = `----WebKitFormBoundary${random}${(__nextFormDataBoundary++).toString(36)}`;
+    const chunks = [];
+    const text = value => chunks.push(new TextEncoder().encode(value));
+    for (const [name, value] of __formDataList(formData)) {
+        text(`--${boundary}\r\nContent-Disposition: form-data; name="${__escapeMultipartName(name)}"`);
+        if (value instanceof File) {
+            text(`; filename="${__escapeMultipartName(value.name)}"\r\nContent-Type: ${value.type || "application/octet-stream"}\r\n\r\n`);
+            chunks.push(value.__bytes);
+        } else {
+            text(`\r\n\r\n${__normalizeFormDataNewlines(value)}`);
+        }
+        text("\r\n");
+    }
+    text(`--${boundary}--\r\n`);
+    return { bytes: __concatBytes(chunks), type: `multipart/form-data; boundary=${boundary}` };
+}

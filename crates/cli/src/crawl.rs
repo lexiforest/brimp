@@ -222,6 +222,10 @@ pub(super) fn run(arguments: &[String]) -> Result<(), AutomationError> {
         options.navigation.persona.clone(),
         options.navigation.network.clone(),
     )?);
+    let context = browser.default_context();
+    for (name, value) in &options.navigation.cookies {
+        context.set_cookie(options.start.as_str(), name, value)?;
+    }
     let interrupt = InterruptMonitor::new();
     let started = Instant::now();
     let pacing = Arc::new(Mutex::new(HashMap::<String, Instant>::new()));

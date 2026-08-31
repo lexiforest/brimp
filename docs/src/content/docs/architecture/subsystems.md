@@ -63,7 +63,8 @@ Fetch request crosses `network::ResourceLoader`. The default
 curl-multi executor and pools handles for reuse.
 
 libcurl owns transport mechanics and browser-profile TLS/HTTP behavior.
-`web-runtime` owns browser policy: URL resolution, cookies, redirect hops,
+`web-runtime` owns browser policy: URL resolution, context-owned cookie jars shared
+by pages, redirect hops,
 persona headers, response limits, cancellation, and lifecycle events. This
 separation also lets tests or embedders inject deterministic loaders.
 
@@ -155,7 +156,9 @@ Canvas behavior, and graphics identity feed the relevant subsystems from one
 snapshot. Backend-derived WebGL/WebGPU capabilities cannot exceed the actual
 initialized backend.
 
-For the exhaustive implemented/missing product surface, see
-[`COHERENT.md`](https://github.com/lexiforest/brimp/blob/main/COHERENT.md). That
-ledger distinguishes completed selected surfaces from full browser-standard
-conformance and records deliberate exclusions such as video.
+For dependency-backed implementation status, see
+[`SUBSYSTEMS.md`](https://github.com/lexiforest/brimp/blob/main/SUBSYSTEMS.md).
+That ledger distinguishes completed selected surfaces from full
+browser-standard conformance and records deliberate exclusions such as video.
+Core DOM and JavaScriptCore compatibility checks remain in
+[`PATCH_ENV.md`](https://github.com/lexiforest/brimp/blob/main/PATCH_ENV.md).

@@ -8,6 +8,7 @@
 | `get URL --format raw|html|markdown|json|png` | Uses one navigation pipeline for response bytes, rendered DOM, live-DOM Defuddle extraction, and screenshots. |
 | `get URL --eval SOURCE` | Prints one structured JSON evaluation result on stdout. |
 | `get URL --script PATH` | Runs repeatable preparation scripts before capturing the selected result. |
+| `get URL --cookie NAME=VALUE` | Seeds the browser-context cookie jar once before navigation; normal cookie scoping applies. |
 | `crawl URL` | Runs a bounded deterministic breadth-first crawl with per-worker pages, robots policy, same-origin scope, safe atomic outputs, and a JSONL manifest. |
 
 All commands support stable categorized exit codes. `get` has one overall

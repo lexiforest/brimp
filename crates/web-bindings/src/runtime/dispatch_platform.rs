@@ -234,6 +234,22 @@ pub(super) fn dispatch(
             };
             Ok(NativeValue::String(value))
         }
+        "historyUpdateUrl" => {
+            let href = required_string(call, 2, "history URL")?;
+            let current = state
+                .browsing_context
+                .current_url()
+                .ok_or_else(|| NativeError::new("the document has no URL"))?;
+            let current = url::Url::parse(&current).map_err(err)?;
+            let next = url::Url::parse(&href).map_err(err)?;
+            if current.origin() != next.origin() {
+                return Err(NativeError::new(
+                    "SecurityError: history URL must be same-origin",
+                ));
+            }
+            state.browsing_context.set_url(next.as_str());
+            Ok(NativeValue::String(next.to_string()))
+        }
         "urlParse" => {
             let input = required_string(call, 2, "URL input")?;
             let base = required_string(call, 3, "URL base")?;
@@ -373,7 +389,10 @@ pub(super) fn dispatch(
             let body = call
                 .argument(5)
                 .filter(|value| !value.is_null_or_undefined())
-                .map(|value| value.to_string())
+                .map(|value| {
+                    let value = value.to_string()?;
+                    serde_json::from_str::<Vec<u8>>(&value).map_err(err)
+                })
                 .transpose()?;
             let (promise, settlement) = call.make_deferred_promise()?.into_parts();
             let mut fetches = state.fetches.borrow_mut();

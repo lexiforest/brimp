@@ -204,6 +204,7 @@ globalThis.__brimpInputController = (() => {
             pointer(target, "pointermove", command);
             mouse(target, "mousemove", command);
         } else if (command.eventType === "mousePressed") {
+            __notifyUserActivation();
             mouseButtons = command.buttons;
             pointer(target, "pointerdown", command);
             const accepted = mouse(target, "mousedown", command);
@@ -256,6 +257,9 @@ globalThis.__brimpInputController = (() => {
         command.modifiers = Number(command.modifiers ?? 0);
         const type = ({ keyDown: "keydown", rawKeyDown: "keydown", keyUp: "keyup", char: "keypress" })[command.eventType];
         if (!type) throw new TypeError(`unsupported key event type: ${command.eventType}`);
+        if ((command.eventType === "keyDown" || command.eventType === "rawKeyDown") && command.key !== "Escape") {
+            __notifyUserActivation();
+        }
         const event = new KeyboardEvent(type, {
             bubbles: true,
             cancelable: true,
@@ -430,6 +434,7 @@ globalThis.__brimpInputController = (() => {
                 ending,
                 command.modifiers,
             );
+            if (command.eventType === "touchEnd" && ending.length > 0) __notifyUserActivation();
             for (const state of ending) {
                 const pointerType = command.eventType === "touchEnd" ? "pointerup" : "pointercancel";
                 touchPointer(state.target, pointerType, state.point, command.modifiers, 0);
