@@ -55,6 +55,7 @@ impl ResourceLoader for MvpLoader {
             headers: headers.into(),
             body,
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

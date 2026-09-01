@@ -80,6 +80,7 @@ impl ResourceLoader for ImageLoader {
             headers: headers.into(),
             body,
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

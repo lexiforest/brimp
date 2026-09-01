@@ -64,7 +64,12 @@ def main() -> None:
                 env=environment,
             )
             subprocess.run(
-                [python, root / "bindings/python/test_api.py"],
+                [python, "-m", "pip", "install", "pytest>=8,<10"],
+                check=True,
+                env=environment,
+            )
+            subprocess.run(
+                [python, "-m", "pytest", root / "bindings/python/test_api.py"],
                 check=True,
                 cwd=temporary_path,
                 env=environment,

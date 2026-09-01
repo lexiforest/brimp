@@ -15,18 +15,20 @@ commands and errors into the conventions of the host language.
 | --- | --- | --- |
 | Create session | `brimp.Session(...)` | `await createSession(...)` |
 | Create page | `session.new_page(proxy=...)` | `await session.newPage({ proxy })` |
-| Navigate | `page.get(url, ...)` | `await page.get(url, ...)` |
+| Create and navigate page | `session.get(url, ...)` | `await session.get(url, ...)` |
+| Navigate existing page | `page.request(method, url, ...)` | `await page.request(method, url, ...)` |
 | Evaluate JavaScript | `page.evaluate(source)` | `await page.evaluate(source)` |
 | Extract live DOM | `page.extract(...)` | `await page.extract(...)` |
 | Click | `page.click(selector)` | `await page.click(selector)` |
 | Hover | `page.hover(selector)` | `await page.hover(selector)` |
 | Type | `page.type(selector, text)` | `await page.type(selector, text)` |
 | Tap | `page.tap(selector)` | `await page.tap(selector)` |
-| Read response | `response.content`, `text`, `html` | `response.content`, `text`, `html` |
+| Read latest navigation | `page.content`, `text`, `html` | `page.content`, `text`, `html` |
 | Capture PNG | `page.screenshot(...)` | `await page.screenshot(...)` |
 | Close | page/session `close()` or context manager | `await page.close()` / `await session.close()` |
 
-Both bindings use a session/page/response model. Python is synchronous; Node returns
+Both bindings use a Session/Page model: Page is both the live browser controller
+and the latest main-navigation result. Python is synchronous; Node returns
 Promises and supports `AbortSignal` cancellation for navigation. Use the
 dedicated [Python reference](/api/python/) and [Node.js reference](/api/node/)
 for complete signatures.
@@ -75,8 +77,8 @@ stable `closed` error category.
 
 ## Choosing a binding or CDP
 
-- Choose Python for synchronous request/response extraction.
-- Choose Node for asynchronous request/response extraction and cancellation.
+- Choose Python for synchronous live-page extraction.
+- Choose Node for asynchronous live-page extraction and cancellation.
 - Choose CDP when an existing Playwright or Puppeteer workflow only needs
   Brimp's documented protocol subset.
 - Choose Rust when embedding the page/runtime directly or supplying a custom

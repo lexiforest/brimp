@@ -23,6 +23,7 @@ impl ResourceLoader for StaticLoader {
             headers: headers.into(),
             body: b"<!doctype html><html><head><title>Loaded</title></head><body id='ready'></body></html>".to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -50,6 +51,7 @@ impl ResourceLoader for LoadEventLoader {
                 </script>"#
                 .to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -146,6 +148,7 @@ impl ResourceLoader for SubresourceLoader {
             headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

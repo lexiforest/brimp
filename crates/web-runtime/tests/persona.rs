@@ -24,6 +24,7 @@ impl ResourceLoader for IdentityLoader {
             headers: headers.into(),
             body: b"<!doctype html><title>Persona</title>".to_vec(),
             effective_url: url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

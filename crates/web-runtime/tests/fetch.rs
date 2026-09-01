@@ -27,6 +27,7 @@ impl ResourceLoader for FetchLoader {
             headers: headers.into(),
             body: br#"{"answer":42}"#.to_vec(),
             effective_url: url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

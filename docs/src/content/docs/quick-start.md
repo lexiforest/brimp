@@ -11,11 +11,10 @@ your application.
 ```python
 import brimp
 
-response = brimp.get("https://example.com")
-response.raise_for_status()
-
-print(response.status_code)
-print(response.html)  # DOM serialized after page scripts run
+with brimp.get("https://example.com") as page:
+    page.raise_for_status()
+    print(page.status_code)
+    print(page.html)  # current live DOM
 ```
 
 Use a session when you need cookies, repeated navigation, evaluation, or a
@@ -24,15 +23,14 @@ screenshot:
 ```python
 import brimp
 
-with brimp.Session() as session:
-    page = session.new_page()
-    response = page.get("https://example.com", timeout=30)
-    print(page.evaluate("document.title"))
-    print(page.extract()["contentMarkdown"])
-    page.hover("#menu")
-    page.type("#name", "agent")
-    page.click("#submit")
-    page.screenshot("example.png", full_page=True)
+with brimp.Session(pool_size=8) as session:
+    with session.get("https://example.com", timeout=30) as page:
+        print(page.evaluate("document.title"))
+        print(page.extract()["contentMarkdown"])
+        page.hover("#menu")
+        page.type("#name", "agent")
+        page.click("#submit")
+        page.screenshot("example.png", full_page=True)
 ```
 
 ## Node.js
@@ -43,9 +41,8 @@ const { createSession } = require('@brimp/brimp')
 async function main() {
   const session = await createSession()
   try {
-    const page = await session.newPage()
-    const response = await page.get('https://example.com')
-    console.log(response.statusCode, response.html)
+    const page = await session.get('https://example.com')
+    console.log(page.statusCode, page.html)
     console.log(await page.evaluate('document.title'))
     console.log((await page.extract()).contentMarkdown)
     await page.hover('#menu')

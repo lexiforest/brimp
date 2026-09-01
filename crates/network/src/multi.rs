@@ -645,9 +645,17 @@ impl Transfer {
     fn response(&self) -> Result<ResourceResponse, NetworkError> {
         let mut status = 0 as c_long;
         let mut effective: *mut c_char = ptr::null_mut();
+        let mut http_version = 0 as c_long;
+        let mut downloaded_bytes = 0_i64;
+        let mut uploaded_bytes = 0_i64;
+        let mut header_bytes = 0 as c_long;
         unsafe {
             getinfo(self.handle, CURLINFO_RESPONSE_CODE, &mut status)?;
             getinfo(self.handle, CURLINFO_EFFECTIVE_URL, &mut effective)?;
+            getinfo(self.handle, CURLINFO_HTTP_VERSION, &mut http_version)?;
+            getinfo(self.handle, CURLINFO_SIZE_DOWNLOAD_T, &mut downloaded_bytes)?;
+            getinfo(self.handle, CURLINFO_SIZE_UPLOAD_T, &mut uploaded_bytes)?;
+            getinfo(self.handle, CURLINFO_HEADER_SIZE, &mut header_bytes)?;
         }
         let status = StatusCode::from_u16(status as u16)
             .map_err(|error| NetworkError::Transport(error.to_string()))?;
@@ -665,6 +673,18 @@ impl Transfer {
             headers,
             body: self.response_body.clone(),
             effective_url,
+            metadata: crate::ResponseMetadata {
+                http_version: match http_version {
+                    CURL_HTTP_VERSION_1_0 => Some("HTTP/1.0".into()),
+                    CURL_HTTP_VERSION_1_1 => Some("HTTP/1.1".into()),
+                    CURL_HTTP_VERSION_2_0 => Some("HTTP/2".into()),
+                    CURL_HTTP_VERSION_3 | CURL_HTTP_VERSION_3ONLY => Some("HTTP/3".into()),
+                    _ => None,
+                },
+                downloaded_bytes: downloaded_bytes.max(0) as u64,
+                uploaded_bytes: uploaded_bytes.max(0) as u64,
+                header_bytes: header_bytes.max(0) as u64,
+            },
         })
     }
     fn complete(&mut self, result: Result<ResourceResponse, NetworkError>) -> Result<(), ()> {

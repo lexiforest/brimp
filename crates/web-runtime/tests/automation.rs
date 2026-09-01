@@ -20,6 +20,7 @@ impl ResourceLoader for WorkflowLoader {
             headers: headers.into(),
             body: b"<!doctype html><title>Workflow</title><main>Hello</main>".to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -115,6 +116,24 @@ fn shared_automation_workflow_navigates_evaluates_screenshots_and_closes() {
     assert!(browser.is_closed());
 }
 
+#[test]
+fn reset_replaces_the_document_and_javascript_realm_without_closing_the_page() {
+    let browser = AutomationBrowser::with_resource_loader(Arc::new(WorkflowLoader));
+    let page = browser.new_page(PageOptions::default()).unwrap();
+    page.navigate("https://example.test/", Duration::from_secs(1))
+        .unwrap();
+    page.evaluate("globalThis.leaked = 42").unwrap();
+
+    page.reset().unwrap();
+
+    assert_eq!(page.evaluate("location.href").unwrap(), "about:blank");
+    assert_eq!(page.evaluate("typeof leaked").unwrap(), "undefined");
+    assert_eq!(page.title().unwrap(), "");
+    page.navigate("https://example.test/reused", Duration::from_secs(1))
+        .unwrap();
+    assert_eq!(page.title().unwrap(), "Workflow");
+}
+
 struct HangingLoader;
 #[async_trait]
 impl ResourceLoader for HangingLoader {
@@ -169,6 +188,7 @@ impl ResourceLoader for ResponseLoader {
             headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -238,6 +258,7 @@ impl ResourceLoader for CookieLoader {
             headers: headers.into(),
             body: b"<!doctype html><title>Cookies</title>".to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -419,6 +440,7 @@ impl ResourceLoader for InputLoader {
             headers: headers.into(),
             body: body.to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

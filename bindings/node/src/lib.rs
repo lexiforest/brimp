@@ -114,6 +114,29 @@ pub struct NativeResponse {
     pub html: Option<String>,
     pub cookies: Vec<Vec<String>>,
     pub elapsed: f64,
+    pub http_version: Option<String>,
+    pub downloaded_bytes: f64,
+    pub uploaded_bytes: f64,
+    pub header_bytes: f64,
+    pub request: NativeRequest,
+    pub history: Vec<NativeRedirect>,
+}
+
+#[napi(object)]
+pub struct NativeRequest {
+    pub method: String,
+    pub url: String,
+    pub headers: Vec<Vec<String>>,
+    pub body: Option<Buffer>,
+}
+
+#[napi(object)]
+pub struct NativeRedirect {
+    pub status_code: u32,
+    pub reason: String,
+    pub url: String,
+    pub headers: Vec<Vec<String>>,
+    pub request: NativeRequest,
 }
 
 impl From<NavigationResponse> for NativeResponse {
@@ -127,6 +150,32 @@ impl From<NavigationResponse> for NativeResponse {
             html: response.html,
             cookies: pairs(response.cookies),
             elapsed: response.elapsed.as_secs_f64(),
+            http_version: response.http_version,
+            downloaded_bytes: response.downloaded_bytes as f64,
+            uploaded_bytes: response.uploaded_bytes as f64,
+            header_bytes: response.header_bytes as f64,
+            request: NativeRequest {
+                method: response.request.method,
+                url: response.request.url,
+                headers: pairs(response.request.headers),
+                body: response.request.body.map(Buffer::from),
+            },
+            history: response
+                .history
+                .into_iter()
+                .map(|entry| NativeRedirect {
+                    status_code: u32::from(entry.status_code),
+                    reason: entry.reason,
+                    url: entry.url,
+                    headers: pairs(entry.headers),
+                    request: NativeRequest {
+                        method: entry.request.method,
+                        url: entry.request.url,
+                        headers: pairs(entry.request.headers),
+                        body: entry.request.body.map(Buffer::from),
+                    },
+                })
+                .collect(),
         }
     }
 }
@@ -200,13 +249,18 @@ pub struct NativePage {
 #[napi]
 impl NativePage {
     #[napi]
-    pub async fn get(
+    #[allow(clippy::too_many_arguments)]
+    pub async fn request(
         &self,
+        method: String,
         url: String,
         timeout_ms: u32,
         token: &CancellationToken,
         headers: Vec<Vec<String>>,
         cookies: Vec<Vec<String>>,
+        body: Option<Buffer>,
+        allow_redirects: bool,
+        max_redirects: u32,
     ) -> Result<NativeResponse> {
         let mut request_headers = Vec::with_capacity(headers.len());
         for entry in headers {
@@ -233,15 +287,25 @@ impl NativePage {
             for (name, value) in cookie_pairs {
                 context.set_cookie(&url, &name, &value)?;
             }
-            page.navigate_with_headers(
+            page.navigate_request(
+                method,
                 url,
                 Duration::from_millis(u64::from(timeout_ms)),
                 token,
                 request_headers,
+                body.map(|body| body.to_vec()),
+                allow_redirects,
+                max_redirects as usize,
             )
             .map(NativeResponse::from)
         })
         .await
+    }
+
+    #[napi]
+    pub async fn html(&self) -> Result<String> {
+        let page = self.page.clone();
+        blocking(move || page.html()).await
     }
 
     #[napi]

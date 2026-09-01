@@ -1,31 +1,33 @@
 const fs = require('node:fs/promises')
+const fsSync = require('node:fs')
+const crypto = require('node:crypto')
+const path = require('node:path')
 const native = require('./brimp_node.node')
 
-class BrimpError extends Error {
+class RequestError extends Error {
   constructor(message, { code = 'internal', cause } = {}) {
     super(message, { cause })
     this.name = this.constructor.name
     this.code = code
   }
 }
-
-class ConnectionError extends BrimpError {}
-class Timeout extends BrimpError {}
+class ConnectionError extends RequestError {}
+class Timeout extends RequestError {}
 class TooManyRedirects extends ConnectionError {}
-class InvalidRequest extends BrimpError {}
+class InvalidRequest extends RequestError {}
 class InvalidURL extends InvalidRequest {}
-class JavaScriptError extends BrimpError {}
-
-class HTTPError extends BrimpError {
-  constructor(message, response) {
+class JavaScriptError extends RequestError {}
+class SessionClosed extends RequestError {}
+class HTTPError extends RequestError {
+  constructor(message, page) {
     super(message, { code: 'http_status' })
-    this.response = response
+    this.page = page
   }
 }
 
 function translate(error) {
   const match = /^brimp ([a-z_]+): (.*)$/s.exec(String(error?.message ?? error))
-  if (!match) return new BrimpError(String(error), { cause: error })
+  if (!match) return new RequestError(String(error), { cause: error })
   const [, code, detail] = match
   if (code === 'transport') {
     return detail.includes('redirect limit')
@@ -39,7 +41,8 @@ function translate(error) {
       : new InvalidRequest(detail, { code, cause: error })
   }
   if (code === 'javascript') return new JavaScriptError(detail, { code, cause: error })
-  return new BrimpError(detail, { code, cause: error })
+  if (code === 'closed') return new SessionClosed(detail, { code, cause: error })
+  return new RequestError(detail, { code, cause: error })
 }
 
 async function call(operation) {
@@ -60,74 +63,96 @@ class Headers {
       this._values.set(key, values)
     }
   }
-
   get(name) {
     const values = this._values.get(String(name).toLowerCase())
     return values ? values.join(', ') : undefined
   }
-
-  getAll(name) {
-    return [...(this._values.get(String(name).toLowerCase()) ?? [])]
-  }
-
+  getAll(name) { return [...(this._values.get(String(name).toLowerCase()) ?? [])] }
   has(name) { return this._values.has(String(name).toLowerCase()) }
   entries() { return this[Symbol.iterator]() }
   keys() { return this._names.values() }
   get raw() { return this._entries.map(entry => [...entry]) }
+  *values() { for (const name of this._names.values()) yield this.get(name) }
+  *[Symbol.iterator]() { for (const name of this._names.values()) yield [name, this.get(name)] }
+}
 
-  *values() {
-    for (const name of this._names.values()) yield this.get(name)
+class Multipart {
+  constructor() { this._parts = [] }
+  addPart({ name, data, localPath, filename, contentType } = {}) {
+    if ((data == null) === (localPath == null)) {
+      throw new InvalidRequest('multipart part requires exactly one of data or localPath', { code: 'invalid_input' })
+    }
+    this._parts.push({ name: String(name), data, localPath, filename, contentType })
+    return this
   }
-
-  *[Symbol.iterator]() {
-    for (const name of this._names.values()) yield [name, this.get(name)]
+  encode() {
+    const boundary = `----BrimpFormBoundary${crypto.randomBytes(12).toString('hex')}`
+    const chunks = []
+    let size = 0
+    const append = value => {
+      const buffer = Buffer.isBuffer(value) ? value : Buffer.from(value)
+      size += buffer.length
+      if (size > 64 * 1024 * 1024) throw new InvalidRequest('multipart body exceeds 67108864 bytes', { code: 'invalid_input' })
+      chunks.push(buffer)
+    }
+    for (const part of this._parts) {
+      const payload = part.localPath == null ? part.data : fsSync.readFileSync(part.localPath)
+      const name = part.name.replaceAll('"', '%22').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
+      let disposition = `Content-Disposition: form-data; name="${name}"`
+      const filename = part.filename ?? (part.localPath == null ? undefined : path.basename(part.localPath))
+      if (filename != null) disposition += `; filename="${String(filename).replaceAll('"', '%22')}"`
+      append(`--${boundary}\r\n${disposition}\r\n`)
+      if (part.contentType != null) append(`Content-Type: ${part.contentType}\r\n`)
+      append('\r\n'); append(payload); append('\r\n')
+    }
+    append(`--${boundary}--\r\n`)
+    return { body: Buffer.concat(chunks), contentType: `multipart/form-data; boundary=${boundary}` }
   }
 }
 
-class Response {
-  constructor(inner) {
-    this.statusCode = inner.statusCode
-    this.reason = inner.reason
-    this.url = inner.url
-    this.headers = new Headers(inner.headers)
-    this.content = inner.content
-    this.html = inner.html ?? null
-    this.cookies = Object.fromEntries(inner.cookies)
-    this.elapsed = inner.elapsed
-  }
+function paramEntries(params) {
+  if (params == null) return []
+  const entries = params instanceof URLSearchParams ? params.entries() : Object.entries(params)
+  return [...entries].flatMap(([name, value]) => (Array.isArray(value) ? value : [value]).map(item => [String(name), String(item)]))
+}
 
-  get ok() { return this.statusCode < 400 }
-
-  get encoding() {
-    const match = /(?:^|;)\s*charset=([^;\s]+)/i.exec(this.headers.get('content-type') ?? '')
-    return match ? match[1].replace(/^["']|["']$/g, '') : 'utf-8'
-  }
-
-  get text() {
-    try { return new TextDecoder(this.encoding).decode(this.content) }
-    catch { return new TextDecoder('utf-8').decode(this.content) }
-  }
-
-  json() { return JSON.parse(this.text) }
-
-  raiseForStatus() {
-    if (!this.ok) throw new HTTPError(`${this.statusCode} ${this.reason} for url: ${this.url}`, this)
-  }
+function mergeParams(defaults, overrides) {
+  const base = paramEntries(defaults)
+  const extra = paramEntries(overrides)
+  if (overrides == null) return base
+  const replaced = new Set(extra.map(([name]) => name))
+  return base.filter(([name]) => !replaced.has(name)).concat(extra)
 }
 
 function addParams(url, params) {
-  if (params == null) return String(url)
+  if (params.length === 0) return String(url)
   let parsed
   try { parsed = new URL(String(url)) }
-  catch (error) {
-    throw new InvalidURL(String(error.message ?? error), { code: 'invalid_input', cause: error })
-  }
-  const entries = params instanceof URLSearchParams ? params : Object.entries(params)
-  for (const [name, rawValue] of entries) {
-    const values = Array.isArray(rawValue) ? rawValue : [rawValue]
-    for (const value of values) parsed.searchParams.append(name, String(value))
-  }
+  catch (error) { throw new InvalidURL(String(error.message ?? error), { code: 'invalid_input', cause: error }) }
+  for (const [name, value] of params) parsed.searchParams.append(name, value)
   return parsed.toString()
+}
+
+function prepareBody(options, headers) {
+  const supplied = ['data', 'content', 'json', 'multipart'].filter(key => options[key] != null)
+  if (supplied.length > 1) throw new InvalidRequest('use only one of data, content, json, or multipart', { code: 'invalid_input' })
+  let body
+  let contentType
+  if (options.multipart != null) {
+    if (!(options.multipart instanceof Multipart)) throw new InvalidRequest('multipart must be a Multipart instance', { code: 'invalid_input' })
+    ;({ body, contentType } = options.multipart.encode())
+  } else if (options.json != null) {
+    body = Buffer.from(JSON.stringify(options.json)); contentType = 'application/json'
+  } else if (options.content != null) {
+    body = Buffer.isBuffer(options.content) ? options.content : Buffer.from(options.content)
+  } else if (options.data != null) {
+    if (Buffer.isBuffer(options.data) || typeof options.data === 'string') body = Buffer.from(options.data)
+    else { body = Buffer.from(new URLSearchParams(options.data).toString()); contentType = 'application/x-www-form-urlencoded' }
+  }
+  const names = new Set(Object.keys(headers).map(name => name.toLowerCase()))
+  if (body != null && contentType != null && !names.has('content-type')) headers['Content-Type'] = contentType
+  if (body != null && !names.has('content-length')) headers['Content-Length'] = String(body.length)
+  return body
 }
 
 class Page {
@@ -135,24 +160,30 @@ class Page {
     this._inner = inner
     this._session = session
     this._closed = false
+    this._ownsSession = false
+    this._navigated = false
   }
-
-  async get(url, options = {}) {
+  async request(method, url, options = {}) {
     this._ensureOpen()
-    const timeoutMs = options.timeoutMs ?? 30_000
+    method = String(method).toUpperCase()
+    const timeoutMs = options.timeoutMs ?? this._session.timeoutMs
     if (!Number.isInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 0xffff_ffff) {
       throw new InvalidRequest('timeoutMs must be a positive 32-bit integer', { code: 'invalid_input' })
     }
     const headers = { ...this._session.headers, ...(options.headers ?? {}) }
-    const protectedHeaders = Object.keys(headers)
-      .map(name => name.toLowerCase())
-      .filter(name => name === 'user-agent' || name === 'accept-language')
+    const protectedHeaders = Object.keys(headers).map(name => name.toLowerCase()).filter(name => name === 'user-agent' || name === 'accept-language')
     if (protectedHeaders.length) {
-      throw new InvalidRequest(
-        `persona-owned headers cannot be overridden: ${[...new Set(protectedHeaders)].sort().join(', ')}; configure a persona instead`,
-        { code: 'invalid_input' },
-      )
+      throw new InvalidRequest(`persona-owned headers cannot be overridden: ${[...new Set(protectedHeaders)].sort().join(', ')}; configure a persona instead`, { code: 'invalid_input' })
     }
+    const referer = options.referer ?? this._session.referer
+    if (referer != null && !Object.keys(headers).some(name => name.toLowerCase() === 'referer')) headers.Referer = String(referer)
+    const auth = options.auth ?? this._session.auth
+    if (auth != null) {
+      if (!Array.isArray(auth) || auth.length !== 2) throw new InvalidRequest('auth must be a [username, password] pair', { code: 'invalid_input' })
+      headers.Authorization = `Basic ${Buffer.from(`${auth[0]}:${auth[1]}`).toString('base64')}`
+    }
+    const body = prepareBody(options, headers)
+    if ((method === 'GET' || method === 'HEAD') && body != null) throw new InvalidRequest(`${method} navigation cannot have a body`, { code: 'invalid_input' })
     const cookies = { ...this._session.cookies, ...(options.cookies ?? {}) }
     const token = new native.NativeCancellationToken()
     const signal = options.signal
@@ -160,138 +191,123 @@ class Page {
     if (signal?.aborted) cancel()
     signal?.addEventListener('abort', cancel, { once: true })
     try {
-      const inner = await call(() => this._inner.get(
-        addParams(url, options.params),
-        timeoutMs,
-        token,
+      const result = await call(() => this._inner.request(
+        method, addParams(url, mergeParams(this._session.params, options.params)), timeoutMs, token,
         Object.entries(headers).map(([name, value]) => [String(name), String(value)]),
         Object.entries(cookies).map(([name, value]) => [String(name), String(value)]),
+        body,
+        options.allowRedirects ?? this._session.allowRedirects,
+        options.maxRedirects ?? this._session.maxRedirects,
       ))
-      const response = new Response(inner)
-      return response
-    } finally {
-      signal?.removeEventListener('abort', cancel)
-    }
+      this._applyNavigation(result)
+      return this
+    } finally { signal?.removeEventListener('abort', cancel) }
   }
-
-  async evaluate(expression) {
-    this._ensureOpen()
-    return JSON.parse(await call(() => this._inner.evaluate(String(expression))))
+  _applyNavigation(result) {
+    this.statusCode = result.statusCode
+    this.reason = result.reason
+    this.url = result.url
+    this.headers = new Headers(result.headers)
+    this.content = result.content
+    this.html = result.html ?? null
+    this.cookies = Object.fromEntries(result.cookies)
+    this.elapsed = result.elapsed
+    this.httpVersion = result.httpVersion ?? null
+    this.downloadedBytes = result.downloadedBytes
+    this.uploadedBytes = result.uploadedBytes
+    this.headerBytes = result.headerBytes
+    this.lastRequest = Object.freeze({ ...result.request, headers: new Headers(result.request.headers) })
+    this.history = Object.freeze(result.history.map(entry => Object.freeze({
+      ...entry, headers: new Headers(entry.headers), request: Object.freeze({ ...entry.request, headers: new Headers(entry.request.headers) }),
+    })))
+    this.redirectCount = this.history.length
+    this._navigated = true
   }
-
-  async screenshot(options = {}) {
-    this._ensureOpen()
-    const content = await call(() => this._inner.screenshot(Boolean(options.fullPage)))
-    if (options.path != null) await fs.writeFile(options.path, content)
-    return content
+  get ok() { this._ensureNavigated(); return this.statusCode < 400 }
+  get encoding() {
+    this._ensureNavigated()
+    const match = /(?:^|;)\s*charset=([^;\s]+)/i.exec(this.headers.get('content-type') ?? '')
+    return this._encoding ?? (match ? match[1].replace(/^['"]|['"]$/g, '') : this._session.defaultEncoding)
   }
-
-  async extract(options = {}) {
-    this._ensureOpen()
-    return JSON.parse(await call(() => this._inner.extract(JSON.stringify(options))))
+  set encoding(value) { this._encoding = value == null ? undefined : String(value) }
+  get text() {
+    try { return new TextDecoder(this.encoding).decode(this.content) }
+    catch { return new TextDecoder('utf-8').decode(this.content) }
   }
-
-  async click(selector) {
-    this._ensureOpen()
-    await call(() => this._inner.click(String(selector)))
-  }
-
-  async hover(selector) {
-    this._ensureOpen()
-    await call(() => this._inner.hover(String(selector)))
-  }
-
-  async type(selector, text) {
-    this._ensureOpen()
-    await call(() => this._inner.typeText(String(selector), String(text)))
-  }
-
-  async tap(selector) {
-    this._ensureOpen()
-    await call(() => this._inner.tap(String(selector)))
-  }
-
-  async close() {
-    if (!this._closed) {
-      await call(() => this._inner.close())
-      this._closed = true
-    }
-  }
-
-  _ensureOpen() {
-    this._session._ensureOpen()
-    if (this._closed) throw new BrimpError('page is closed', { code: 'closed' })
-  }
+  json() { return JSON.parse(this.text) }
+  raiseForStatus() { if (!this.ok) throw new HTTPError(`${this.statusCode} ${this.reason} for url: ${this.url}`, this) }
+  async _refreshHtml() { if (this.html != null) this.html = await call(() => this._inner.html()) }
+  async get(url, options) { return this.request('GET', url, options) }
+  async head(url, options = {}) { return this.request('HEAD', url, { allowRedirects: false, ...options }) }
+  async options(url, options) { return this.request('OPTIONS', url, options) }
+  async delete(url, options) { return this.request('DELETE', url, options) }
+  async post(url, options) { return this.request('POST', url, options) }
+  async put(url, options) { return this.request('PUT', url, options) }
+  async patch(url, options) { return this.request('PATCH', url, options) }
+  async evaluate(expression) { const value = JSON.parse(await call(() => this._inner.evaluate(String(expression)))); await this._refreshHtml(); return value }
+  async screenshot(options = {}) { const bytes = await call(() => this._inner.screenshot(Boolean(options.fullPage))); if (options.path != null) await fs.writeFile(options.path, bytes); return bytes }
+  async extract(options = {}) { return JSON.parse(await call(() => this._inner.extract(JSON.stringify(options)))) }
+  async click(selector) { await call(() => this._inner.click(String(selector))); await this._refreshHtml() }
+  async hover(selector) { await call(() => this._inner.hover(String(selector))); await this._refreshHtml() }
+  async type(selector, text) { await call(() => this._inner.typeText(String(selector), String(text))); await this._refreshHtml() }
+  async tap(selector) { await call(() => this._inner.tap(String(selector))); await this._refreshHtml() }
+  async close() { if (!this._closed) { if (this._ownsSession) await this._session.close(); else await call(() => this._inner.close()); this._closed = true } }
+  _ensureOpen() { this._session._ensureOpen(); if (this._closed) throw new SessionClosed('page is closed', { code: 'closed' }) }
+  _ensureNavigated() { this._ensureOpen(); if (!this._navigated) throw new InvalidRequest('page has not navigated', { code: 'invalid_input' }) }
 }
 
 class Session {
-  constructor(inner) {
+  constructor(inner, options = {}) {
     this._inner = inner
-    this.headers = {}
-    this.cookies = {}
+    this.headers = { ...(options.headers ?? {}) }
+    this.params = options.params
+    this.cookies = { ...(options.cookies ?? {}) }
+    this.auth = options.auth
+    this.proxy = options.proxy
+    this.referer = options.referer
+    this.timeoutMs = options.timeoutMs ?? 30_000
+    this.allowRedirects = options.allowRedirects ?? true
+    this.maxRedirects = options.maxRedirects ?? 30
+    this.defaultEncoding = options.defaultEncoding ?? 'utf-8'
     this._closed = false
   }
-
-  async newPage(options = {}) {
-    this._ensureOpen()
-    const proxy = options.proxy == null ? undefined : String(options.proxy)
-    return new Page(await call(() => this._inner.newPage(proxy)), this)
-  }
-
-  async close() {
-    if (!this._closed) {
-      await call(() => this._inner.close())
-      this._closed = true
-    }
-  }
-
-  _ensureOpen() {
-    if (this._closed) throw new BrimpError('session is closed', { code: 'closed' })
-  }
+  async newPage(options = {}) { this._ensureOpen(); return new Page(await call(() => this._inner.newPage(options.proxy ?? this.proxy)), this) }
+  async request(method, url, options = {}) { const page = await this.newPage({ proxy: options.proxy }); try { return await page.request(method, url, options) } catch (error) { await page.close(); throw error } }
+  async get(url, options) { return this.request('GET', url, options) }
+  async head(url, options = {}) { return this.request('HEAD', url, { allowRedirects: false, ...options }) }
+  async options(url, options) { return this.request('OPTIONS', url, options) }
+  async delete(url, options) { return this.request('DELETE', url, options) }
+  async post(url, options) { return this.request('POST', url, options) }
+  async put(url, options) { return this.request('PUT', url, options) }
+  async patch(url, options) { return this.request('PATCH', url, options) }
+  async close() { if (!this._closed) { await call(() => this._inner.close()); this._closed = true } }
+  _ensureOpen() { if (this._closed) throw new SessionClosed('session is closed', { code: 'closed' }) }
 }
 
+const nativeOptionNames = [
+  'personaJson', 'caBundle', 'enableWorker', 'enableStreamingNetworking', 'enableCanvas',
+  'enableWebGL', 'enableWebGPU', 'enableWebAudio', 'enableWebAudioOutput', 'storagePath',
+  'storageQuotaBytes',
+]
 async function createSession(options = {}) {
-  return new Session(await call(() => native.NativeSession.create(options)))
+  const nativeOptions = Object.fromEntries(nativeOptionNames.filter(key => key in options).map(key => [key, options[key]]))
+  return new Session(await call(() => native.NativeSession.create(nativeOptions)), options)
 }
-
-async function get(url, options = {}) {
-  const sessionKeys = [
-    'personaJson', 'caBundle', 'enableWorker', 'enableStreamingNetworking',
-    'enableCanvas', 'enableWebGL', 'enableWebGPU', 'enableWebAudio',
-    'enableWebAudioOutput', 'storagePath', 'storageQuotaBytes',
-  ]
-  const sessionOptions = {}
-  const requestOptions = { ...options }
-  for (const key of sessionKeys) {
-    if (key in requestOptions) {
-      sessionOptions[key] = requestOptions[key]
-      delete requestOptions[key]
-    }
-  }
-  const session = await createSession(sessionOptions)
-  const proxy = requestOptions.proxy
-  delete requestOptions.proxy
-  try {
-    const page = await session.newPage({ proxy })
-    try { return await page.get(url, requestOptions) }
-    finally { await page.close() }
-  }
-  finally { await session.close() }
+async function request(method, url, options = {}) {
+  const session = await createSession(options)
+  try { const page = await session.request(method, url, options); page._ownsSession = true; return page }
+  catch (error) { await session.close(); throw error }
 }
+const get = (url, options) => request('GET', url, options)
+const head = (url, options = {}) => request('HEAD', url, { allowRedirects: false, ...options })
+const options = (url, requestOptions) => request('OPTIONS', url, requestOptions)
+const del = (url, requestOptions) => request('DELETE', url, requestOptions)
+const post = (url, requestOptions) => request('POST', url, requestOptions)
+const put = (url, requestOptions) => request('PUT', url, requestOptions)
+const patch = (url, requestOptions) => request('PATCH', url, requestOptions)
 
 module.exports = {
-  BrimpError,
-  ConnectionError,
-  Headers,
-  HTTPError,
-  InvalidRequest,
-  InvalidURL,
-  JavaScriptError,
-  Page,
-  Response,
-  Session,
-  Timeout,
-  TooManyRedirects,
-  createSession,
-  get,
+  ConnectionError, Headers, HTTPError, InvalidRequest, InvalidURL, JavaScriptError, Multipart,
+  Page, RequestError, Session, SessionClosed, Timeout, TooManyRedirects, createSession, delete: del,
+  get, head, options, patch, post, put, request,
 }

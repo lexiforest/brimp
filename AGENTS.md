@@ -1,3 +1,5 @@
+## General
+
 Do not preserve backward compatibility. Remove obsolete paths instead of adding
 compatibility layers, fallbacks, or migrations.
 
@@ -23,3 +25,7 @@ works for now and is meant to be replaced later.
 Choose the simplest implementation that fully meets the current requirements.
 
 Use TODO.md to track the implementation progress and interact with the user.
+
+## Coding
+
+- Use pytest for python testing

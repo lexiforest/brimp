@@ -17,8 +17,9 @@ pub use extraction::{
     DebugInfo, DebugRemoval, ExtractedDocument, ExtractionError, ExtractionOptions, MetaTagItem,
 };
 pub use page::{
-    BrowserSubsystemOptions, LoadState, NavigationError, NavigationResponse, Page, PageOptions,
-    PageOptionsBuilder, PersistentStorageOptions,
+    BrowserSubsystemOptions, LoadState, NavigationError, NavigationHistoryEntry,
+    NavigationRequestInfo, NavigationResponse, Page, PageOptions, PageOptionsBuilder,
+    PersistentStorageOptions,
 };
 pub use screenshot::{ScreenshotError, ScreenshotOptions};
 pub use task::{TaskQueue, TaskSendError, TaskSender};

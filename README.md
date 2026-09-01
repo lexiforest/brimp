@@ -94,16 +94,16 @@ brimp get https://example.com --persona persona/example.json --eval 'navigator.u
 
 ### Python
 
-The Python binding is synchronous and in-process. `Response.text` is the
-original HTTP response text; `Response.html` is the live DOM serialized after
-page scripts execute.
+The Python binding is synchronous and in-process. Request helpers return a live
+Page carrying the latest main-response metadata.
 
 ```python
 import brimp
 
-response = brimp.get("https://example.com")
-print(response.status_code)
-print(response.html)
+with brimp.get("https://example.com") as page:
+    print(page.status_code)
+    print(page.text)  # original response text
+    print(page.html)  # current live DOM
 ```
 
 Use a Session to share cookies across independently concurrent pages. Each page
@@ -112,15 +112,14 @@ owns its document, connections, and optional immutable proxy:
 ```python
 import brimp
 
-with brimp.Session() as session:
-    page = session.new_page()
-    response = page.get("https://example.com", params={"q": "browser"})
-    response.raise_for_status()
-    print(page.evaluate("document.title"))
-    page.hover("#menu")
-    page.type("#name", "agent")
-    page.click("#submit")
-    page.screenshot("example.png", full_page=True)
+with brimp.Session(pool_size=8) as session:
+    with session.get("https://example.com", params={"q": "browser"}) as page:
+        page.raise_for_status()
+        print(page.evaluate("document.title"))
+        page.hover("#menu")
+        page.type("#name", "agent")
+        page.click("#submit")
+        page.screenshot("example.png", full_page=True)
 ```
 
 ### Node.js
@@ -131,9 +130,8 @@ const brimp = require('@brimp/brimp')
 async function main() {
   const session = await brimp.createSession()
   try {
-    const page = await session.newPage()
-    const response = await page.get('https://example.com')
-    console.log(response.statusCode, response.html)
+    const page = await session.get('https://example.com')
+    console.log(page.statusCode, page.html)
     console.log(await page.evaluate('document.title'))
     await page.hover('#menu')
     await page.type('#name', 'agent')

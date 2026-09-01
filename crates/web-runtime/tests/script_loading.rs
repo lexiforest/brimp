@@ -56,6 +56,7 @@ impl ResourceLoader for ScriptLoader {
             headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -119,6 +120,7 @@ impl ResourceLoader for ParserLoader {
             headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -181,6 +183,7 @@ impl ResourceLoader for ThrowingScriptLoader {
             headers: headers.into(),
             body: body.as_bytes().to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

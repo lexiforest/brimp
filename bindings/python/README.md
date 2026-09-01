@@ -1,86 +1,84 @@
 # Brimp Python binding
 
-Brimp exposes a synchronous, Requests-style API backed by the shared native
-browser runtime. It runs in-process and does not start a CDP server.
+Brimp combines a curl-impersonate transport with a live JavaScript browser
+runtime. Its request vocabulary follows `curl_cffi.requests` where that maps
+cleanly, but every navigation returns a live `Page` instead of a detached
+response object.
 
 ```python
 import brimp
 
-response = brimp.get("https://example.com")
-print(response.status_code)
-print(response.text)  # original HTTP response
-print(response.html)  # DOM after JavaScript
+with brimp.get("https://example.com") as page:
+    print(page.status_code)
+    print(page.text)  # original main-response body
+    print(page.html)  # current live DOM
+    page.click("#continue")
+    print(page.html)  # includes DOM changes caused by the click
 ```
 
-Sessions own shared cookies while pages own documents, connections, and an
-optional immutable proxy:
+Use a Session to share cookies, connections, and a bounded pool of reusable
+Pages. The pool defaults to twice the logical CPU count and grows lazily.
+Session request helpers lease and navigate a Page; leaving its context resets
+and returns the native Page to the pool.
 
 ```python
-with brimp.Session() as session:
-    page = session.new_page(proxy="socks5h://127.0.0.1:1080")
-    response = page.get("https://example.com", timeout=30)
-    response.raise_for_status()
-    print(page.evaluate("document.title"))
-    article = page.extract(content_selector="main")
-    print(article["contentMarkdown"])
-    page.hover("#menu")
-    page.type("#name", "agent")
-    page.click("#submit")
-    page.screenshot("page.png", full_page=True)
+with brimp.Session(pool_size=8, headers={"X-Agent": "brimp"}) as session:
+    with session.post(
+        "https://example.com/login",
+        data={"name": "agent"},
+    ) as login:
+        login.raise_for_status()
+        login.type("#code", "123456")
+        login.click("#submit")
+
+    with session.new_page(proxy="socks5h://127.0.0.1:1080") as page:
+        page.get("https://example.com", timeout=30)
+        print(page.evaluate("document.title"))
+        print(page.extract(content_selector="main")["contentMarkdown"])
 ```
 
-`Page.extract()` runs the vendored Defuddle browser bundle against the live,
-post-JavaScript document. It does not create a jsdom document or make another
-network request.
+`request()` and the `get`, `head`, `options`, `delete`, `post`, `put`, and
+`patch` helpers accept query parameters, ordered headers, cookies, Basic Auth,
+form `data`, raw `content`, JSON, redirect controls, a scalar navigation
+timeout, a referrer, and buffered `Multipart` uploads.
+
+The Page stores main-response metadata from its latest navigation:
+`status_code`, `reason`, `url`, `headers`, `content`, `text`, `cookies`,
+`elapsed`, `last_request`, `history`, `http_version`, `downloaded_bytes`,
+`uploaded_bytes`, and `header_bytes`. A later navigation replaces those values
+just as it replaces the document. `html` is different: it serializes the current
+DOM each time it is read.
+
+Module helpers create a private Session owned by the returned Page, so their
+Page context closes that Session. A Page leased from an explicit Session is
+reset and returned by its context or by `page.reset()`. `page.close()` discards
+that native Page; the Session lazily replaces the slot when needed. Released
+wrappers raise `PageReleased`.
 
 Private test and enterprise roots can be trusted without disabling certificate
 or hostname verification:
 
 ```python
 with brimp.Session(ca_bundle="path/to/cacert.pem") as session:
-    response = session.new_page().get("https://internal.example")
+    with session.get("https://internal.example") as page:
+        print(page.status_code)
 ```
 
-Persona JSON uses the versioned schema in [`../../persona/`](../../persona/README.md):
+Persona JSON uses the versioned schema in [`../../persona/`](../../persona/README.md).
+Persona-owned headers and the curl impersonation profile are coherent with the
+JavaScript-visible environment and therefore cannot be changed per request.
 
-```python
-persona_json = open("persona/example.json").read()
-with brimp.Session(persona_json=persona_json) as session:
-    print(session.new_page().get("https://example.com").status_code)
-```
+Heavy browser subsystems remain Session configuration and are disabled by
+default: `enable_worker`, `enable_streaming_networking`, `enable_canvas`,
+`enable_webgl`, `enable_webgpu`, `enable_webaudio`, persistent storage, and
+optional WebAudio system output.
 
-Heavy browser subsystems are page-scoped and disabled by default:
-
-```python
-with brimp.Session(
-    enable_worker=True,
-    enable_streaming_networking=True,
-    enable_canvas=True,
-    enable_webgl=True,
-    enable_webgpu=True,
-    enable_webaudio=True,
-    enable_webaudio_output=True,
-    storage_path="profile/storage",
-) as session:
-    session.new_page().get("https://example.com")
-```
-
-`enable_webaudio=True` keeps real-time graphs device-free.
-`enable_webaudio_output=True` also enables WebAudio and authorizes the system
-audio output device.
-
-See `SUPPORT.md` for the exact tested surface.
+See `SUPPORT.md` for the exact tested surface and intentional differences from
+curl_cffi.
 
 ## Binary wheels
 
-The release workflow produces self-contained CPython 3.10+ ABI3 wheels for:
-
-- manylinux 2.28 x86-64 and ARM64;
-- macOS 11 or newer on Apple silicon; and
-- Windows x86-64.
-
-Run the `Python wheels` workflow manually to exercise all builds without
-publishing. Pushing a `v<project-version>` tag publishes the validated four-wheel
-set through the `pypi` environment and PyPI Trusted Publishing. Source
+Release workflows produce self-contained CPython 3.10+ ABI3 wheels for
+manylinux 2.28 x86-64/ARM64, macOS ARM64, and Windows x86-64. Source
 distributions are intentionally omitted because their native dependency build
 is not self-contained.

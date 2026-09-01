@@ -4,14 +4,57 @@ use web_bindings::BrowsingContext;
 
 const REDIRECT_LIMIT: usize = 20;
 
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct RedirectOptions {
+    pub follow: bool,
+    pub limit: usize,
+}
+
+impl Default for RedirectOptions {
+    fn default() -> Self {
+        Self {
+            follow: true,
+            limit: REDIRECT_LIMIT,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct RedirectHop {
+    pub request: ResourceRequest,
+    pub status: http::StatusCode,
+    pub headers: network::HeaderList,
+    pub url: String,
+}
+
+#[derive(Debug)]
+pub(crate) struct FetchResult {
+    pub response: ResourceResponse,
+    pub request: ResourceRequest,
+    pub history: Vec<RedirectHop>,
+}
+
 /// Applies browser-owned redirect and cookie policy around the transport.
 pub(crate) async fn fetch(
     loader: &dyn ResourceLoader,
     context: &BrowsingContext,
-    mut request: ResourceRequest,
+    request: ResourceRequest,
 ) -> Result<ResourceResponse, NetworkError> {
-    for redirects in 0..=REDIRECT_LIMIT {
+    fetch_with_redirects(loader, context, request, RedirectOptions::default())
+        .await
+        .map(|result| result.response)
+}
+
+pub(crate) async fn fetch_with_redirects(
+    loader: &dyn ResourceLoader,
+    context: &BrowsingContext,
+    mut request: ResourceRequest,
+    options: RedirectOptions,
+) -> Result<FetchResult, NetworkError> {
+    let mut history = Vec::new();
+    for redirects in 0..=options.limit {
         refresh_cookie_header(context, &mut request)?;
+        let sent_request = request.clone();
         let requested_url = request.url.clone();
         let mut response = loader.fetch(request.clone()).await?;
         for cookie in response.headers.get_all(http::header::SET_COOKIE) {
@@ -19,19 +62,34 @@ pub(crate) async fn fetch(
                 context.store_response_cookie(&requested_url, cookie);
             }
         }
-        if !response.status.is_redirection() {
+        if !response.status.is_redirection() || !options.follow {
             response.effective_url = requested_url;
-            return Ok(response);
+            return Ok(FetchResult {
+                response,
+                request: sent_request,
+                history,
+            });
         }
-        if redirects == REDIRECT_LIMIT {
+        if redirects == options.limit {
             return Err(NetworkError::Transport(format!(
-                "redirect limit of {REDIRECT_LIMIT} exceeded"
+                "redirect limit of {} exceeded",
+                options.limit
             )));
         }
         let Some(location) = response.headers.get(http::header::LOCATION) else {
             response.effective_url = requested_url;
-            return Ok(response);
+            return Ok(FetchResult {
+                response,
+                request: sent_request,
+                history,
+            });
         };
+        history.push(RedirectHop {
+            request: sent_request,
+            status: response.status,
+            headers: response.headers.clone(),
+            url: requested_url.clone(),
+        });
         let location = location
             .to_str()
             .map_err(|_| NetworkError::InvalidRequest("redirect Location is not ASCII".into()))?;
@@ -210,6 +268,7 @@ mod tests {
     struct RedirectLoader {
         requests: Mutex<Vec<ResourceRequest>>,
         cross_origin: bool,
+        status: StatusCode,
     }
     #[async_trait]
     impl ResourceLoader for RedirectLoader {
@@ -230,7 +289,7 @@ mod tests {
                     })
                     .unwrap(),
                 );
-                StatusCode::FOUND
+                self.status
             } else {
                 StatusCode::OK
             };
@@ -240,6 +299,7 @@ mod tests {
                 headers,
                 body: b"done".to_vec(),
                 effective_url: request.url,
+                metadata: network::ResponseMetadata::default(),
             })
         }
     }
@@ -249,6 +309,7 @@ mod tests {
         let loader = RedirectLoader {
             requests: Mutex::new(Vec::new()),
             cross_origin: false,
+            status: StatusCode::FOUND,
         };
         let context = BrowsingContext::default();
         let runtime = tokio::runtime::Builder::new_current_thread()
@@ -274,6 +335,7 @@ mod tests {
         let loader = RedirectLoader {
             requests: Mutex::new(Vec::new()),
             cross_origin: true,
+            status: StatusCode::FOUND,
         };
         let context = BrowsingContext::default();
         context.store_response_cookie("https://example.test/", "session=yes; Path=/");
@@ -303,6 +365,110 @@ mod tests {
         assert!(!requests[1].headers.contains_key(http::header::CONTENT_TYPE));
     }
 
+    #[test]
+    fn disabled_redirects_return_the_first_response() {
+        let loader = RedirectLoader {
+            requests: Mutex::new(Vec::new()),
+            cross_origin: false,
+            status: StatusCode::FOUND,
+        };
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let result = runtime
+            .block_on(fetch_with_redirects(
+                &loader,
+                &BrowsingContext::default(),
+                ResourceRequest::get("https://example.test/start"),
+                RedirectOptions {
+                    follow: false,
+                    limit: 0,
+                },
+            ))
+            .unwrap();
+        assert_eq!(result.response.status, StatusCode::FOUND);
+        assert_eq!(result.response.effective_url, "https://example.test/start");
+        assert!(result.history.is_empty());
+        assert_eq!(loader.requests.lock().unwrap().len(), 1);
+    }
+
+    #[test]
+    fn temporary_redirect_preserves_method_and_body() {
+        let loader = RedirectLoader {
+            requests: Mutex::new(Vec::new()),
+            cross_origin: false,
+            status: StatusCode::TEMPORARY_REDIRECT,
+        };
+        let mut request = ResourceRequest::new(Method::PATCH, "https://example.test/start");
+        request.body = Some(b"body".to_vec());
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let result = runtime
+            .block_on(fetch_with_redirects(
+                &loader,
+                &BrowsingContext::default(),
+                request,
+                RedirectOptions {
+                    follow: true,
+                    limit: 1,
+                },
+            ))
+            .unwrap();
+        assert_eq!(result.history.len(), 1);
+        assert_eq!(result.request.method, Method::PATCH);
+        assert_eq!(result.request.body.as_deref(), Some(b"body".as_slice()));
+    }
+
+    #[test]
+    fn redirect_method_rewrites_match_browser_navigation_rules() {
+        let cases = [
+            (StatusCode::MOVED_PERMANENTLY, Method::POST, Method::GET),
+            (StatusCode::MOVED_PERMANENTLY, Method::PUT, Method::PUT),
+            (StatusCode::FOUND, Method::POST, Method::GET),
+            (StatusCode::FOUND, Method::PATCH, Method::PATCH),
+            (StatusCode::SEE_OTHER, Method::DELETE, Method::GET),
+            (StatusCode::SEE_OTHER, Method::HEAD, Method::HEAD),
+            (StatusCode::TEMPORARY_REDIRECT, Method::POST, Method::POST),
+            (StatusCode::PERMANENT_REDIRECT, Method::PATCH, Method::PATCH),
+        ];
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        for (status, method, expected) in cases {
+            let loader = RedirectLoader {
+                requests: Mutex::new(Vec::new()),
+                cross_origin: false,
+                status,
+            };
+            let mut request = ResourceRequest::new(method.clone(), "https://example.test/start");
+            if method != Method::HEAD {
+                request.body = Some(b"body".to_vec());
+            }
+            let result = runtime
+                .block_on(fetch_with_redirects(
+                    &loader,
+                    &BrowsingContext::default(),
+                    request,
+                    RedirectOptions {
+                        follow: true,
+                        limit: 1,
+                    },
+                ))
+                .unwrap();
+            assert_eq!(result.request.method, expected, "status {status}");
+            if expected == Method::GET {
+                assert!(result.request.body.is_none(), "status {status}");
+            } else if expected != Method::HEAD {
+                assert_eq!(
+                    result.request.body.as_deref(),
+                    Some(b"body".as_slice()),
+                    "status {status}"
+                );
+            }
+        }
+    }
+
     struct EndlessRedirect;
     #[async_trait]
     impl ResourceLoader for EndlessRedirect {
@@ -314,6 +480,7 @@ mod tests {
                 headers,
                 body: Vec::new(),
                 effective_url: request.url,
+                metadata: network::ResponseMetadata::default(),
             })
         }
     }
@@ -330,5 +497,18 @@ mod tests {
             ))
             .unwrap_err();
         assert!(error.to_string().contains("redirect limit"));
+
+        let error = runtime
+            .block_on(fetch_with_redirects(
+                &EndlessRedirect,
+                &BrowsingContext::default(),
+                ResourceRequest::get("https://example.test/start"),
+                RedirectOptions {
+                    follow: true,
+                    limit: 2,
+                },
+            ))
+            .unwrap_err();
+        assert!(error.to_string().contains("redirect limit of 2"));
     }
 }

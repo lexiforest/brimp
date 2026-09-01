@@ -6,7 +6,7 @@ use std::sync::{
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
-use network::{HeaderList, ResourceLoader};
+use network::{HeaderList, ResourceLoader, ResourceRequest};
 use serde::Serialize;
 use serde_json::Value;
 use web_bindings::{CookieJar, StoredCookie};
@@ -387,11 +387,29 @@ impl AutomationPage {
         cancellation: CancellationToken,
         headers: Vec<(String, String)>,
     ) -> Result<NavigationResponse, AutomationError> {
+        self.navigate_request("GET", url, timeout, cancellation, headers, None, true, 20)
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn navigate_request(
+        &self,
+        method: impl AsRef<str>,
+        url: impl Into<String>,
+        timeout: Duration,
+        cancellation: CancellationToken,
+        headers: Vec<(String, String)>,
+        body: Option<Vec<u8>>,
+        allow_redirects: bool,
+        max_redirects: usize,
+    ) -> Result<NavigationResponse, AutomationError> {
         if timeout.is_zero() {
             return Err(AutomationError::InvalidInput(
                 "timeout must be positive".into(),
             ));
         }
+        let method = http::Method::from_bytes(method.as_ref().as_bytes()).map_err(|error| {
+            AutomationError::InvalidInput(format!("invalid HTTP method: {error}"))
+        })?;
         let mut request_headers = HeaderList::new();
         for (name, value) in headers {
             let name = name.parse::<http::HeaderName>().map_err(|error| {
@@ -403,10 +421,14 @@ impl AutomationPage {
             request_headers.append(name, value);
         }
         self.request(|response| Command::Navigate {
+            method,
             url: url.into(),
             timeout,
             cancellation,
             headers: request_headers,
+            body,
+            allow_redirects,
+            max_redirects,
             response,
         })?
     }
@@ -509,6 +531,9 @@ impl AutomationPage {
     }
     pub fn text_content(&self) -> Result<String, AutomationError> {
         self.request(|response| Command::Text { response })?
+    }
+    pub fn html(&self) -> Result<String, AutomationError> {
+        self.request(|response| Command::Html { response })?
     }
     pub fn viewport(&self) -> Result<Viewport, AutomationError> {
         self.request(|response| Command::Viewport { response })?
@@ -711,6 +736,9 @@ impl AutomationPage {
     pub fn close(&self) {
         self.control.close();
     }
+    pub fn reset(&self) -> Result<(), AutomationError> {
+        self.request(Command::Reset)?
+    }
     pub fn is_closed(&self) -> bool {
         self.control.closed.load(Ordering::Acquire)
     }
@@ -780,11 +808,16 @@ impl Drop for PageControl {
 }
 
 enum Command {
+    Reset(mpsc::SyncSender<Result<(), AutomationError>>),
     Navigate {
+        method: http::Method,
         url: String,
         timeout: Duration,
         cancellation: CancellationToken,
         headers: HeaderList,
+        body: Option<Vec<u8>>,
+        allow_redirects: bool,
+        max_redirects: usize,
         response: mpsc::SyncSender<Result<NavigationResponse, AutomationError>>,
     },
     Evaluate {
@@ -831,6 +864,9 @@ enum Command {
         response: mpsc::SyncSender<Result<usize, AutomationError>>,
     },
     Text {
+        response: mpsc::SyncSender<Result<String, AutomationError>>,
+    },
+    Html {
         response: mpsc::SyncSender<Result<String, AutomationError>>,
     },
     Viewport {
@@ -922,16 +958,29 @@ fn run_page(
             Err(mpsc::RecvTimeoutError::Disconnected) => break,
         };
         match command {
+            Command::Reset(response) => {
+                let result = page
+                    .reset()
+                    .map_err(|error| AutomationError::JavaScript(error.to_string()));
+                let _ = response.send(result);
+            }
             Command::Navigate {
+                method,
                 url,
                 timeout,
                 cancellation,
                 headers,
+                body,
+                allow_redirects,
+                max_redirects,
                 response,
             } => {
+                let mut request = ResourceRequest::new(method, url);
+                request.headers = headers;
+                request.body = body;
                 let result = runtime.block_on(async {
                     tokio::select! {
-                        result = page.goto_with_headers(&url, headers) => result.map_err(AutomationError::from),
+                        result = page.goto_request(request, allow_redirects, max_redirects) => result.map_err(AutomationError::from),
                         () = wait_for_cancellation(cancellation) => Err(AutomationError::Cancellation),
                         () = tokio::time::sleep(timeout) => Err(AutomationError::Timeout(timeout)),
                     }
@@ -1028,6 +1077,9 @@ fn run_page(
                         })
                     });
                 let _ = response.send(result);
+            }
+            Command::Html { response } => {
+                let _ = response.send(Ok(page.html()));
             }
             Command::Viewport { response } => {
                 let _ = response.send(Ok(page.viewport()));
@@ -1446,7 +1498,10 @@ impl From<NavigationError> for AutomationError {
         match error {
             NavigationError::Network(error) => Self::Transport(error.to_string()),
             NavigationError::HttpStatus(status) => Self::HttpStatus(status),
-            NavigationError::InvalidUrl(error) => Self::InvalidInput(error.to_string()),
+            NavigationError::InvalidUrl(error) => {
+                Self::InvalidInput(format!("invalid URL: {error}"))
+            }
+            NavigationError::InvalidRequest(error) => Self::InvalidInput(error),
             other => Self::Navigation(other.to_string()),
         }
     }

@@ -10,7 +10,7 @@ Choose the package that matches the interface you plan to use.
 Brimp publishes self-contained CPython 3.10+ ABI3 wheels:
 
 ```sh
-python -m pip install brimp
+pip install brimp
 ```
 
 Supported wheel targets are:
@@ -27,7 +27,7 @@ runtime libraries. No separate browser download is required.
 Verify the package:
 
 ```sh
-python -c "import brimp; print(brimp.get('https://example.com').status_code)"
+python -c "import brimp; p=brimp.get('https://example.com'); print(p.status_code); p.close()"
 ```
 
 ## Node.js

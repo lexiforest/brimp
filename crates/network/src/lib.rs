@@ -109,6 +109,15 @@ pub struct ResourceResponse {
     pub headers: HeaderList,
     pub body: Vec<u8>,
     pub effective_url: String,
+    pub metadata: ResponseMetadata,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct ResponseMetadata {
+    pub http_version: Option<String>,
+    pub downloaded_bytes: u64,
+    pub uploaded_bytes: u64,
+    pub header_bytes: u64,
 }
 
 #[derive(Debug, Clone)]

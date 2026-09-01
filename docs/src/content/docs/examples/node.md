@@ -1,6 +1,6 @@
 ---
 title: Node.js examples
-description: Requests-style navigation, extraction, state, screenshots, and cancellation.
+description: Live Page navigation, extraction, state, screenshots, and cancellation.
 ---
 
 ## One request
@@ -9,12 +9,16 @@ description: Requests-style navigation, extraction, state, screenshots, and canc
 const brimp = require('@brimp/brimp')
 
 async function main() {
-  const response = await brimp.get('https://example.com', {
+  const page = await brimp.get('https://example.com', {
     params: { q: ['browser', 'runtime'] },
   })
-  response.raiseForStatus()
-  console.log(response.text)
-  console.log(response.html)
+  try {
+    page.raiseForStatus()
+    console.log(page.text)
+    console.log(page.html)
+  } finally {
+    await page.close()
+  }
 }
 ```
 
@@ -27,9 +31,8 @@ async function main() {
   const session = await createSession()
   try {
     session.headers['X-Client'] = 'brimp'
-    const page = await session.newPage()
-    const response = await page.get('https://example.com')
-    console.log(response.statusCode)
+    const page = await session.get('https://example.com')
+    console.log(page.statusCode)
     console.log(await page.evaluate('document.title'))
     await page.screenshot({ path: 'example.png', fullPage: true })
   } finally {

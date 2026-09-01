@@ -1,115 +1,101 @@
 ---
 title: Node.js API
-description: Reference for the asynchronous @brimp/brimp package.
+description: Asynchronous curl-shaped navigation with a live JavaScript Page.
 ---
 
 ```js
 const brimp = require('@brimp/brimp')
 ```
 
-The Node binding is asynchronous and in process. Pages in one session run
-concurrently while sharing its cookie jar.
+Every request resolves to a live `Page`, not a detached response.
 
-## `brimp.get()`
+## Module helpers
 
-```ts
-get(url: string | URL, options?: SessionOptions & PageOptions & GetOptions): Promise<Response>
+`request`, `get`, `head`, `options`, `delete`, `post`, `put`, and `patch`
+create a private Session and return its owning Page. Always close it:
+
+```js
+const page = await brimp.get('https://example.com')
+try {
+  console.log(page.statusCode, page.text, page.html)
+  await page.click('#continue')
+} finally {
+  await page.close()
+}
 ```
 
-Creates a temporary session, performs one GET navigation, closes the native
-session, and returns a detached response.
+## Session
 
-## `createSession()`
-
-```ts
-createSession(options?: {
-  personaJson?: string
-  caBundle?: string
-  enableWorker?: boolean
-  enableStreamingNetworking?: boolean
-  enableCanvas?: boolean
-  enableWebGL?: boolean
-  enableWebGPU?: boolean
-  enableWebAudio?: boolean
-  enableWebAudioOutput?: boolean
-  storagePath?: string
-  storageQuotaBytes?: number
-}): Promise<Session>
+```js
+const session = await brimp.createSession({
+  headers: { 'X-Agent': 'brimp' },
+  cookies: { manual: 'yes' },
+  auth: ['agent', 'secret'],
+  proxy: 'socks5h://127.0.0.1:1080',
+  timeoutMs: 30_000,
+  allowRedirects: true,
+  maxRedirects: 30,
+})
 ```
 
-Creates one persistent browsing session. `caBundle` trusts private certificate
-authorities without disabling verification. Browser subsystems are disabled by
-default. Supplying `storagePath` enables persistent storage with a 1 GiB default
-quota.
+A Session owns the shared browser context, cookies, direct transport, coherent
+persona, and request defaults. Its request/verb helpers create and return a new
+live Page. `newPage({ proxy })` creates an un-navigated Page whose network scope
+is immutable.
 
-## `Session.newPage()`
+Browser subsystem options include `enableWorker`,
+`enableStreamingNetworking`, `enableCanvas`, `enableWebGL`, `enableWebGPU`,
+`enableWebAudio`, optional system audio output, and persistent storage.
 
-```ts
-session.newPage({ proxy?: string }): Promise<Page>
-```
+## Page navigation
 
-Creates an independently concurrent page. Its direct, HTTP, SOCKS5, or SOCKS5H
-proxy is immutable and covers redirects, subresources, Fetch, workers,
-streaming requests, and WebSockets for the page's lifetime.
-
-## `Page.get()`
-
-```ts
-page.get(url, {
+```js
+await page.request(method, url, {
   params,
+  data,
+  content,
+  json,
+  multipart,
   headers,
   cookies,
-  timeoutMs: 30_000,
+  auth,
+  timeoutMs,
+  allowRedirects,
+  maxRedirects,
+  referer,
   signal,
-}): Promise<Response>
+})
 ```
 
-Performs a GET navigation with a fresh JavaScript realm. Query values may be
-scalars or arrays. Session headers and cookies are merged with request values;
-request values take precedence. Cookies are inserted into the browser-managed
-jar before navigation, so normal scoping and redirect rules apply. `User-Agent` and `Accept-Language` are
-persona-owned. An `AbortSignal` cancels the core operation and network request.
+All verb helpers resolve to the same Page. Form `data`, raw `content`, JSON,
+and explicit `Multipart` bodies are mutually exclusive. GET and HEAD reject
+bodies. AbortSignal cancellation applies to the complete rendered navigation.
 
-## Page utilities
+The Page exposes latest `statusCode`, `reason`, `url`, `headers`, `content`,
+`text`, `html`, `cookies`, `elapsed`, `ok`, `lastRequest`, `history`, and
+`redirectCount`, `httpVersion`, `downloadedBytes`, `uploadedBytes`, and
+`headerBytes`, plus `json()` and `raiseForStatus()`. Awaited evaluation and input
+operations refresh the cached `html` serialization.
 
-```ts
-page.evaluate(source): Promise<unknown>
-page.screenshot({ path?, fullPage? }): Promise<Buffer>
-page.extract({ contentSelector?, removeImages?, language?, debug? }): Promise<ExtractedDocument>
-page.click(selector): Promise<void>
-page.hover(selector): Promise<void>
-page.type(selector, text): Promise<void>
-page.tap(selector): Promise<void>
-page.close(): Promise<void>
-session.close(): Promise<void>
+## Browser operations
+
+```js
+await page.evaluate(source)
+await page.screenshot({ path, fullPage })
+await page.extract({ contentSelector, removeImages, language, debug })
+await page.hover(selector)
+await page.click(selector)
+await page.type(selector, text)
+await page.tap(selector)
 ```
 
-Evaluation returns JSON-compatible values. Screenshots return PNG bytes and
-write the same bytes when `path` is provided. Extraction runs the pinned
-Defuddle browser bundle against the current live DOM and returns content,
-Markdown, and metadata. Input methods hit-test and send
-trusted browser input events; `hover` moves without pressing and `type` focuses the matched control first. A
-missing selector rejects with code `invalid_input`. Closing either level is idempotent;
-operations after close fail with code `closed`.
+## Lifecycle and errors
 
-## `Response`
+`Page.close()` closes one Page; for a module-helper Page it also closes the
+private Session. `Session.close()` closes all Pages and native resources.
 
-| Member | Meaning |
-| --- | --- |
-| `statusCode`, `reason`, `url` | Final response status and URL. |
-| `headers` | Case-insensitive `Headers` collection with `get()`, `getAll()`, and `raw`. |
-| `content`, `text` | Original response `Buffer` and decoded text. |
-| `html` | Post-JavaScript serialized DOM for HTML, otherwise `null`. |
-| `cookies`, `elapsed`, `ok` | Response cookies, elapsed seconds, and status below 400. |
+Errors derive from `RequestError` and carry stable `code` values. `HTTPError`
+exposes the failing live Page as `error.page`.
 
-`response.json()` decodes the response text. `response.raiseForStatus()` throws
-`HTTPError` for 4xx and 5xx responses.
-
-## Errors
-
-All errors derive from `BrimpError` and carry a stable `code`. Specialized
-classes include `ConnectionError`, `Timeout`, `TooManyRedirects`,
-`InvalidRequest`, `InvalidURL`, `HTTPError`, and `JavaScriptError`.
-
-The initial API supports GET only. Use [`brimp cdp`](/api/cdp/) when a
-Puppeteer or Playwright browser/page interface is required.
+Transport fingerprints, persona headers, TLS trust, and proxy affinity are
+scope-level browser decisions rather than arbitrary per-request curl options.

@@ -19,11 +19,26 @@ for (const target of document.querySelectorAll('button,input')) {
 </script>"""
 
 class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
+    def handle_request(self):
         if self.path.startswith("/hang"):
             time.sleep(5)
             return
-        if self.path.startswith("/inspect"):
+        length = int(self.headers.get("Content-Length", 0))
+        request_body = self.rfile.read(length)
+        if self.path.startswith("/redirect"):
+            self.send_response(302)
+            self.send_header("Location", "/final")
+            self.end_headers()
+            return
+        if self.path.startswith("/echo"):
+            body = json.dumps({
+                "method": self.command,
+                "body": request_body.decode(),
+                "contentType": self.headers.get("Content-Type"),
+            }).encode()
+            status = 200
+            content_type = "application/json; charset=utf-8"
+        elif self.path.startswith("/inspect"):
             body = json.dumps({
                 "header": self.headers.get("X-Binding"),
                 "cookie": self.headers.get("Cookie"),
@@ -44,6 +59,12 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Set-Cookie", "server=ready; Path=/")
         self.end_headers()
         self.wfile.write(body)
+    do_GET = handle_request
+    do_POST = handle_request
+    do_PUT = handle_request
+    do_PATCH = handle_request
+    do_DELETE = handle_request
+    do_OPTIONS = handle_request
     def log_message(self, *_): pass
 
 def run(command, env=None):

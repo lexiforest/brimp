@@ -233,6 +233,19 @@ impl Page {
         Ok(())
     }
 
+    /// Replaces the current document and JavaScript realm with a clean,
+    /// unnavigated page while retaining page-scoped transport and persona
+    /// configuration.
+    pub fn reset(&mut self) -> Result<(), JsException> {
+        const BLANK_URL: &str = "about:blank";
+        const BLANK_DOCUMENT: &str = "<!doctype html><html><head></head><body></body></html>";
+        self.browsing_context.set_url(BLANK_URL);
+        self.reset_page_at(BLANK_URL, false)?;
+        self.set_content_at(BLANK_DOCUMENT, Some(BLANK_URL))?;
+        self.load_state = LoadState::Idle;
+        Ok(())
+    }
+
     pub async fn goto(&mut self, url: &str) -> Result<NavigationResponse, NavigationError> {
         self.goto_with_headers(url, HeaderList::new()).await
     }
@@ -242,14 +255,35 @@ impl Page {
         url: &str,
         headers: HeaderList,
     ) -> Result<NavigationResponse, NavigationError> {
-        let started = Instant::now();
-        self.load_state = LoadState::Loading;
         let mut request = self.resource_request(url)?;
         request.headers = headers;
-        let response = match crate::request::fetch(
+        self.goto_request(request, true, 20).await
+    }
+
+    pub async fn goto_request(
+        &mut self,
+        request: ResourceRequest,
+        allow_redirects: bool,
+        max_redirects: usize,
+    ) -> Result<NavigationResponse, NavigationError> {
+        if (request.method == http::Method::GET || request.method == http::Method::HEAD)
+            && request.body.is_some()
+        {
+            return Err(NavigationError::InvalidRequest(format!(
+                "{} navigation cannot have a body",
+                request.method
+            )));
+        }
+        let started = Instant::now();
+        self.load_state = LoadState::Loading;
+        let fetched = match crate::request::fetch_with_redirects(
             self.network_scope.loader.as_ref(),
             &self.browsing_context,
             request,
+            crate::request::RedirectOptions {
+                follow: allow_redirects,
+                limit: max_redirects,
+            },
         )
         .await
         {
@@ -259,6 +293,19 @@ impl Page {
                 return Err(error.into());
             }
         };
+        let request = navigation_request_info(&fetched.request);
+        let history = fetched
+            .history
+            .iter()
+            .map(|hop| NavigationHistoryEntry {
+                status_code: hop.status.as_u16(),
+                reason: hop.status.canonical_reason().unwrap_or_default().to_owned(),
+                url: hop.url.clone(),
+                headers: header_pairs(&hop.headers),
+                request: navigation_request_info(&hop.request),
+            })
+            .collect();
+        let response = fetched.response;
         let cross_origin_isolated = response_is_cross_origin_isolated(&response.headers);
         let status_code = response.status.as_u16();
         let reason = response
@@ -266,16 +313,8 @@ impl Page {
             .canonical_reason()
             .unwrap_or_default()
             .to_owned();
-        let headers = response
-            .headers
-            .iter()
-            .map(|(name, value)| {
-                (
-                    name.as_str().to_owned(),
-                    String::from_utf8_lossy(value.as_bytes()).into_owned(),
-                )
-            })
-            .collect();
+        let headers = header_pairs(&response.headers);
+        let metadata = response.metadata;
         let is_html = response
             .headers
             .get(http::header::CONTENT_TYPE)
@@ -315,7 +354,7 @@ impl Page {
         } else {
             None
         };
-        let cookies = self.browsing_context.cookies_for_url(&effective_url);
+        let cookies = response_cookie_pairs(&response.headers);
         self.load_state = LoadState::Complete;
         Ok(NavigationResponse {
             status_code,
@@ -326,7 +365,17 @@ impl Page {
             html,
             cookies,
             elapsed: started.elapsed(),
+            request,
+            history,
+            http_version: metadata.http_version,
+            downloaded_bytes: metadata.downloaded_bytes,
+            uploaded_bytes: metadata.uploaded_bytes,
+            header_bytes: metadata.header_bytes,
         })
+    }
+
+    pub fn html(&self) -> String {
+        self.document.borrow().outer_html()
     }
 
     pub async fn wait_for_load(&self) -> Result<(), NavigationError> {
@@ -983,6 +1032,7 @@ impl Page {
                         headers,
                         body: response.body.into_bytes(),
                         effective_url: String::new(),
+                        metadata: network::ResponseMetadata::default(),
                     },
                 )),
             )?;
@@ -1475,6 +1525,61 @@ pub struct NavigationResponse {
     pub html: Option<String>,
     pub cookies: Vec<(String, String)>,
     pub elapsed: Duration,
+    pub request: NavigationRequestInfo,
+    pub history: Vec<NavigationHistoryEntry>,
+    pub http_version: Option<String>,
+    pub downloaded_bytes: u64,
+    pub uploaded_bytes: u64,
+    pub header_bytes: u64,
+}
+
+fn header_pairs(headers: &HeaderList) -> Vec<(String, String)> {
+    headers
+        .iter()
+        .map(|(name, value)| {
+            (
+                name.as_str().to_owned(),
+                String::from_utf8_lossy(value.as_bytes()).into_owned(),
+            )
+        })
+        .collect()
+}
+
+fn response_cookie_pairs(headers: &HeaderList) -> Vec<(String, String)> {
+    headers
+        .get_all(http::header::SET_COOKIE)
+        .filter_map(|value| value.to_str().ok())
+        .filter_map(|value| value.split(';').next())
+        .filter_map(|pair| pair.split_once('='))
+        .map(|(name, value)| (name.trim().to_owned(), value.trim().to_owned()))
+        .filter(|(name, _)| !name.is_empty())
+        .collect()
+}
+
+fn navigation_request_info(request: &ResourceRequest) -> NavigationRequestInfo {
+    NavigationRequestInfo {
+        method: request.method.as_str().to_owned(),
+        url: request.url.clone(),
+        headers: header_pairs(&request.headers),
+        body: request.body.clone(),
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct NavigationRequestInfo {
+    pub method: String,
+    pub url: String,
+    pub headers: Vec<(String, String)>,
+    pub body: Option<Vec<u8>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct NavigationHistoryEntry {
+    pub status_code: u16,
+    pub reason: String,
+    pub url: String,
+    pub headers: Vec<(String, String)>,
+    pub request: NavigationRequestInfo,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -1485,6 +1590,8 @@ pub enum NavigationError {
     HttpStatus(u16),
     #[error("invalid resource URL: {0}")]
     InvalidUrl(#[from] url::ParseError),
+    #[error("invalid navigation request: {0}")]
+    InvalidRequest(String),
     #[error("script response is not UTF-8: {0}")]
     InvalidScriptUtf8(#[from] std::string::FromUtf8Error),
     #[error("document query failed: {0}")]

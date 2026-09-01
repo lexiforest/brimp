@@ -51,6 +51,7 @@ impl ResourceLoader for AudioWorkletLoader {
             headers: HeaderList::new(),
             body,
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -103,6 +104,7 @@ impl ResourceLoader for MediaLoader {
             headers,
             body,
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

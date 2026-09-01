@@ -40,6 +40,7 @@ impl ResourceLoader for HtmlLoader {
             headers: HeaderList::new(),
             body: b"<!doctype html><title>storage</title>".to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }
@@ -69,6 +70,7 @@ impl ResourceLoader for WorkerLoader {
             headers: HeaderList::new(),
             body,
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

@@ -20,13 +20,13 @@ fn error(error: AutomationError) -> PyErr {
     PyRuntimeError::new_err(format!("brimp {}: {error}", error.code()))
 }
 
-#[pyclass(name = "_Response", module = "brimp._brimp")]
-struct PyResponse {
+#[pyclass(name = "_NavigationResult", module = "brimp._brimp")]
+struct PyNavigationResult {
     response: NavigationResponse,
 }
 
 #[pymethods]
-impl PyResponse {
+impl PyNavigationResult {
     #[getter]
     fn status_code(&self) -> u16 {
         self.response.status_code
@@ -65,6 +65,82 @@ impl PyResponse {
     #[getter]
     fn elapsed(&self) -> f64 {
         self.response.elapsed.as_secs_f64()
+    }
+
+    #[getter]
+    fn http_version(&self) -> Option<&str> {
+        self.response.http_version.as_deref()
+    }
+
+    #[getter]
+    fn downloaded_bytes(&self) -> u64 {
+        self.response.downloaded_bytes
+    }
+
+    #[getter]
+    fn uploaded_bytes(&self) -> u64 {
+        self.response.uploaded_bytes
+    }
+
+    #[getter]
+    fn header_bytes(&self) -> u64 {
+        self.response.header_bytes
+    }
+
+    #[getter]
+    fn request_method(&self) -> &str {
+        &self.response.request.method
+    }
+
+    #[getter]
+    fn request_url(&self) -> &str {
+        &self.response.request.url
+    }
+
+    #[getter]
+    fn request_headers(&self) -> Vec<(String, String)> {
+        self.response.request.headers.clone()
+    }
+
+    #[getter]
+    fn request_body<'py>(&self, py: Python<'py>) -> Option<Bound<'py, PyBytes>> {
+        self.response
+            .request
+            .body
+            .as_ref()
+            .map(|body| PyBytes::new(py, body))
+    }
+
+    #[getter]
+    #[allow(clippy::type_complexity)]
+    fn history(
+        &self,
+    ) -> Vec<(
+        u16,
+        String,
+        String,
+        Vec<(String, String)>,
+        String,
+        String,
+        Vec<(String, String)>,
+        Option<Vec<u8>>,
+    )> {
+        self.response
+            .history
+            .iter()
+            .map(|entry| {
+                (
+                    entry.status_code,
+                    entry.reason.clone(),
+                    entry.url.clone(),
+                    entry.headers.clone(),
+                    entry.request.method.clone(),
+                    entry.request.url.clone(),
+                    entry.request.headers.clone(),
+                    entry.request.body.clone(),
+                )
+            })
+            .collect()
     }
 }
 
@@ -156,6 +232,74 @@ impl PySession {
         let browser = Arc::clone(&self.browser);
         py.detach(move || browser.close());
     }
+
+    #[allow(clippy::type_complexity)]
+    fn cookies(
+        &self,
+    ) -> Vec<(
+        String,
+        String,
+        String,
+        bool,
+        String,
+        Option<i64>,
+        bool,
+        bool,
+        Option<String>,
+    )> {
+        self.browser
+            .default_context()
+            .cookies()
+            .into_iter()
+            .map(|cookie| {
+                (
+                    cookie.name,
+                    cookie.value,
+                    cookie.domain,
+                    cookie.host_only,
+                    cookie.path,
+                    cookie.expires,
+                    cookie.http_only,
+                    cookie.secure,
+                    cookie.same_site,
+                )
+            })
+            .collect()
+    }
+
+    fn set_cookie(&self, url: String, name: String, value: String) -> PyResult<()> {
+        self.browser
+            .default_context()
+            .set_cookie(&url, &name, &value)
+            .map_err(error)
+    }
+
+    fn store_cookie(&self, url: String, header: String) -> PyResult<()> {
+        self.browser
+            .default_context()
+            .store_cookie(&url, &header)
+            .map_err(error)
+    }
+
+    #[pyo3(signature = (name, url = None, domain = None, path = None))]
+    fn delete_cookies(
+        &self,
+        name: String,
+        url: Option<String>,
+        domain: Option<String>,
+        path: Option<String>,
+    ) {
+        self.browser.default_context().delete_cookies(
+            &name,
+            url.as_deref(),
+            domain.as_deref(),
+            path.as_deref(),
+        );
+    }
+
+    fn clear_cookies(&self) {
+        self.browser.default_context().clear_cookies();
+    }
 }
 
 #[pyclass(name = "_Page", module = "brimp._brimp")]
@@ -166,30 +310,49 @@ struct PyPage {
 
 #[pymethods]
 impl PyPage {
-    #[pyo3(signature = (url, timeout_ms, headers = None, cookies = None))]
-    fn get(
+    #[pyo3(signature = (method, url, timeout_ms, headers = None, cookies = None, body = None, allow_redirects = true, max_redirects = 30))]
+    #[allow(clippy::too_many_arguments)]
+    fn request(
         &self,
         py: Python<'_>,
+        method: String,
         url: String,
         timeout_ms: u64,
         headers: Option<Vec<(String, String)>>,
         cookies: Option<Vec<(String, String)>>,
-    ) -> PyResult<PyResponse> {
+        body: Option<Vec<u8>>,
+        allow_redirects: bool,
+        max_redirects: usize,
+    ) -> PyResult<PyNavigationResult> {
         let page = self.page.clone();
         let context = self.browser.default_context();
         py.detach(move || {
             for (name, value) in cookies.unwrap_or_default() {
                 context.set_cookie(&url, &name, &value).map_err(error)?;
             }
-            page.navigate_with_headers(
+            page.navigate_request(
+                method,
                 url,
                 Duration::from_millis(timeout_ms),
                 CancellationToken::new(),
                 headers.unwrap_or_default(),
+                body,
+                allow_redirects,
+                max_redirects,
             )
-            .map(|response| PyResponse { response })
+            .map(|response| PyNavigationResult { response })
             .map_err(error)
         })
+    }
+
+    fn html(&self, py: Python<'_>) -> PyResult<String> {
+        let page = self.page.clone();
+        py.detach(move || page.html().map_err(error))
+    }
+
+    fn reset(&self, py: Python<'_>) -> PyResult<()> {
+        let page = self.page.clone();
+        py.detach(move || page.reset().map_err(error))
     }
 
     fn evaluate(&self, py: Python<'_>, expression: String) -> PyResult<String> {
@@ -260,7 +423,7 @@ fn _brimp(module: &Bound<'_, PyModule>) -> PyResult<()> {
     let _alignment = unsafe { std::ptr::read_volatile(&raw const NSApp) };
     module.add_class::<PySession>()?;
     module.add_class::<PyPage>()?;
-    module.add_class::<PyResponse>()?;
+    module.add_class::<PyNavigationResult>()?;
     module.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }

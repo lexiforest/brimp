@@ -47,7 +47,15 @@ pub(crate) const CURLOPT_CONNECTTIMEOUT_MS: CurlOption = 156;
 pub(crate) const CURLOPT_CONNECT_ONLY: CurlOption = 141;
 pub(crate) const CURLINFO_EFFECTIVE_URL: CurlInfo = 0x100001;
 pub(crate) const CURLINFO_RESPONSE_CODE: CurlInfo = 0x200002;
+pub(crate) const CURLINFO_HEADER_SIZE: CurlInfo = 0x20000b;
+pub(crate) const CURLINFO_HTTP_VERSION: CurlInfo = 0x20002e;
+pub(crate) const CURLINFO_SIZE_UPLOAD_T: CurlInfo = 0x600007;
+pub(crate) const CURLINFO_SIZE_DOWNLOAD_T: CurlInfo = 0x600008;
+pub(crate) const CURL_HTTP_VERSION_1_0: c_long = 1;
+pub(crate) const CURL_HTTP_VERSION_1_1: c_long = 2;
+pub(crate) const CURL_HTTP_VERSION_2_0: c_long = 3;
 pub(crate) const CURL_HTTP_VERSION_3: c_long = 30;
+pub(crate) const CURL_HTTP_VERSION_3ONLY: c_long = 31;
 static INIT: Once = Once::new();
 unsafe extern "C" {
     fn curl_global_init(flags: c_long) -> CurlCode;
