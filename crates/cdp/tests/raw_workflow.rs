@@ -44,6 +44,7 @@ impl ResourceLoader for FixtureLoader {
             body: b"<!doctype html><title>CDP</title><main style='height:1200px'>Hello CDP</main>"
                 .to_vec(),
             effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
         })
     }
 }

@@ -1,0 +1,338 @@
+---
+title: Quick start
+description: Render your first page with Python, Node.js, the CLI, or Puppeteer.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+
+## Install
+
+Brimp support native Python and Nodejs bindings, CLI usage and Chrome Devtools Protocol(CDP),
+You can install the tools that suits you best.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+```sh
+pip install brimp
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```sh
+npm install @brimp/brimp
+```
+  </TabItem>
+  <TabItem label="CLI">
+```sh
+git clone https://github.com/lexiforest/brimp.git
+cd brimp
+cargo build --release -p brimp-cli
+./target/release/brimp doctor
+```
+  </TabItem>
+  <TabItem label="CDP">
+```sh
+npm install playwright-core
+brimp cdp --bind 127.0.0.1:9222
+```
+  </TabItem>
+</Tabs>
+
+To install the beta version, or build from source, see [install](/install).
+
+## Basic Usage
+
+When using a traditional browser driver, such as Playwright, a lot of boilerplate code
+is needed to fetch a single html page. Brimp takes the other way.
+
+The brimp Python/Nodejs bindings tries to hide the complexity, and offer the simple
+API inspired by Python's `requests`.
+
+However, if you have existing CDP pipelines, just continue using them, unchanged.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+```python
+import brimp
+
+with brimp.get("https://example.com") as page:
+    page.raise_for_status()
+    print(page.status_code)
+    print(page.html)  # current live DOM
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+const brimp = require('@brimp/brimp')
+
+async function main() {
+  const page = await brimp.get('https://example.com')
+  try {
+    page.raiseForStatus()
+    console.log(page.statusCode)
+    console.log(page.html)
+  } finally {
+    await page.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+  <TabItem label="CLI">
+```sh
+brimp get https://example.com --format html
+```
+  </TabItem>
+  <TabItem label="CDP">
+```javascript
+const { chromium } = require('playwright-core')
+
+async function main() {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+  try {
+    const context = browser.contexts()[0] ?? await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('https://example.com')
+    console.log(await page.content())
+  } finally {
+    await browser.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+</Tabs>
+
+For a serious job, ad-hoc fetching is not good enough, we usually use a `Session`,
+brimp provides similar ideas.
+
+Use a session when you need cookies, repeated navigation, evaluation, or a
+screenshot:
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+```python
+import brimp
+
+with brimp.Session() as session:
+    with session.get("https://example.com", timeout=30) as page:
+        print(page.evaluate("document.title"))
+        print(page.extract()["contentMarkdown"])
+        page.evaluate("document.body.insertAdjacentHTML('beforeend', '<input id=name>')")
+        page.hover("h1")
+        page.type("#name", "agent")
+        page.screenshot("example.png", full_page=True)
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+const { createSession } = require('@brimp/brimp')
+
+async function main() {
+  const session = await createSession()
+  try {
+    const page = await session.get('https://example.com', { timeoutMs: 30_000 })
+    try {
+      console.log(await page.evaluate('document.title'))
+      console.log((await page.extract()).contentMarkdown)
+      await page.evaluate("document.body.insertAdjacentHTML('beforeend', '<input id=name>')")
+      await page.hover('h1')
+      await page.type('#name', 'agent')
+      await page.screenshot({ path: 'example.png', fullPage: true })
+    } finally {
+      await page.close()
+    }
+  } finally {
+    await session.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+  <TabItem label="CLI">
+```sh
+brimp get https://example.com --eval 'document.title'
+brimp get https://example.com --format markdown
+brimp get https://example.com --output example.png --full-page
+```
+  </TabItem>
+  <TabItem label="CDP">
+```javascript
+const { chromium } = require('playwright-core')
+
+async function main() {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+  try {
+    const context = browser.contexts()[0] ?? await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('https://example.com')
+    console.log(await page.evaluate(() => document.title))
+    await page.evaluate(() => {
+      document.body.insertAdjacentHTML('beforeend', '<input id="name">')
+    })
+    await page.hover('h1')
+    await page.type('#name', 'agent')
+    await page.screenshot({ path: 'example.png', fullPage: true })
+  } finally {
+    await browser.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+</Tabs>
+
+Unlike requests/curl_cffi or any other simple http client, even a lightweight browser
+like brimp carries a significant resources for each request and response. Use the
+`pool_size` parameter to control the resource limit.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+```python
+import brimp
+
+with brimp.Session(pool_size=8) as session:
+    with session.get("https://example.com", timeout=30) as page:
+        print(page.evaluate("document.title"))
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+const { createSession } = require('@brimp/brimp')
+
+async function main() {
+  const session = await createSession()
+  const urls = Array.from({ length: 32 }, () => 'https://example.com')
+  let next = 0
+
+  async function worker() {
+    while (next < urls.length) {
+      const url = urls[next++]
+      const page = await session.get(url, { timeoutMs: 30_000 })
+      try {
+        console.log(await page.evaluate('document.title'))
+      } finally {
+        await page.close()
+      }
+    }
+  }
+
+  try {
+    await Promise.all(Array.from({ length: 8 }, () => worker()))
+  } finally {
+    await session.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+  <TabItem label="CLI">
+```sh
+brimp crawl https://example.com \
+  --output-dir ./example-crawl \
+  --workers 8 \
+  --max-pages 32
+```
+  </TabItem>
+  <TabItem label="CDP">
+```javascript
+const { chromium } = require('playwright-core')
+
+async function main() {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+  try {
+    const context = browser.contexts()[0] ?? await browser.newContext()
+    const pages = await Promise.all(
+      Array.from({ length: 8 }, () => context.newPage()),
+    )
+    await Promise.all(
+      pages.map(async (page) => {
+        await page.goto('https://example.com')
+        console.log(await page.title())
+        await page.close()
+      }),
+    )
+  } finally {
+    await browser.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+</Tabs>
+
+## Output
+
+As a browser for agents, brimp provide various format of output:
+
+- html, the rendered html content
+- clean_html, rendered html, with non-content tags removed
+- markdown, clean markdown of the main content, perfect for agents to read
+- screenshot, a png of the entire page, for multi-modal agents
+
+
+Capture a full-page screenshot:
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+```python
+import brimp
+
+with brimp.get("https://example.com") as page:
+    page.screenshot("example.png", full_page=True)
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+const brimp = require('@brimp/brimp')
+
+async function main() {
+  const page = await brimp.get('https://example.com')
+  try {
+    await page.screenshot({ path: 'example.png', fullPage: true })
+  } finally {
+    await page.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+  <TabItem label="CLI">
+```sh
+brimp get https://example.com \
+  --output example.png \
+  --full-page
+```
+  </TabItem>
+  <TabItem label="CDP">
+```javascript
+const { chromium } = require('playwright-core')
+
+async function main() {
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
+  try {
+    const context = browser.contexts()[0] ?? await browser.newContext()
+    const page = await context.newPage()
+    await page.goto('https://example.com')
+    await page.screenshot({ path: 'example.png', fullPage: true })
+  } finally {
+    await browser.close()
+  }
+}
+
+main().catch(console.error)
+```
+  </TabItem>
+</Tabs>
+
+## Notes for CDP
+
+The CDP server supports a checked protocol subset. Consult the [CDP API
+reference](/api/cdp/) before adapting a larger Puppeteer workflow.

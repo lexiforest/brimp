@@ -29,3 +29,4 @@ Use TODO.md to track the implementation progress and interact with the user.
 ## Coding
 
 - Use pytest for python testing
+- Prefer playwright over puppeteer in examples and docs

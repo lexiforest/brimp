@@ -475,6 +475,7 @@ impl InterceptionRegistry {
             headers,
             body,
             effective_url,
+            metadata: network::ResponseMetadata::default(),
         }));
         Ok(())
     }
@@ -492,6 +493,7 @@ impl InterceptionRegistry {
                 headers: response.1,
                 body: response.2,
                 effective_url: pending.request.url,
+                metadata: network::ResponseMetadata::default(),
             }));
             return Ok(());
         }
