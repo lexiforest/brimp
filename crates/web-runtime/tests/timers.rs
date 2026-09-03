@@ -1,6 +1,36 @@
 use web_runtime::{Browser, PageOptions};
 
 #[test]
+fn intervals_repeat_until_cleared_and_are_available_in_child_windows() {
+    let browser = Browser::new().unwrap();
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.set_content("<iframe></iframe>").unwrap();
+    page.eval(
+        r#"
+        globalThis.intervalCount = 0;
+        const id = setInterval(() => {
+            intervalCount += 1;
+            if (intervalCount === 2) clearInterval(id);
+        }, 0);
+        globalThis.childIntervals = typeof document.querySelector("iframe").contentWindow.setInterval === "function";
+        "#,
+    )
+    .unwrap();
+
+    for _ in 0..4 {
+        std::thread::sleep(std::time::Duration::from_millis(2));
+        page.run_pending_tasks().unwrap();
+    }
+    assert_eq!(
+        page.eval("`${intervalCount}|${childIntervals}`")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "2|true"
+    );
+}
+
+#[test]
 fn zero_delay_timers_run_on_the_page_owner_thread() {
     let browser = Browser::new().unwrap();
     let mut page = browser.new_page(PageOptions::default()).unwrap();

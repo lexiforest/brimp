@@ -3,6 +3,7 @@
 /docs/.astro
 /docs/dist
 /out.png
+/examples/cli/artifacts/
 **/__pycache__/
 **/node_modules/
 benchmark/**/.tools/

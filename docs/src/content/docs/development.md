@@ -57,6 +57,17 @@ cargo test -p brimp-cli -p brimp-cdp
 python3 bindings/python/test_api.py
 ```
 
+## Pre-commit formatting
+
+Install and enable the repository hook once per checkout:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+The shell hook runs `cargo fmt --all --check` whenever staged Rust files are
+committed.
+
 ## Work on the docs
 
 Install the locked documentation dependencies:

@@ -6,6 +6,20 @@ pub(super) fn dispatch(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "cryptoRandomBytes" => {
+            let length = call
+                .argument(2)
+                .ok_or_else(|| NativeError::new("missing byte length"))?
+                .to_number()?;
+            if !length.is_finite() || length < 0.0 || length.fract() != 0.0 || length > 65_536.0 {
+                return Err(NativeError::new("invalid byte length"));
+            }
+            let mut bytes = vec![0_u8; length as usize];
+            getrandom::fill(&mut bytes).map_err(|error| NativeError::new(error.to_string()))?;
+            Ok(NativeValue::String(
+                serde_json::to_string(&bytes).map_err(err)?,
+            ))
+        }
         "workerCreate" => {
             if !state.features.worker_system {
                 return Err(NativeError::new("worker system is disabled"));
@@ -169,7 +183,7 @@ pub(super) fn dispatch(
                 storage.quota()
             )))
         }
-        "setTimeout" => {
+        "setTimeout" | "setInterval" => {
             let callback = call
                 .argument(2)
                 .ok_or_else(|| NativeError::new("missing timer callback"))?
@@ -179,10 +193,14 @@ pub(super) fn dispatch(
                 .map(|value| value.to_number())
                 .transpose()?
                 .unwrap_or(0.0);
-            let id = state.timers.borrow_mut().schedule(delay, callback);
+            let id =
+                state
+                    .timers
+                    .borrow_mut()
+                    .schedule(delay, operation == "setInterval", callback);
             Ok(NativeValue::Number(f64::from(id)))
         }
-        "clearTimeout" => {
+        "clearTimeout" | "clearInterval" => {
             let id = call
                 .argument(2)
                 .map(|value| value.to_number())
@@ -233,6 +251,12 @@ pub(super) fn dispatch(
                 _ => return Err(NativeError::new("unknown Location property")),
             };
             Ok(NativeValue::String(value))
+        }
+        "locationNavigate" => {
+            let href = required_string(call, 2, "navigation URL")?;
+            url::Url::parse(&href).map_err(err)?;
+            state.browsing_context.request_navigation(href);
+            Ok(NativeValue::Undefined)
         }
         "historyUpdateUrl" => {
             let href = required_string(call, 2, "history URL")?;

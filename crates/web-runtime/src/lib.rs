@@ -2,6 +2,7 @@ mod automation;
 mod blitz_net;
 mod browser;
 mod extraction;
+mod module_script;
 mod page;
 mod request;
 mod task;

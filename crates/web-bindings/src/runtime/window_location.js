@@ -28,6 +28,13 @@ class Text extends CharacterData {
 class Comment extends CharacterData {
     constructor(data = "") { return document.createComment(String(data)); }
 }
+class CDATASection extends Text {
+    constructor() { throw new TypeError("Illegal constructor"); }
+}
+class ProcessingInstruction extends CharacterData {
+    constructor() { throw new TypeError("Illegal constructor"); }
+    get target() { return ""; }
+}
 class DocumentFragment extends Node {
     constructor() { return document.createDocumentFragment(); }
     get children() { return new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element)); }
@@ -66,10 +73,17 @@ Object.defineProperties(Window.prototype, {
     innerWidth: { get() { return __callHost("innerWidth", this); }, enumerable: true, configurable: true },
     innerHeight: { get() { return __callHost("innerHeight", this); }, enumerable: true, configurable: true },
     devicePixelRatio: { get() { return __callHost("devicePixelRatio", this); }, enumerable: true, configurable: true },
+    frames: { get() { return this; }, enumerable: true, configurable: true },
+    length: {
+        get() { return document.getElementsByTagName("iframe").length; },
+        enumerable: true,
+        configurable: true,
+    },
 });
 
 class Location {
     get href() { return __callHost("location", this, "href"); }
+    set href(value) { this.assign(value); }
     get protocol() { return __callHost("location", this, "protocol"); }
     get host() { return __callHost("location", this, "host"); }
     get hostname() { return __callHost("location", this, "hostname"); }
@@ -78,6 +92,13 @@ class Location {
     get search() { return __callHost("location", this, "search"); }
     get hash() { return __callHost("location", this, "hash"); }
     get origin() { return __callHost("location", this, "origin"); }
+    assign(url) {
+        __callHost("locationNavigate", this, new URL(__toUSVString(url), this.href).href);
+    }
+    replace(url) {
+        __callHost("locationNavigate", this, new URL(__toUSVString(url), this.href).href);
+    }
+    reload() { __callHost("locationNavigate", this, this.href); }
     toString() { return this.href; }
 }
 

@@ -6,11 +6,18 @@ globalThis.MutationRecord = MutationRecord;
 globalThis.MutationObserver = MutationObserver;
 globalThis.IntersectionObserverEntry = IntersectionObserverEntry;
 globalThis.IntersectionObserver = IntersectionObserver;
+globalThis.ResizeObserverSize = ResizeObserverSize;
+globalThis.ResizeObserverEntry = ResizeObserverEntry;
+globalThis.ResizeObserver = ResizeObserver;
 globalThis.EventTarget = EventTarget;
 globalThis.Event = Event;
 globalThis.CustomEvent = CustomEvent;
 globalThis.UIEvent = UIEvent;
 globalThis.MouseEvent = MouseEvent;
+globalThis.WheelEvent = WheelEvent;
+globalThis.FocusEvent = FocusEvent;
+globalThis.ProgressEvent = ProgressEvent;
+globalThis.SubmitEvent = SubmitEvent;
 globalThis.KeyboardEvent = KeyboardEvent;
 globalThis.PointerEvent = PointerEvent;
 globalThis.Touch = Touch;
@@ -25,7 +32,9 @@ globalThis.postMessage = postMessage.bind(globalThis);
 globalThis.AbortSignal = AbortSignal;
 globalThis.AbortController = AbortController;
 globalThis.DOMTokenList = DOMTokenList;
+globalThis.DOMStringMap = DOMStringMap;
 globalThis.HTMLCollection = HTMLCollection;
+globalThis.HTMLFormControlsCollection = HTMLFormControlsCollection;
 globalThis.NodeList = NodeList;
 globalThis.NamedNodeMap = NamedNodeMap;
 globalThis.Attr = Attr;
@@ -111,6 +120,8 @@ globalThis.HTMLFontElement = HTMLFontElement;
 globalThis.CharacterData = CharacterData;
 globalThis.Text = Text;
 globalThis.Comment = Comment;
+globalThis.CDATASection = CDATASection;
+globalThis.ProcessingInstruction = ProcessingInstruction;
 globalThis.DocumentFragment = DocumentFragment;
 globalThis.Range = Range;
 globalThis.Selection = Selection;
@@ -122,6 +133,7 @@ globalThis.History = History;
 globalThis.UserActivation = UserActivation;
 globalThis.Lock = Lock;
 globalThis.LockManager = LockManager;
+globalThis.Crypto = Crypto;
 globalThis.DOMRect = DOMRect;
 globalThis.MediaQueryList = MediaQueryList;
 globalThis.MediaQueryListEvent = MediaQueryListEvent;
@@ -154,6 +166,8 @@ function __exposeWebIdl(name, value) {
 }
 
 for (const [constructor, name, members] of [
+    [DOMStringMap, "DOMStringMap", []],
+    [DOMImplementation, "DOMImplementation", ["hasFeature", "createHTMLDocument"]],
     [FormData, "FormData", ["append", "delete", "get", "getAll", "has", "set", "entries", "keys", "values", "forEach"]],
     [History, "History", ["length", "state", "scrollRestoration", "pushState", "replaceState", "go", "back", "forward"]],
     [PopStateEvent, "PopStateEvent", ["state", "hasUAVisualTransition"]],
@@ -188,12 +202,233 @@ for (const [constructor, name, members] of [
 __exposeWebIdl("CSS", CSS);
 
 const __performanceTimeOrigin = Date.now();
+const __performanceEntries = [];
+const __performanceObservers = new Set();
+const __performanceEntryToken = {};
+class PerformanceEntry {
+    constructor(token, name, entryType, startTime, duration) {
+        if (token !== __performanceEntryToken) throw new TypeError("Illegal constructor");
+        this.__name = name;
+        this.__entryType = entryType;
+        this.__startTime = startTime;
+        this.__duration = duration;
+    }
+    get name() { return this.__name; }
+    get entryType() { return this.__entryType; }
+    get startTime() { return this.__startTime; }
+    get duration() { return this.__duration; }
+    toJSON() {
+        return { name: this.name, entryType: this.entryType, startTime: this.startTime, duration: this.duration };
+    }
+}
+class PerformanceMark extends PerformanceEntry {
+    constructor(token, name, startTime, detail) {
+        if (token !== __performanceEntryToken) throw new TypeError("Illegal constructor");
+        super(token, name, "mark", startTime, 0);
+        this.__detail = detail;
+    }
+    get detail() { return this.__detail; }
+    toJSON() { return { ...super.toJSON(), detail: this.detail }; }
+}
+class PerformanceMeasure extends PerformanceEntry {
+    constructor(token, name, startTime, duration, detail) {
+        if (token !== __performanceEntryToken) throw new TypeError("Illegal constructor");
+        super(token, name, "measure", startTime, duration);
+        this.__detail = detail;
+    }
+    get detail() { return this.__detail; }
+    toJSON() { return { ...super.toJSON(), detail: this.detail }; }
+}
+class PerformanceObserverEntryList {
+    constructor(entries) { this.__entries = entries; }
+    getEntries() { return this.__entries.slice(); }
+    getEntriesByType(type) {
+        type = String(type);
+        return this.__entries.filter(entry => entry.entryType === type);
+    }
+    getEntriesByName(name, type) {
+        name = String(name);
+        return this.__entries.filter(entry => entry.name === name &&
+            (type === undefined || entry.entryType === String(type)));
+    }
+}
+class PerformanceObserver {
+    constructor(callback) {
+        if (typeof callback !== "function") throw new TypeError("callback must be a function");
+        this.__callback = callback;
+        this.__entryTypes = new Set();
+        this.__records = [];
+        this.__scheduled = false;
+    }
+    observe(options = {}) {
+        if (options === null || typeof options !== "object") throw new TypeError("options must be an object");
+        const types = options.entryTypes === undefined
+            ? (options.type === undefined ? [] : [String(options.type)])
+            : Array.from(options.entryTypes, String);
+        if (!types.length) throw new TypeError("an entry type is required");
+        this.__entryTypes = new Set(types);
+        __performanceObservers.add(this);
+        if (options.buffered) {
+            for (const entry of __performanceEntries) {
+                if (this.__entryTypes.has(entry.entryType)) this.__records.push(entry);
+            }
+            this.__schedule();
+        }
+    }
+    disconnect() {
+        __performanceObservers.delete(this);
+        this.__entryTypes.clear();
+        this.__records.length = 0;
+        this.__scheduled = false;
+    }
+    takeRecords() { return this.__records.splice(0); }
+    __enqueue(entry) {
+        if (!this.__entryTypes.has(entry.entryType)) return;
+        this.__records.push(entry);
+        this.__schedule();
+    }
+    __schedule() {
+        if (this.__scheduled || !this.__records.length) return;
+        this.__scheduled = true;
+        queueMicrotask(() => {
+            this.__scheduled = false;
+            const records = this.takeRecords();
+            if (records.length) this.__callback(new PerformanceObserverEntryList(records), this);
+        });
+    }
+    static get supportedEntryTypes() { return ["mark", "measure"]; }
+}
+const __queuePerformanceEntry = entry => {
+    __performanceEntries.push(entry);
+    for (const observer of __performanceObservers) observer.__enqueue(entry);
+    return entry;
+};
+class PerformanceTiming {
+    get navigationStart() { return __performanceTimeOrigin; }
+    get unloadEventStart() { return 0; }
+    get unloadEventEnd() { return 0; }
+    get redirectStart() { return 0; }
+    get redirectEnd() { return 0; }
+    get fetchStart() { return __performanceTimeOrigin; }
+    get domainLookupStart() { return __performanceTimeOrigin; }
+    get domainLookupEnd() { return __performanceTimeOrigin; }
+    get connectStart() { return __performanceTimeOrigin; }
+    get connectEnd() { return __performanceTimeOrigin; }
+    get secureConnectionStart() { return __performanceTimeOrigin; }
+    get requestStart() { return __performanceTimeOrigin; }
+    get responseStart() { return __performanceTimeOrigin; }
+    get responseEnd() { return __performanceTimeOrigin; }
+    get domLoading() { return __performanceTimeOrigin; }
+    get domInteractive() { return __performanceTimeOrigin; }
+    get domContentLoadedEventStart() { return __performanceTimeOrigin; }
+    get domContentLoadedEventEnd() { return __performanceTimeOrigin; }
+    get domComplete() { return __performanceTimeOrigin; }
+    get loadEventStart() { return __performanceTimeOrigin; }
+    get loadEventEnd() { return __performanceTimeOrigin; }
+    toJSON() {
+        const result = {};
+        for (const name of Object.getOwnPropertyNames(PerformanceTiming.prototype)) {
+            if (name !== "constructor" && name !== "toJSON") result[name] = this[name];
+        }
+        return result;
+    }
+}
+const __performanceTiming = new PerformanceTiming();
 class Performance extends EventTarget {
     now() { return Math.max(0, Date.now() - __performanceTimeOrigin); }
     get timeOrigin() { return __performanceTimeOrigin; }
+    get timing() { return __performanceTiming; }
+    getEntries() { return __performanceEntries.slice(); }
+    getEntriesByType(type) {
+        type = String(type);
+        return __performanceEntries.filter(entry => entry.entryType === type);
+    }
+    getEntriesByName(name, type) {
+        name = String(name);
+        return __performanceEntries.filter(entry => entry.name === name &&
+            (type === undefined || entry.entryType === String(type)));
+    }
+    mark(name, options = {}) {
+        name = String(name);
+        const startTime = options.startTime === undefined ? this.now() : Number(options.startTime);
+        if (!Number.isFinite(startTime) || startTime < 0) throw new TypeError("startTime must be non-negative");
+        const entry = new PerformanceMark(__performanceEntryToken, name, startTime, options.detail ?? null);
+        return __queuePerformanceEntry(entry);
+    }
+    clearMarks(name) {
+        const selected = name === undefined ? null : String(name);
+        for (let index = __performanceEntries.length - 1; index >= 0; index--) {
+            const entry = __performanceEntries[index];
+            if (entry.entryType === "mark" && (selected === null || entry.name === selected)) {
+                __performanceEntries.splice(index, 1);
+            }
+        }
+    }
+    measure(name, startOrOptions, endMark) {
+        name = String(name);
+        const resolve = value => {
+            if (value === undefined) return 0;
+            if (typeof value === "number") return value;
+            const entries = this.getEntriesByName(String(value), "mark");
+            if (!entries.length) throw new DOMException(`The mark '${value}' does not exist`, "SyntaxError");
+            return entries[entries.length - 1].startTime;
+        };
+        let startTime;
+        let endTime;
+        let detail = null;
+        if (startOrOptions !== null && typeof startOrOptions === "object") {
+            startTime = resolve(startOrOptions.start);
+            endTime = startOrOptions.duration === undefined
+                ? (startOrOptions.end === undefined ? this.now() : resolve(startOrOptions.end))
+                : startTime + Number(startOrOptions.duration);
+            detail = startOrOptions.detail ?? null;
+        } else {
+            startTime = resolve(startOrOptions);
+            endTime = endMark === undefined ? this.now() : resolve(endMark);
+        }
+        if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) {
+            throw new TypeError("invalid performance measure range");
+        }
+        const entry = new PerformanceMeasure(
+            __performanceEntryToken, name, startTime, endTime - startTime, detail,
+        );
+        return __queuePerformanceEntry(entry);
+    }
+    clearMeasures(name) {
+        const selected = name === undefined ? null : String(name);
+        for (let index = __performanceEntries.length - 1; index >= 0; index--) {
+            const entry = __performanceEntries[index];
+            if (entry.entryType === "measure" && (selected === null || entry.name === selected)) {
+                __performanceEntries.splice(index, 1);
+            }
+        }
+    }
     toJSON() { return { timeOrigin: this.timeOrigin }; }
 }
-globalThis.Performance = Performance;
+for (const [constructor, name, members] of [
+    [PerformanceEntry, "PerformanceEntry", ["name", "entryType", "startTime", "duration", "toJSON"]],
+    [PerformanceMark, "PerformanceMark", ["detail", "toJSON"]],
+    [PerformanceMeasure, "PerformanceMeasure", ["detail", "toJSON"]],
+    [PerformanceObserverEntryList, "PerformanceObserverEntryList", [
+        "getEntries", "getEntriesByType", "getEntriesByName",
+    ]],
+    [PerformanceObserver, "PerformanceObserver", ["observe", "disconnect", "takeRecords"]],
+    [PerformanceTiming, "PerformanceTiming", [
+        "navigationStart", "unloadEventStart", "unloadEventEnd", "redirectStart", "redirectEnd",
+        "fetchStart", "domainLookupStart", "domainLookupEnd", "connectStart", "connectEnd",
+        "secureConnectionStart", "requestStart", "responseStart", "responseEnd", "domLoading",
+        "domInteractive", "domContentLoadedEventStart", "domContentLoadedEventEnd", "domComplete",
+        "loadEventStart", "loadEventEnd", "toJSON",
+    ]],
+    [Performance, "Performance", [
+        "now", "timeOrigin", "timing", "getEntries", "getEntriesByType", "getEntriesByName",
+        "mark", "clearMarks", "measure", "clearMeasures", "toJSON",
+    ]],
+]) {
+    __makeWebIdlMembersEnumerable(constructor.prototype, members);
+    __tagWebIdlPrototype(constructor, name);
+    __exposeWebIdl(name, constructor);
+}
 globalThis.performance = new Performance();
 
 globalThis.window = globalThis;
@@ -225,6 +460,8 @@ globalThis.getSelection = () => __selection;
 globalThis.matchMedia = matchMedia;
 globalThis.setTimeout = (callback, delay = 0) => __callHost("setTimeout", window, callback, delay);
 globalThis.clearTimeout = id => __callHost("clearTimeout", window, id);
+globalThis.setInterval = (callback, delay = 0) => __callHost("setInterval", window, callback, delay);
+globalThis.clearInterval = id => __callHost("clearInterval", window, id);
 globalThis.queueMicrotask = callback => __callHost("queueMicrotask", window, callback);
 let __nextAnimationFrameId = 1;
 let __animationFrameScheduled = false;
@@ -249,6 +486,8 @@ globalThis.requestAnimationFrame = callback => {
 globalThis.cancelAnimationFrame = id => { __animationFrameCallbacks.delete(Number(id)); };
 window.setTimeout = globalThis.setTimeout;
 window.clearTimeout = globalThis.clearTimeout;
+window.setInterval = globalThis.setInterval;
+window.clearInterval = globalThis.clearInterval;
 window.queueMicrotask = globalThis.queueMicrotask;
 window.requestAnimationFrame = globalThis.requestAnimationFrame;
 window.cancelAnimationFrame = globalThis.cancelAnimationFrame;
@@ -270,7 +509,7 @@ for (const name of Object.getOwnPropertyNames(globalThis)) {
 }
 for (const name of [
     "atob", "btoa", "fetch", "postMessage", "getComputedStyle", "getSelection",
-    "setTimeout", "clearTimeout", "queueMicrotask", "requestAnimationFrame", "matchMedia",
+    "setTimeout", "clearTimeout", "setInterval", "clearInterval", "queueMicrotask", "requestAnimationFrame", "matchMedia",
     "cancelAnimationFrame", "addEventListener", "removeEventListener", "dispatchEvent",
 ]) {
     __markWebBuiltin(globalThis[name], `function ${name}() { [native code] }`);

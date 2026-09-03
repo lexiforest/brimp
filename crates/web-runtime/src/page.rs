@@ -1,6 +1,6 @@
 use std::{
     cell::{Ref, RefCell, RefMut},
-    collections::{BTreeMap, HashMap},
+    collections::{BTreeMap, HashMap, HashSet, VecDeque},
     path::{Path, PathBuf},
     rc::Rc,
     sync::{
@@ -28,6 +28,8 @@ use crate::{
     worker::{ServiceWorkerResponse, WorkerCoordinator, WorkerRealm},
 };
 
+type ConsoleCallback = Rc<dyn Fn(&str)>;
+
 pub struct Page {
     // Bindings must drop before `js`, because their objects are protected in that context.
     bindings: BindingRuntime,
@@ -48,6 +50,7 @@ pub struct Page {
     persona: persona::ResolvedPersona,
     subsystems: BrowserSubsystemOptions,
     navigator_identity_override: Option<String>,
+    console_callback: Option<ConsoleCallback>,
     preload_scripts: Vec<(String, String)>,
     worker_queue: Rc<RefCell<WorkerQueue>>,
     workers: HashMap<u64, WorkerInstance>,
@@ -56,6 +59,7 @@ pub struct Page {
     websockets: HashMap<u64, network::WebSocketHandle>,
     fetch_streams: RefCell<HashMap<u64, network::ResourceStreamHandle>>,
     service_worker: Option<(u64, String)>,
+    script_execution_deadline: Option<Instant>,
 }
 
 #[derive(Clone)]
@@ -150,6 +154,7 @@ impl Page {
             persona: options.persona,
             subsystems: options.subsystems,
             navigator_identity_override: None,
+            console_callback: None,
             preload_scripts: Vec::new(),
             worker_queue,
             workers: HashMap::new(),
@@ -158,6 +163,7 @@ impl Page {
             websockets: HashMap::new(),
             fetch_streams: RefCell::new(HashMap::new()),
             service_worker: None,
+            script_execution_deadline: None,
         })
     }
 
@@ -191,6 +197,9 @@ impl Page {
         *self.document.borrow_mut() = document;
         self.document_ready = false;
         let js = JsRuntime::new()?;
+        if let Some(deadline) = self.script_execution_deadline {
+            js.set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+        }
         let timers = Rc::new(RefCell::new(TimerQueue::default()));
         let fetches = Rc::new(RefCell::new(FetchQueue::default()));
         let worker_queue = Rc::new(RefCell::new(WorkerQueue::default()));
@@ -218,11 +227,13 @@ impl Page {
         if let Some(identity_override) = &self.navigator_identity_override {
             js.call_function_with_string(&persona_identity_setter, identity_override)?;
         }
+        if let Some(callback) = self.console_callback.clone() {
+            js.set_console_callback(move |message| callback(message))?;
+        }
 
         self.bindings = bindings;
         self.persona_identity_setter = persona_identity_setter;
         self.defuddle_extractor = None;
-        self.js = js;
         self.timers = timers;
         self.fetches = fetches;
         self.worker_queue = worker_queue;
@@ -230,7 +241,21 @@ impl Page {
         self.service_worker = None;
         self.tasks = TaskQueue::default();
         self.async_error = None;
+        self.js = js;
         Ok(())
+    }
+
+    pub(crate) fn set_script_execution_deadline(&mut self, timeout: Duration) {
+        self.script_execution_deadline = Instant::now().checked_add(timeout);
+        if let Some(deadline) = self.script_execution_deadline {
+            self.js
+                .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+        }
+    }
+
+    pub(crate) fn clear_script_execution_deadline(&mut self) {
+        self.js.clear_execution_time_limit();
+        self.script_execution_deadline = None;
     }
 
     /// Replaces the current document and JavaScript realm with a clean,
@@ -239,6 +264,7 @@ impl Page {
     pub fn reset(&mut self) -> Result<(), JsException> {
         const BLANK_URL: &str = "about:blank";
         const BLANK_DOCUMENT: &str = "<!doctype html><html><head></head><body></body></html>";
+        let _ = self.browsing_context.take_pending_navigation();
         self.browsing_context.set_url(BLANK_URL);
         self.reset_page_at(BLANK_URL, false)?;
         self.set_content_at(BLANK_DOCUMENT, Some(BLANK_URL))?;
@@ -349,13 +375,18 @@ impl Page {
                 "document.dispatchEvent(new Event('DOMContentLoaded'));\
                  window.dispatchEvent(new Event('load'));",
             );
+            self.process_dynamic_scripts().await;
             let _ = self.run_pending_tasks();
+            self.process_dynamic_scripts().await;
             Some(self.document.borrow().outer_html())
         } else {
             None
         };
         let cookies = response_cookie_pairs(&response.headers);
         self.load_state = LoadState::Complete;
+        if let Some(destination) = self.browsing_context.take_pending_navigation() {
+            return Box::pin(self.goto(&destination)).await;
+        }
         Ok(NavigationResponse {
             status_code,
             reason,
@@ -427,6 +458,7 @@ impl Page {
         let mut deferred_order = Vec::new();
         let mut pending_loads = tokio::task::JoinSet::new();
         let mut loaded_deferred = BTreeMap::new();
+        let mut module_scripts = Vec::new();
 
         loop {
             let progress = parser.resume();
@@ -446,24 +478,41 @@ impl Page {
             let Some(script) = self.script_from_node(node_id, order) else {
                 continue;
             };
+            if script.kind == ScriptKind::Module {
+                module_scripts.push(script);
+                continue;
+            }
             match (script.mode, script.source) {
                 (ScriptMode::Blocking, ScriptSource::Inline(source)) => {
                     self.process_blitz_resources().await;
-                    self.execute_page_script(&source);
+                    self.execute_document_script(&source, script.order);
                 }
                 (ScriptMode::Blocking, ScriptSource::External(src)) => {
                     self.process_blitz_resources().await;
-                    let script_url = base_url.join(&src)?;
-                    let source =
-                        String::from_utf8(self.fetch_success(script_url.as_str()).await?.body)?;
-                    self.execute_page_script(&source);
+                    let result = async {
+                        let script_url = base_url.join(&src)?;
+                        let response = self.fetch_success(script_url.as_str()).await?;
+                        Ok::<_, NavigationError>(String::from_utf8(response.body)?)
+                    }
+                    .await;
+                    match result {
+                        Ok(source) => self.execute_document_script(&source, script.order),
+                        Err(error) => self.report_script_load_error(&src, &error),
+                    }
                 }
                 (mode, ScriptSource::External(src)) => {
                     if mode == ScriptMode::Defer {
                         deferred_order.push(script.order);
                     }
-                    let script_url = base_url.join(&src)?.to_string();
+                    let script_url = match base_url.join(&src) {
+                        Ok(url) => url.to_string(),
+                        Err(error) => {
+                            self.report_script_load_error(&src, &error.into());
+                            continue;
+                        }
+                    };
                     let request = self.resource_request(&script_url)?;
+                    let source = script_url.clone();
                     let loader = Arc::clone(&self.network_scope.loader);
                     let browsing_context = Arc::clone(&self.browsing_context);
                     pending_loads.spawn(async move {
@@ -473,6 +522,7 @@ impl Page {
                         LoadedScript {
                             order: script.order,
                             mode,
+                            source,
                             result,
                         }
                     });
@@ -492,6 +542,34 @@ impl Page {
             self.handle_loaded_script(result?, &mut loaded_deferred)?;
             self.execute_ready_deferred(&deferred_order, &mut next_deferred, &mut loaded_deferred)?;
         }
+        for script in module_scripts {
+            let result = match script.source {
+                ScriptSource::Inline(source) => {
+                    let url = format!("{document_url}#inline-module-{}", script.order);
+                    self.load_and_execute_module(url, source).await
+                }
+                ScriptSource::External(source) => {
+                    let url = match base_url.join(&source) {
+                        Ok(url) => url.to_string(),
+                        Err(error) => {
+                            self.report_script_load_error(&source, &error.into());
+                            continue;
+                        }
+                    };
+                    match self.fetch_success(&url).await {
+                        Ok(response) => match String::from_utf8(response.body) {
+                            Ok(body) => self.load_and_execute_module(url, body).await,
+                            Err(error) => Err(error.to_string()),
+                        },
+                        Err(error) => Err(error.to_string()),
+                    }
+                }
+            };
+            if let Err(error) = result {
+                self.report_page_script_error(&JsException::from_message(error));
+            }
+        }
+        self.process_dynamic_scripts().await;
         Ok(())
     }
 
@@ -503,35 +581,146 @@ impl Page {
             .unwrap_or_default()
             .trim()
             .to_ascii_lowercase();
-        if !matches!(
-            script_type.as_str(),
-            "" | "text/javascript" | "application/javascript"
-        ) {
-            return None;
-        }
+        let kind = match script_type.as_str() {
+            "" | "text/javascript" | "application/javascript" => ScriptKind::Classic,
+            "module" => ScriptKind::Module,
+            _ => return None,
+        };
         let source = match node.attr(blitz_dom::local_name!("src")) {
             Some(src) => ScriptSource::External(src.to_owned()),
             None => ScriptSource::Inline(node.text_content()),
         };
-        let mode = match source {
-            ScriptSource::Inline(_) => ScriptMode::Blocking,
-            ScriptSource::External(_)
+        let mode = match (kind, &source) {
+            (ScriptKind::Module, _) if node.attr(blitz_dom::LocalName::from("async")).is_some() => {
+                ScriptMode::Async
+            }
+            (ScriptKind::Module, _) => ScriptMode::Defer,
+            (ScriptKind::Classic, ScriptSource::Inline(_)) => ScriptMode::Blocking,
+            (ScriptKind::Classic, ScriptSource::External(_))
                 if node.attr(blitz_dom::LocalName::from("async")).is_some() =>
             {
                 ScriptMode::Async
             }
-            ScriptSource::External(_)
+            (ScriptKind::Classic, ScriptSource::External(_))
                 if node.attr(blitz_dom::LocalName::from("defer")).is_some() =>
             {
                 ScriptMode::Defer
             }
-            ScriptSource::External(_) => ScriptMode::Blocking,
+            (ScriptKind::Classic, ScriptSource::External(_)) => ScriptMode::Blocking,
         };
         Some(Script {
             order,
             source,
             mode,
+            kind,
         })
+    }
+
+    async fn load_and_execute_module(
+        &self,
+        root_url: String,
+        root_source: String,
+    ) -> Result<(), String> {
+        self.js
+            .eval(MODULE_LOADER_RUNTIME)
+            .map_err(|error| error.message().to_owned())?;
+
+        let mut pending = VecDeque::from([(root_url.clone(), root_source)]);
+        let mut seen = HashSet::new();
+        while let Some((module_url, source)) = pending.pop_front() {
+            if !seen.insert(module_url.clone()) {
+                continue;
+            }
+            let compiled = crate::module_script::compile(&source, &module_url)?;
+            for specifier in &compiled.dependencies {
+                let dependency_url = resolve_module_specifier(&module_url, specifier)?;
+                if seen.contains(&dependency_url) {
+                    continue;
+                }
+                let response = self
+                    .fetch_success(&dependency_url)
+                    .await
+                    .map_err(|error| error.to_string())?;
+                let source = String::from_utf8(response.body).map_err(|error| error.to_string())?;
+                pending.push_back((dependency_url, source));
+            }
+            let module_url =
+                serde_json::to_string(&module_url).map_err(|error| error.to_string())?;
+            let code = serde_json::to_string(&compiled.code).map_err(|error| error.to_string())?;
+            self.js
+                .eval(&format!(
+                    "globalThis.__brimpModuleLoader.register({module_url}, {code})"
+                ))
+                .map_err(|error| error.message().to_owned())?;
+        }
+
+        let root_url = serde_json::to_string(&root_url).map_err(|error| error.to_string())?;
+        self.execute_page_script(&format!(
+            "globalThis.__brimpModuleLoader.evaluate({root_url})"
+        ));
+        Ok(())
+    }
+
+    pub(crate) async fn process_dynamic_scripts(&self) {
+        loop {
+            let serialized = match self.js.eval("__brimpTakeDynamicScripts()") {
+                Ok(value) => value.to_string().unwrap_or_else(|_| "[]".to_owned()),
+                Err(error) => {
+                    self.report_page_script_error(&error);
+                    return;
+                }
+            };
+            let pending: Vec<DynamicScript> = match serde_json::from_str(&serialized) {
+                Ok(pending) => pending,
+                Err(error) => {
+                    self.report_page_script_error(&JsException::from_message(error.to_string()));
+                    return;
+                }
+            };
+            if pending.is_empty() {
+                return;
+            }
+            for script in pending {
+                let result = match (script.module, script.src) {
+                    (true, Some(url)) => match self.fetch_success(&url).await {
+                        Ok(response) => match String::from_utf8(response.body) {
+                            Ok(source) => self.load_and_execute_module(url, source).await,
+                            Err(error) => Err(error.to_string()),
+                        },
+                        Err(error) => Err(error.to_string()),
+                    },
+                    (true, None) => {
+                        let base = self
+                            .browsing_context
+                            .current_url()
+                            .unwrap_or_else(|| "about:blank".to_owned());
+                        self.load_and_execute_module(
+                            format!("{base}#dynamic-module-{}", script.id),
+                            script.source,
+                        )
+                        .await
+                    }
+                    (false, Some(url)) => match self.fetch_success(&url).await {
+                        Ok(response) => String::from_utf8(response.body)
+                            .map(|source| self.execute_dynamic_script(&source, script.id))
+                            .map_err(|error| error.to_string()),
+                        Err(error) => Err(error.to_string()),
+                    },
+                    (false, None) => {
+                        self.execute_dynamic_script(&script.source, script.id);
+                        Ok(())
+                    }
+                };
+                if let Err(error) = &result {
+                    self.report_page_script_error(&JsException::from_message(error.clone()));
+                }
+                self.execute_page_script(&format!(
+                    "__brimpCompleteDynamicScript({}, {})",
+                    script.id,
+                    result.is_err()
+                ));
+            }
+        }
     }
 
     fn handle_loaded_script(
@@ -539,11 +728,29 @@ impl Page {
         loaded: LoadedScript,
         deferred: &mut BTreeMap<usize, String>,
     ) -> Result<(), NavigationError> {
-        let response = self.accept_success_response(loaded.result?)?;
-        let source = String::from_utf8(response.body)?;
+        let response = match loaded.result {
+            Ok(response) => match self.accept_success_response(response) {
+                Ok(response) => response,
+                Err(error) => {
+                    self.report_script_load_error(&loaded.source, &error);
+                    return Ok(());
+                }
+            },
+            Err(error) => {
+                self.report_script_load_error(&loaded.source, &error.into());
+                return Ok(());
+            }
+        };
+        let source = match String::from_utf8(response.body) {
+            Ok(source) => source,
+            Err(error) => {
+                self.report_script_load_error(&loaded.source, &error.into());
+                return Ok(());
+            }
+        };
         match loaded.mode {
             ScriptMode::Async => {
-                self.execute_page_script(&source);
+                self.execute_document_script(&source, loaded.order);
             }
             ScriptMode::Defer => {
                 deferred.insert(loaded.order, source);
@@ -562,17 +769,65 @@ impl Page {
         while let Some(script_order) = order.get(*next)
             && let Some(source) = loaded.remove(script_order)
         {
-            self.execute_page_script(&source);
+            self.execute_document_script(&source, *script_order);
             *next += 1;
         }
         Ok(())
     }
 
     fn execute_page_script(&self, source: &str) {
+        self.execute_page_script_with_current(source, None);
+    }
+
+    fn execute_document_script(&self, source: &str, index: usize) {
+        self.execute_page_script_with_current(
+            source,
+            Some(format!("__brimpSetCurrentScriptByIndex({index})")),
+        );
+    }
+
+    fn execute_dynamic_script(&self, source: &str, id: u64) {
+        self.execute_page_script_with_current(
+            source,
+            Some(format!("__brimpSetCurrentDynamicScript({id})")),
+        );
+    }
+
+    fn execute_page_script_with_current(&self, source: &str, current: Option<String>) {
         let _ = self.bindings.sync_window_named_properties(&self.js);
-        let _ = self.js.eval(source);
-        let _ = self.perform_microtask_checkpoint();
-        let _ = self.start_pending_fetches();
+        if let Some(current) = current.as_deref()
+            && let Err(error) = self.js.eval(current)
+        {
+            self.report_page_script_error(&error);
+        }
+        let result = self.js.eval(source);
+        if current.is_some()
+            && let Err(error) = self.js.eval("__brimpClearCurrentScript()")
+        {
+            self.report_page_script_error(&error);
+        }
+        if let Err(error) = result {
+            self.report_page_script_error(&error);
+        }
+        if let Err(error) = self.perform_microtask_checkpoint() {
+            self.report_page_script_error(&error);
+        }
+        if let Err(error) = self.start_pending_fetches() {
+            self.report_page_script_error(&error);
+        }
+    }
+
+    fn report_page_script_error(&self, error: &JsException) {
+        let Ok(message) = serde_json::to_string(error.message()) else {
+            return;
+        };
+        let _ = self.js.eval(&format!("console.error({message})"));
+    }
+
+    fn report_script_load_error(&self, source: &str, error: &NavigationError) {
+        self.report_page_script_error(&JsException::from_message(format!(
+            "Failed to load script {source:?}: {error}"
+        )));
     }
 
     async fn fetch_success(&self, url: &str) -> Result<network::ResourceResponse, NavigationError> {
@@ -650,11 +905,16 @@ impl Page {
         Ok(value)
     }
 
-    pub fn set_console_callback<F>(&self, callback: F) -> Result<(), JsException>
+    pub fn set_console_callback<F>(&mut self, callback: F) -> Result<(), JsException>
     where
         F: Fn(&str) + 'static,
     {
-        self.js.set_console_callback(callback)
+        let callback: Rc<dyn Fn(&str)> = Rc::new(callback);
+        let installed = Rc::clone(&callback);
+        self.js
+            .set_console_callback(move |message| installed(message))?;
+        self.console_callback = Some(callback);
+        Ok(())
     }
 
     pub fn document(&self) -> Ref<'_, BrowserDocument> {
@@ -1503,17 +1763,86 @@ enum ScriptMode {
     Async,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ScriptKind {
+    Classic,
+    Module,
+}
+
 struct Script {
     order: usize,
     source: ScriptSource,
     mode: ScriptMode,
+    kind: ScriptKind,
 }
 
 struct LoadedScript {
     order: usize,
     mode: ScriptMode,
+    source: String,
     result: Result<network::ResourceResponse, NetworkError>,
 }
+
+#[derive(serde::Deserialize)]
+struct DynamicScript {
+    id: u64,
+    module: bool,
+    src: Option<String>,
+    source: String,
+}
+
+fn resolve_module_specifier(base: &str, specifier: &str) -> Result<String, String> {
+    if let Ok(url) = url::Url::parse(specifier) {
+        return Ok(url.to_string());
+    }
+    if !(specifier.starts_with('/') || specifier.starts_with("./") || specifier.starts_with("../"))
+    {
+        return Err(format!(
+            "bare module specifier {specifier:?} requires an import map"
+        ));
+    }
+    url::Url::parse(base)
+        .and_then(|base| base.join(specifier))
+        .map(|url| url.to_string())
+        .map_err(|error| format!("could not resolve module {specifier:?} from {base}: {error}"))
+}
+
+const MODULE_LOADER_RUNTIME: &str = r#"
+if (!globalThis.__brimpModuleLoader) {
+    globalThis.__brimpModuleLoader = (() => {
+        const definitions = new Map();
+        const cache = new Map();
+        const resolve = (specifier, parent) => new URL(specifier, parent).href;
+        const register = (url, code) => {
+            definitions.set(url, new Function(
+                "require", "module", "exports", "__filename", "__dirname",
+                `${code}\n//# sourceURL=${url}`
+            ));
+        };
+        const load = url => {
+            if (cache.has(url)) return cache.get(url).exports;
+            const definition = definitions.get(url);
+            if (!definition) throw new TypeError(`Module was not loaded: ${url}`);
+            const module = { id: url, uri: url, exports: {} };
+            cache.set(url, module);
+            const require = specifier => {
+                if (specifier === "url") {
+                    return { pathToFileURL: value => new URL(value) };
+                }
+                return load(resolve(specifier, url));
+            };
+            require.resolve = specifier => resolve(specifier, url);
+            require.toUrl = specifier => resolve(specifier, url);
+            require.main = module;
+            let directory = url;
+            try { directory = new URL(".", url).href; } catch {}
+            definition(require, module, module.exports, url, directory);
+            return module.exports;
+        };
+        return Object.freeze({ register, evaluate: load });
+    })();
+}
+"#;
 
 #[derive(Clone, Debug)]
 pub struct NavigationResponse {

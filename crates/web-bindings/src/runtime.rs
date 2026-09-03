@@ -218,6 +218,7 @@ impl FetchQueue {
 struct Timer {
     id: u32,
     deadline: Instant,
+    interval: Option<Duration>,
     callback: ProtectedJsObject,
 }
 
@@ -232,7 +233,7 @@ impl Default for TimerQueue {
 }
 
 impl TimerQueue {
-    fn schedule(&mut self, delay_ms: f64, callback: ProtectedJsObject) -> u32 {
+    fn schedule(&mut self, delay_ms: f64, repeat: bool, callback: ProtectedJsObject) -> u32 {
         let id = self.next_id;
         self.next_id = self.next_id.wrapping_add(1).max(1);
         let delay_ms = if delay_ms.is_finite() {
@@ -240,9 +241,11 @@ impl TimerQueue {
         } else {
             0.0
         };
+        let delay = Duration::from_secs_f64(delay_ms / 1000.0);
         self.timers.push(Timer {
             id,
-            deadline: Instant::now() + Duration::from_secs_f64(delay_ms / 1000.0),
+            deadline: Instant::now() + delay,
+            interval: repeat.then_some(delay.max(Duration::from_millis(1))),
             callback,
         });
         id
@@ -261,7 +264,12 @@ impl TimerQueue {
             .filter(|(_, timer)| timer.deadline <= now)
             .min_by_key(|(_, timer)| timer.deadline)
             .map(|(index, _)| index)?;
-        Some(self.timers.remove(index).callback)
+        if let Some(interval) = self.timers[index].interval {
+            self.timers[index].deadline = now + interval;
+            Some(self.timers[index].callback.clone())
+        } else {
+            Some(self.timers.remove(index).callback)
+        }
     }
 
     fn queue_microtask(&mut self, callback: ProtectedJsObject) {
@@ -455,6 +463,7 @@ fn stored_cookie(cookie: &cookie_store::Cookie<'static>) -> StoredCookie {
 
 pub struct BrowsingContext {
     url: Mutex<Option<String>>,
+    pending_navigation: Mutex<Option<String>>,
     cookies: Arc<CookieJar>,
     request_headers: Mutex<Vec<(http::HeaderName, http::HeaderValue)>>,
     resource_cors: Mutex<HashMap<String, ResourceCorsPolicy>>,
@@ -477,6 +486,7 @@ impl BrowsingContext {
     pub fn with_cookie_jar(cookies: Arc<CookieJar>) -> Self {
         Self {
             url: Mutex::new(None),
+            pending_navigation: Mutex::new(None),
             cookies,
             request_headers: Mutex::new(Vec::new()),
             resource_cors: Mutex::new(HashMap::new()),
@@ -587,6 +597,20 @@ impl BrowsingContext {
 
     pub fn current_url(&self) -> Option<String> {
         self.url.lock().expect("browsing URL lock poisoned").clone()
+    }
+
+    pub fn request_navigation(&self, url: impl Into<String>) {
+        *self
+            .pending_navigation
+            .lock()
+            .expect("pending navigation lock poisoned") = Some(url.into());
+    }
+
+    pub fn take_pending_navigation(&self) -> Option<String> {
+        self.pending_navigation
+            .lock()
+            .expect("pending navigation lock poisoned")
+            .take()
     }
 
     pub fn store_response_cookie(&self, url: &str, header: &str) {
@@ -1051,13 +1075,17 @@ fn is_platform_operation(operation: &str) -> bool {
         || operation.starts_with("encoding")
         || operation.starts_with("legacyQuery")
         || operation.starts_with("base64")
+        || operation.starts_with("crypto")
         || operation.starts_with("fetch")
         || matches!(
             operation,
             "setTimeout"
+                | "setInterval"
                 | "clearTimeout"
+                | "clearInterval"
                 | "queueMicrotask"
                 | "location"
+                | "locationNavigate"
                 | "historyUpdateUrl"
                 | "formUrlEncode"
                 | "decodeBytes"

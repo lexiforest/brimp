@@ -7,10 +7,12 @@ use std::{
     rc::Rc,
     slice,
     sync::OnceLock,
+    time::Duration,
 };
 
 use jsc_sys::{
-    JSClassCreate, JSClassDefinition, JSClassRelease, JSContextGetGlobalObject, JSContextRef,
+    JSClassCreate, JSClassDefinition, JSClassRelease, JSContextGetGlobalObject, JSContextGetGroup,
+    JSContextGroupClearExecutionTimeLimit, JSContextGroupSetExecutionTimeLimit, JSContextRef,
     JSEvaluateScript, JSGarbageCollect, JSGlobalContextCreate, JSGlobalContextRef,
     JSGlobalContextRelease, JSObjectCallAsFunction, JSObjectGetProperty, JSObjectMake,
     JSObjectMakeDeferredPromise, JSObjectMakeFunctionWithCallback, JSObjectSetProperty,
@@ -128,6 +130,25 @@ impl JsRuntime {
     pub fn garbage_collect(&self) {
         // SAFETY: the context remains live for the duration of this call.
         unsafe { JSGarbageCollect(self.as_raw()) };
+    }
+
+    pub fn set_execution_time_limit(&self, limit: Duration) {
+        let seconds = limit.as_secs_f64().max(0.001);
+        // SAFETY: the context owns a live group. A null callback requests
+        // unconditional termination when the watchdog expires.
+        unsafe {
+            JSContextGroupSetExecutionTimeLimit(
+                JSContextGetGroup(self.as_raw()),
+                seconds,
+                ptr::null(),
+                ptr::null_mut(),
+            )
+        };
+    }
+
+    pub fn clear_execution_time_limit(&self) {
+        // SAFETY: the context and its group remain live for this call.
+        unsafe { JSContextGroupClearExecutionTimeLimit(JSContextGetGroup(self.as_raw())) };
     }
 
     pub fn make_object(&self) -> Result<ProtectedJsObject, JsException> {

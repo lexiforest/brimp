@@ -343,3 +343,257 @@ globalThis.fetch = (input, init = {}) => {
             return new Response(payload.bytes ?? payload.body, payload);
         }, reason => { throw new TypeError(String(reason)); });
 };
+
+class XMLHttpRequestEventTarget extends EventTarget {
+    constructor() {
+        super();
+        this.onloadstart = null;
+        this.onprogress = null;
+        this.onabort = null;
+        this.onerror = null;
+        this.onload = null;
+        this.ontimeout = null;
+        this.onloadend = null;
+    }
+}
+
+class XMLHttpRequestUpload extends XMLHttpRequestEventTarget {}
+
+function __xhrProgressEvent(type, loaded = 0, total = 0) {
+    return new ProgressEvent(type, {
+        lengthComputable: total > 0,
+        loaded,
+        total,
+    });
+}
+
+class XMLHttpRequest extends XMLHttpRequestEventTarget {
+    constructor() {
+        super();
+        this.onreadystatechange = null;
+        this.readyState = XMLHttpRequest.UNSENT;
+        this.response = null;
+        this.responseText = "";
+        this.responseXML = null;
+        this.responseURL = "";
+        this.status = 0;
+        this.statusText = "";
+        this.timeout = 0;
+        this.upload = new XMLHttpRequestUpload();
+        this.withCredentials = false;
+        this.__responseType = "";
+        this.__method = "GET";
+        this.__url = "";
+        this.__headers = new Headers();
+        this.__sent = false;
+        this.__overrideMimeType = null;
+        this.__generation = 0;
+        this.__timeoutId = null;
+        this.__controller = null;
+        this.__responseHeaders = new Headers();
+    }
+
+    get responseType() { return this.__responseType; }
+    set responseType(value) {
+        value = String(value);
+        if (!["", "text", "arraybuffer", "blob", "document", "json"].includes(value)) {
+            throw new TypeError(`Unsupported XMLHttpRequest responseType: ${value}`);
+        }
+        if (this.readyState === XMLHttpRequest.LOADING || this.readyState === XMLHttpRequest.DONE) {
+            throw new DOMException("The object is in an invalid state", "InvalidStateError");
+        }
+        this.__responseType = value;
+    }
+
+    open(method, url, async = true, username = null, password = null) {
+        if (arguments.length < 2) throw new TypeError("XMLHttpRequest.open requires a method and URL");
+        method = String(method);
+        if (!/^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/.test(method)) {
+            throw new DOMException("Invalid HTTP method", "SyntaxError");
+        }
+        method = method.toUpperCase();
+        if (["CONNECT", "TRACE", "TRACK"].includes(method)) {
+            throw new DOMException("Forbidden HTTP method", "SecurityError");
+        }
+        if (!Boolean(async)) {
+            throw new DOMException("Synchronous XMLHttpRequest is not supported", "NotSupportedError");
+        }
+        const parsed = new URL(String(url), location.href);
+        if (username !== null) parsed.username = String(username);
+        if (password !== null) parsed.password = String(password);
+        this.__generation += 1;
+        this.__clearTimeout();
+        this.__method = method;
+        this.__url = parsed.href;
+        this.__headers = new Headers();
+        this.__responseHeaders = new Headers();
+        this.__sent = false;
+        this.__resetResponse();
+        this.readyState = XMLHttpRequest.OPENED;
+        this.dispatchEvent(new Event("readystatechange"));
+    }
+
+    setRequestHeader(name, value) {
+        if (this.readyState !== XMLHttpRequest.OPENED || this.__sent) {
+            throw new DOMException("The object is in an invalid state", "InvalidStateError");
+        }
+        this.__headers.append(name, value);
+    }
+
+    getResponseHeader(name) {
+        if (this.readyState < XMLHttpRequest.HEADERS_RECEIVED) return null;
+        return this.__responseHeaders.get(name);
+    }
+
+    getAllResponseHeaders() {
+        if (this.readyState < XMLHttpRequest.HEADERS_RECEIVED) return "";
+        let serialized = "";
+        for (const [name, value] of this.__responseHeaders) serialized += `${name}: ${value}\r\n`;
+        return serialized;
+    }
+
+    overrideMimeType(mime) {
+        if (this.readyState === XMLHttpRequest.LOADING || this.readyState === XMLHttpRequest.DONE) {
+            throw new DOMException("The object is in an invalid state", "InvalidStateError");
+        }
+        this.__overrideMimeType = String(mime);
+    }
+
+    send(body = null) {
+        if (this.readyState !== XMLHttpRequest.OPENED || this.__sent) {
+            throw new DOMException("The object is in an invalid state", "InvalidStateError");
+        }
+        this.__sent = true;
+        const generation = ++this.__generation;
+        const controller = new AbortController();
+        this.__controller = controller;
+        this.dispatchEvent(__xhrProgressEvent("loadstart"));
+        if (body !== null && this.__method !== "GET" && this.__method !== "HEAD") {
+            this.upload.dispatchEvent(__xhrProgressEvent("loadstart"));
+        } else {
+            body = null;
+        }
+        if (this.timeout > 0) {
+            this.__timeoutId = setTimeout(() => {
+                if (generation !== this.__generation || !this.__sent) return;
+                this.__terminate("timeout");
+            }, Math.max(0, Number(this.timeout)));
+        }
+        fetch(this.__url, {
+            method: this.__method,
+            headers: this.__headers,
+            body,
+            credentials: this.withCredentials ? "include" : "same-origin",
+            signal: controller.signal,
+        }).then(response => {
+            if (generation !== this.__generation || !this.__sent) return;
+            this.status = response.status;
+            this.statusText = response.statusText;
+            this.responseURL = response.url;
+            this.__responseHeaders = new Headers(response.headers);
+            this.readyState = XMLHttpRequest.HEADERS_RECEIVED;
+            this.dispatchEvent(new Event("readystatechange"));
+            this.readyState = XMLHttpRequest.LOADING;
+            this.dispatchEvent(new Event("readystatechange"));
+            const bytes = response.__bytes.slice();
+            this.__finishResponse(bytes);
+        }, () => {
+            if (generation !== this.__generation || !this.__sent) return;
+            this.__terminate("error");
+        });
+    }
+
+    abort() {
+        const active = this.__sent || this.readyState === XMLHttpRequest.HEADERS_RECEIVED ||
+            this.readyState === XMLHttpRequest.LOADING;
+        this.__generation += 1;
+        this.__clearTimeout();
+        if (this.__controller) this.__controller.abort();
+        this.__controller = null;
+        this.__sent = false;
+        this.__resetResponse();
+        if (active) {
+            this.readyState = XMLHttpRequest.DONE;
+            this.dispatchEvent(new Event("readystatechange"));
+            this.dispatchEvent(__xhrProgressEvent("abort"));
+            this.dispatchEvent(__xhrProgressEvent("loadend"));
+        }
+        this.readyState = XMLHttpRequest.UNSENT;
+    }
+
+    __finishResponse(bytes) {
+        const text = new TextDecoder().decode(bytes);
+        const type = this.__responseType;
+        this.responseText = type === "" || type === "text" ? text : "";
+        this.responseXML = null;
+        if (type === "arraybuffer") this.response = bytes.buffer;
+        else if (type === "blob") {
+            this.response = new Blob([bytes], { type: this.__responseMimeType() });
+        } else if (type === "json") {
+            try { this.response = text === "" ? null : JSON.parse(text); }
+            catch (_) { this.response = null; }
+        } else if (type === "document" || type === "") {
+            const mime = this.__responseMimeType();
+            if (/^(?:text\/html|application\/xhtml\+xml|(?:application|text)\/xml|image\/svg\+xml)(?:;|$)/i.test(mime)) {
+                const parserType = /^text\/html(?:;|$)/i.test(mime) ? "text/html" : "application/xml";
+                this.responseXML = new DOMParser().parseFromString(text, parserType);
+            }
+            this.response = type === "document" ? this.responseXML : text;
+        } else this.response = text;
+        this.__sent = false;
+        this.__controller = null;
+        this.__clearTimeout();
+        this.readyState = XMLHttpRequest.DONE;
+        this.dispatchEvent(new Event("readystatechange"));
+        const total = bytes.byteLength;
+        this.dispatchEvent(__xhrProgressEvent("progress", total, total));
+        this.dispatchEvent(__xhrProgressEvent("load", total, total));
+        this.dispatchEvent(__xhrProgressEvent("loadend", total, total));
+    }
+
+    __terminate(type) {
+        this.__generation += 1;
+        this.__clearTimeout();
+        if (this.__controller) this.__controller.abort();
+        this.__controller = null;
+        this.__sent = false;
+        this.__resetResponse();
+        this.readyState = XMLHttpRequest.DONE;
+        this.dispatchEvent(new Event("readystatechange"));
+        this.dispatchEvent(__xhrProgressEvent(type));
+        this.dispatchEvent(__xhrProgressEvent("loadend"));
+    }
+
+    __responseMimeType() {
+        return this.__overrideMimeType ?? this.__responseHeaders.get("content-type") ?? "";
+    }
+
+    __resetResponse() {
+        this.response = null;
+        this.responseText = "";
+        this.responseXML = null;
+        this.responseURL = "";
+        this.status = 0;
+        this.statusText = "";
+    }
+
+    __clearTimeout() {
+        if (this.__timeoutId !== null) clearTimeout(this.__timeoutId);
+        this.__timeoutId = null;
+    }
+}
+
+for (const [name, value] of Object.entries({
+    UNSENT: 0,
+    OPENED: 1,
+    HEADERS_RECEIVED: 2,
+    LOADING: 3,
+    DONE: 4,
+})) {
+    Object.defineProperty(XMLHttpRequest, name, { value, enumerable: true });
+    Object.defineProperty(XMLHttpRequest.prototype, name, { value, enumerable: true });
+}
+
+globalThis.XMLHttpRequestEventTarget = XMLHttpRequestEventTarget;
+globalThis.XMLHttpRequestUpload = XMLHttpRequestUpload;
+globalThis.XMLHttpRequest = XMLHttpRequest;

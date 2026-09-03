@@ -107,6 +107,119 @@ fn exposes_window_document_classes_and_stable_wrappers() {
 }
 
 #[test]
+fn exposes_input_and_xml_character_data_interfaces() {
+    let page = page_with("<html><body><input id='field'></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            const field = document.getElementById("field");
+            const event = new FocusEvent("focus", { relatedTarget: field });
+            if (!(event instanceof UIEvent) || event.relatedTarget !== field) return false;
+            const wheel = new WheelEvent("wheel", { deltaX: 1, deltaY: 2, deltaMode: WheelEvent.DOM_DELTA_LINE });
+            if (!(wheel instanceof MouseEvent) || wheel.deltaX !== 1 || wheel.deltaY !== 2 ||
+                wheel.deltaMode !== 1 || WheelEvent.DOM_DELTA_PAGE !== 2) return false;
+            if (Object.getPrototypeOf(CDATASection.prototype) !== Text.prototype ||
+                Object.getPrototypeOf(ProcessingInstruction.prototype) !== CharacterData.prototype) return false;
+            for (const constructor of [CDATASection, ProcessingInstruction]) {
+                try { new constructor(); return false; }
+                catch (error) { if (!(error instanceof TypeError)) return false; }
+            }
+            return document.createEvent("FocusEvent") instanceof FocusEvent;
+        })()"#,
+    );
+}
+
+#[test]
+fn exposes_live_dataset_dom_string_maps() {
+    let page = page_with(
+        "<html><body><div id='target' data-content-len='42' data-user-id='first'></div></body></html>",
+    );
+    assert_js(
+        &page,
+        r#"(() => {
+            const element = document.getElementById("target");
+            const dataset = element.dataset;
+            if (dataset !== element.dataset || !(dataset instanceof DOMStringMap)) return false;
+            if (dataset.contentLen !== "42" || dataset.userId !== "first") return false;
+            dataset.userId = 7;
+            dataset.camelCase = null;
+            if (element.getAttribute("data-user-id") !== "7" ||
+                element.getAttribute("data-camel-case") !== "null") return false;
+            element.setAttribute("data-live-value", "yes");
+            if (dataset.liveValue !== "yes" || !Object.keys(dataset).includes("liveValue")) return false;
+            delete dataset.contentLen;
+            if (element.hasAttribute("data-content-len") || "contentLen" in dataset) return false;
+            try { dataset["bad-name"] = "no"; return false; }
+            catch (error) { if (error.name !== "SyntaxError") return false; }
+            return Object.prototype.toString.call(dataset) === "[object DOMStringMap]";
+        })()"#,
+    );
+}
+
+#[test]
+fn creates_detached_html_documents() {
+    let page = page_with("<html><head></head><body></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            const created = document.implementation.createHTMLDocument("Inert title");
+            return created !== document && created instanceof Document &&
+                created.documentElement.localName === "html" &&
+                created.head.localName === "head" && created.body.localName === "body" &&
+                created.title === "Inert title" && created.location === null &&
+                Object.prototype.toString.call(document.implementation) === "[object DOMImplementation]";
+        })()"#,
+    );
+}
+
+#[test]
+fn exposes_legacy_navigation_and_user_timing() {
+    let page = page_with("<html><head></head><body></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            const first = performance.mark("first", { startTime: 2, detail: { source: "test" } });
+            const second = performance.mark("second", { startTime: 7 });
+            const measure = performance.measure("span", "first", "second");
+            return performance.timing.responseStart > 0 &&
+                performance.timing.navigationStart === performance.timeOrigin &&
+                first instanceof PerformanceMark && first instanceof PerformanceEntry &&
+                first.detail.source === "test" && measure.duration === 5 &&
+                performance.getEntriesByType("mark").length === 2 &&
+                performance.getEntriesByName("span", "measure")[0] === measure &&
+                Object.prototype.toString.call(performance) === "[object Performance]";
+        })()"#,
+    );
+}
+
+#[test]
+fn performance_observers_receive_buffered_and_new_entries() {
+    let page = page_with("<html><head></head><body></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            performance.mark("before");
+            globalThis.performanceDelivered = [];
+            const observer = new PerformanceObserver(list => {
+                performanceDelivered.push(...list.getEntries().map(entry => entry.name));
+            });
+            observer.observe({ type: "mark", buffered: true });
+            performance.mark("after");
+            queueMicrotask(() => observer.disconnect());
+            return observer instanceof PerformanceObserver &&
+                PerformanceObserver.supportedEntryTypes.includes("mark");
+        })()"#,
+    );
+    assert_eq!(
+        page.eval("performanceDelivered.join(',')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "before,after"
+    );
+}
+
+#[test]
 fn focus_tracks_the_active_element_and_dispatches_events() {
     let page =
         page_with("<html><body><input id='first'><textarea id='second'></textarea></body></html>");
@@ -423,6 +536,73 @@ fn validates_and_tracks_custom_element_definitions() {
             });
             try { customElements.define("Invalid-Element", function() {}); return false; }
             catch (error) { return error instanceof DOMException && error.name === "SyntaxError"; }
+        })()"#,
+    );
+}
+
+#[test]
+fn custom_elements_upgrade_existing_and_new_elements_with_lifecycle_callbacks() {
+    let page = page_with(
+        "<html><head><style>example-card:not(:defined) { display: none } example-card:defined { display: block }</style></head><body><example-card count='1'></example-card><private-card></private-card></body></html>",
+    );
+    assert_js(
+        &page,
+        "document.body.matches(':defined') && document.querySelector('example-card').matches(':not(:defined)') && getComputedStyle(document.querySelector('example-card')).display === 'none'",
+    );
+    assert_js(
+        &page,
+        r#"(() => {
+            globalThis.customLifecycle = [];
+            class ExampleCard extends HTMLElement {
+                static get observedAttributes() { return ["count"]; }
+                constructor() { super(); this.constructed = true; }
+                connectedCallback() { customLifecycle.push(`connected:${this.getAttribute("count")}`); }
+                disconnectedCallback() { customLifecycle.push("disconnected"); }
+                attributeChangedCallback(name, oldValue, newValue) {
+                    customLifecycle.push(`${name}:${oldValue}:${newValue}`);
+                }
+            }
+            customElements.define("example-card", ExampleCard);
+            class PrivateCard extends HTMLElement {
+                #ready = true;
+                #isReady() { return this.#ready; }
+                connectedCallback() { this.privateStateWorked = this.#isReady(); }
+            }
+            customElements.define("private-card", PrivateCard);
+            const existing = document.querySelector("example-card");
+            if (!(existing instanceof ExampleCard) || !existing.constructed) return false;
+            if (getComputedStyle(existing).display !== "block") return false;
+            if (!document.querySelector("private-card").privateStateWorked) return false;
+            const created = document.createElement("example-card");
+            created.setAttribute("count", "2");
+            document.body.appendChild(created);
+            created.removeAttribute("count");
+            created.remove();
+            return created instanceof ExampleCard && created.constructed;
+        })()"#,
+    );
+    assert_eq!(
+        page.eval("customLifecycle.join('|')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "count:null:1|connected:1|count:null:2|connected:2|count:2:null|disconnected"
+    );
+}
+
+#[test]
+fn nodes_report_their_connected_or_detached_root() {
+    let page = page_with("<html><body><div id='connected'></div></body></html>");
+    assert_js(
+        &page,
+        r#"(() => {
+            const connected = document.getElementById("connected");
+            const fragment = document.createDocumentFragment();
+            const detached = document.createElement("span");
+            fragment.appendChild(detached);
+            return connected.getRootNode() === document &&
+                connected.getRootNode({ composed: true }) === document &&
+                detached.getRootNode() === fragment;
         })()"#,
     );
 }
@@ -918,6 +1098,33 @@ fn submits_legacy_encoded_get_forms_to_named_iframes() {
 }
 
 #[test]
+fn request_submit_dispatches_a_submit_event_and_uses_live_form_controls() {
+    let mut page = page_with(
+        "<iframe name='result'></iframe><form id='form' action='data:text/html,<title>submitted</title>' target='result'><input name='solution'><button type='submit'>Go</button></form>",
+    );
+    assert_js(
+        &page,
+        r#"(() => {
+            const form = document.getElementById("form");
+            if (document.forms[0] !== form || document.forms.form !== form) return false;
+            const frame = document.querySelector("iframe");
+            let submitEvent = null;
+            form.onsubmit = event => {
+                submitEvent = event;
+                form.elements.namedItem("solution").value = "answer";
+            };
+            form.requestSubmit();
+            return form.elements instanceof HTMLFormControlsCollection &&
+                form.length === 2 && form.elements.solution.value === "answer" &&
+                submitEvent instanceof SubmitEvent && submitEvent.submitter === null &&
+                submitEvent.bubbles && submitEvent.cancelable &&
+                frame.contentWindow.location.search === "?solution=answer";
+        })()"#,
+    );
+    page.run_pending_tasks().unwrap();
+}
+
+#[test]
 fn executes_data_iframes_and_delivers_window_messages() {
     let mut page = page_with("<meta charset='utf-8'><body></body>");
     assert_js(
@@ -925,6 +1132,8 @@ fn executes_data_iframes_and_delivers_window_messages() {
         r#"(() => {
             const frame = document.createElement("iframe");
             frame.name = "target";
+            if (!frame.contentDocument.body || !frame.contentDocument.head) return false;
+            frame.contentDocument.body.appendChild(frame.contentDocument.createElement("span"));
             document.body.appendChild(frame);
             const childComment = new frame.contentWindow.Comment("child");
             if (frame.contentDocument !== childComment.ownerDocument) return false;
@@ -1216,5 +1425,33 @@ fn inner_html_and_style_are_live_blitz_mutations() {
             .attr(blitz_dom::local_name!("style"))
             .unwrap()
             .contains("width: 120px")
+    );
+}
+
+#[test]
+fn exposes_import_focus_crypto_and_resize_observer() {
+    let page = page_with(
+        "<html><body><main id='target'><span>hello</span></main><noscript id='fallback'>disabled</noscript></body></html>",
+    );
+
+    assert_js(
+        &page,
+        r#"(() => {
+            const parsed = new DOMParser().parseFromString("<section><b>copy</b></section>", "text/html");
+            const imported = document.importNode(parsed.body.firstElementChild, true);
+            if (imported.ownerDocument !== document || imported.querySelector("b").textContent !== "copy") return false;
+            if (!document.hasFocus()) return false;
+
+            const bytes = new Uint8Array(32);
+            if (crypto.getRandomValues(bytes) !== bytes || !bytes.some(value => value !== 0)) return false;
+            if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(crypto.randomUUID())) return false;
+
+            const observer = new ResizeObserver(() => {});
+            observer.observe(document.getElementById("target"));
+            observer.unobserve(document.getElementById("target"));
+            observer.disconnect();
+            return typeof ResizeObserverEntry === "function" && typeof ResizeObserverSize === "function" &&
+                getComputedStyle(document.getElementById("fallback")).display === "none";
+        })()"#,
     );
 }

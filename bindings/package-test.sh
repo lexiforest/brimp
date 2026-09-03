@@ -2,9 +2,9 @@
 set -eu
 
 workspace=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-output="$workspace/dist"
 test_root=$(mktemp -d "${TMPDIR:-/tmp}/brimp-package-test.XXXXXX")
 trap 'rm -rf "$test_root"' EXIT
+output="$test_root/build"
 
 mkdir -p "$output/python" "$output/node"
 uvx maturin build --manifest-path "$workspace/bindings/python/Cargo.toml" \

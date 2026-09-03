@@ -137,3 +137,105 @@ fn fetch_serializes_form_data_as_multipart_bytes() {
     assert!(body.windows(3).any(|bytes| bytes == [0, 255, 65]));
     assert!(body.ends_with(format!("--{boundary}--\r\n").as_bytes()));
 }
+
+#[test]
+fn xml_http_request_exposes_response_state_headers_and_events() {
+    let loader = Arc::new(FetchLoader::default());
+    let browser = Browser::with_resource_loader(loader.clone());
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+
+    page.eval(
+        r#"
+        globalThis.xhrResult = "waiting";
+        const xhr = new XMLHttpRequest();
+        const events = [];
+        for (const type of ["readystatechange", "loadstart", "progress", "load", "loadend"]) {
+            xhr.addEventListener(type, event => events.push(`${type}:${xhr.readyState}:${event.loaded}`));
+        }
+        xhr.open("POST", "https://example.test/api");
+        xhr.setRequestHeader("X-Test", "one");
+        xhr.responseType = "json";
+        xhr.onloadend = () => {
+            xhrResult = JSON.stringify({
+                status: xhr.status,
+                statusText: xhr.statusText,
+                url: xhr.responseURL,
+                header: xhr.getResponseHeader("X-Result"),
+                allHeaders: xhr.getAllResponseHeaders(),
+                answer: xhr.response.answer,
+                text: xhr.responseText,
+                state: xhr.readyState,
+                events,
+                interfaces: xhr instanceof XMLHttpRequestEventTarget &&
+                    xhr.upload instanceof XMLHttpRequestUpload &&
+                    new ProgressEvent("progress", { loaded: 3, total: 4 }).loaded === 3,
+            });
+        };
+        xhr.send("hello");
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    let result = page.eval("xhrResult").unwrap().to_string().unwrap();
+    let result: serde_json::Value = serde_json::from_str(&result).unwrap();
+    assert_eq!(result["status"], 201);
+    assert_eq!(result["statusText"], "Created");
+    assert_eq!(result["url"], "https://example.test/api");
+    assert_eq!(result["header"], "yes");
+    assert!(
+        result["allHeaders"]
+            .as_str()
+            .unwrap()
+            .contains("x-result: yes\r\n")
+    );
+    assert_eq!(result["answer"], 42);
+    assert_eq!(result["text"], "");
+    assert_eq!(result["state"], 4);
+    assert_eq!(result["interfaces"], true);
+    assert!(
+        result["events"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|event| event == "load:4:13")
+    );
+
+    let requests = loader.requests.lock().unwrap();
+    assert_eq!(requests[0].method, http::Method::POST);
+    assert_eq!(requests[0].headers["x-test"], "one");
+    assert_eq!(requests[0].body.as_deref(), Some(&b"hello"[..]));
+}
+
+#[test]
+fn xml_http_request_reports_network_errors_and_abort() {
+    let browser = Browser::with_resource_loader(Arc::new(FetchLoader::default()));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.eval(
+        r#"
+        globalThis.xhrFailures = [];
+        const failed = new XMLHttpRequest();
+        failed.open("GET", "https://example.test/failure");
+        failed.onerror = () => xhrFailures.push(`error:${failed.status}:${failed.readyState}`);
+        failed.onloadend = () => xhrFailures.push("error-end");
+        failed.send();
+
+        const aborted = new XMLHttpRequest();
+        aborted.open("GET", "https://example.test/api");
+        aborted.onabort = () => xhrFailures.push("abort");
+        aborted.onloadend = () => xhrFailures.push("abort-end");
+        aborted.send();
+        aborted.abort();
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    assert_eq!(
+        page.eval("xhrFailures.join(',')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "abort,abort-end,error:0:4,error-end"
+    );
+}

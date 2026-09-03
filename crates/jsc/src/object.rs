@@ -12,6 +12,18 @@ pub struct ProtectedJsObject {
     _thread_bound: PhantomData<Rc<()>>,
 }
 
+impl Clone for ProtectedJsObject {
+    fn clone(&self) -> Self {
+        // SAFETY: cloning adds an independent root for the same live context/value.
+        unsafe { JSValueProtect(self.context, self.raw) };
+        Self {
+            context: self.context,
+            raw: self.raw,
+            _thread_bound: PhantomData,
+        }
+    }
+}
+
 pub struct DeferredPromise {
     promise: ProtectedJsObject,
     resolve: ProtectedJsObject,

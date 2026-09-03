@@ -153,6 +153,49 @@ fn navigation_timeout_is_deterministic_and_close_remains_safe() {
     page.close();
 }
 
+struct LoopingScriptLoader;
+
+#[async_trait]
+impl ResourceLoader for LoopingScriptLoader {
+    async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            http::header::CONTENT_TYPE,
+            HeaderValue::from_static("text/html"),
+        );
+        let body = if request.url.ends_with("/loop") {
+            "<!doctype html><script>while (true) {}</script>"
+        } else {
+            "<!doctype html><title>Recovered</title>"
+        };
+        Ok(ResourceResponse {
+            status: StatusCode::OK,
+            headers: headers.into(),
+            body: body.as_bytes().to_vec(),
+            effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
+        })
+    }
+}
+
+#[test]
+fn navigation_timeout_interrupts_non_yielding_javascript() {
+    let browser = AutomationBrowser::with_resource_loader(Arc::new(LoopingScriptLoader));
+    let page = browser.new_page(PageOptions::default()).unwrap();
+    let started = std::time::Instant::now();
+    let result = page.navigate("https://loop.test/loop", Duration::from_millis(50));
+    assert!(
+        matches!(result, Err(AutomationError::Timeout(_))),
+        "unexpected navigation result: {result:?}"
+    );
+    assert!(started.elapsed() < Duration::from_secs(2));
+    page.reset().unwrap();
+    page.navigate("https://loop.test/recovered", Duration::from_secs(1))
+        .unwrap();
+    assert_eq!(page.title().unwrap(), "Recovered");
+    page.close();
+}
+
 struct ResponseLoader;
 
 #[async_trait]

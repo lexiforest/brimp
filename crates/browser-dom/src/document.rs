@@ -214,6 +214,17 @@ impl BrowserDocument {
         }
     }
 
+    pub fn set_custom_element_defined(&mut self, node_id: NodeId) -> bool {
+        let Some(node) = self.inner.get_node_mut(node_id) else {
+            return false;
+        };
+        if !node.is_element() {
+            return false;
+        }
+        node.set_defined();
+        true
+    }
+
     pub fn adopt_subtree(&mut self, node_id: NodeId, document_id: NodeId) {
         self.set_node_document(node_id, document_id);
         let children = self
@@ -271,6 +282,12 @@ impl BrowserDocument {
             base_url: base_url.map(str::to_owned),
             net_provider,
             font_ctx: Some(bundled_font_context()),
+            // Stylo does not currently evaluate Media Queries' `scripting`
+            // feature, so Blitz's conditional rule does not hide noscript.
+            ua_stylesheets: Some(vec![format!(
+                "{}\nnoscript {{ display: none !important; }}",
+                blitz_dom::DEFAULT_CSS
+            )]),
             ..DocumentConfig::default()
         }
     }
@@ -623,11 +640,79 @@ impl BrowserDocument {
         let root = self.root();
         let mut html = String::new();
         for child in &root.children {
-            if let Some(node) = self.node(*child) {
-                node.write_outer_html(&mut html);
-            }
+            self.write_outer_html(*child, &mut html);
         }
         html
+    }
+
+    pub fn write_outer_html(&self, node_id: NodeId, html: &mut String) {
+        self.write_html_node(node_id, html, false);
+    }
+
+    fn write_html_node(&self, node_id: NodeId, html: &mut String, raw_text: bool) {
+        let Some(node) = self.node(node_id) else {
+            return;
+        };
+        match &node.data {
+            NodeData::Document | NodeData::AnonymousBlock(_) => {
+                for child in &node.children {
+                    self.write_html_node(*child, html, raw_text);
+                }
+            }
+            NodeData::Comment => {
+                html.push_str("<!--");
+                html.push_str(self.comment_data(node_id).unwrap_or_default());
+                html.push_str("-->");
+            }
+            NodeData::Text(data) if raw_text => html.push_str(&data.content),
+            NodeData::Text(data) => escape_html_text(&data.content, html),
+            NodeData::Element(data) => {
+                html.push('<');
+                if let Some(prefix) = &data.name.prefix {
+                    html.push_str(prefix.as_ref());
+                    html.push(':');
+                }
+                let name = data.name.local.as_ref();
+                html.push_str(name);
+                for attribute in data.attrs.iter() {
+                    html.push(' ');
+                    if let Some(prefix) = &attribute.name.prefix {
+                        html.push_str(prefix.as_ref());
+                        html.push(':');
+                    }
+                    html.push_str(attribute.name.local.as_ref());
+                    html.push_str("=\"");
+                    escape_html_attribute(&attribute.value, html);
+                    html.push('"');
+                }
+                html.push('>');
+
+                let is_html = data.name.ns == ns!(html);
+                if is_html && is_html_void_element(name) {
+                    return;
+                }
+                let child_raw_text = is_html && is_html_raw_text_element(name);
+                if name == "template"
+                    && let Some(contents) = data.template_contents
+                    && let Some(root) = self.node(contents)
+                {
+                    for child in &root.children {
+                        self.write_html_node(*child, html, child_raw_text);
+                    }
+                } else {
+                    for child in &node.children {
+                        self.write_html_node(*child, html, child_raw_text);
+                    }
+                }
+                html.push_str("</");
+                if let Some(prefix) = &data.name.prefix {
+                    html.push_str(prefix.as_ref());
+                    html.push(':');
+                }
+                html.push_str(name);
+                html.push('>');
+            }
+        }
     }
 
     pub fn node(&self, node_id: NodeId) -> Option<&Node> {
@@ -817,6 +902,60 @@ impl BrowserDocument {
         let name = QualName::new(None, ns!(), local_name!("style"));
         self.inner.mutate().set_attribute(node_id, name, &css);
     }
+}
+
+fn escape_html_text(value: &str, output: &mut String) {
+    for character in value.chars() {
+        match character {
+            '&' => output.push_str("&amp;"),
+            '\u{00a0}' => output.push_str("&nbsp;"),
+            '<' => output.push_str("&lt;"),
+            '>' => output.push_str("&gt;"),
+            _ => output.push(character),
+        }
+    }
+}
+
+fn escape_html_attribute(value: &str, output: &mut String) {
+    for character in value.chars() {
+        match character {
+            '&' => output.push_str("&amp;"),
+            '\u{00a0}' => output.push_str("&nbsp;"),
+            '"' => output.push_str("&quot;"),
+            _ => output.push(character),
+        }
+    }
+}
+
+fn is_html_void_element(name: &str) -> bool {
+    matches!(
+        name,
+        "area"
+            | "base"
+            | "basefont"
+            | "bgsound"
+            | "br"
+            | "col"
+            | "embed"
+            | "frame"
+            | "hr"
+            | "img"
+            | "input"
+            | "keygen"
+            | "link"
+            | "meta"
+            | "param"
+            | "source"
+            | "track"
+            | "wbr"
+    )
+}
+
+fn is_html_raw_text_element(name: &str) -> bool {
+    matches!(
+        name,
+        "iframe" | "noembed" | "noframes" | "noscript" | "plaintext" | "script" | "style" | "xmp"
+    )
 }
 
 fn bundled_font_context() -> FontContext {

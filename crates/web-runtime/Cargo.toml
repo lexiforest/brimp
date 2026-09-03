@@ -15,6 +15,13 @@ persona = { path = "../persona" }
 screenshot = { path = "../screenshot" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+swc_common = "26"
+swc_ecma_ast = "29"
+swc_ecma_codegen = "32"
+swc_ecma_parser = "45"
+swc_ecma_transforms_base = { version = "49", features = ["inline-helpers"] }
+swc_ecma_transforms_module = "55"
+swc_ecma_visit = "29"
 thiserror = "2"
 tokio = { version = "1", features = ["macros", "rt", "time"] }
 url = "2"

@@ -19,6 +19,19 @@ class Document extends Node {
     get compatMode() { return this.__compatMode ?? "CSS1Compat"; }
     get location() { return this === document ? globalThis.location : null; }
     get defaultView() { return this === document ? window : null; }
+    get currentScript() { return this === document ? __currentScript : null; }
+    get domain() {
+        if (this.__domain !== undefined) return this.__domain;
+        return this.location?.hostname ?? "";
+    }
+    set domain(value) {
+        value = String(value).toLowerCase().replace(/\.$/, "");
+        const current = this.location?.hostname.toLowerCase().replace(/\.$/, "") ?? "";
+        if (value === "" || (value !== current && !current.endsWith("." + value))) {
+            throw new DOMException("The document domain cannot be set to this value", "SecurityError");
+        }
+        this.__domain = value;
+    }
     get adoptedStyleSheets() { return __documentAdoptedStyleSheets; }
     set adoptedStyleSheets(value) { __replaceAdoptedStyleSheets(value); }
     get dir() {
@@ -41,6 +54,14 @@ class Document extends Node {
     get documentElement() { return __callHost("documentElement", this); }
     get head() { return __callHost("head", this); }
     get body() { return __callHost("body", this); }
+    get forms() { return new HTMLCollection(() => [...this.querySelectorAll("form")]); }
+    get images() { return new HTMLCollection(() => [...this.querySelectorAll("img")]); }
+    get embeds() { return new HTMLCollection(() => [...this.querySelectorAll("embed")]); }
+    get plugins() { return this.embeds; }
+    get links() { return new HTMLCollection(() => [...this.querySelectorAll("a[href],area[href]")]); }
+    get scripts() { return new HTMLCollection(() => [...this.querySelectorAll("script")]); }
+    get anchors() { return new HTMLCollection(() => [...this.querySelectorAll("a[name]")]); }
+    get applets() { return new HTMLCollection(() => []); }
     get activeElement() { return __activeElement || this.body; }
     get children() { return new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element)); }
     get childElementCount() { return this.children.length; }
@@ -48,13 +69,21 @@ class Document extends Node {
     get lastElementChild() { return this.children.item(this.children.length - 1); }
     get implementation() { return __domImplementation; }
     get styleSheets() { return __documentStyleSheets; }
-    createElement(name) { return __callHost("createElement", this, name); }
+    createElement(name) { return __upgradeCustomElement(__callHost("createElement", this, name)); }
     createElementNS(namespace, qualifiedName) {
         return __callHost("createElementNS", this, namespace, qualifiedName);
     }
     createTextNode(text) { return __callHost("createTextNode", this, text); }
     createComment(data) { return __callHost("createComment", this, data); }
     createDocumentFragment() { return __callHost("createDocumentFragment", this); }
+    importNode(node, deep = false) {
+        if (!(node instanceof Node)) throw new TypeError("node must be a Node");
+        if (node.nodeType === Node.DOCUMENT_NODE) {
+            throw new DOMException("Documents cannot be imported", "NotSupportedError");
+        }
+        return __callHost("importNode", this, node, Boolean(deep));
+    }
+    hasFocus() { return true; }
     createTreeWalker(root, whatToShow = NodeFilter.SHOW_ALL, filter = null) {
         if (!(root instanceof Node)) throw new TypeError("root must be a Node");
         return new TreeWalker(root, whatToShow, filter);
@@ -80,6 +109,7 @@ class Document extends Node {
             case "customevent": return new CustomEvent("");
             case "uievent":
             case "uievents": return new UIEvent("");
+            case "focusevent": return new FocusEvent("");
             case "mouseevent":
             case "mouseevents": return new MouseEvent("");
             case "keyboardevent": return new KeyboardEvent("");
@@ -501,6 +531,8 @@ class HTMLCollection {
     get [Symbol.toStringTag]() { return "HTMLCollection"; }
     [Symbol.iterator]() { return this.__items()[Symbol.iterator](); }
 }
+
+class HTMLFormControlsCollection extends HTMLCollection {}
 
 class NodeList extends Array {
     constructor(items = []) {

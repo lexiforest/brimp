@@ -251,6 +251,33 @@ pub(super) fn dispatch(
             };
             node_value(state, call, id)
         }
+        "importNode" => {
+            let owner = required_document_target(state, call)?;
+            let source = state
+                .wrappers
+                .node_id(required_object(call, 2, "node")?)
+                .ok_or_else(|| NativeError::new("node must be a Node"))?;
+            let deep = call
+                .argument(3)
+                .ok_or_else(|| NativeError::new("missing deep flag"))?
+                .to_boolean();
+            let clone = {
+                let mut document = state.document.borrow_mut();
+                if document.is_document(source) {
+                    return Err(NativeError::new("Documents cannot be imported"));
+                }
+                let mut mutator = document.blitz_mut().mutate();
+                let clone = mutator.deep_clone_node(source);
+                if !deep {
+                    mutator.remove_and_drop_all_children(clone);
+                }
+                drop(mutator);
+                document.copy_node_metadata(source, clone, deep);
+                document.adopt_subtree(clone, owner);
+                clone
+            };
+            node_value(state, call, clone)
+        }
         "getElementById" => {
             let root = required_document_target(state, call)?;
             let id = required_string(call, 2, "id")?;
@@ -533,6 +560,13 @@ pub(super) fn dispatch(
             };
             node_value(state, call, clone)
         }
+        "setCustomElementDefined" => {
+            let id = required_element_target(state, call)?;
+            if !state.document.borrow_mut().set_custom_element_defined(id) {
+                return Err(NativeError::new("element no longer exists"));
+            }
+            Ok(NativeValue::Undefined)
+        }
         "tagName" => {
             let id = required_element_target(state, call)?;
             let document = state.document.borrow();
@@ -704,10 +738,7 @@ pub(super) fn dispatch(
             let node = document.node(id).ok_or_else(stale_wrapper)?;
             let mut html = String::new();
             for child in &node.children {
-                document
-                    .node(*child)
-                    .ok_or_else(stale_wrapper)?
-                    .write_outer_html(&mut html);
+                document.write_outer_html(*child, &mut html);
             }
             Ok(NativeValue::String(html))
         }
@@ -716,7 +747,7 @@ pub(super) fn dispatch(
             let document = state.document.borrow();
             let node = document.node(id).ok_or_else(stale_wrapper)?;
             let mut html = String::new();
-            node.write_outer_html(&mut html);
+            document.write_outer_html(node.id, &mut html);
             Ok(NativeValue::String(html))
         }
         "setInnerHTML" => {

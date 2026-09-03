@@ -3,12 +3,14 @@
 use std::ffi::{c_char, c_double, c_int, c_uint, c_void};
 
 pub enum OpaqueJSContext {}
+pub enum OpaqueJSContextGroup {}
 pub enum OpaqueJSValue {}
 pub enum OpaqueJSString {}
 pub enum OpaqueJSClass {}
 
 pub type JSContextRef = *const OpaqueJSContext;
 pub type JSGlobalContextRef = *const OpaqueJSContext;
+pub type JSContextGroupRef = *const OpaqueJSContextGroup;
 pub type JSValueRef = *const OpaqueJSValue;
 pub type JSObjectRef = *mut OpaqueJSValue;
 pub type JSStringRef = *mut OpaqueJSString;
@@ -94,6 +96,14 @@ unsafe extern "C" {
     pub fn JSClassCreate(definition: *const JSClassDefinition) -> JSClassRef;
     pub fn JSClassRelease(class: JSClassRef);
     pub fn JSContextGetGlobalObject(ctx: JSContextRef) -> JSObjectRef;
+    pub fn JSContextGetGroup(ctx: JSContextRef) -> JSContextGroupRef;
+    pub fn JSContextGroupSetExecutionTimeLimit(
+        group: JSContextGroupRef,
+        limit: c_double,
+        callback: *const c_void,
+        context: *mut c_void,
+    );
+    pub fn JSContextGroupClearExecutionTimeLimit(group: JSContextGroupRef);
     pub fn JSGarbageCollect(ctx: JSContextRef);
 
     pub fn JSEvaluateScript(

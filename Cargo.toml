@@ -15,6 +15,9 @@ members = [
 ]
 resolver = "3"
 
+[patch.crates-io]
+blitz-dom = { path = "vendor/blitz-dom" }
+
 [workspace.package]
 version = "0.1.1"
 edition = "2024"

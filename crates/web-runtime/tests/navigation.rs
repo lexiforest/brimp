@@ -226,6 +226,64 @@ fn navigation_updates_location_and_exposes_a_navigator_subset() {
     );
 }
 
+struct ScriptNavigationLoader;
+
+#[async_trait]
+impl ResourceLoader for ScriptNavigationLoader {
+    async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        let body = match request.url.as_str() {
+            "https://example.test/start" => {
+                "<!doctype html><script>Promise.resolve().then(() => location.replace('/result'))</script><script>setTimeout(() => {}, 2000)</script>"
+            }
+            "https://example.test/result" => {
+                "<!doctype html><title>Result</title><main id='result'>navigated</main>"
+            }
+            other => panic!("unexpected resource request: {other}"),
+        };
+        let mut headers = HeaderMap::new();
+        headers.insert(CONTENT_TYPE, HeaderValue::from_static("text/html"));
+        Ok(ResourceResponse {
+            status: StatusCode::OK,
+            headers: headers.into(),
+            body: body.as_bytes().to_vec(),
+            effective_url: request.url,
+            metadata: network::ResponseMetadata::default(),
+        })
+    }
+}
+
+#[test]
+fn location_replace_navigates_the_page_after_the_current_script() {
+    let browser = Browser::with_resource_loader(Arc::new(ScriptNavigationLoader));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap();
+
+    let response = runtime
+        .block_on(page.goto("https://example.test/start"))
+        .unwrap();
+
+    assert_eq!(response.url, "https://example.test/result");
+    assert_eq!(page.url().as_deref(), Some("https://example.test/result"));
+    assert_eq!(
+        page.eval("`${document.title}|${document.querySelector('#result').textContent}`")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "Result|navigated"
+    );
+    assert_eq!(
+        page.eval(
+            "[typeof location.assign, typeof location.replace, typeof location.reload].join(',')"
+        )
+        .unwrap()
+        .to_string()
+        .unwrap(),
+        "function,function,function"
+    );
+}
+
 #[test]
 fn history_api_updates_same_document_entries_and_dispatches_traversal_events() {
     let browser = Browser::with_resource_loader(Arc::new(StaticLoader));

@@ -193,9 +193,8 @@ impl InterceptionRegistry {
             let ids = state
                 .pending
                 .iter()
-                .filter_map(|(id, pending)| {
-                    (pending.target_id == target_id && pending.mode == mode).then(|| id.clone())
-                })
+                .filter(|(_, pending)| pending.target_id == target_id && pending.mode == mode)
+                .map(|(id, _)| id.clone())
                 .collect::<Vec<_>>();
             ids.into_iter()
                 .filter_map(|id| state.pending.remove(&id))

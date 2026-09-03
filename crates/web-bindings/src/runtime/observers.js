@@ -119,3 +119,57 @@ class IntersectionObserver {
     takeRecords() { return []; }
 }
 
+class ResizeObserverSize {
+    constructor(inlineSize, blockSize) {
+        this.inlineSize = inlineSize;
+        this.blockSize = blockSize;
+    }
+}
+
+class ResizeObserverEntry {
+    constructor(target, rect) {
+        this.target = target;
+        this.contentRect = rect;
+        const size = Object.freeze([new ResizeObserverSize(rect.width, rect.height)]);
+        this.borderBoxSize = size;
+        this.contentBoxSize = size;
+        this.devicePixelContentBoxSize = size;
+    }
+}
+
+class ResizeObserver {
+    constructor(callback) {
+        if (typeof callback !== "function") throw new TypeError("ResizeObserver callback must be a function");
+        this.__callback = callback;
+        this.__targets = new Map();
+        this.__timer = null;
+    }
+    observe(target) {
+        if (!(target instanceof Element)) throw new TypeError("ResizeObserver target must be an Element");
+        this.__targets.set(target, null);
+        this.__schedule();
+    }
+    unobserve(target) { this.__targets.delete(target); }
+    disconnect() {
+        if (this.__timer !== null) clearTimeout(this.__timer);
+        this.__timer = null;
+        this.__targets.clear();
+    }
+    __schedule() {
+        if (this.__timer !== null || this.__targets.size === 0) return;
+        this.__timer = setTimeout(() => {
+            this.__timer = null;
+            const entries = [];
+            for (const [target, previous] of this.__targets) {
+                const rect = target.getBoundingClientRect();
+                const size = `${rect.width}:${rect.height}`;
+                if (size !== previous) {
+                    this.__targets.set(target, size);
+                    entries.push(new ResizeObserverEntry(target, rect));
+                }
+            }
+            if (entries.length) this.__callback(entries, this);
+            this.__schedule();
+        }, 16);
+    }
+}

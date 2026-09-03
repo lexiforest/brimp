@@ -15,6 +15,83 @@ function __insertAdjacentNode(element, position, node) {
     return node;
 }
 
+const __datasetConstructorToken = {};
+const __datasetMaps = new WeakMap();
+class DOMStringMap {
+    constructor(token, element) {
+        if (token !== __datasetConstructorToken) throw new TypeError("Illegal constructor");
+        Object.defineProperty(this, "__element", { value: element });
+    }
+}
+
+function __datasetPropertyFromAttribute(name) {
+    return name.slice(5).replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+function __datasetAttributeFromProperty(property) {
+    if (/-[a-z]/.test(property)) {
+        throw new DOMException("dataset property contains a hyphen followed by a lowercase letter", "SyntaxError");
+    }
+    return "data-" + property.replace(/[A-Z]/g, letter => "-" + letter.toLowerCase());
+}
+
+function __datasetFor(element) {
+    let dataset = __datasetMaps.get(element);
+    if (dataset) return dataset;
+    const target = new DOMStringMap(__datasetConstructorToken, element);
+    dataset = new Proxy(target, {
+        get(target, property, receiver) {
+            if (typeof property !== "string" || Reflect.has(target, property)) {
+                return Reflect.get(target, property, receiver);
+            }
+            const value = element.getAttribute(__datasetAttributeFromProperty(property));
+            return value === null ? undefined : value;
+        },
+        set(target, property, value, receiver) {
+            if (typeof property !== "string" || Reflect.has(target, property)) {
+                return Reflect.set(target, property, value, receiver);
+            }
+            element.setAttribute(__datasetAttributeFromProperty(property), String(value));
+            return true;
+        },
+        deleteProperty(target, property) {
+            if (typeof property !== "string" || Reflect.has(target, property)) {
+                return Reflect.deleteProperty(target, property);
+            }
+            element.removeAttribute(__datasetAttributeFromProperty(property));
+            return true;
+        },
+        has(target, property) {
+            if (typeof property !== "string" || Reflect.has(target, property)) return true;
+            return element.hasAttribute(__datasetAttributeFromProperty(property));
+        },
+        ownKeys(target) {
+            const keys = element.getAttributeNames()
+                .filter(name => name.startsWith("data-") && name.length > 5)
+                .map(__datasetPropertyFromAttribute);
+            return [...Reflect.ownKeys(target), ...new Set(keys)];
+        },
+        getOwnPropertyDescriptor(target, property) {
+            const own = Reflect.getOwnPropertyDescriptor(target, property);
+            if (own || typeof property !== "string") return own;
+            const value = element.getAttribute(__datasetAttributeFromProperty(property));
+            return value === null ? undefined : {
+                value, writable: true, enumerable: true, configurable: true,
+            };
+        },
+        defineProperty(target, property, descriptor) {
+            if (typeof property !== "string" || Reflect.has(target, property)) {
+                return Reflect.defineProperty(target, property, descriptor);
+            }
+            if (!("value" in descriptor)) return false;
+            element.setAttribute(__datasetAttributeFromProperty(property), String(descriptor.value));
+            return true;
+        },
+    });
+    __datasetMaps.set(element, dataset);
+    return dataset;
+}
+
 class Element extends Node {
     get tagName() { return __callHost("tagName", this); }
     get localName() { return __callHost("localName", this); }
@@ -42,6 +119,7 @@ class Element extends Node {
         }
         return attributes;
     }
+    get dataset() { return __datasetFor(this); }
     get id() { return __callHost("getAttributeOrEmpty", this, "id"); }
     set id(value) { __callHost("setAttribute", this, "id", value); }
     get className() { return __callHost("getAttributeOrEmpty", this, "class"); }
@@ -73,9 +151,24 @@ class Element extends Node {
     setAttribute(name, value) {
         name = String(name);
         if (name === "") throw new DOMException("attribute name cannot be empty", "InvalidCharacterError");
+        const oldValue = this.getAttribute(name);
         __callHost("setAttribute", this, name, value);
+        const observed = this.constructor.observedAttributes;
+        if (__upgradedCustomElements.has(this) && Array.isArray(observed) && observed.map(String).includes(name) &&
+            typeof this.attributeChangedCallback === "function") {
+            this.attributeChangedCallback(name, oldValue, String(value));
+        }
     }
-    removeAttribute(name) { __callHost("removeAttribute", this, name); }
+    removeAttribute(name) {
+        name = String(name);
+        const oldValue = this.getAttribute(name);
+        __callHost("removeAttribute", this, name);
+        const observed = this.constructor.observedAttributes;
+        if (oldValue !== null && __upgradedCustomElements.has(this) && Array.isArray(observed) &&
+            observed.map(String).includes(name) && typeof this.attributeChangedCallback === "function") {
+            this.attributeChangedCallback(name, oldValue, null);
+        }
+    }
     hasAttribute(name) { return this.getAttribute(name) !== null; }
     getAttributeNames() { return __attributeRecords(this).map(attribute => attribute.name); }
     toggleAttribute(name, force = undefined) {
@@ -165,6 +258,17 @@ function __setReflectedBoolean(element, name, value) {
 class SVGElement extends Element {}
 
 class HTMLElement extends Element {
+    constructor() {
+        super();
+        const upgrading = __customElementConstructionStack.pop();
+        if (upgrading !== undefined) return upgrading;
+        const name = customElements.getName(new.target);
+        if (name === null) throw new TypeError("Illegal constructor");
+        const element = __callHost("createElement", document, name);
+        Object.setPrototypeOf(element, new.target.prototype);
+        __upgradedCustomElements.add(element);
+        return element;
+    }
     get innerText() { return this.textContent; }
     set innerText(value) { this.textContent = String(value); }
     get title() { return __reflectedString(this, "title"); }

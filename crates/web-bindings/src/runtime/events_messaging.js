@@ -191,6 +191,42 @@ class MouseEvent extends UIEvent {
     }
 }
 
+class WheelEvent extends MouseEvent {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.deltaX = Number(options.deltaX ?? 0);
+        this.deltaY = Number(options.deltaY ?? 0);
+        this.deltaZ = Number(options.deltaZ ?? 0);
+        this.deltaMode = Number(options.deltaMode ?? WheelEvent.DOM_DELTA_PIXEL);
+    }
+}
+WheelEvent.DOM_DELTA_PIXEL = 0;
+WheelEvent.DOM_DELTA_LINE = 1;
+WheelEvent.DOM_DELTA_PAGE = 2;
+
+class FocusEvent extends UIEvent {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.relatedTarget = options.relatedTarget === undefined ? null : options.relatedTarget;
+    }
+}
+
+class ProgressEvent extends Event {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.lengthComputable = Boolean(options.lengthComputable);
+        this.loaded = Number(options.loaded ?? 0);
+        this.total = Number(options.total ?? 0);
+    }
+}
+
+class SubmitEvent extends Event {
+    constructor(type, options = {}) {
+        super(type, options);
+        this.submitter = options.submitter === undefined ? null : options.submitter;
+    }
+}
+
 class KeyboardEvent extends UIEvent {
     constructor(type, options = {}) {
         super(type, options);

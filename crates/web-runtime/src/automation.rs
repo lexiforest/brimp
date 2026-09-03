@@ -953,6 +953,7 @@ fn run_page(
             Ok(command) => command,
             Err(mpsc::RecvTimeoutError::Timeout) => {
                 let _ = page.run_pending_tasks();
+                runtime.block_on(page.process_dynamic_scripts());
                 continue;
             }
             Err(mpsc::RecvTimeoutError::Disconnected) => break,
@@ -978,13 +979,22 @@ fn run_page(
                 let mut request = ResourceRequest::new(method, url);
                 request.headers = headers;
                 request.body = body;
-                let result = runtime.block_on(async {
+                let started = Instant::now();
+                page.set_script_execution_deadline(timeout);
+                let mut result = runtime.block_on(async {
                     tokio::select! {
-                        result = page.goto_request(request, allow_redirects, max_redirects) => result.map_err(AutomationError::from),
+                        biased;
                         () = wait_for_cancellation(cancellation) => Err(AutomationError::Cancellation),
                         () = tokio::time::sleep(timeout) => Err(AutomationError::Timeout(timeout)),
+                        result = page.goto_request(request, allow_redirects, max_redirects) => result.map_err(AutomationError::from),
                     }
                 });
+                page.clear_script_execution_deadline();
+                if started.elapsed() >= timeout
+                    && !matches!(result, Err(AutomationError::Cancellation))
+                {
+                    result = Err(AutomationError::Timeout(timeout));
+                }
                 let _ = response.send(result);
             }
             Command::Evaluate {
@@ -1162,6 +1172,7 @@ fn run_page(
                         }
                         page.run_pending_tasks()
                             .map_err(|error| AutomationError::JavaScript(error.to_string()))?;
+                        runtime.block_on(page.process_dynamic_scripts());
                         std::thread::sleep(Duration::from_millis(5));
                     }
                 });
@@ -1185,6 +1196,7 @@ fn run_page(
                     if let Err(error) = page.run_pending_tasks() {
                         break Err(AutomationError::JavaScript(error.to_string()));
                     }
+                    runtime.block_on(page.process_dynamic_scripts());
                     if page.is_network_idle() {
                         let since = idle_since.get_or_insert_with(Instant::now);
                         if since.elapsed() >= quiet_window {

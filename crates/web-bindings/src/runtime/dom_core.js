@@ -1,3 +1,50 @@
+const __dynamicScriptElements = new Map();
+const __pendingDynamicScripts = [];
+let __nextDynamicScriptId = 1;
+let __currentScript = null;
+
+function __queueDynamicScript(element) {
+    if (!(element instanceof HTMLScriptElement) || !element.isConnected || element.__alreadyStarted) return;
+    const type = element.type.trim().toLowerCase();
+    if (type !== "" && type !== "text/javascript" && type !== "application/javascript" && type !== "module") return;
+    element.__alreadyStarted = true;
+    const id = __nextDynamicScriptId++;
+    __dynamicScriptElements.set(id, element);
+    __pendingDynamicScripts.push({
+        id,
+        module: type === "module",
+        src: element.getAttribute("src") === null ? null : element.src,
+        source: element.textContent,
+    });
+}
+
+function __brimpTakeDynamicScripts() {
+    return JSON.stringify(__pendingDynamicScripts.splice(0));
+}
+
+function __brimpCompleteDynamicScript(id, error) {
+    const element = __dynamicScriptElements.get(id);
+    if (!element) return;
+    __dynamicScriptElements.delete(id);
+    element.dispatchEvent(new Event(error ? "error" : "load"));
+}
+function __brimpSetCurrentScriptByIndex(index) {
+    __currentScript = document.scripts.item(index);
+}
+function __brimpSetCurrentDynamicScript(id) {
+    __currentScript = __dynamicScriptElements.get(id) ?? null;
+}
+function __brimpClearCurrentScript() {
+    __currentScript = null;
+}
+Object.defineProperties(globalThis, {
+    __brimpTakeDynamicScripts: { value: __brimpTakeDynamicScripts, configurable: true },
+    __brimpCompleteDynamicScript: { value: __brimpCompleteDynamicScript, configurable: true },
+    __brimpSetCurrentScriptByIndex: { value: __brimpSetCurrentScriptByIndex, configurable: true },
+    __brimpSetCurrentDynamicScript: { value: __brimpSetCurrentDynamicScript, configurable: true },
+    __brimpClearCurrentScript: { value: __brimpClearCurrentScript, configurable: true },
+});
+
 class Node extends EventTarget {
     get nodeType() { return __callHost("nodeType", this); }
     get nodeName() { return __callHost("nodeName", this); }
@@ -18,6 +65,11 @@ class Node extends EventTarget {
         let node = this;
         while (node.parentNode) node = node.parentNode;
         return node instanceof Document;
+    }
+    getRootNode(_options = {}) {
+        let node = this;
+        while (node.parentNode) node = node.parentNode;
+        return node;
     }
     contains(other) {
         if (other === null) return false;
@@ -70,12 +122,20 @@ class Node extends EventTarget {
     appendChild(child) {
         const result = __callHost("appendChild", this, child);
         if (child instanceof HTMLIFrameElement) child.__connected();
+        __connectCustomElementTree(child);
+        __queueDynamicScript(child);
         return result;
     }
-    removeChild(child) { return __callHost("removeChild", this, child); }
+    removeChild(child) {
+        const result = __callHost("removeChild", this, child);
+        __disconnectCustomElementTree(child);
+        return result;
+    }
     insertBefore(child, reference) {
         const result = __callHost("insertBefore", this, child, reference);
         if (child instanceof HTMLIFrameElement) child.__connected();
+        __connectCustomElementTree(child);
+        __queueDynamicScript(child);
         return result;
     }
     replaceChild(node, child) {
@@ -186,6 +246,18 @@ class TreeWalker {
 
 class DOMImplementation {
     hasFeature() { return true; }
+    createHTMLDocument(title) {
+        const created = new DOMParser().parseFromString(
+            "<!doctype html><html><head></head><body></body></html>",
+            "text/html",
+        );
+        if (arguments.length > 0) {
+            const titleElement = created.createElement("title");
+            titleElement.appendChild(created.createTextNode(String(title)));
+            created.head.appendChild(titleElement);
+        }
+        return created;
+    }
 }
 const __domImplementation = new DOMImplementation();
 
@@ -278,6 +350,10 @@ const __reservedCustomElementNames = new Set([
     "annotation-xml", "color-profile", "font-face", "font-face-src",
     "font-face-uri", "font-face-format", "font-face-name", "missing-glyph",
 ]);
+const __customElementConstructionStack = [];
+const __upgradedCustomElements = new WeakSet();
+const __failedCustomElements = new WeakSet();
+const __connectedCustomElements = new WeakSet();
 
 function __isValidCustomElementName(name) {
     if (name.length === 0 || name[0] < "a" || name[0] > "z" || !name.includes("-") ||
@@ -306,6 +382,7 @@ class CustomElementRegistry {
         if (options.extends !== undefined) String(options.extends);
         this.__definitions.set(name, constructor);
         this.__constructorNames.set(constructor, name);
+        this.upgrade(document);
         const waiters = this.__waiters.get(name) ?? [];
         this.__waiters.delete(name);
         for (const resolve of waiters) resolve(constructor);
@@ -325,9 +402,67 @@ class CustomElementRegistry {
             this.__waiters.set(name, waiters);
         });
     }
-    upgrade() {}
+    upgrade(root) {
+        if (!(root instanceof Node)) throw new TypeError("root must be a Node");
+        if (root instanceof Element) __upgradeCustomElement(root);
+        for (const element of root.querySelectorAll("*")) __upgradeCustomElement(element);
+    }
 }
 const customElements = new CustomElementRegistry();
+
+function __upgradeCustomElement(element) {
+    if (__upgradedCustomElements.has(element) || __failedCustomElements.has(element)) return element;
+    const constructor = customElements.get(element.localName);
+    if (constructor === undefined) return element;
+    __upgradedCustomElements.add(element);
+    Object.setPrototypeOf(element, constructor.prototype);
+    __customElementConstructionStack.push(element);
+    try {
+        const result = Reflect.construct(constructor, []);
+        if (result !== element) throw new TypeError("custom element constructor returned another object");
+        __callHost("setCustomElementDefined", element);
+        const observed = Array.from(constructor.observedAttributes ?? [], String);
+        if (typeof element.attributeChangedCallback === "function") {
+            for (const name of observed) {
+                if (element.hasAttribute(name)) {
+                    element.attributeChangedCallback(name, null, element.getAttribute(name));
+                }
+            }
+        }
+        if (element.isConnected && typeof element.connectedCallback === "function") {
+            __connectedCustomElements.add(element);
+            element.connectedCallback();
+        }
+    } catch (error) {
+        __failedCustomElements.add(element);
+        console.error(`Custom element upgrade failed for <${element.localName}> (${constructor.name || "anonymous"})`, error);
+    } finally {
+        const index = __customElementConstructionStack.lastIndexOf(element);
+        if (index !== -1) __customElementConstructionStack.splice(index, 1);
+    }
+    return element;
+}
+
+function __customElementTree(root) {
+    return [root, ...(root instanceof Element ? root.querySelectorAll("*") : [])];
+}
+
+function __connectCustomElementTree(root) {
+    for (const element of __customElementTree(root)) {
+        __upgradeCustomElement(element);
+        if (__upgradedCustomElements.has(element) && !__connectedCustomElements.has(element)) {
+            __connectedCustomElements.add(element);
+            if (typeof element.connectedCallback === "function") element.connectedCallback();
+        }
+    }
+}
+
+function __disconnectCustomElementTree(root) {
+    for (const element of __customElementTree(root)) {
+        if (!__connectedCustomElements.delete(element)) continue;
+        if (typeof element.disconnectedCallback === "function") element.disconnectedCallback();
+    }
+}
 
 function __nodesFromArguments(values) {
     return values.map(value => value instanceof Node ? value : document.createTextNode(String(value)));

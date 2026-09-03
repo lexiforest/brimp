@@ -538,6 +538,9 @@ impl Default for CurlResourceLoader {
 #[async_trait]
 impl ResourceLoader for CurlResourceLoader {
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        if let Some(response) = data_url_response(&request) {
+            return response;
+        }
         self.executor.fetch(request).await
     }
     fn fetch_callback(
@@ -545,6 +548,10 @@ impl ResourceLoader for CurlResourceLoader {
         request: ResourceRequest,
         callback: ResourceCallback,
     ) -> Result<(), NetworkError> {
+        if let Some(response) = data_url_response(&request) {
+            callback(response);
+            return Ok(());
+        }
         self.executor.fetch_callback(request, callback)
     }
     fn open_websocket(
@@ -564,6 +571,47 @@ impl ResourceLoader for CurlResourceLoader {
     }
 }
 
+fn data_url_response(request: &ResourceRequest) -> Option<Result<ResourceResponse, NetworkError>> {
+    if !request
+        .url
+        .trim_start_matches(|character: char| character <= ' ')
+        .get(..5)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("data:"))
+    {
+        return None;
+    }
+    Some((|| {
+        if request.method != Method::GET || request.body.is_some() {
+            return Err(NetworkError::InvalidRequest(
+                "data URL resources require GET without a body".into(),
+            ));
+        }
+        let parsed = data_url::DataUrl::process(&request.url)
+            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        let content_type = parsed.mime_type().to_string();
+        let (body, _) = parsed
+            .decode_to_vec()
+            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        let mut headers = HeaderList::new();
+        headers.insert(
+            http::header::CONTENT_TYPE,
+            HeaderValue::from_str(&content_type)
+                .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?,
+        );
+        let downloaded_bytes = body.len() as u64;
+        Ok(ResourceResponse {
+            status: StatusCode::OK,
+            headers,
+            body,
+            effective_url: request.url.clone(),
+            metadata: ResponseMetadata {
+                downloaded_bytes,
+                ..ResponseMetadata::default()
+            },
+        })
+    })())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -573,6 +621,26 @@ mod tests {
     use std::time::{Duration, Instant};
 
     static EXECUTOR_TEST_LOCK: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn data_urls_are_decoded_without_entering_curl() {
+        let loader = CurlResourceLoader::default();
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .build()
+            .unwrap();
+        let response = runtime
+            .block_on(loader.fetch(ResourceRequest::get(
+                "data:text/javascript;charset=utf-8;base64,Y29uc29sZS5sb2coJ29rJyk=",
+            )))
+            .unwrap();
+        assert_eq!(response.status, StatusCode::OK);
+        assert_eq!(response.body, b"console.log('ok')");
+        assert_eq!(
+            response.headers["content-type"].to_str().unwrap(),
+            "text/javascript;charset=utf-8"
+        );
+        assert_eq!(response.metadata.downloaded_bytes, 17);
+    }
 
     #[test]
     fn many_loader_clones_share_exactly_one_executor_thread() {

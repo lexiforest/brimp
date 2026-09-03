@@ -279,6 +279,11 @@ function __childConstructor(context, creator) {
     return function(...arguments_) { return creator(context.document, ...arguments_); };
 }
 
+function __parseChildDocument(source) {
+    if (source === "") source = "<!doctype html><html><head></head><body></body></html>";
+    return new DOMParser().parseFromString(source, "text/html");
+}
+
 class HTMLIFrameElement extends HTMLElement {
     constructor() { __illegalHtmlElementConstructor(); }
     get contentWindow() {
@@ -287,14 +292,14 @@ class HTMLIFrameElement extends HTMLElement {
             let location = new URL("about:blank");
             const childWindow = new EventTarget();
             context = {
-                document: new DOMParser().parseFromString("", "text/html"),
+                document: __parseChildDocument(""),
                 window: childWindow,
                 navigate(url) {
                     location = new URL(url, document.URL);
                     const source = location.protocol === "data:"
                         ? __decodeDataUrlDocument(location.href)
                         : "";
-                    context.document = new DOMParser().parseFromString(source, "text/html");
+                    context.document = __parseChildDocument(source);
                     Object.defineProperty(context.document, "__URL", {
                         value: location.href, configurable: true,
                     });
@@ -318,6 +323,11 @@ class HTMLIFrameElement extends HTMLElement {
             });
             childWindow.window = childWindow;
             childWindow.self = childWindow;
+            childWindow.setTimeout = setTimeout;
+            childWindow.clearTimeout = clearTimeout;
+            childWindow.setInterval = setInterval;
+            childWindow.clearInterval = clearInterval;
+            childWindow.queueMicrotask = queueMicrotask;
             childWindow.Comment = __childConstructor(context, (doc, data = "") => doc.createComment(String(data)));
             childWindow.Text = __childConstructor(context, (doc, data = "") => doc.createTextNode(String(data)));
             childWindow.DocumentFragment = __childConstructor(context, doc => doc.createDocumentFragment());
@@ -484,6 +494,30 @@ class HTMLMapElement extends HTMLElement { constructor() { __illegalHtmlElementC
 class HTMLAreaElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
 class HTMLFormElement extends HTMLElement {
     constructor() { __illegalHtmlElementConstructor(); }
+    get elements() {
+        return new HTMLFormControlsCollection(() =>
+            [...this.querySelectorAll("button,input,object,output,select,textarea")]);
+    }
+    get length() { return this.elements.length; }
+    requestSubmit(submitter = null) {
+        if (submitter !== null) {
+            const isButton = submitter instanceof HTMLButtonElement && submitter.type === "submit";
+            const isInput = submitter instanceof HTMLInputElement &&
+                (submitter.type === "submit" || submitter.type === "image");
+            if (!isButton && !isInput) throw new TypeError("submitter is not a submit button");
+            let owner = submitter.parentElement;
+            while (owner !== null && !(owner instanceof HTMLFormElement)) owner = owner.parentElement;
+            if (owner !== this) {
+                throw new DOMException("The submitter is not owned by this form", "NotFoundError");
+            }
+        }
+        const event = new SubmitEvent("submit", {
+            bubbles: true,
+            cancelable: true,
+            submitter,
+        });
+        if (this.dispatchEvent(event)) this.submit();
+    }
     submit() {
         if (this.method !== "get") {
             throw new DOMException("Only GET form submission is implemented", "NotSupportedError");
