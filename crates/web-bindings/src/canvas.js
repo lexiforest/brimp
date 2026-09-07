@@ -1366,7 +1366,6 @@ Object.defineProperties(HTMLCanvasElement.prototype, {
     getContext: {
         value(type, options = null) {
             type = String(type).toLowerCase();
-            if (type === "experimental-webgl") type = "webgl";
             const current = contexts.get(this);
             if (current) return current.type === type ? current.context : null;
             if (type === "2d" && features.canvas) {
@@ -1386,21 +1385,6 @@ Object.defineProperties(HTMLCanvasElement.prototype, {
                 const context = new CanvasRenderingContext2D(construct, this, attributes);
                 contexts.set(this, { type, context });
                 return context;
-            }
-            if (features.webgpu && type === "webgpu") {
-                const context = globalThis.__brimpCreateWebGPUContext?.(this);
-                if (context) {
-                    contexts.set(this, { type, context });
-                    return context;
-                }
-            }
-            if (features.webgl && (type === "webgl" || type === "webgl2")) {
-                const normalizedType = type === "webgl2" ? "webgl2" : "webgl";
-                const context = globalThis.__brimpCreateWebGLContext?.(this, normalizedType);
-                if (context) {
-                    contexts.set(this, { type: normalizedType, context });
-                    return context;
-                }
             }
             return null;
         },

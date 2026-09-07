@@ -17,13 +17,11 @@
     "viewport": { "$ref": "#/$defs/viewport" },
     "screen": { "$ref": "#/$defs/screen" },
     "window": { "$ref": "#/$defs/window" },
-    "graphics": { "$ref": "#/$defs/graphics" },
     "plugins": { "$ref": "#/$defs/plugins" },
     "chrome": { "$ref": "#/$defs/chrome" },
     "navigator": { "$ref": "#/$defs/navigator" },
     "css": { "$ref": "#/$defs/css" },
     "media": { "$ref": "#/$defs/media" },
-    "audio": { "$ref": "#/$defs/audio" },
     "speech": { "$ref": "#/$defs/speech" },
     "geolocation": { "$ref": "#/$defs/geolocation" },
     "webrtc": { "$ref": "#/$defs/webrtc" },
@@ -64,8 +62,7 @@
         "page_transition_events": { "type": "boolean" },
         "screen_extended": { "type": "boolean" },
         "moz_window_geometry": { "type": "boolean" },
-        "webgl": { "type": "boolean" }, "webgl2": { "type": "boolean" },
-        "webgpu": { "type": "boolean" }, "opfs": { "type": "boolean" },
+        "opfs": { "type": "boolean" },
         "webrtc": { "type": "boolean" },
         "battery": { "type": "boolean" }, "vibration": { "type": "boolean" },
         "permissions": { "type": "boolean" }, "workers": { "type": "boolean" },
@@ -107,23 +104,6 @@
         "runtime": { "type": "boolean" }, "app": { "type": "boolean" },
         "load_times": { "type": "boolean" }, "csi": { "type": "boolean" },
         "window_key_strategy": { "enum": ["native-order", "append", "prepend"] }
-      }
-    },
-    "webgl": {
-      "type": "object", "additionalProperties": false,
-      "properties": {
-        "parameters": { "type": "object" }, "extensions": { "type": "array", "items": { "type": "string" } },
-        "context_attributes": { "type": "object" },
-        "shader_precision_formats": { "type": "array", "items": { "$ref": "#/$defs/shader_precision" } },
-        "block_unknown_parameters": { "type": "boolean" }, "block_unknown_extensions": { "type": "boolean" }
-      }
-    },
-    "shader_precision": {
-      "type": "object", "additionalProperties": false,
-      "required": ["shader_type", "precision_type", "range_min", "range_max", "precision"],
-      "properties": {
-        "shader_type": { "type": "string" }, "precision_type": { "type": "string" },
-        "range_min": { "type": "integer" }, "range_max": { "type": "integer" }, "precision": { "type": "integer" }
       }
     },
     "css_media": {
@@ -218,23 +198,6 @@
         "outer_height": { "type": "integer", "minimum": 0 },
         "screen_x": { "type": "integer" },
         "screen_y": { "type": "integer" }
-      }
-    },
-    "graphics": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "webgl_vendor": { "type": "string", "minLength": 1 },
-        "webgl_renderer": { "type": "string", "minLength": 1 },
-        "webgl_masked_vendor": { "type": "string", "minLength": 1 },
-        "webgl_masked_renderer": { "type": "string", "minLength": 1 },
-        "webgpu_adapter_vendor": { "type": "string" },
-        "webgpu_adapter_architecture": { "type": "string" },
-        "webgpu_adapter_device": { "type": "string" },
-        "webgpu_adapter_description": { "type": "string" },
-        "webgpu_max_bind_groups_plus_vertex_buffers": { "type": "integer", "minimum": 1 },
-        "webgl1": { "$ref": "#/$defs/webgl" },
-        "webgl2": { "$ref": "#/$defs/webgl" }
       }
     },
     "navigator": {
@@ -412,19 +375,6 @@
         }
       }
     },
-    "audio": {
-      "type": "object", "additionalProperties": false,
-      "properties": {
-        "sample_rate": { "type": "integer", "minimum": 1 }, "output_latency_ms": { "type": "integer" },
-        "max_channel_count": { "type": "integer", "minimum": 1 }, "compressor_reduction": { "type": "string" },
-        "frequency_data": { "type": "array", "items": { "type": "string" } },
-        "time_domain_data": { "type": "array", "items": { "type": "string" } },
-        "rendered_buffer": { "type": "array", "items": { "type": "string" } },
-        "render_leading_silence_samples": { "type": "integer", "minimum": 0 },
-        "fake_completion_delay_ms": { "type": "integer" }, "native_shape": { "type": "boolean" },
-        "noise_enabled": { "type": "boolean" }, "seed": { "$ref": "#/$defs/seed" }
-      }
-    },
     "speech": {
       "type": "object", "additionalProperties": false,
       "properties": {
@@ -494,7 +444,7 @@
     "noise": {
       "type": "object", "additionalProperties": false,
       "properties": {
-        "enabled": { "type": "boolean" }, "canvas": { "type": "boolean" }, "webgl": { "type": "boolean" }, "audio": { "type": "boolean" },
+        "enabled": { "type": "boolean" }, "canvas": { "type": "boolean" },
         "fonts": { "type": "boolean" }, "domrect": { "type": "boolean" }, "svg": { "type": "boolean" }
       }
     }

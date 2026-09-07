@@ -531,11 +531,6 @@ function installPersona(persona, runtimeFeatures) {
         delete globalThis.chrome;
     }
 
-    globalThis.__brimpSetGpuPersona?.(persona.graphics);
-    globalThis.__brimpSetWebGlPersona?.(persona.graphics);
-    delete globalThis.__brimpSetGpuPersona;
-    delete globalThis.__brimpSetWebGlPersona;
-
     const applyIdentityOverride = serialized => {
         const override = JSON.parse(serialized);
         for (const name of ["userAgent", "platform", "language", "languages"]) {

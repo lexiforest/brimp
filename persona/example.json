@@ -31,9 +31,6 @@
     "sec_ch_ua_model": "\"\""
   },
   "features": {
-    "webgl": true,
-    "webgl2": true,
-    "webgpu": false,
     "webrtc": true,
     "battery": true,
     "permissions": true,
@@ -85,29 +82,6 @@
       "prefers_reduced_motion": "no-preference",
       "orientation": "landscape",
       "display_mode": "browser"
-    }
-  },
-  "graphics": {
-    "webgl_masked_vendor": "WebKit",
-    "webgl_masked_renderer": "WebKit WebGL",
-    "webgl_vendor": "Google Inc. (Intel Inc.)",
-    "webgl_renderer": "ANGLE (Intel Inc., Intel(R) Iris(TM) Plus Graphics OpenGL Engine, OpenGL 4.1)",
-    "webgl1": {
-      "parameters": { "3379": 16384, "34076": 16384 },
-      "extensions": ["ANGLE_instanced_arrays", "EXT_blend_minmax", "WEBGL_debug_renderer_info"],
-      "context_attributes": { "alpha": true, "antialias": true, "depth": true, "stencil": false },
-      "shader_precision_formats": [
-        { "shader_type": "35633", "precision_type": "36338", "range_min": 127, "range_max": 127, "precision": 23 }
-      ],
-      "block_unknown_parameters": false,
-      "block_unknown_extensions": true
-    },
-    "webgl2": {
-      "parameters": { "3379": 16384, "35375": 65536 },
-      "extensions": ["EXT_color_buffer_float", "WEBGL_debug_renderer_info"],
-      "context_attributes": { "alpha": true, "antialias": true, "depth": true, "stencil": false },
-      "block_unknown_parameters": false,
-      "block_unknown_extensions": true
     }
   },
   "plugins": {
@@ -198,19 +172,6 @@
     "audio_inputs": 1,
     "video_inputs": 1,
     "audio_outputs": 1
-  },
-  "audio": {
-    "sample_rate": 48000,
-    "output_latency_ms": 20,
-    "max_channel_count": 2,
-    "compressor_reduction": "-20.538288116455078",
-    "frequency_data": ["-20.538288116455078", "-160"],
-    "time_domain_data": ["0.122705061", "-0.122705061"],
-    "rendered_buffer": ["0"],
-    "render_leading_silence_samples": 256,
-    "fake_completion_delay_ms": 0,
-    "native_shape": true,
-    "noise_enabled": true
   },
   "speech": {
     "voices": [
@@ -319,8 +280,6 @@
   "noise": {
     "enabled": true,
     "canvas": true,
-    "webgl": true,
-    "audio": true,
     "fonts": true,
     "domrect": true,
     "svg": true

@@ -17,9 +17,6 @@ fn chrome_preset_exposes_expected_identity() {
             .contains("\"Not;A=Brand\";v=\"8.0.0.0\"")
     );
     assert_eq!(persona.network.sec_ch_ua_arch, "\"x86\"");
-    assert_eq!(persona.graphics.webgl_vendor, "Intel Inc.");
-    assert_eq!(persona.graphics.webgl_masked_vendor, "WebKit");
-    assert_eq!(persona.graphics.webgl_masked_renderer, "WebKit WebGL");
     assert_eq!(
         persona.engine.error_messages["number.to_fixed.range"],
         "toFixed() digits argument must be between 0 and 100"
@@ -43,13 +40,6 @@ fn firefox_preset_uses_firefox_transport_and_hides_chromium_apis() {
     assert!(persona.js.expose_global_privacy_control);
     assert!(!persona.js.global_privacy_control);
     assert_eq!(persona.js.hardware_concurrency, 10);
-    assert_eq!(persona.graphics.webgl_vendor, "Apple");
-    assert_eq!(persona.graphics.webgl_renderer, "Apple M1, or similar");
-    assert_eq!(persona.graphics.webgl_masked_vendor, "Mozilla");
-    assert_eq!(
-        persona.graphics.webgl_masked_renderer,
-        "Apple M1, or similar"
-    );
     assert_eq!(persona.viewport.width, 1280);
     assert_eq!(persona.viewport.height, 956);
     assert_eq!(persona.viewport.device_scale_factor, 2);
@@ -105,7 +95,6 @@ fn partial_feature_overrides_preserve_preset_family_gates() {
     let persona = PersonaConfig {
         preset: BrowserPersonaPreset::FirefoxStable,
         features: Some(FeaturesConfig {
-            webgpu: Some(true),
             gamepad: Some(false),
             ..Default::default()
         }),
@@ -113,7 +102,6 @@ fn partial_feature_overrides_preserve_preset_family_gates() {
     }
     .resolve();
 
-    assert_eq!(persona.features.webgpu, Some(true));
     assert_eq!(persona.features.gamepad, Some(false));
     assert_eq!(persona.features.user_agent_data, Some(false));
     assert_eq!(persona.features.device_memory, Some(false));
@@ -300,7 +288,6 @@ fn canonical_persona_json_is_valid_v1() {
     assert_eq!(persona.network.accept_encoding, "gzip, deflate, br, zstd");
     assert_eq!(persona.plugins.entries.len(), 5);
     assert_eq!(persona.plugins.entries[0].mime_types.len(), 2);
-    assert_eq!(persona.graphics.webgl1.parameters["3379"], 16384);
     assert_eq!(persona.speech.voices.len(), 2);
     assert_eq!(persona.geo.latitude.as_deref(), Some("37.7749"));
     assert_eq!(persona.webrtc.ipv4.as_deref(), Some("192.0.2.10"));
@@ -422,43 +409,6 @@ fn persona_config_applies_css_prefix_overrides() {
 }
 
 #[test]
-fn persona_config_applies_graphics_overrides() {
-    let persona = PersonaConfig {
-        graphics: Some(GraphicsConfig {
-            webgl_vendor: Some("Google Inc. (Intel Inc.)".to_string()),
-            webgl_renderer: Some(
-                "ANGLE (Intel Inc., Intel(R) UHD Graphics 630, OpenGL 4.1)".to_string(),
-            ),
-            webgl_masked_vendor: Some("WebKit".to_string()),
-            webgl_masked_renderer: Some("WebKit WebGL".to_string()),
-            webgpu_adapter_vendor: Some(String::new()),
-            webgpu_adapter_description: Some("sampled adapter".to_string()),
-            webgpu_max_bind_groups_plus_vertex_buffers: Some(24),
-            ..Default::default()
-        }),
-        ..Default::default()
-    }
-    .resolve();
-
-    assert_eq!(persona.graphics.webgl_vendor, "Google Inc. (Intel Inc.)");
-    assert_eq!(
-        persona.graphics.webgl_renderer,
-        "ANGLE (Intel Inc., Intel(R) UHD Graphics 630, OpenGL 4.1)"
-    );
-    assert_eq!(persona.graphics.webgl_masked_vendor, "WebKit");
-    assert_eq!(persona.graphics.webgl_masked_renderer, "WebKit WebGL");
-    assert!(persona.graphics.webgpu_adapter_vendor.is_empty());
-    assert_eq!(
-        persona.graphics.webgpu_adapter_description,
-        "sampled adapter"
-    );
-    assert_eq!(
-        persona.graphics.webgpu_max_bind_groups_plus_vertex_buffers,
-        24
-    );
-}
-
-#[test]
 fn persona_config_applies_navigator_overrides() {
     let persona = PersonaConfig {
         navigator: Some(NavigatorConfig {
@@ -514,7 +464,6 @@ fn persona_config_applies_navigator_overrides() {
     assert!(!persona.js.bluetooth_enabled);
     assert!(!persona.js.bluetooth_available);
     assert!(!persona.js.media_devices_enabled);
-    assert!(!persona.js.webgpu_enabled);
     assert!(!persona.js.offscreen_canvas_enabled);
     assert!(!persona.js.service_worker_enabled);
     assert_eq!(persona.js.ua_platform_version, "10.0.0");

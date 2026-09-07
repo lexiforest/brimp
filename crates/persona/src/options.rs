@@ -23,9 +23,6 @@ pub struct FeaturesConfig {
     pub page_transition_events: Option<bool>,
     pub screen_extended: Option<bool>,
     pub moz_window_geometry: Option<bool>,
-    pub webgl: Option<bool>,
-    pub webgl2: Option<bool>,
-    pub webgpu: Option<bool>,
     pub opfs: Option<bool>,
     pub webrtc: Option<bool>,
     pub battery: Option<bool>,
@@ -90,51 +87,6 @@ pub struct ChromeConfig {
     pub load_times: Option<bool>,
     pub csi: Option<bool>,
     pub window_key_strategy: Option<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-pub struct WebGlConfig {
-    #[serde(default)]
-    pub parameters: std::collections::BTreeMap<String, serde_json::Value>,
-    #[serde(default)]
-    pub extensions: Vec<String>,
-    #[serde(default)]
-    pub context_attributes: std::collections::BTreeMap<String, serde_json::Value>,
-    #[serde(default)]
-    pub shader_precision_formats: Vec<ShaderPrecisionConfig>,
-    pub block_unknown_parameters: Option<bool>,
-    pub block_unknown_extensions: Option<bool>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-pub struct ShaderPrecisionConfig {
-    pub shader_type: String,
-    pub precision_type: String,
-    pub range_min: i32,
-    pub range_max: i32,
-    pub precision: i32,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-pub struct AudioConfig {
-    pub sample_rate: Option<u32>,
-    pub output_latency_ms: Option<u32>,
-    pub max_channel_count: Option<u32>,
-    pub compressor_reduction: Option<String>,
-    #[serde(default)]
-    pub frequency_data: Vec<String>,
-    #[serde(default)]
-    pub time_domain_data: Vec<String>,
-    #[serde(default)]
-    pub rendered_buffer: Vec<String>,
-    pub render_leading_silence_samples: Option<u32>,
-    pub fake_completion_delay_ms: Option<u32>,
-    pub native_shape: Option<bool>,
-    pub noise_enabled: Option<bool>,
-    pub seed: Option<PersonaSeed>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -242,8 +194,6 @@ pub struct NativeFunctionsConfig {
 pub struct NoiseConfig {
     pub enabled: Option<bool>,
     pub canvas: Option<bool>,
-    pub webgl: Option<bool>,
-    pub audio: Option<bool>,
     pub fonts: Option<bool>,
     pub domrect: Option<bool>,
     pub svg: Option<bool>,
@@ -391,34 +341,6 @@ pub struct CssConfig {
     pub webkit_prefix_enabled: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub media: Option<CssMediaConfig>,
-}
-
-/// Optional WebGL and graphics fingerprint overrides.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
-#[serde(deny_unknown_fields)]
-pub struct GraphicsConfig {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl_vendor: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl_renderer: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl_masked_vendor: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl_masked_renderer: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl1: Option<WebGlConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgl2: Option<WebGlConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgpu_adapter_vendor: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgpu_adapter_architecture: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgpu_adapter_device: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgpu_adapter_description: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub webgpu_max_bind_groups_plus_vertex_buffers: Option<u32>,
 }
 
 /// Optional `navigator` and JS capability overrides.
@@ -634,9 +556,6 @@ impl FeaturesConfig {
             page_transition_events,
             screen_extended,
             moz_window_geometry,
-            webgl,
-            webgl2,
-            webgpu,
             opfs,
             webrtc,
             battery,
@@ -1005,56 +924,6 @@ impl NavigatorConfig {
     }
 }
 
-impl GraphicsConfig {
-    pub(crate) fn apply_to(&self, graphics: &mut GraphicsFingerprint) {
-        if let Some(webgl_vendor) = self.webgl_vendor.as_ref().filter(|value| !value.is_empty()) {
-            graphics.webgl_vendor = webgl_vendor.clone();
-        }
-        if let Some(webgl_renderer) = self
-            .webgl_renderer
-            .as_ref()
-            .filter(|value| !value.is_empty())
-        {
-            graphics.webgl_renderer = webgl_renderer.clone();
-        }
-        if let Some(webgl_masked_vendor) = self
-            .webgl_masked_vendor
-            .as_ref()
-            .filter(|value| !value.is_empty())
-        {
-            graphics.webgl_masked_vendor = webgl_masked_vendor.clone();
-        }
-        if let Some(webgl_masked_renderer) = self
-            .webgl_masked_renderer
-            .as_ref()
-            .filter(|value| !value.is_empty())
-        {
-            graphics.webgl_masked_renderer = webgl_masked_renderer.clone();
-        }
-        if let Some(value) = &self.webgl1 {
-            graphics.webgl1 = value.clone();
-        }
-        if let Some(value) = &self.webgl2 {
-            graphics.webgl2 = value.clone();
-        }
-        if let Some(value) = &self.webgpu_adapter_vendor {
-            graphics.webgpu_adapter_vendor = value.clone();
-        }
-        if let Some(value) = &self.webgpu_adapter_architecture {
-            graphics.webgpu_adapter_architecture = value.clone();
-        }
-        if let Some(value) = &self.webgpu_adapter_device {
-            graphics.webgpu_adapter_device = value.clone();
-        }
-        if let Some(value) = &self.webgpu_adapter_description {
-            graphics.webgpu_adapter_description = value.clone();
-        }
-        if let Some(value) = self.webgpu_max_bind_groups_plus_vertex_buffers {
-            graphics.webgpu_max_bind_groups_plus_vertex_buffers = value;
-        }
-    }
-}
-
 impl ScreenConfig {
     pub(crate) fn apply_to(&self, screen: &mut ScreenFingerprint) {
         if let Some(width) = self.width {
@@ -1130,47 +999,6 @@ impl CssConfig {
         }
         if let Some(media) = &self.media {
             css.media = media.clone();
-        }
-    }
-}
-
-impl AudioConfig {
-    pub(crate) fn apply_to(&self, audio: &mut AudioFingerprint) {
-        if let Some(value) = self.sample_rate {
-            audio.sample_rate = value;
-        }
-        if let Some(value) = self.output_latency_ms {
-            audio.output_latency_ms = value;
-        }
-        if let Some(value) = self.max_channel_count {
-            audio.max_channel_count = value;
-        }
-        if let Some(value) = &self.compressor_reduction {
-            audio.compressor_reduction = value.clone();
-        }
-        if !self.frequency_data.is_empty() {
-            audio.frequency_data = self.frequency_data.clone();
-        }
-        if !self.time_domain_data.is_empty() {
-            audio.time_domain_data = self.time_domain_data.clone();
-        }
-        if !self.rendered_buffer.is_empty() {
-            audio.rendered_buffer = self.rendered_buffer.clone();
-        }
-        if let Some(value) = self.render_leading_silence_samples {
-            audio.render_leading_silence_samples = value;
-        }
-        if let Some(value) = self.fake_completion_delay_ms {
-            audio.fake_completion_delay_ms = value;
-        }
-        if let Some(value) = self.native_shape {
-            audio.native_shape = value;
-        }
-        if let Some(value) = self.noise_enabled {
-            audio.noise_enabled = value;
-        }
-        if let Some(value) = &self.seed {
-            audio.seed = value.clone();
         }
     }
 }
@@ -1279,7 +1107,6 @@ impl NoiseConfig {
         let master = self.enabled.unwrap_or(true);
         persona.canvas.noise_enabled =
             master && self.canvas.unwrap_or(persona.canvas.noise_enabled);
-        persona.audio.noise_enabled = master && self.audio.unwrap_or(persona.audio.noise_enabled);
         persona.domrect.enabled = master && self.domrect.unwrap_or(persona.domrect.enabled);
     }
 }

@@ -4,10 +4,6 @@ export interface SessionOptions {
   enableWorker?: boolean
   enableStreamingNetworking?: boolean
   enableCanvas?: boolean
-  enableWebGL?: boolean
-  enableWebGPU?: boolean
-  enableWebAudio?: boolean
-  enableWebAudioOutput?: boolean
   storagePath?: string
   storageQuotaBytes?: number
   headers?: Record<string, string | number | boolean>

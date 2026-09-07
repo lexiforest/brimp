@@ -47,8 +47,6 @@ pub struct PersonaConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub window: Option<WindowConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub graphics: Option<GraphicsConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub plugins: Option<PluginsConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub chrome: Option<ChromeConfig>,
@@ -58,8 +56,6 @@ pub struct PersonaConfig {
     pub css: Option<CssConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub media: Option<MediaConfig>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub audio: Option<AudioConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub speech: Option<SpeechConfig>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -107,13 +103,11 @@ impl Default for PersonaConfig {
             viewport: Viewport::default(),
             screen: None,
             window: None,
-            graphics: None,
             plugins: None,
             chrome: None,
             navigator: None,
             css: None,
             media: None,
-            audio: None,
             speech: None,
             geolocation: None,
             webrtc: None,
@@ -250,9 +244,6 @@ impl PersonaConfig {
         if let Some(window) = &self.window {
             window.apply_to(&mut persona.window);
         }
-        if let Some(graphics) = &self.graphics {
-            graphics.apply_to(&mut persona.graphics);
-        }
         if let Some(features) = &self.features {
             features.apply_to(&mut persona.features);
         }
@@ -281,9 +272,6 @@ impl PersonaConfig {
         }
         if let Some(media) = &self.media {
             media.apply_to(&mut persona.media);
-        }
-        if let Some(audio) = &self.audio {
-            audio.apply_to(&mut persona.audio);
         }
         if let Some(speech) = &self.speech {
             persona.speech = speech.clone();
@@ -419,27 +407,6 @@ impl PersonaConfig {
             {
                 return Err(PersonaConfigError::InvalidNativeProfile(
                     "plugin MIME types must not be empty".to_string(),
-                ));
-            }
-        }
-        if let Some(audio) = &self.audio {
-            if audio.sample_rate == Some(0) || audio.max_channel_count == Some(0) {
-                return Err(PersonaConfigError::InvalidNativeProfile(
-                    "audio sample_rate and max_channel_count must be positive".to_string(),
-                ));
-            }
-            let values = audio
-                .compressor_reduction
-                .iter()
-                .chain(&audio.frequency_data)
-                .chain(&audio.time_domain_data)
-                .chain(&audio.rendered_buffer);
-            if values
-                .into_iter()
-                .any(|value| value.parse::<f64>().is_err())
-            {
-                return Err(PersonaConfigError::InvalidNativeProfile(
-                    "audio numeric profile values must be decimal strings".to_string(),
                 ));
             }
         }

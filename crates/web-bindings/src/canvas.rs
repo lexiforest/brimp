@@ -13,7 +13,6 @@ use skia_safe::{
     canvas::SrcRectConstraint,
     color_filters, dash_path_effect,
     gradient::{Colors as GradientColors, Gradient, Interpolation, shaders as gradient_shaders},
-    image::CachingHint,
     image_filters, named_primaries, named_transfer_fn, paint, path, path_utils,
     shaders as skia_shaders, surfaces,
 };
@@ -58,9 +57,6 @@ pub struct CanvasRaster {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum ContextKind {
     TwoDimensional,
-    WebGl1,
-    WebGl2,
-    WebGpu,
 }
 
 struct CanvasBitmap {
@@ -459,17 +455,10 @@ impl CanvasStore {
         Ok(())
     }
 
+    #[cfg(test)]
     pub(crate) fn image_bitmap_rgba(
         &self,
         bitmap: u64,
-    ) -> Result<(u32, u32, Vec<u8>, bool), String> {
-        self.image_bitmap_rgba_in_color_space(bitmap, CanvasColorSpace::Srgb)
-    }
-
-    pub(crate) fn image_bitmap_rgba_in_color_space(
-        &self,
-        bitmap: u64,
-        color_space: CanvasColorSpace,
     ) -> Result<(u32, u32, Vec<u8>, bool), String> {
         let bitmap = self
             .image_bitmaps
@@ -484,55 +473,20 @@ impl CanvasStore {
             .ok_or("ImageBitmap row is too large")?;
         let mut pixels = vec![0; pixel_byte_len(width, height)?];
         if !bitmap.image.read_pixels(
-            &image_data_info(width, height, color_space, CanvasColorType::Unorm8)?,
+            &image_data_info(
+                width,
+                height,
+                CanvasColorSpace::Srgb,
+                CanvasColorType::Unorm8,
+            )?,
             &mut pixels,
             row_bytes,
             (0, 0),
-            CachingHint::Disallow,
+            skia_safe::image::CachingHint::Disallow,
         ) {
             return Err("Skia could not read ImageBitmap pixels".to_owned());
         }
         Ok((width, height, pixels, bitmap.origin_clean))
-    }
-
-    pub(crate) fn convert_image_data_to_unorm8(
-        width: u32,
-        height: u32,
-        pixels: &[u8],
-        source_color_space: CanvasColorSpace,
-        source_color_type: CanvasColorType,
-        destination_color_space: CanvasColorSpace,
-    ) -> Result<Vec<u8>, String> {
-        if pixels.len() != pixel_byte_len_for(width, height, source_color_type)? {
-            return Err("image data byte length does not match its dimensions".to_owned());
-        }
-        let mut surface =
-            new_canvas_surface(width, height, true, source_color_space, source_color_type)?
-                .ok_or("image data has no pixels")?;
-        let source_row_bytes = width as usize * source_color_type.bytes_per_pixel();
-        if !surface.canvas().write_pixels(
-            &image_data_info(width, height, source_color_space, source_color_type)?,
-            pixels,
-            source_row_bytes,
-            (0, 0),
-        ) {
-            return Err("Skia could not import image data pixels".to_owned());
-        }
-        let mut converted = vec![0; pixel_byte_len(width, height)?];
-        if !surface.read_pixels(
-            &image_data_info(
-                width,
-                height,
-                destination_color_space,
-                CanvasColorType::Unorm8,
-            )?,
-            &mut converted,
-            width as usize * 4,
-            (0, 0),
-        ) {
-            return Err("Skia could not convert image data pixels".to_owned());
-        }
-        Ok(converted)
     }
 
     pub(crate) fn create_linear_gradient(
@@ -733,79 +687,13 @@ impl CanvasStore {
                 Ok(true)
             }
             Some(ContextKind::TwoDimensional) => Ok(true),
-            Some(ContextKind::WebGl1 | ContextKind::WebGl2 | ContextKind::WebGpu) => Ok(false),
         }
-    }
-
-    pub(crate) fn can_acquire_webgl(
-        &mut self,
-        id: NodeId,
-        width: u32,
-        height: u32,
-        version: u8,
-    ) -> Result<bool, String> {
-        let bitmap = self.bitmap(id, width, height)?;
-        Ok(matches!(
-            (bitmap.context, version),
-            (None, _) | (Some(ContextKind::WebGl1), 1) | (Some(ContextKind::WebGl2), 2)
-        ))
-    }
-
-    pub(crate) fn acquire_webgpu(
-        &mut self,
-        id: NodeId,
-        width: u32,
-        height: u32,
-    ) -> Result<bool, String> {
-        let bitmap = self.bitmap(id, width, height)?;
-        match bitmap.context {
-            None => {
-                bitmap.context = Some(ContextKind::WebGpu);
-                Ok(true)
-            }
-            Some(ContextKind::WebGpu) => Ok(true),
-            Some(ContextKind::TwoDimensional | ContextKind::WebGl1 | ContextKind::WebGl2) => {
-                Ok(false)
-            }
-        }
-    }
-
-    pub(crate) fn commit_webgl(&mut self, id: NodeId, version: u8) -> Result<(), String> {
-        let bitmap = self.entries.get_mut(&id).ok_or("unknown canvas")?;
-        bitmap.context = Some(if version == 2 {
-            ContextKind::WebGl2
-        } else {
-            ContextKind::WebGl1
-        });
-        Ok(())
-    }
-
-    pub(crate) fn is_webgl(&self, id: NodeId) -> bool {
-        self.entries.get(&id).is_some_and(|bitmap| {
-            matches!(
-                bitmap.context,
-                Some(ContextKind::WebGl1 | ContextKind::WebGl2)
-            )
-        })
     }
 
     pub(crate) fn origin_clean(&self, id: NodeId) -> bool {
         self.entries
             .get(&id)
             .is_none_or(|bitmap| bitmap.origin_clean)
-    }
-
-    pub(crate) fn webgl_dimensions(&self) -> Vec<(NodeId, u32, u32)> {
-        self.entries
-            .iter()
-            .filter_map(|(&id, bitmap)| {
-                matches!(
-                    bitmap.context,
-                    Some(ContextKind::WebGl1 | ContextKind::WebGl2)
-                )
-                .then_some((id, bitmap.width, bitmap.height))
-            })
-            .collect()
     }
 
     pub(crate) fn reset(&mut self, id: NodeId, width: u32, height: u32) -> Result<(), String> {
@@ -1547,6 +1435,7 @@ impl CanvasStore {
     }
 
     #[allow(clippy::too_many_arguments)]
+    #[cfg(test)]
     pub(crate) fn read_rgba(
         &mut self,
         id: NodeId,
@@ -1602,6 +1491,7 @@ impl CanvasStore {
     }
 
     #[allow(clippy::too_many_arguments)]
+    #[cfg(test)]
     pub(crate) fn write_rgba(
         &mut self,
         id: NodeId,

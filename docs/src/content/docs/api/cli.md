@@ -122,15 +122,9 @@ Page-creating commands accept these opt-in controls:
 --enable-streaming-networking
 --storage-path PATH [--storage-quota-bytes N]
 --enable-canvas
---enable-webgl
---enable-webgpu
---enable-webaudio
---enable-webaudio-output
 ```
 
-Every subsystem is absent when omitted. `--enable-webaudio` uses a device-free
-sink; `--enable-webaudio-output` additionally authorizes the system output
-device.
+Every subsystem is absent when omitted.
 
 ## Exit codes
 

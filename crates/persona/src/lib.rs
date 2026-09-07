@@ -1,7 +1,7 @@
 //! Browser persona configuration and resolved fingerprint values.
 //!
 //! `persona` turns a versioned JSON configuration into concrete browser,
-//! network, JavaScript, screen, graphics, media, and automation fingerprint
+//! network, JavaScript, screen, media, and automation fingerprint
 //! values consumed by the Brimp runtime.
 
 mod config;

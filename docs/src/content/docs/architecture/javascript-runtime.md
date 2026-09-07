@@ -32,8 +32,8 @@ protection, native callbacks, and deferred Promise settlement.
 
 `web-bindings` installs browser-facing JavaScript classes and one native host
 entry point. JavaScript wrappers retain normal Web-IDL-shaped objects while
-native operations dispatch to Rust-owned DOM, Canvas, WebGL, WebGPU, WebAudio,
-storage, and networking state. DOM wrappers cache native node identities so the
+native operations dispatch to Rust-owned DOM, Canvas, storage, and networking
+state. DOM wrappers cache native node identities so the
 same native node returns the same JavaScript object.
 
 The shared JavaScript bootstrap is assembled from dependency-ordered files in

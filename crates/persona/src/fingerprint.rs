@@ -96,23 +96,6 @@ impl ScreenFingerprint {
     }
 }
 
-/// Resolved WebGL and graphics fingerprint values.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct GraphicsFingerprint {
-    pub webgl_vendor: String,
-    pub webgl_renderer: String,
-    pub webgl_masked_vendor: String,
-    pub webgl_masked_renderer: String,
-    pub webgl_seed: PersonaSeed,
-    pub webgl1: WebGlConfig,
-    pub webgl2: WebGlConfig,
-    pub webgpu_adapter_vendor: String,
-    pub webgpu_adapter_architecture: String,
-    pub webgpu_adapter_device: String,
-    pub webgpu_adapter_description: String,
-    pub webgpu_max_bind_groups_plus_vertex_buffers: u32,
-}
-
 /// Resolved JavaScript environment fingerprint values.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct JsFingerprint {
@@ -137,7 +120,6 @@ pub struct JsFingerprint {
     pub bluetooth_enabled: bool,
     pub bluetooth_available: bool,
     pub media_devices_enabled: bool,
-    pub webgpu_enabled: bool,
     pub offscreen_canvas_enabled: bool,
     pub service_worker_enabled: bool,
     pub ua_platform_version: String,
@@ -219,23 +201,6 @@ pub struct EngineFingerprint {
     pub builtin_sources: BTreeMap<String, String>,
 }
 
-/// Resolved audio fingerprint behavior.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct AudioFingerprint {
-    pub seed: PersonaSeed,
-    pub sample_rate: u32,
-    pub output_latency_ms: u32,
-    pub max_channel_count: u32,
-    pub compressor_reduction: String,
-    pub frequency_data: Vec<String>,
-    pub time_domain_data: Vec<String>,
-    pub rendered_buffer: Vec<String>,
-    pub render_leading_silence_samples: u32,
-    pub fake_completion_delay_ms: u32,
-    pub native_shape: bool,
-    pub noise_enabled: bool,
-}
-
 /// Resolved font fingerprint values.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FontFingerprint {
@@ -303,14 +268,12 @@ pub struct ResolvedPersona {
     pub window: WindowFingerprint,
     pub css: CssFingerprint,
     pub network: NetworkFingerprint,
-    pub graphics: GraphicsFingerprint,
     pub js: JsFingerprint,
     pub geo: GeoFingerprint,
     pub webrtc: WebRtcFingerprint,
     pub canvas: CanvasFingerprint,
     pub domrect: DomRectFingerprint,
     pub engine: EngineFingerprint,
-    pub audio: AudioFingerprint,
     pub fonts: FontFingerprint,
     pub media: MediaFingerprint,
     pub battery: BatteryFingerprint,
@@ -368,10 +331,6 @@ impl ResolvedPersona {
         persona.js.hardware_concurrency = 10;
         persona.js.vendor.clear();
         persona.js.product_sub = "20100101".to_string();
-        persona.graphics.webgl_vendor = "Apple".to_string();
-        persona.graphics.webgl_renderer = "Apple M1, or similar".to_string();
-        persona.graphics.webgl_masked_vendor = "Mozilla".to_string();
-        persona.graphics.webgl_masked_renderer = "Apple M1, or similar".to_string();
         persona.webrtc.audio_codecs = firefox_audio_codecs();
         persona.webrtc.video_codecs = firefox_video_codecs();
         persona.webrtc.ice_candidate_semantics = "firefox".to_string();
@@ -479,20 +438,6 @@ impl ResolvedPersona {
                 sec_ch_ua_platform_version: "\"15.7.0\"".to_string(),
                 sec_ch_ua_model: "\"\"".to_string(),
             },
-            graphics: GraphicsFingerprint {
-                webgl_vendor: "Intel Inc.".to_string(),
-                webgl_renderer: "Intel(R) Iris(TM) Plus Graphics OpenGL Engine".to_string(),
-                webgl_masked_vendor: "WebKit".to_string(),
-                webgl_masked_renderer: "WebKit WebGL".to_string(),
-                webgl_seed: PersonaSeed::from_stable_input(format!("{seed}:webgl")),
-                webgl1: WebGlConfig::default(),
-                webgl2: WebGlConfig::default(),
-                webgpu_adapter_vendor: String::new(),
-                webgpu_adapter_architecture: String::new(),
-                webgpu_adapter_device: String::new(),
-                webgpu_adapter_description: String::new(),
-                webgpu_max_bind_groups_plus_vertex_buffers: 24,
-            },
             js: JsFingerprint {
                 app_version: "5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36".to_string(),
                 oscpu: String::new(),
@@ -515,7 +460,6 @@ impl ResolvedPersona {
                 bluetooth_enabled: true,
                 bluetooth_available: true,
                 media_devices_enabled: true,
-                webgpu_enabled: false,
                 offscreen_canvas_enabled: true,
                 service_worker_enabled: false,
                 ua_platform_version: "15.7.0".to_string(),
@@ -590,20 +534,6 @@ impl ResolvedPersona {
                     "function Array() { [native code] }".to_string(),
                 )]),
             },
-            audio: AudioFingerprint {
-                seed: PersonaSeed::from_stable_input(format!("{seed}:audio")),
-                sample_rate: 48_000,
-                output_latency_ms: 20,
-                max_channel_count: 2,
-                compressor_reduction: "-20.538288116455078".to_string(),
-                frequency_data: vec!["-20.538288116455078".to_string(), "-160".to_string()],
-                time_domain_data: vec!["0.122705061".to_string(), "-0.122705061".to_string()],
-                rendered_buffer: vec!["0".to_string()],
-                render_leading_silence_samples: 256,
-                fake_completion_delay_ms: 0,
-                native_shape: true,
-                noise_enabled: true,
-            },
             fonts: FontFingerprint {
                 seed: PersonaSeed::from_stable_input(format!("{seed}:fonts")),
                 families: vec![
@@ -669,8 +599,6 @@ impl ResolvedPersona {
             noise: NoiseConfig {
                 enabled: Some(true),
                 canvas: Some(true),
-                webgl: Some(true),
-                audio: Some(true),
                 fonts: Some(true),
                 domrect: Some(true),
                 svg: Some(true),

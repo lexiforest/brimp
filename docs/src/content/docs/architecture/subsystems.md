@@ -21,9 +21,6 @@ rules rather than maintaining parallel state.
 | WebSocket, EventSource and streaming Fetch | curl-impersonate streaming handles with bounded backpressure | `streaming_networking` |
 | Persistent web storage | Origin partitions, quota enforcement, and filesystem backing | `persistent_storage` |
 | Canvas 2D | Raster-only `skia-safe`; Rustybuzz and bundled fonts for text | `canvas` |
-| WebGL 1/2 | WebKit-pinned ANGLE through EGL/GLES | `webgl` |
-| WebGPU | `wgpu` 30 and the platform-native backend | `webgpu` |
-| WebAudio | `web-audio-api` 1.7; optional CPAL device output | `webaudio` / `webaudio_output` |
 | Document screenshots | Blitz paint through Vello CPU, encoded as PNG | Always present |
 | Persona | One resolved identity shared by transport and Web APIs | Always present |
 
@@ -97,53 +94,13 @@ operations, and encoding. Canvas does not initialize Skia's GPU backends.
 Text is shaped with Rustybuzz, Unicode bidi and grapheme handling, and
 deterministic bundled WenQuanYi/Noto faces. Host fonts are never consulted.
 Canvas maintains origin-clean state for image sources and supplies consistent
-pixels to `getImageData()`, export methods, WebGL/WebGPU uploads, and document
-screenshots. Completed Canvas rasters enter the document's Vello compositor as
-images.
-
-## WebGL
-
-WebGL 1 and 2 use the ANGLE revision pinned by Brimp's WebKit build. A narrow
-EGL/GLES boundary creates headless contexts and translates JavaScript objects
-to native resource IDs. Supported limits and extensions come from initialized
-ANGLE capabilities and are restricted by the page persona.
-
-ANGLE calls are currently serialized across pages and each operation releases
-the current context afterward. This avoids invalid cross-thread EGL state with
-the pinned backend at the cost of WebGL command parallelism. Readback and
-presentation copy the ANGLE surface into the canonical Canvas/document image
-path.
-
-## WebGPU
-
-WebGPU uses `wgpu` 30: Metal on macOS, Vulkan/GLES on Linux, and Direct3D 12 on
-Windows. Rust owns adapters, devices, resources, pipelines, encoders, command
-buffers, mappings, errors, and loss state. JavaScript descriptors are validated
-and translated into typed `wgpu` descriptors.
-
-Adapter information, features, and limits are derived from the native adapter
-and restricted by persona policy. `GPUCanvasContext` presentation copies the
-rendered texture into the same Canvas backing used by document composition.
-Video/external-video sources are deliberately outside the supported surface.
-
-## WebAudio
-
-`web-audio-api` supplies offline and realtime graphs, buffers/decoding,
-processing nodes, automation, analysis, media-element/stream routing, and
-rendering. Realtime contexts use a device-free sink by default. The independent
-hardware-output option authorizes CPAL and implicitly enables WebAudio; no audio
-device is opened merely by enabling the option.
-
-AudioWorklet module registration is validated in an isolated JavaScriptCore
-realm. Processor instances for one context share a JSC realm owned by that
-context's render thread. The public JSC C API has no ES-module loader hook, so
-worklet source is currently dependency-free classic-script-compatible source;
-imports and exports are rejected.
+pixels to `getImageData()`, export methods, and document screenshots. Completed
+Canvas rasters enter the document's Vello compositor as images.
 
 ## Screenshots
 
 Document screenshots resolve the Blitz layout, paint through `blitz-paint` and
-AnyRender's Vello CPU backend, composite Canvas/WebGL/WebGPU rasters, and encode
+AnyRender's Vello CPU backend, composite Canvas rasters, and encode
 the final RGBA image as PNG. No native window or display server is required.
 Viewport screenshots use the configured viewport; full-page screenshots
 temporarily extend rendering to the document content bounds.
@@ -152,9 +109,7 @@ temporarily extend rendering to the document content bounds.
 
 A persona is resolved once when the browsing context is created. Its transport
 profile, ordered request headers, Navigator values, language, screen, viewport,
-Canvas behavior, and graphics identity feed the relevant subsystems from one
-snapshot. Backend-derived WebGL/WebGPU capabilities cannot exceed the actual
-initialized backend.
+and Canvas behavior feed the relevant subsystems from one snapshot.
 
 For dependency-backed implementation status, see
 [`SUBSYSTEMS.md`](https://github.com/lexiforest/brimp/blob/main/SUBSYSTEMS.md).

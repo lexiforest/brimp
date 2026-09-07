@@ -44,8 +44,7 @@ live Page. `newPage({ proxy })` creates an un-navigated Page whose network scope
 is immutable.
 
 Browser subsystem options include `enableWorker`,
-`enableStreamingNetworking`, `enableCanvas`, `enableWebGL`, `enableWebGPU`,
-`enableWebAudio`, optional system audio output, and persistent storage.
+`enableStreamingNetworking`, `enableCanvas`, and persistent storage.
 
 ## Page navigation
 

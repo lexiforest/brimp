@@ -2028,32 +2028,6 @@ impl PageOptionsBuilder {
         self
     }
 
-    pub fn webgl(mut self, enabled: bool) -> Self {
-        self.options.subsystems.webgl = enabled;
-        self
-    }
-
-    pub fn webgpu(mut self, enabled: bool) -> Self {
-        self.options.subsystems.webgpu = enabled;
-        self
-    }
-
-    pub fn webaudio(mut self, enabled: bool) -> Self {
-        self.options.subsystems.webaudio = enabled;
-        if !enabled {
-            self.options.subsystems.webaudio_output = false;
-        }
-        self
-    }
-
-    pub fn webaudio_output(mut self, enabled: bool) -> Self {
-        self.options.subsystems.webaudio_output = enabled;
-        if enabled {
-            self.options.subsystems.webaudio = true;
-        }
-        self
-    }
-
     pub fn viewport(mut self, width: u32, height: u32) -> Self {
         self.options.viewport.width = f64::from(width);
         self.options.viewport.height = f64::from(height);
@@ -2100,10 +2074,6 @@ pub struct BrowserSubsystemOptions {
     streaming_networking: bool,
     persistent_storage: Option<PersistentStorageOptions>,
     canvas: bool,
-    webgl: bool,
-    webgpu: bool,
-    webaudio: bool,
-    webaudio_output: bool,
 }
 
 impl BrowserSubsystemOptions {
@@ -2123,32 +2093,12 @@ impl BrowserSubsystemOptions {
         self.canvas
     }
 
-    pub fn webgl(&self) -> bool {
-        self.webgl
-    }
-
-    pub fn webgpu(&self) -> bool {
-        self.webgpu
-    }
-
-    pub fn webaudio(&self) -> bool {
-        self.webaudio
-    }
-
-    pub fn webaudio_output(&self) -> bool {
-        self.webaudio_output
-    }
-
     fn web_features(&self) -> WebFeatureFlags {
         WebFeatureFlags {
             worker_system: self.worker_system,
             streaming_networking: self.streaming_networking,
             persistent_storage: self.persistent_storage.is_some(),
             canvas: self.canvas,
-            webgl: self.webgl,
-            webgpu: self.webgpu,
-            webaudio: self.webaudio,
-            webaudio_output: self.webaudio_output,
         }
     }
 }

@@ -69,9 +69,8 @@ Persona-owned headers and the curl impersonation profile are coherent with the
 JavaScript-visible environment and therefore cannot be changed per request.
 
 Heavy browser subsystems remain Session configuration and are disabled by
-default: `enable_worker`, `enable_streaming_networking`, `enable_canvas`,
-`enable_webgl`, `enable_webgpu`, `enable_webaudio`, persistent storage, and
-optional WebAudio system output.
+default: `enable_worker`, `enable_streaming_networking`, `enable_canvas`, and
+persistent storage.
 
 See `SUPPORT.md` for the exact tested surface and intentional differences from
 curl_cffi.

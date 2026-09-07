@@ -23,28 +23,16 @@ use style::dom_apis::element_matches;
 
 use crate::{
     PersistentStorage, WrapperCache,
-    angle::{AngleStore, UniformValue},
-    audio::AudioStore,
     canvas::{
         CanvasColorSpace, CanvasColorType, CanvasDrawEffects, CanvasFilterInput,
         CanvasFilterOperation, CanvasLightSource, CanvasPaintStyle, CanvasShadowStyle, CanvasStore,
         CanvasStrokeStyle,
     },
-    gpu::{
-        GpuBindGroupEntry, GpuBindGroupLayoutEntry, GpuColorAttachment, GpuColorTarget,
-        GpuComputeCommand, GpuDepthStencilAttachment, GpuDepthStencilState, GpuMultisampleState,
-        GpuPrimitiveState, GpuRenderBundleEncoderDescriptor, GpuRenderCommand,
-        GpuSamplerDescriptor, GpuStore, GpuTextureViewDescriptor, GpuTimestampWrites,
-        GpuVertexBufferLayout,
-    },
 };
 
-mod dispatch_audio;
 mod dispatch_canvas;
 mod dispatch_dom;
-mod dispatch_gpu;
 mod dispatch_platform;
-mod dispatch_webgl;
 
 const CLASS_DEFINITIONS: &str = concat!(
     include_str!("runtime/bootstrap.js"),
@@ -70,24 +58,13 @@ pub struct WebFeatureFlags {
     pub streaming_networking: bool,
     pub persistent_storage: bool,
     pub canvas: bool,
-    pub webgl: bool,
-    pub webgpu: bool,
-    pub webaudio: bool,
-    pub webaudio_output: bool,
 }
 
 impl WebFeatureFlags {
     pub fn json(self) -> String {
         format!(
-            "{{\"workerSystem\":{},\"streamingNetworking\":{},\"persistentStorage\":{},\"canvas\":{},\"webgl\":{},\"webgpu\":{},\"webaudio\":{},\"webaudioOutput\":{}}}",
-            self.worker_system,
-            self.streaming_networking,
-            self.persistent_storage,
-            self.canvas,
-            self.webgl,
-            self.webgpu,
-            self.webaudio,
-            self.webaudio_output,
+            "{{\"workerSystem\":{},\"streamingNetworking\":{},\"persistentStorage\":{},\"canvas\":{}}}",
+            self.worker_system, self.streaming_networking, self.persistent_storage, self.canvas,
         )
     }
 }
@@ -667,9 +644,6 @@ struct BindingState {
     websocket_delivery: RefCell<Option<ProtectedJsObject>>,
     fetch_stream_delivery: RefCell<Option<ProtectedJsObject>>,
     canvases: RefCell<CanvasStore>,
-    audio: RefCell<AudioStore>,
-    gpu: RefCell<GpuStore>,
-    angles: RefCell<AngleStore>,
 }
 
 struct Prototypes {
@@ -686,23 +660,6 @@ struct Prototypes {
 
 impl BindingRuntime {
     pub fn canvas_rasters(&self) -> Result<Vec<crate::canvas::CanvasRaster>, String> {
-        let _angle_guard = crate::angle::lock();
-        let webgl = self.state.canvases.borrow().webgl_dimensions();
-        for (id, width, height) in webgl {
-            if width == 0 || height == 0 {
-                continue;
-            }
-            let mut pixels = self
-                .state
-                .angles
-                .borrow()
-                .read_canvas_rgba(id, 0, 0, width, height)?;
-            flip_rows(&mut pixels, width, height);
-            self.state
-                .canvases
-                .borrow_mut()
-                .write_rgba(id, width, height, 0, 0, width, height, &pixels)?;
-        }
         Ok(self.state.canvases.borrow_mut().rasters())
     }
 
@@ -732,9 +689,6 @@ impl BindingRuntime {
             websocket_delivery: RefCell::new(None),
             fetch_stream_delivery: RefCell::new(None),
             canvases: RefCell::new(CanvasStore::default()),
-            audio: RefCell::new(AudioStore::default()),
-            gpu: RefCell::new(GpuStore::default()),
-            angles: RefCell::new(AngleStore::default()),
         });
         let callback_state = Rc::clone(&state);
         runtime.set_global_function("__brimp", move |call| dispatch(&callback_state, &call))?;
@@ -781,36 +735,13 @@ impl BindingRuntime {
             runtime.eval("delete globalThis.__brimpDeliverFetchStream")?;
             runtime.eval("delete globalThis.__brimpStreamingHost")?;
         }
-        if features.canvas || features.webgl || features.webgpu {
+        if features.canvas {
             let canvas_state = Rc::clone(&state);
             runtime.set_global_function("__brimpCanvasHost", move |call| {
                 dispatch(&canvas_state, &call)
             })?;
             runtime.eval(include_str!("canvas.js"))?;
             runtime.eval("delete globalThis.__brimpCanvasHost")?;
-        }
-        if features.webaudio {
-            let audio_state = Rc::clone(&state);
-            runtime.set_global_function("__brimpAudioHost", move |call| {
-                dispatch(&audio_state, &call)
-            })?;
-            runtime.eval(include_str!("audio.js"))?;
-            runtime.eval("delete globalThis.__brimpAudioHost")?;
-        }
-        if features.webgpu {
-            let gpu_state = Rc::clone(&state);
-            runtime
-                .set_global_function("__brimpGpuHost", move |call| dispatch(&gpu_state, &call))?;
-            runtime.eval(include_str!("gpu.js"))?;
-            runtime.eval("delete globalThis.__brimpGpuHost")?;
-        }
-        if features.webgl {
-            let webgl_state = Rc::clone(&state);
-            runtime.set_global_function("__brimpWebGlHost", move |call| {
-                dispatch(&webgl_state, &call)
-            })?;
-            runtime.eval(include_str!("webgl.js"))?;
-            runtime.eval("delete globalThis.__brimpWebGlHost")?;
         }
         runtime.eval("delete globalThis.__brimpMarkTrustedEvent")?;
         runtime.eval(if cross_origin_isolated {
@@ -958,8 +889,6 @@ impl BindingRuntime {
         self.state.style_wrappers.clear();
         self.state.computed_style_wrappers.clear();
         self.state.canvases.borrow_mut().clear();
-        self.state.audio.borrow_mut().clear();
-        *self.state.angles.borrow_mut() = AngleStore::default();
         let document_id = self.state.document.borrow().root().id;
         let prototype = self
             .state
@@ -1047,18 +976,10 @@ impl BindingRuntime {
 
 fn dispatch(state: &BindingState, call: &NativeCall<'_>) -> Result<NativeValue, NativeError> {
     let operation = required_string(call, 0, "operation")?;
-    let _angle_guard = operation_uses_angle(&operation).then(crate::angle::lock);
     match operation.as_str() {
         "runtimeFeatures" => Ok(NativeValue::String(state.features.json())),
         operation if operation == "canvasFeatures" || operation.starts_with("canvas") => {
             dispatch_canvas::dispatch(state, call, operation)
-        }
-        operation if operation.starts_with("audio") => {
-            dispatch_audio::dispatch(state, call, operation)
-        }
-        operation if operation.starts_with("gpu") => dispatch_gpu::dispatch(state, call, operation),
-        operation if operation.starts_with("webgl") => {
-            dispatch_webgl::dispatch(state, call, operation)
         }
         operation if is_platform_operation(operation) => {
             dispatch_platform::dispatch(state, call, operation)
@@ -1090,18 +1011,6 @@ fn is_platform_operation(operation: &str) -> bool {
                 | "formUrlEncode"
                 | "decodeBytes"
                 | "encodeUtf8"
-        )
-}
-
-fn operation_uses_angle(operation: &str) -> bool {
-    operation.starts_with("webgl")
-        || matches!(
-            operation,
-            "canvasReset"
-                | "canvas2dDrawCanvas"
-                | "canvasCreateImageBitmap"
-                | "canvas2dCreatePattern"
-                | "canvasEncode"
         )
 }
 
@@ -1300,137 +1209,11 @@ fn required_i32(call: &NativeCall<'_>, index: usize, label: &str) -> Result<i32,
     Ok(value.trunc() as i32)
 }
 
-fn required_f32_array(
-    call: &NativeCall<'_>,
-    index: usize,
-    label: &str,
-) -> Result<Vec<f32>, NativeError> {
-    let bytes = call
-        .argument(index)
-        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
-        .to_bytes()?;
-    if bytes.len() % std::mem::size_of::<f32>() != 0 {
-        return Err(NativeError::new(format!("invalid {label}")));
-    }
-    Ok(bytes
-        .chunks_exact(std::mem::size_of::<f32>())
-        .map(|chunk| f32::from_ne_bytes(chunk.try_into().expect("four-byte f32 chunk")))
-        .collect())
-}
-
-fn required_i32_array(
-    call: &NativeCall<'_>,
-    index: usize,
-    label: &str,
-) -> Result<Vec<i32>, NativeError> {
-    let bytes = call
-        .argument(index)
-        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
-        .to_bytes()?;
-    if bytes.len() % std::mem::size_of::<i32>() != 0 {
-        return Err(NativeError::new(format!("invalid {label}")));
-    }
-    Ok(bytes
-        .chunks_exact(std::mem::size_of::<i32>())
-        .map(|chunk| i32::from_ne_bytes(chunk.try_into().expect("four-byte i32 chunk")))
-        .collect())
-}
-
-fn required_u32_array(
-    call: &NativeCall<'_>,
-    index: usize,
-    label: &str,
-) -> Result<Vec<u32>, NativeError> {
-    let bytes = call
-        .argument(index)
-        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
-        .to_bytes()?;
-    if bytes.len() % std::mem::size_of::<u32>() != 0 {
-        return Err(NativeError::new(format!("invalid {label}")));
-    }
-    Ok(bytes
-        .chunks_exact(std::mem::size_of::<u32>())
-        .map(|chunk| u32::from_ne_bytes(chunk.try_into().expect("four-byte u32 chunk")))
-        .collect())
-}
-
 fn canvas_dimensions(call: &NativeCall<'_>) -> Result<(u32, u32), NativeError> {
     Ok((
         required_u32(call, 2, "canvas width")?,
         required_u32(call, 3, "canvas height")?,
     ))
-}
-
-fn flip_rows(pixels: &mut [u8], width: u32, height: u32) {
-    let row_bytes = width as usize * 4;
-    for top in 0..height as usize / 2 {
-        let bottom = height as usize - top - 1;
-        let (before_bottom, bottom_and_after) = pixels.split_at_mut(bottom * row_bytes);
-        before_bottom[top * row_bytes..(top + 1) * row_bytes]
-            .swap_with_slice(&mut bottom_and_after[..row_bytes]);
-    }
-}
-
-fn crop_rgba(
-    pixels: &[u8],
-    source_width: u32,
-    source_height: u32,
-    x: u32,
-    y: u32,
-    width: u32,
-    height: u32,
-) -> Result<Vec<u8>, NativeError> {
-    let end_x = x
-        .checked_add(width)
-        .ok_or_else(|| NativeError::new("external image crop x range overflow"))?;
-    let end_y = y
-        .checked_add(height)
-        .ok_or_else(|| NativeError::new("external image crop y range overflow"))?;
-    if end_x > source_width || end_y > source_height {
-        return Err(NativeError::new(
-            "external image crop exceeds the source dimensions",
-        ));
-    }
-    let source_stride = usize::try_from(source_width)
-        .ok()
-        .and_then(|width| width.checked_mul(4))
-        .ok_or_else(|| NativeError::new("external image row size overflow"))?;
-    let row_bytes = usize::try_from(width)
-        .ok()
-        .and_then(|width| width.checked_mul(4))
-        .ok_or_else(|| NativeError::new("external image crop row size overflow"))?;
-    let output_len = row_bytes
-        .checked_mul(height as usize)
-        .ok_or_else(|| NativeError::new("external image crop size overflow"))?;
-    let x = usize::try_from(x)
-        .ok()
-        .and_then(|x| x.checked_mul(4))
-        .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
-    let mut output = Vec::with_capacity(output_len);
-    for row in y..end_y {
-        let start = (row as usize)
-            .checked_mul(source_stride)
-            .and_then(|start| start.checked_add(x))
-            .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
-        let end = start
-            .checked_add(row_bytes)
-            .ok_or_else(|| NativeError::new("external image crop offset overflow"))?;
-        output.extend_from_slice(
-            pixels
-                .get(start..end)
-                .ok_or_else(|| NativeError::new("external image pixels are incomplete"))?,
-        );
-    }
-    Ok(output)
-}
-
-fn premultiply_rgba(pixels: &mut [u8]) {
-    for pixel in pixels.chunks_exact_mut(4) {
-        let alpha = u16::from(pixel[3]);
-        for component in &mut pixel[..3] {
-            *component = ((u16::from(*component) * alpha + 127) / 255) as u8;
-        }
-    }
 }
 
 fn required_object(
@@ -2083,15 +1866,7 @@ fn storage_origin(state: &BindingState) -> Result<String, NativeError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CookieJar, flip_rows, premultiply_rgba};
-
-    #[test]
-    fn webgl_source_unpack_flips_and_premultiplies_rgba() {
-        let mut pixels = vec![200, 100, 50, 128, 10, 20, 30, 255];
-        flip_rows(&mut pixels, 1, 2);
-        premultiply_rgba(&mut pixels);
-        assert_eq!(pixels, [10, 20, 30, 255, 100, 50, 25, 128]);
-    }
+    use super::CookieJar;
 
     #[test]
     fn document_cookie_cannot_create_or_overwrite_http_only_cookies() {

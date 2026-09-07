@@ -182,8 +182,6 @@ directories. See `NATIVE.md` for the expected layouts.
 
 ### Architecture
 
-Brimp is inspired by Cloudflare's [kitesurf](https://blog.cloudflare.com/kitesurf/).
-
 The implemented runtime supports:
 
 - static HTML, JavaScript DOM mutation, style/layout queries, and CPU PNG screenshots;

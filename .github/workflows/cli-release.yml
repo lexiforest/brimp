@@ -40,7 +40,7 @@ jobs:
         run: echo "/opt/python/cp312-cp312/bin" >> "$GITHUB_PATH"
 
       - name: Install Linux system dependencies
-        run: dnf install -y alsa-lib-devel fontconfig-devel patchelf pkgconf-pkg-config
+        run: dnf install -y fontconfig-devel patchelf pkgconf-pkg-config
 
       - name: Download pinned native SDKs
         run: >-

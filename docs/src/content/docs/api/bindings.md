@@ -44,14 +44,8 @@ Heavy browser subsystems are page-scoped and absent by default.
 | Persistent storage | `storage_path=...` | `storagePath: ...` |
 | Storage quota | `storage_quota_bytes=...` | `storageQuotaBytes: ...` |
 | Canvas 2D | `enable_canvas=True` | `enableCanvas: true` |
-| WebGL | `enable_webgl=True` | `enableWebGL: true` |
-| WebGPU | `enable_webgpu=True` | `enableWebGPU: true` |
-| WebAudio | `enable_webaudio=True` | `enableWebAudio: true` |
-| Hardware audio output | `enable_webaudio_output=True` | `enableWebAudioOutput: true` |
 
-Enabling hardware audio output also enables WebAudio. Other options are
-independent; for example, enabling WebGL does not implicitly expose Canvas 2D
-or WebGPU.
+The options are independent.
 
 ## Evaluation values
 

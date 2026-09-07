@@ -445,7 +445,7 @@ class HTMLMediaElement extends HTMLElement {
     play() {
         const controller = __mediaElementController(this);
         if (controller === null) {
-            return Promise.reject(new DOMException("Media playback requires a WebAudio media source", "NotSupportedError"));
+            return Promise.reject(new DOMException("Media playback is unavailable", "NotSupportedError"));
         }
         const state = __mediaElementState(this);
         state.paused = false;

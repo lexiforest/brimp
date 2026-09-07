@@ -568,7 +568,7 @@ fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
 }
 
 fn cdp_usage() -> &'static str {
-    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas\n  --enable-webgl\n  --enable-webgpu\n  --enable-webaudio\n  --enable-webaudio-output"
+    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas"
 }
 
 fn cdp_error(error: ServerError) -> AutomationError {
@@ -616,5 +616,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp get URL [OPTIONS] | brimp crawl URL [OPTIONS] | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp help [COMMAND]\n\nRun `brimp help COMMAND` for command-specific options.\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas\n  --enable-webgl\n  --enable-webgpu\n  --enable-webaudio\n  --enable-webaudio-output".into()
+    "usage: brimp doctor | brimp get URL [OPTIONS] | brimp crawl URL [OPTIONS] | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp help [COMMAND]\n\nRun `brimp help COMMAND` for command-specific options.\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas".into()
 }

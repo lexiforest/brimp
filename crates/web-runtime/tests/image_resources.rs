@@ -202,7 +202,7 @@ fn cross_origin_images_taint_canvas_readback_and_patterns_until_reset() {
     });
     let browser = Browser::with_resource_loader(loader);
     let mut page = browser
-        .new_page(PageOptions::builder().canvas(true).webgpu(true).build())
+        .new_page(PageOptions::builder().canvas(true).build())
         .unwrap();
     tokio::runtime::Builder::new_current_thread()
         .build()
@@ -251,30 +251,11 @@ fn cross_origin_images_taint_canvas_readback_and_patterns_until_reset() {
             const bitmapContext = bitmapCanvas.getContext("2d");
             bitmapContext.drawImage(bitmap, 0, 0);
             const bitmapRead = securityName(() => bitmapContext.getImageData(0, 0, 1, 1));
-            const adapter = await navigator.gpu.requestAdapter();
-            let gpuCanvas = "no-adapter";
-            let gpuBitmap = "no-adapter";
-            let gpuImage = "no-adapter";
-            if (adapter) {
-                const device = await adapter.requestDevice();
-                const texture = device.createTexture({
-                    size: [2, 2],
-                    format: "rgba8unorm",
-                    usage: GPUTextureUsage.COPY_DST,
-                });
-                const copy = source => device.queue.copyExternalImageToTexture(
-                    { source }, { texture }, [2, 2],
-                );
-                gpuCanvas = securityName(() => copy(taintedCanvas));
-                gpuBitmap = securityName(() => copy(bitmap));
-                gpuImage = securityName(() => copy(crossImage));
-            }
             bitmap.close();
             taintedCanvas.width = 2;
             const resetRead = securityName(() => taintedContext.getImageData(0, 0, 1, 1));
             globalThis.taintResult = JSON.stringify({
-                directRead, directExport, copiedRead, patternRead, bitmapRead,
-                gpuCanvas, gpuBitmap, gpuImage, resetRead,
+                directRead, directExport, copiedRead, patternRead, bitmapRead, resetRead,
             });
         }).catch(error => globalThis.taintResult = `error:${error}`);
         "#,
@@ -308,10 +289,6 @@ fn cross_origin_images_taint_canvas_readback_and_patterns_until_reset() {
         assert_eq!(result[field], "SecurityError");
     }
     assert_eq!(result["resetRead"], "none");
-    let gpu_result = result["gpuCanvas"].as_str().unwrap();
-    assert!(gpu_result == "no-adapter" || gpu_result == "SecurityError");
-    assert_eq!(result["gpuBitmap"], gpu_result);
-    assert_eq!(result["gpuImage"], gpu_result);
 }
 
 #[test]
@@ -323,7 +300,7 @@ fn cors_approved_cross_origin_images_remain_canvas_origin_clean() {
     });
     let browser = Browser::with_resource_loader(loader);
     let mut page = browser
-        .new_page(PageOptions::builder().canvas(true).webgl(true).build())
+        .new_page(PageOptions::builder().canvas(true).build())
         .unwrap();
     tokio::runtime::Builder::new_current_thread()
         .build()
@@ -347,22 +324,12 @@ fn cors_approved_cross_origin_images_remain_canvas_origin_clean() {
                     try { return [...context.getImageData(0, 0, 1, 1).data]; }
                     catch (error) { return error.name; }
                 };
-                const image = document.getElementById("anonymous");
-                const gl = document.createElement("canvas").getContext("webgl");
-                let webgl = "unavailable";
-                if (gl) {
-                    const texture = gl.createTexture();
-                    gl.bindTexture(gl.TEXTURE_2D, texture);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-                    webgl = gl.getError() === gl.NO_ERROR;
-                }
                 return JSON.stringify({
                     anonymous: read("anonymous"),
                     credentials: read("credentials"),
                     credentialsWildcard: read("credentials-wildcard"),
                     noMode: read("no-mode"),
                     mismatch: read("mismatch"),
-                    webgl,
                 });
             })()"#,
         )
@@ -375,5 +342,4 @@ fn cors_approved_cross_origin_images_remain_canvas_origin_clean() {
     assert_eq!(result["credentialsWildcard"], "SecurityError");
     assert_eq!(result["noMode"], "SecurityError");
     assert_eq!(result["mismatch"], "SecurityError");
-    assert!(result["webgl"] == true || result["webgl"] == "unavailable");
 }

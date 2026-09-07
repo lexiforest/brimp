@@ -153,7 +153,7 @@ struct PySession {
 #[pymethods]
 impl PySession {
     #[new]
-    #[pyo3(signature = (persona_json = None, ca_bundle = None, enable_worker = false, enable_streaming_networking = false, enable_canvas = false, enable_webgl = false, enable_webgpu = false, enable_webaudio = false, enable_webaudio_output = false, storage_path = None, storage_quota_bytes = None))]
+    #[pyo3(signature = (persona_json = None, ca_bundle = None, enable_worker = false, enable_streaming_networking = false, enable_canvas = false, storage_path = None, storage_quota_bytes = None))]
     #[allow(clippy::too_many_arguments)]
     fn new(
         py: Python<'_>,
@@ -162,10 +162,6 @@ impl PySession {
         enable_worker: bool,
         enable_streaming_networking: bool,
         enable_canvas: bool,
-        enable_webgl: bool,
-        enable_webgpu: bool,
-        enable_webaudio: bool,
-        enable_webaudio_output: bool,
         storage_path: Option<String>,
         storage_quota_bytes: Option<u64>,
     ) -> PyResult<Self> {
@@ -198,11 +194,7 @@ impl PySession {
             let mut page_options = PageOptions::builder()
                 .worker_system(enable_worker)
                 .streaming_networking(enable_streaming_networking)
-                .canvas(enable_canvas)
-                .webgl(enable_webgl)
-                .webgpu(enable_webgpu)
-                .webaudio(enable_webaudio)
-                .webaudio_output(enable_webaudio_output);
+                .canvas(enable_canvas);
             if let Some(path) = storage_path {
                 let storage = PersistentStorageOptions::new(path)
                     .quota_bytes(storage_quota_bytes.unwrap_or(1024 * 1024 * 1024));

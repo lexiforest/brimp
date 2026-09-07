@@ -9,10 +9,6 @@ pub(crate) struct PageFeatures {
     pub(crate) worker: bool,
     pub(crate) streaming_networking: bool,
     pub(crate) canvas: bool,
-    pub(crate) webgl: bool,
-    pub(crate) webgpu: bool,
-    pub(crate) webaudio: bool,
-    pub(crate) webaudio_output: bool,
     pub(crate) storage_path: Option<PathBuf>,
     pub(crate) storage_quota: Option<u64>,
 }
@@ -23,10 +19,6 @@ impl PageFeatures {
             worker: parser.contains("--enable-worker"),
             streaming_networking: parser.contains("--enable-streaming-networking"),
             canvas: parser.contains("--enable-canvas"),
-            webgl: parser.contains("--enable-webgl"),
-            webgpu: parser.contains("--enable-webgpu"),
-            webaudio: parser.contains("--enable-webaudio"),
-            webaudio_output: parser.contains("--enable-webaudio-output"),
             storage_path: parser
                 .opt_value_from_os_str("--storage-path", |value| {
                     Ok::<_, pico_args::Error>(PathBuf::from(value))
@@ -56,11 +48,7 @@ impl PageFeatures {
             .request_headers(request_headers)
             .worker_system(self.worker)
             .streaming_networking(self.streaming_networking)
-            .canvas(self.canvas)
-            .webgl(self.webgl)
-            .webgpu(self.webgpu)
-            .webaudio(self.webaudio)
-            .webaudio_output(self.webaudio_output);
+            .canvas(self.canvas);
         if let Some(path) = self.storage_path {
             page = page.persistent_storage(
                 PersistentStorageOptions::new(path)

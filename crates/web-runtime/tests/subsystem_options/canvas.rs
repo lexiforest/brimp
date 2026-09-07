@@ -35,7 +35,7 @@ fn canvas_2d_option_enables_a_real_skia_backing_store() {
                     written,
                     reset,
                     png: png.startsWith("data:image/png;base64,iVBORw0KGgo"),
-                    otherContext: canvas.getContext("webgl"),
+                    otherContext: canvas.getContext("bitmaprenderer"),
                     native: Function.prototype.toString.call(CanvasRenderingContext2D.prototype.fillRect),
                 });
             })()"##,

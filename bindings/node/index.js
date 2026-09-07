@@ -286,7 +286,7 @@ class Session {
 
 const nativeOptionNames = [
   'personaJson', 'caBundle', 'enableWorker', 'enableStreamingNetworking', 'enableCanvas',
-  'enableWebGL', 'enableWebGPU', 'enableWebAudio', 'enableWebAudioOutput', 'storagePath',
+  'storagePath',
   'storageQuotaBytes',
 ]
 async function createSession(options = {}) {

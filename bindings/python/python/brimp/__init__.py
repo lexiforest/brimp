@@ -442,10 +442,6 @@ class Session:
         enable_worker: bool = False,
         enable_streaming_networking: bool = False,
         enable_canvas: bool = False,
-        enable_webgl: bool = False,
-        enable_webgpu: bool = False,
-        enable_webaudio: bool = False,
-        enable_webaudio_output: bool = False,
         storage_path=None,
         storage_quota_bytes: int | None = None,
         pool_size: int | None = None,
@@ -459,8 +455,6 @@ class Session:
                 persona_json,
                 None if ca_bundle is None else str(Path(ca_bundle)),
                 bool(enable_worker), bool(enable_streaming_networking), bool(enable_canvas),
-                bool(enable_webgl), bool(enable_webgpu), bool(enable_webaudio),
-                bool(enable_webaudio_output),
                 None if storage_path is None else str(Path(storage_path)),
                 storage_quota_bytes,
             )
@@ -874,8 +868,7 @@ class Page:
 
 _SESSION_OPTION_NAMES = {
     "persona_json", "ca_bundle", "enable_worker", "enable_streaming_networking",
-    "enable_canvas", "enable_webgl", "enable_webgpu", "enable_webaudio",
-    "enable_webaudio_output", "storage_path", "storage_quota_bytes", "pool_size",
+    "enable_canvas", "storage_path", "storage_quota_bytes", "pool_size",
 }
 
 

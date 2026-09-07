@@ -45,11 +45,9 @@ async function main() {
 post-JavaScript document. It does not create a jsdom document or make another
 network request.
 
-Worker, streaming-networking, persistent-storage, Canvas 2D, WebGL, WebGPU,
-and WebAudio APIs are disabled by default. Enable only the required surfaces
-through `createSession(options)`. `enableWebAudio` uses a device-free sink;
-`enableWebAudioOutput` also enables WebAudio and authorizes the system output
-device.
+Worker, streaming-networking, persistent-storage, and Canvas 2D APIs are
+disabled by default. Enable only the required surfaces through
+`createSession(options)`.
 
 `request()` and the HTTP verb helpers support query parameters, buffered form,
 raw, JSON, and multipart bodies, Basic Auth, redirects/history, referrers,

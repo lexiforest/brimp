@@ -7,8 +7,8 @@ pub(super) fn dispatch(
 ) -> Result<NativeValue, NativeError> {
     match operation {
         "canvasFeatures" => Ok(NativeValue::String(format!(
-            "{{\"canvas\":{},\"webgl\":{},\"webgpu\":{}}}",
-            state.features.canvas, state.features.webgl, state.features.webgpu,
+            "{{\"canvas\":{}}}",
+            state.features.canvas,
         ))),
         "canvas2dAcquire" => {
             if !state.features.canvas {
@@ -39,19 +39,11 @@ pub(super) fn dispatch(
         "canvasReset" => {
             let id = required_canvas_target(state, call)?;
             let (width, height) = canvas_dimensions(call)?;
-            let was_webgl = state.canvases.borrow().is_webgl(id);
             state
                 .canvases
                 .borrow_mut()
                 .reset(id, width, height)
                 .map_err(NativeError::new)?;
-            if was_webgl {
-                state
-                    .angles
-                    .borrow_mut()
-                    .resize(id, width, height)
-                    .map_err(NativeError::new)?;
-            }
             Ok(NativeValue::Undefined)
         }
         "canvas2dFillRect" => {
@@ -134,28 +126,6 @@ pub(super) fn dispatch(
             let smoothing = required_boolean(call, 22, "image smoothing")?;
             let effects = required_canvas_draw_effects(call, 23)?;
             let composite = required_string(call, 24, "composite operation")?;
-            if state.canvases.borrow().is_webgl(source) && source_width > 0 && source_height > 0 {
-                let mut pixels = state
-                    .angles
-                    .borrow()
-                    .read_canvas_rgba(source, 0, 0, source_width, source_height)
-                    .map_err(NativeError::new)?;
-                flip_rows(&mut pixels, source_width, source_height);
-                state
-                    .canvases
-                    .borrow_mut()
-                    .write_rgba(
-                        source,
-                        source_width,
-                        source_height,
-                        0,
-                        0,
-                        source_width,
-                        source_height,
-                        &pixels,
-                    )
-                    .map_err(NativeError::new)?;
-            }
             state
                 .canvases
                 .borrow_mut()
@@ -193,19 +163,6 @@ pub(super) fn dispatch(
             }
             let source = required_canvas_target(state, call)?;
             let (width, height) = canvas_dimensions(call)?;
-            if state.canvases.borrow().is_webgl(source) && width > 0 && height > 0 {
-                let mut pixels = state
-                    .angles
-                    .borrow()
-                    .read_canvas_rgba(source, 0, 0, width, height)
-                    .map_err(NativeError::new)?;
-                flip_rows(&mut pixels, width, height);
-                state
-                    .canvases
-                    .borrow_mut()
-                    .write_rgba(source, width, height, 0, 0, width, height, &pixels)
-                    .map_err(NativeError::new)?;
-            }
             let (id, width, height) = state
                 .canvases
                 .borrow_mut()
@@ -344,28 +301,6 @@ pub(super) fn dispatch(
             let source_width = required_u32(call, 3, "pattern source width")?;
             let source_height = required_u32(call, 4, "pattern source height")?;
             let repetition = required_string(call, 5, "pattern repetition")?;
-            if state.canvases.borrow().is_webgl(source) {
-                let mut pixels = state
-                    .angles
-                    .borrow()
-                    .read_canvas_rgba(source, 0, 0, source_width, source_height)
-                    .map_err(NativeError::new)?;
-                flip_rows(&mut pixels, source_width, source_height);
-                state
-                    .canvases
-                    .borrow_mut()
-                    .write_rgba(
-                        source,
-                        source_width,
-                        source_height,
-                        0,
-                        0,
-                        source_width,
-                        source_height,
-                        &pixels,
-                    )
-                    .map_err(NativeError::new)?;
-            }
             let pattern = state
                 .canvases
                 .borrow_mut()
@@ -1001,19 +936,6 @@ pub(super) fn dispatch(
             let (width, height) = canvas_dimensions(call)?;
             let mime_type = required_string(call, 4, "image MIME type")?.to_ascii_lowercase();
             let quality = required_u32(call, 5, "image quality")?.min(100) as u8;
-            if state.canvases.borrow().is_webgl(id) && width > 0 && height > 0 {
-                let mut pixels = state
-                    .angles
-                    .borrow()
-                    .read_canvas_rgba(id, 0, 0, width, height)
-                    .map_err(NativeError::new)?;
-                flip_rows(&mut pixels, width, height);
-                state
-                    .canvases
-                    .borrow_mut()
-                    .write_rgba(id, width, height, 0, 0, width, height, &pixels)
-                    .map_err(NativeError::new)?;
-            }
             let Some((encoded_type, bytes)) = state
                 .canvases
                 .borrow_mut()

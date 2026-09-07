@@ -30,7 +30,7 @@ migrated.
 | --- | --- | --- |
 | `schema_version` | Validated as version 1. | None. |
 | `preset` | Supplies defaults for every resolved field; applied surfaces use those defaults. | Defaults for schema-only surfaces remain unapplied. |
-| `seed` | Deterministically derives resolved sub-seeds. | Seeded canvas, graphics, audio, font, DOMRect, and SVG effects are not applied. |
+| `seed` | Deterministically derives resolved sub-seeds. | Seeded canvas, font, DOMRect, and SVG effects are not applied. |
 | `identity` | `brand`, `version`, `platform`, `platform_version`, `architecture`, `bitness`, and `model` feed `navigator.userAgentData`. | `family` and `engine` are resolved metadata only. Identity does not synthesize a User-Agent; set `network.user_agent` explicitly. |
 | `transport` | `impersonation_profile` selects the curl-impersonate HTTP/TLS profile for the native loader. | A caller-supplied `ResourceLoader` is responsible for its own transport fingerprint. |
 | `network` | All fields: `user_agent`, `accept`, `accept_language`, `accept_encoding`, `sec_ch_ua`, `sec_ch_ua_mobile`, `sec_ch_ua_platform`, `sec_ch_ua_full_version`, `sec_ch_ua_full_version_list`, `sec_ch_ua_arch`, `sec_ch_ua_bitness`, `sec_ch_ua_platform_version`, and `sec_ch_ua_model`. They are installed on navigation, redirects, subresources, and fetches unless the individual request overrides a header. | None. |
@@ -74,16 +74,14 @@ observable Brimp surface:
 
 | Group | Why it is not applied in this repository-only stage |
 | --- | --- |
-| `graphics` | WebGL/WebGPU contexts and parameter interception are not implemented. |
 | `css` | Prefix exposure and input/media feature overrides require Stylo/Blitz integration. |
-| `audio` | Web Audio fingerprint hooks are absent. |
 | `fonts` | Arbitrary font inventory and metric substitution require real font assets and Blitz text integration. |
 | `canvas` | Canvas fingerprint-noise hooks are absent. |
 | `domrect` | Quantization and transform-model changes require Blitz layout/geometry changes. |
 | `engine` | Stack syntax, timing, errors, and builtin source text require JavaScriptCore changes, which are out of scope. |
 | `svg` | Persona-specific SVG geometry requires Blitz/SVG geometry integration. |
 | `native_functions` | Function source, descriptors, constructors, and stack sanitation require JavaScriptCore changes. |
-| `noise` | This is an umbrella for the unsupported canvas, WebGL, audio, font, DOMRect, and SVG hooks. |
+| `noise` | This is an umbrella for the unsupported canvas, font, DOMRect, and SVG hooks. |
 
 No Blitz or JavaScriptCore dependency is patched by this migration. When an
 unsupported field is supplied, it still participates in validated resolution
