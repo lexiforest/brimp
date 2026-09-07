@@ -805,9 +805,9 @@ function fontFamily(font) {
     const families = (match?.[1] ?? "sans-serif").split(",");
     for (let family of families) {
         family = family.trim().replace(/^(?:'|")|(?:'|")$/g, "").toLowerCase();
-        if (["wenquanyi micro hei mono", "monospace", "ui-monospace"].includes(family)) return "monospace";
-        if (["noto color emoji", "emoji"].includes(family)) return "emoji";
-        if (["wenquanyi micro hei", "sans-serif", "serif", "system-ui", "cursive", "fantasy"].includes(family)) return "proportional";
+        if (["monospace", "ui-monospace"].includes(family)) return "monospace";
+        if (family === "emoji") return "emoji";
+        if (["sans-serif", "serif", "system-ui", "cursive", "fantasy"].includes(family)) return "proportional";
     }
     return "proportional";
 }

@@ -9,13 +9,13 @@ export default defineConfig({
       description: 'A lightweight, headless browser for agents.',
       customCss: ['./src/styles/custom.css'],
       editLink: {
-        baseUrl: 'https://github.com/lexiforest/brimp/edit/main/docs/',
+        baseUrl: 'https://github.com/lexiforest/brimp-lite/edit/main/docs/',
       },
       social: [
         {
           icon: 'github',
           label: 'GitHub',
-          href: 'https://github.com/lexiforest/brimp',
+          href: 'https://github.com/lexiforest/brimp-lite',
         },
       ],
       sidebar: [

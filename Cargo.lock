@@ -3875,6 +3875,7 @@ dependencies = [
  "browser-dom",
  "cookie_store",
  "encoding_rs",
+ "fontique",
  "getrandom",
  "http",
  "jsc",

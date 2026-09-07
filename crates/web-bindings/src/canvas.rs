@@ -4,12 +4,13 @@ use std::{
 };
 
 use browser_dom::NodeId;
+use fontique::{Blob, Collection, CollectionOptions, GenericFamily, QueryStatus, SourceCache};
 use rustybuzz::{Direction, Face, UnicodeBuffer};
 use skia_safe::{
     AlphaType, BlendMode, Color, Color4f, ColorChannel, ColorSpace, ColorType, Data,
-    EncodedImageFormat, FilterMode, Font, FontArguments, FontMgr, GlyphId, IPoint, ISize, Image,
-    ImageInfo, Matrix, Paint, Path, PathBuilder, PathFillType, Point, Point3, RRect, Rect,
-    SamplingOptions, Surface, TileMode, Typeface, Vector,
+    EncodedImageFormat, FilterMode, Font, FontMgr, GlyphId, IPoint, ISize, Image, ImageInfo,
+    Matrix, Paint, Path, PathBuilder, PathFillType, Point, Point3, RRect, Rect, SamplingOptions,
+    Surface, TileMode, Typeface, Vector,
     canvas::SrcRectConstraint,
     color_filters, dash_path_effect,
     gradient::{Colors as GradientColors, Gradient, Interpolation, shaders as gradient_shaders},
@@ -21,12 +22,9 @@ use unicode_segmentation::UnicodeSegmentation;
 
 const MAX_CANVAS_DIMENSION: u32 = 32_767;
 const MAX_CANVAS_PIXELS: u64 = 64 * 1024 * 1024;
-const WENQUANYI_FONT: &[u8] = include_bytes!("../../browser-dom/assets/fonts/wqy-microhei.ttc");
-const NOTO_EMOJI_FONT: &[u8] =
-    include_bytes!("../../browser-dom/assets/fonts/noto-color-emoji.ttf");
-static PROPORTIONAL_TYPEFACE: OnceLock<Option<Typeface>> = OnceLock::new();
-static MONOSPACE_TYPEFACE: OnceLock<Option<Typeface>> = OnceLock::new();
-static EMOJI_TYPEFACE: OnceLock<Option<Typeface>> = OnceLock::new();
+static PROPORTIONAL_FONT: OnceLock<Option<SystemCanvasFont>> = OnceLock::new();
+static MONOSPACE_FONT: OnceLock<Option<SystemCanvasFont>> = OnceLock::new();
+static EMOJI_FONT: OnceLock<Option<SystemCanvasFont>> = OnceLock::new();
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum CanvasFontFace {
@@ -45,6 +43,12 @@ struct ShapedText {
     runs: Vec<ShapedRun>,
     advance: f32,
     bounds: Rect,
+}
+
+struct SystemCanvasFont {
+    data: Blob<u8>,
+    index: u32,
+    typeface: Typeface,
 }
 
 pub struct CanvasRaster {
@@ -2364,51 +2368,57 @@ impl CanvasFontFace {
         }
     }
 
-    fn data(self) -> &'static [u8] {
+    fn generic_family(self) -> GenericFamily {
         match self {
-            Self::Proportional | Self::Monospace => WENQUANYI_FONT,
-            Self::Emoji => NOTO_EMOJI_FONT,
+            Self::Proportional => GenericFamily::SansSerif,
+            Self::Monospace => GenericFamily::Monospace,
+            Self::Emoji => GenericFamily::Emoji,
         }
     }
 
-    fn index(self) -> u32 {
+    fn cache(self) -> &'static OnceLock<Option<SystemCanvasFont>> {
         match self {
-            Self::Proportional => 0,
-            Self::Monospace => 1,
-            Self::Emoji => 0,
+            Self::Proportional => &PROPORTIONAL_FONT,
+            Self::Monospace => &MONOSPACE_FONT,
+            Self::Emoji => &EMOJI_FONT,
         }
     }
 
-    fn typeface(self) -> &'static OnceLock<Option<Typeface>> {
-        match self {
-            Self::Proportional => &PROPORTIONAL_TYPEFACE,
-            Self::Monospace => &MONOSPACE_TYPEFACE,
-            Self::Emoji => &EMOJI_TYPEFACE,
-        }
+    fn system_font(self) -> Result<&'static SystemCanvasFont, String> {
+        self.cache()
+            .get_or_init(|| load_system_canvas_font(self.generic_family()))
+            .as_ref()
+            .ok_or_else(|| format!("no installed {:?} font is available", self.generic_family()))
     }
+}
+
+fn load_system_canvas_font(generic: GenericFamily) -> Option<SystemCanvasFont> {
+    let mut collection = Collection::new(CollectionOptions {
+        shared: true,
+        system_fonts: true,
+    });
+    let mut source_cache = SourceCache::new_shared();
+    let mut selected = None;
+    let mut query = collection.query(&mut source_cache);
+    query.set_families([generic]);
+    query.matches_with(|font| {
+        selected = Some((font.blob.clone(), font.index));
+        QueryStatus::Stop
+    });
+    let (data, index) = selected?;
+    let typeface = FontMgr::new().new_from_data(data.as_ref(), index as usize)?;
+    Some(SystemCanvasFont {
+        data,
+        index,
+        typeface,
+    })
 }
 
 fn canvas_font(face: CanvasFontFace, size: f32) -> Result<Font, String> {
     if !size.is_finite() || size <= 0.0 {
         return Err("Canvas font size must be positive and finite".to_owned());
     }
-    let typeface = face
-        .typeface()
-        .get_or_init(|| {
-            FontMgr::new()
-                .new_from_data(face.data(), 0)
-                .and_then(|typeface| {
-                    if face == CanvasFontFace::Monospace {
-                        let mut arguments = FontArguments::new();
-                        arguments.set_collection_index(1);
-                        typeface.clone_with_arguments(&arguments)
-                    } else {
-                        Some(typeface)
-                    }
-                })
-        })
-        .clone()
-        .ok_or("Skia could not load the bundled Canvas font")?;
+    let typeface = face.system_font()?.typeface.clone();
     let mut font = Font::new(typeface, size);
     font.set_subpixel(true).set_linear_metrics(true);
     Ok(font)
@@ -2484,15 +2494,16 @@ fn shape_text(
 ) -> Result<ShapedText, String> {
     let bidi_runs = bidi_text_runs(text, direction)?;
     let mut source_runs = Vec::<(CanvasFontFace, String, Direction)>::new();
-    let primary_face = Face::from_slice(primary.data(), primary.index())
-        .ok_or("Rustybuzz could not load the selected bundled Canvas font")?;
-    let proportional_face = Face::from_slice(
-        CanvasFontFace::Proportional.data(),
-        CanvasFontFace::Proportional.index(),
-    )
-    .ok_or("Rustybuzz could not load the proportional bundled Canvas font")?;
-    let emoji_face = Face::from_slice(CanvasFontFace::Emoji.data(), CanvasFontFace::Emoji.index())
-        .ok_or("Rustybuzz could not load the emoji bundled Canvas font")?;
+    let primary_font = primary.system_font()?;
+    let proportional_font = CanvasFontFace::Proportional.system_font()?;
+    let emoji_font = CanvasFontFace::Emoji.system_font()?;
+    let primary_face = Face::from_slice(primary_font.data.as_ref(), primary_font.index)
+        .ok_or("Rustybuzz could not load the selected system Canvas font")?;
+    let proportional_face =
+        Face::from_slice(proportional_font.data.as_ref(), proportional_font.index)
+            .ok_or("Rustybuzz could not load the proportional system Canvas font")?;
+    let emoji_face = Face::from_slice(emoji_font.data.as_ref(), emoji_font.index)
+        .ok_or("Rustybuzz could not load the emoji system Canvas font")?;
     for (bidi_text, run_direction) in bidi_runs {
         let mut font_runs = Vec::<(CanvasFontFace, String, Direction)>::new();
         let mut previous = primary;
@@ -2524,8 +2535,9 @@ fn shape_text(
     let mut pen = Point::new(0.0, 0.0);
     let mut bounds = None::<Rect>;
     for (face_kind, run, run_direction) in source_runs {
-        let face = Face::from_slice(face_kind.data(), face_kind.index())
-            .ok_or("Rustybuzz could not load a bundled Canvas font")?;
+        let system_font = face_kind.system_font()?;
+        let face = Face::from_slice(system_font.data.as_ref(), system_font.index)
+            .ok_or("Rustybuzz could not load a system Canvas font")?;
         let font = canvas_font(face_kind, size)?;
         let scale = size / face.units_per_em() as f32;
         let mut buffer = UnicodeBuffer::new();
@@ -2732,7 +2744,7 @@ mod tests {
     }
 
     #[test]
-    fn bundled_font_shaping_combines_marks_and_honors_direction() {
+    fn system_font_shaping_combines_marks_and_honors_direction() {
         let decomposed = shape_text("A\u{301}", 20.0, "ltr", CanvasFontFace::Proportional).unwrap();
         let composed = shape_text("\u{c1}", 20.0, "ltr", CanvasFontFace::Proportional).unwrap();
         assert_eq!(decomposed.runs[0].glyphs, composed.runs[0].glyphs);
@@ -2767,7 +2779,7 @@ mod tests {
     }
 
     #[test]
-    fn bundled_font_selection_uses_the_monospace_ttc_face() {
+    fn system_font_selection_uses_a_monospace_face() {
         let proportional = shape_text("ii", 20.0, "ltr", CanvasFontFace::Proportional).unwrap();
         let monospace_narrow = shape_text("ii", 20.0, "ltr", CanvasFontFace::Monospace).unwrap();
         let monospace_wide = shape_text("WW", 20.0, "ltr", CanvasFontFace::Monospace).unwrap();
@@ -2776,16 +2788,13 @@ mod tests {
     }
 
     #[test]
-    fn bundled_font_fallback_keeps_extended_graphemes_in_one_face() {
-        // The proportional face contains U+2008 while the monospace face does
-        // not. The combining acute accent is present in both, so scalar-based
-        // fallback would incorrectly split this grapheme across two faces.
+    fn system_font_fallback_keeps_extended_graphemes_in_one_face() {
         let shaped = shape_text("\u{2008}\u{301}", 20.0, "ltr", CanvasFontFace::Monospace).unwrap();
         assert_eq!(shaped.runs.len(), 1);
     }
 
     #[test]
-    fn bundled_font_fallback_keeps_emoji_sequences_in_the_emoji_face() {
+    fn system_font_fallback_keeps_emoji_sequences_in_the_emoji_face() {
         let shaped = shape_text("👩‍💻", 24.0, "ltr", CanvasFontFace::Proportional).unwrap();
         assert_eq!(shaped.runs.len(), 1);
         assert!(!shaped.runs[0].glyphs.is_empty());

@@ -12,8 +12,8 @@ license = "MIT OR Apache-2.0"
 keywords = ["browser", "headless", "requests", "javascriptcore"]
 
 [project.urls]
-Repository = "https://github.com/lexiforest/brimp"
-Issues = "https://github.com/lexiforest/brimp/issues"
+Repository = "https://github.com/lexiforest/brimp-lite"
+Issues = "https://github.com/lexiforest/brimp-lite/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=8,<10"]
