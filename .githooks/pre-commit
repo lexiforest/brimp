@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+workspace=$(git rev-parse --show-toplevel)
+cd "$workspace"
+
+if git diff --cached --quiet -- '*.rs'; then
+  exit 0
+fi
+
+cargo fmt --all --check

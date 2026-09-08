@@ -26,9 +26,9 @@ pages need:
 
 ## One runtime, four interfaces
 
-The CLI, Python binding, Node binding, and CDP server all delegate to the same
-`web-runtime` automation boundary. They do not contain separate browser
-implementations.
+The CLI, Python binding, Node binding, and controller-managed CDP worker all
+delegate to the same `web-runtime` automation boundary. They do not contain
+separate browser implementations.
 
 ```text
 CLI          Python          Node          CDP / Playwright / Puppeteer
@@ -42,7 +42,8 @@ CLI          Python          Node          CDP / Playwright / Puppeteer
                   curl-impersonate
 ```
 
-Python and Node run in process. CDP is the remote JSON/WebSocket boundary.
+Python and Node run in process. The CDP worker exchanges framed JSON with the
+Brimp controller (`brimp serve`), which owns the remote endpoint.
 
 ## When to use Brimp
 

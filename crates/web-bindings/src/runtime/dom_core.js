@@ -420,7 +420,6 @@ function __upgradeCustomElement(element) {
     try {
         const result = Reflect.construct(constructor, []);
         if (result !== element) throw new TypeError("custom element constructor returned another object");
-        __callHost("setCustomElementDefined", element);
         const observed = Array.from(constructor.observedAttributes ?? [], String);
         if (typeof element.attributeChangedCallback === "function") {
             for (const name of observed) {

@@ -3,6 +3,12 @@ title: Quick start
 description: Render your first page with Python, Node.js, the CLI, or Puppeteer.
 ---
 
+CLI browser commands currently require macOS and a child worker. Set
+`BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
+or pass `--worker-path PATH`. Build both with
+`cargo build -p brimp-cli -p lite-worker`.
+
+
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 
@@ -24,8 +30,8 @@ npm install @brimp/brimp
   </TabItem>
   <TabItem label="CLI">
 ```sh
-git clone https://github.com/lexiforest/brimp-lite.git
-cd brimp-lite
+git clone https://github.com/lexiforest/brimp.git
+cd brimp
 cargo build --release -p brimp-cli
 ./target/release/brimp doctor
 ```
@@ -33,7 +39,7 @@ cargo build --release -p brimp-cli
   <TabItem label="CDP">
 ```sh
 npm install playwright-core
-brimp cdp --bind 127.0.0.1:9222
+brimp serve --worker-path /path/to/lite-worker --port=9222
 ```
   </TabItem>
 </Tabs>
@@ -334,5 +340,5 @@ main().catch(console.error)
 
 ## Notes for CDP
 
-The CDP server supports a checked protocol subset. Consult the [CDP API
+The controller-managed CDP worker supports a checked protocol subset. Consult the [CDP API
 reference](/api/cdp/) before adapting a larger Puppeteer workflow.

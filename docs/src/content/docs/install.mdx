@@ -3,6 +3,12 @@ title: Install
 description: Install the Python and Node bindings or build the Brimp CLI.
 ---
 
+CLI browser commands currently require macOS and a child worker. Set
+`BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
+or pass `--worker-path PATH`. Build both with
+`cargo build -p brimp-cli -p lite-worker`.
+
+
 Choose the package that matches the interface you plan to use.
 
 ## Python
@@ -42,7 +48,7 @@ npm install @brimp/brimp
 The package is a native addon. Other Node platforms are not currently
 published.
 
-## CLI and CDP server
+## CLI and CDP worker
 
 Each tagged GitHub Release includes standalone CLI archives for every supported
 native target:
@@ -64,13 +70,13 @@ tar -xzf brimp-vVERSION-aarch64-apple-darwin.tar.gz
 ./brimp-vVERSION-aarch64-apple-darwin/brimp doctor
 ```
 
-Other targets build the `brimp` executable, including the `brimp cdp`
-subcommand, from source:
+The CLI and the controller-managed CDP worker can also be built from source:
 
 ```sh
-git clone https://github.com/lexiforest/brimp-lite.git
-cd brimp-lite
+git clone https://github.com/lexiforest/brimp.git
+cd brimp
 cargo build --release -p brimp-cli
+cargo build --release -p lite-worker
 ./target/release/brimp doctor
 ```
 

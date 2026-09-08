@@ -10,7 +10,7 @@ Brimp exposes four automation interfaces backed by the same runtime:
 | [Python](/api/python/) | Synchronous, in-process | Requests-style extraction and scripts |
 | [Node.js](/api/node/) | Asynchronous, in-process | Node applications and cancellable navigation |
 | [CLI](/api/cli/) | One command per operation | Shell automation and diagnostics |
-| [CDP](/api/cdp/) | HTTP/WebSocket server | Supported Playwright, Puppeteer, and raw-CDP workflows |
+| [CDP](/api/cdp/) | Controller-managed worker | Supported Playwright, Puppeteer, and raw-CDP workflows through the Brimp daemon |
 | [Rust page API](/architecture/javascript-runtime/#evaluate-directly-on-a-page) | Embedded, owner-thread-bound | Direct JSC values and custom resource loaders |
 
 ## Shared behavior

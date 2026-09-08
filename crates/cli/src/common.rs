@@ -1,63 +1,9 @@
 use std::path::PathBuf;
 use std::time::Duration;
 
-use web_runtime::{AutomationError, ExtractionOptions, PageOptions, PersistentStorageOptions};
+use brimp_worker_api::{AutomationError, ExtractionOptions, WorkerConfig};
 
 use super::{WaitCondition, argument_error, parse_duration, parse_header};
-
-pub(crate) struct PageFeatures {
-    pub(crate) worker: bool,
-    pub(crate) streaming_networking: bool,
-    pub(crate) canvas: bool,
-    pub(crate) storage_path: Option<PathBuf>,
-    pub(crate) storage_quota: Option<u64>,
-}
-
-impl PageFeatures {
-    pub(crate) fn parse(parser: &mut pico_args::Arguments) -> Result<Self, AutomationError> {
-        Ok(Self {
-            worker: parser.contains("--enable-worker"),
-            streaming_networking: parser.contains("--enable-streaming-networking"),
-            canvas: parser.contains("--enable-canvas"),
-            storage_path: parser
-                .opt_value_from_os_str("--storage-path", |value| {
-                    Ok::<_, pico_args::Error>(PathBuf::from(value))
-                })
-                .map_err(argument_error)?,
-            storage_quota: parser
-                .opt_value_from_str::<_, u64>("--storage-quota-bytes")
-                .map_err(argument_error)?,
-        })
-    }
-
-    pub(crate) fn build(
-        self,
-        request_headers: Vec<(String, String)>,
-    ) -> Result<PageOptions, AutomationError> {
-        if self.storage_quota == Some(0) {
-            return Err(AutomationError::InvalidInput(
-                "--storage-quota-bytes must be positive".into(),
-            ));
-        }
-        if self.storage_quota.is_some() && self.storage_path.is_none() {
-            return Err(AutomationError::InvalidInput(
-                "--storage-quota-bytes requires --storage-path".into(),
-            ));
-        }
-        let mut page = PageOptions::builder()
-            .request_headers(request_headers)
-            .worker_system(self.worker)
-            .streaming_networking(self.streaming_networking)
-            .canvas(self.canvas);
-        if let Some(path) = self.storage_path {
-            page = page.persistent_storage(
-                PersistentStorageOptions::new(path)
-                    .quota_bytes(self.storage_quota.unwrap_or(1_073_741_824)),
-            );
-        }
-        Ok(page.build())
-    }
-}
 
 pub(crate) struct NavigationOptions {
     pub(crate) timeout: Duration,
@@ -66,9 +12,8 @@ pub(crate) struct NavigationOptions {
     pub(crate) network_idle: Duration,
     pub(crate) scripts: Vec<String>,
     pub(crate) extraction: ExtractionOptions,
-    pub(crate) persona: persona::PersonaConfig,
-    pub(crate) network: network::CurlConfig,
-    pub(crate) page: PageOptions,
+    pub(crate) config: WorkerConfig,
+    pub(crate) worker_path: String,
     pub(crate) cookies: Vec<(String, String)>,
 }
 
@@ -126,18 +71,16 @@ impl NavigationOptions {
             })
             .map_err(argument_error)?;
         let persona = persona_path.map_or_else(
-            || Ok(persona::PersonaConfig::default()),
+            || Ok(None),
             |path| {
                 persona::PersonaConfig::from_json_file(path)
+                    .map(Some)
                     .map_err(|error| AutomationError::InvalidInput(error.to_string()))
             },
         )?;
         let proxy = parser
             .opt_value_from_str::<_, String>("--proxy")
-            .map_err(argument_error)?
-            .map(network::Proxy::parse)
-            .transpose()
-            .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
+            .map_err(argument_error)?;
         let ca_bundle = parser
             .opt_value_from_os_str("--ca-bundle", |value| {
                 Ok::<_, pico_args::Error>(PathBuf::from(value))
@@ -165,7 +108,33 @@ impl NavigationOptions {
                 Ok((name.to_owned(), value.to_owned()))
             })
             .collect::<Result<Vec<_>, _>>()?;
-        let page = PageFeatures::parse(parser)?.build(request_headers)?;
+        let worker_path = worker_path(parser)?;
+        let config = WorkerConfig {
+            navigation_timeout_ms: Some(timeout.as_millis() as u64),
+            persona,
+            proxy,
+            ca_bundle,
+            headers: request_headers,
+            worker: parser.contains("--enable-worker"),
+            streaming_networking: parser.contains("--enable-streaming-networking"),
+            canvas: parser.contains("--enable-canvas"),
+            storage_path: parser
+                .opt_value_from_str::<_, PathBuf>("--storage-path")
+                .map_err(argument_error)?,
+            storage_quota: parser
+                .opt_value_from_str("--storage-quota-bytes")
+                .map_err(argument_error)?,
+        };
+        if config.storage_quota == Some(0) {
+            return Err(AutomationError::InvalidInput(
+                "--storage-quota-bytes must be positive".into(),
+            ));
+        }
+        if config.storage_quota.is_some() && config.storage_path.is_none() {
+            return Err(AutomationError::InvalidInput(
+                "--storage-quota-bytes requires --storage-path".into(),
+            ));
+        }
         Ok(Self {
             timeout,
             wait,
@@ -173,14 +142,20 @@ impl NavigationOptions {
             network_idle,
             scripts,
             extraction,
-            persona,
-            network: network::CurlConfig {
-                proxy,
-                ca_bundle,
-                ..network::CurlConfig::default()
-            },
-            page,
+            config,
+            worker_path,
             cookies,
         })
     }
+}
+
+pub(crate) fn worker_path(parser: &mut pico_args::Arguments) -> Result<String, AutomationError> {
+    parser
+        .opt_value_from_str::<_, String>("--worker-path")
+        .map_err(argument_error)?
+        .or_else(|| std::env::var("BRIMP_WORKER_PATH").ok())
+        .filter(|path| !path.is_empty())
+        .ok_or_else(|| {
+            AutomationError::InvalidInput("--worker-path or BRIMP_WORKER_PATH is required".into())
+        })
 }

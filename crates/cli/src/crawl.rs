@@ -7,10 +7,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, mpsc};
 use std::time::{Duration, Instant};
 
+use brimp_controller::browser::{Browser as AutomationBrowser, Page as AutomationPage};
+use brimp_worker_api::{AutomationError, CancellationToken};
 use glob::Pattern;
 use robotstxt::DefaultMatcher;
 use url::Url;
-use web_runtime::{AutomationBrowser, AutomationError, AutomationPage, CancellationToken};
 
 use super::{
     InterruptMonitor, WaitCondition, argument_error, parse_duration, remaining_timeout, wait_fixed,
@@ -218,16 +219,19 @@ pub(super) fn run(arguments: &[String]) -> Result<(), AutomationError> {
     prepare_output_dir(&options)?;
     let manifest_path = options.output_dir.join("manifest.jsonl");
     let mut manifest = BufWriter::new(File::create(&manifest_path).map_err(io_error)?);
-    let browser = Arc::new(AutomationBrowser::with_persona_and_network_config(
-        options.navigation.persona.clone(),
-        options.navigation.network.clone(),
+    let interrupt = InterruptMonitor::new();
+    let started = Instant::now();
+    let browser = Arc::new(AutomationBrowser::launch(
+        &options.navigation.worker_path,
+        options.navigation.config.clone(),
+        remaining_timeout(started, options.navigation.timeout)?,
+        interrupt.token(),
+        matches!(options.navigation.wait, WaitCondition::DomContentLoaded),
     )?);
     let context = browser.default_context();
     for (name, value) in &options.navigation.cookies {
         context.set_cookie(options.start.as_str(), name, value)?;
     }
-    let interrupt = InterruptMonitor::new();
-    let started = Instant::now();
     let pacing = Arc::new(Mutex::new(HashMap::<String, Instant>::new()));
     let mut robots = HashMap::<String, String>::new();
     let mut allowed_origins = options.allowed_origins.clone();
@@ -439,7 +443,7 @@ fn run_tasks(
             let cancellation = cancellation.clone();
             let allowed_origins = allowed_origins.clone();
             scope.spawn(move || {
-                let page = browser.new_page(options.navigation.page.clone());
+                let page = browser.new_page();
                 loop {
                     let index = next.fetch_add(1, Ordering::Relaxed);
                     let Some(task) = tasks.get(index).cloned() else {
@@ -492,15 +496,13 @@ fn process_page(
     started: Instant,
 ) -> PageResult {
     pace(pacing, &task.url, options.delay, &cancellation);
-    let page_timeout = match remaining_timeout(started, options.navigation.timeout) {
-        Ok(timeout) => timeout,
+    if let Err(error) = remaining_timeout(started, options.navigation.timeout) {
+        return failed(task, error);
+    }
+    let response = match page.navigate_cancellable(task.url.as_str(), cancellation.clone(), false) {
+        Ok(response) => response,
         Err(error) => return failed(task, error),
     };
-    let response =
-        match page.navigate_cancellable(task.url.as_str(), page_timeout, cancellation.clone()) {
-            Ok(response) => response,
-            Err(error) => return failed(task, error),
-        };
     let final_url = Url::parse(&response.url).ok();
     if !task.start
         && final_url
@@ -665,12 +667,9 @@ fn fetch_robots(
     robots.set_query(None);
     robots.set_fragment(None);
     pace(pacing, &robots, options.delay, &cancellation);
-    let page = browser.new_page(options.navigation.page.clone())?;
-    let response = page.navigate_cancellable(
-        robots.as_str(),
-        remaining_timeout(started, options.navigation.timeout)?,
-        cancellation,
-    );
+    let page = browser.new_page()?;
+    remaining_timeout(started, options.navigation.timeout)?;
+    let response = page.navigate_cancellable(robots.as_str(), cancellation, true);
     page.close();
     match response {
         Ok(response) if (200..300).contains(&response.status_code) => {
@@ -812,7 +811,7 @@ fn io_error(error: std::io::Error) -> AutomationError {
     AutomationError::Internal(error.to_string())
 }
 
-const CRAWL_USAGE: &str = "usage: brimp crawl URL [OPTIONS]\n\nBOUNDS:\n  --output-dir PATH       default: ./brimp-crawl\n  --depth N               default: 2\n  --workers N             default: 2\n  --max-pages N           default: 1000\n  --format markdown|html|json\n\nSCOPE:\n  --include GLOB          repeatable\n  --exclude GLOB          repeatable\n  --allow-origin URL      repeatable\n  --ignore-robots\n  --delay DURATION\n\nWAITING AND ACTIONS:\n  --wait domcontentloaded|load|networkidle|SECONDS\n  --wait-selector SELECTOR\n  --network-idle DURATION\n  --script PATH           repeatable\n\nFAILURES:\n  --fail-fast\n  --allow-errors\n  --overwrite\n\nCrawl also accepts get's extraction, network, identity, timeout, and page subsystem options.";
+const CRAWL_USAGE: &str = "usage: brimp crawl URL [--worker-path PATH] [OPTIONS]\n\nBOUNDS:\n  --output-dir PATH       default: ./brimp-crawl\n  --depth N               default: 2\n  --workers N             default: 2\n  --max-pages N           default: 1000\n  --format markdown|html|json\n\nSCOPE:\n  --include GLOB          repeatable\n  --exclude GLOB          repeatable\n  --allow-origin URL      repeatable\n  --ignore-robots\n  --delay DURATION\n\nWAITING AND ACTIONS:\n  --wait domcontentloaded|load|networkidle|SECONDS\n  --wait-selector SELECTOR\n  --network-idle DURATION\n  --script PATH           repeatable\n\nFAILURES:\n  --fail-fast\n  --allow-errors\n  --overwrite\n\nCrawl also accepts get's extraction, network, identity, timeout, and page subsystem options.";
 
 pub(super) fn usage() -> &'static str {
     CRAWL_USAGE

@@ -1,79 +1,9 @@
-use std::collections::BTreeMap;
-
+use brimp_worker_api::{DEFUDDLE_BUNDLE, INSTALL_EXTRACTOR};
+pub use brimp_worker_api::{
+    DebugInfo, DebugRemoval, ExtractedDocument, ExtractionOptions, MetaTagItem,
+};
 use jsc::{JsRuntime, ProtectedJsObject};
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
-const DEFUDDLE_BUNDLE: &str = include_str!("../vendor/defuddle/0.19.3/index.full.js");
-const INSTALL_EXTRACTOR: &str = include_str!("extraction/install.js");
-
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ExtractionOptions {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub content_selector: Option<String>,
-    pub remove_images: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub language: Option<String>,
-    pub debug: bool,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ExtractedDocument {
-    pub title: String,
-    pub description: String,
-    pub domain: String,
-    pub favicon: String,
-    pub image: String,
-    pub language: String,
-    pub parse_time: f64,
-    pub published: String,
-    pub author: String,
-    pub site: String,
-    pub schema_org_data: Value,
-    pub word_count: u64,
-    pub content: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content_markdown: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub extractor_type: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub meta_tags: Option<Vec<MetaTagItem>>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub debug: Option<DebugInfo>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub profile: Option<BTreeMap<String, f64>>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub variables: Option<BTreeMap<String, String>>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct MetaTagItem {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub property: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub content: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct DebugInfo {
-    pub content_selector: String,
-    pub removals: Vec<DebugRemoval>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct DebugRemoval {
-    pub step: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub selector: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub reason: Option<String>,
-    pub text: String,
-}
 
 #[derive(Debug, thiserror::Error)]
 pub enum ExtractionError {

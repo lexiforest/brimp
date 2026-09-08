@@ -204,17 +204,6 @@ impl BrowserDocument {
         }
     }
 
-    pub fn set_custom_element_defined(&mut self, node_id: NodeId) -> bool {
-        let Some(node) = self.inner.get_node_mut(node_id) else {
-            return false;
-        };
-        if !node.is_element() {
-            return false;
-        }
-        node.set_defined();
-        true
-    }
-
     pub fn adopt_subtree(&mut self, node_id: NodeId, document_id: NodeId) {
         self.set_node_document(node_id, document_id);
         let children = self

@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+brimp-worker-api = { path = "../worker-api" }
 blitz-dom = "=0.3.0-beta.1"
 blitz-traits = "=0.3.0-beta.1"
 browser-dom = { path = "../browser-dom" }

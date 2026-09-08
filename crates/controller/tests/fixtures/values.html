@@ -1,0 +1,10 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>values fixture</title>
+<script>
+window.fixtureValues = {
+    string: 'webkit', number: 42.5, boolean: true, nil: null,
+    array: [1, 'two', false], object: { nested: 'value' }
+};
+window.rejectedFixturePromise = () => Promise.reject(new Error('fixture rejection'));
+</script>

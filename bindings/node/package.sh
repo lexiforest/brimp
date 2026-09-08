@@ -17,9 +17,9 @@ cp "$workspace/LICENSE" "$staging/licenses/brimp-LICENSE"
 cp "$workspace/bindings/python/python/brimp/licenses/curl-impersonate-LICENSE" \
   "$staging/licenses/"
 mkdir -p "$staging/licenses/defuddle"
-cp "$workspace/crates/web-runtime/vendor/defuddle/0.19.3/NOTICE.md" \
+cp "$workspace/crates/worker-api/defuddle/0.19.3/NOTICE.md" \
   "$staging/licenses/defuddle/"
-cp -R "$workspace/crates/web-runtime/vendor/defuddle/0.19.3/licenses" \
+cp -R "$workspace/crates/worker-api/defuddle/0.19.3/licenses" \
   "$staging/licenses/defuddle/"
 install_name_tool -change @rpath/libcurl-impersonate.4.dylib \
   @loader_path/libcurl-impersonate.4.dylib "$staging/brimp_node.node"

@@ -1,7 +1,13 @@
 ---
 title: CLI and CDP examples
-description: Shell automation and supported Playwright and Puppeteer workflows.
+description: Shell automation and controller-managed Playwright and Puppeteer workflows.
 ---
+
+CLI browser commands currently require macOS and a child worker. Set
+`BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
+or pass `--worker-path PATH`. Build both with
+`cargo build -p brimp-cli -p lite-worker`.
+
 
 ## Check native dependencies
 
@@ -54,14 +60,15 @@ Brimp refuses to replace an existing file unless `--overwrite` is explicit.
 
 ## Connect Puppeteer
 
-Start the server on its loopback default:
+Start the Brimp controller (`brimp serve`) with the worker:
 
 ```sh
-brimp cdp
+brimp serve \
+  --worker-path /path/to/lite-worker \
+  --headless --window-size=1280,720 --port=9222
 ```
 
-The first output line is the browser WebSocket endpoint. Puppeteer can discover
-it through the HTTP endpoint:
+Puppeteer connects to the controller's HTTP discovery endpoint:
 
 ```js
 const fs = require('node:fs/promises')
@@ -108,8 +115,7 @@ try {
 Use `playwright-core`, not a Playwright browser download: Brimp is the browser
 process being controlled.
 
-Do not expose the server to a network unless you intend to give every reachable
-client control of the browser. Non-loopback binds require
-`--allow-non-loopback` and print a security warning.
+Do not expose the controller to a network unless you intend to give every
+reachable client control of the browser.
 
 See the [CLI API](/api/cli/) and [CDP API](/api/cdp/) for exhaustive support.

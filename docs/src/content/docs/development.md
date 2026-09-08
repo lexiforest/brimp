@@ -43,12 +43,10 @@ From the repository root:
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ./bindings/package-test.sh
-./crates/cdp/puppeteer-test.sh
 ```
 
-The package test is the combined macOS ARM64 Python and Node check. The
-The client workflow installs its exact locked Puppeteer and Playwright
-dependencies into a temporary directory and connects both to `brimp cdp`.
+The package test is the combined macOS ARM64 Python and Node check. The Rust CDP
+workflow exercises the same framed transport used by the worker executable.
 
 For a quicker interface-specific cycle:
 

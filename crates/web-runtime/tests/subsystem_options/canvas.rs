@@ -1324,7 +1324,7 @@ fn canvas_2d_svg_diffuse_and_specular_lighting_execute_in_skia() {
 }
 
 #[test]
-fn canvas_2d_text_uses_bundled_skia_font_metrics_and_pixels() {
+fn canvas_2d_text_uses_system_font_metrics_and_pixels() {
     let browser = Browser::with_resource_loader(Arc::new(UnusedLoader));
     let mut page = browser
         .new_page(PageOptions::builder().canvas(true).build())

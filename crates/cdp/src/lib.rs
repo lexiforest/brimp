@@ -1,6 +1,6 @@
 mod dispatch;
+mod framed;
 mod interception;
 mod protocol;
-mod server;
 
-pub use server::{ServerConfig, ServerError, ServerHandle, parse_bind, start, start_with_browser};
+pub use framed::{FramedError, MAX_FRAME_SIZE, serve_framed, serve_framed_with_browser};

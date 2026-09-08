@@ -1,32 +1,11 @@
 # Brimp CDP
 
-`brimp cdp` exposes a deliberately small Chrome DevTools Protocol server over
-HTTP discovery and WebSocket transport. It is a remote server/client boundary;
-unlike the Python and Node native extensions, protocol values are serialized as
-JSON and screenshots are base64 encoded.
-
-The server binds to `127.0.0.1:9222` by default. A non-loopback bind is rejected
-unless `--allow-non-loopback` is passed, in which case the server prints a
-security warning before binding.
+`brimp-cdp` implements the worker's deliberately small Chrome DevTools Protocol
+subset. It reads length-prefixed CDP JSON from a local stream inherited from the
+Brimp daemon. The daemon owns the public HTTP discovery and WebSocket boundary.
 
 See `SUPPORT.md` for the exact tested method subset.
 
-Playwright connects through its public CDP attachment API:
-
-```js
-import { chromium } from 'playwright-core'
-
-const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
-const context = browser.contexts()[0] ?? await browser.newContext()
-const page = await context.newPage()
-await page.goto('https://example.com')
-console.log(await page.evaluate(() => document.title))
-await browser.close()
-```
-
-The complete method matrix and client notes are maintained in the documentation
-site's `api/cdp` page.
-
-Run `./crates/cdp/puppeteer-test.sh` to install the exact locked Puppeteer and
-Playwright versions into a temporary directory and execute both public-API
-workflows.
+`serve_framed` accepts any Tokio asynchronous byte stream. The
+`lite-worker` executable supplies its inherited Unix socket; a Windows
+host can supply a named pipe without changing protocol dispatch.

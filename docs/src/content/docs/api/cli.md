@@ -3,6 +3,12 @@ title: CLI API
 description: Commands, flags, output contracts, and exit codes for brimp.
 ---
 
+CLI browser commands currently require macOS and a child worker. Set
+`BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
+or pass `--worker-path PATH`. Build both with
+`cargo build -p brimp-cli -p lite-worker`.
+
+
 The CLI writes primary results to standard output or the requested path and
 diagnostics to standard error.
 
@@ -10,12 +16,10 @@ diagnostics to standard error.
 brimp doctor
 brimp get URL [OPTIONS]
 brimp crawl URL [OPTIONS]
-brimp cdp [OPTIONS]
 brimp help [COMMAND]
 ```
 
-Use `brimp help get`, `brimp help crawl`, or `brimp help cdp` for the installed
-command synopsis.
+Use `brimp help get` or `brimp help crawl` for the installed command synopsis.
 
 ## `brimp doctor`
 
@@ -101,17 +105,6 @@ after the current frontier, while `--allow-errors` permits a successful process
 exit when terminal page records contain failures. The output directory must be
 absent or empty unless `--overwrite` is present; unrelated files are never
 removed.
-
-## `brimp cdp`
-
-```text
-brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]
-```
-
-The default bind is `127.0.0.1:9222`. A non-loopback bind is rejected unless
-explicitly allowed because every reachable client can control the browser. On
-success, stdout contains the browser WebSocket URL and the process serves until
-terminated.
 
 ## Optional page subsystems
 

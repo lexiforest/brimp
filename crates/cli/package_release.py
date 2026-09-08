@@ -61,7 +61,7 @@ def copy_licenses(root: Path, package: Path, jsc_library_dir: Path) -> None:
         root / "bindings/python/python/brimp/licenses/curl-impersonate-LICENSE",
         licenses,
     )
-    defuddle = root / "crates/web-runtime/vendor/defuddle/0.19.3"
+    defuddle = root / "crates/worker-api/defuddle/0.19.3"
     shutil.copytree(defuddle / "licenses", licenses / "defuddle")
     shutil.copy2(defuddle / "NOTICE.md", licenses / "defuddle-NOTICE.md")
     jsc_licenses = jsc_library_dir.parent / "share/licenses"
@@ -115,7 +115,7 @@ def copy_linux_package_licenses(library: Path, package: Path) -> None:
 
 
 def package_linux(binary: Path, package: Path) -> None:
-    executable = package / "brimp"
+    executable = package / "lite-worker"
     libraries = package / "lib"
     libraries.mkdir()
     shutil.copy2(binary, executable)
@@ -162,7 +162,7 @@ def package_macos(
     jsc_library_dir: Path,
     curl_library_dir: Path,
 ) -> None:
-    executable = package / "brimp"
+    executable = package / "lite-worker"
     frameworks = package / "Frameworks"
     libraries = package / "lib"
     frameworks.mkdir()
@@ -189,7 +189,7 @@ def package_macos(
         None,
     )
     if not jsc_dependency or not curl_dependency:
-        raise RuntimeError(f"CLI native dependencies are incomplete: {dependencies}")
+        raise RuntimeError(f"Worker native dependencies are incomplete: {dependencies}")
     run(
         "install_name_tool",
         "-change",
@@ -216,7 +216,7 @@ def package_windows(
     jsc_library_dir: Path,
     curl_library_dir: Path,
 ) -> None:
-    shutil.copy2(binary, package / "brimp.exe")
+    shutil.copy2(binary, package / "lite-worker.exe")
     sources = [
         jsc_library_dir.parent / "bin/JavaScriptCore.dll",
         jsc_library_dir.parent / "bin/icudt77.dll",
@@ -241,10 +241,16 @@ def validate(package: Path, platform: str, forbidden_roots: list[Path]) -> None:
         for entry in environment.get("PATH", "").split(os.pathsep)
         if entry and not any(Path(entry).resolve().is_relative_to(root) for root in forbidden)
     )
-    run(str(executable), "doctor", env=environment)
+    run(str(executable), "--help", env=environment)
+    worker = package / ("lite-worker.exe" if platform == "windows" else "lite-worker")
+    if platform == "macos":
+        dependencies = otool_dependencies(executable)
+        if any("JavaScriptCore" in item or "curl" in item for item in dependencies):
+            raise RuntimeError(f"CLI must not link browser libraries: {dependencies}")
+        run(str(executable), "doctor", "--worker-path", str(worker), env=environment)
 
     inspected = b""
-    files = [executable]
+    files = [executable, worker]
     if platform == "linux":
         files.extend((package / "lib").iterdir())
     for path in files:
@@ -277,6 +283,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True, choices=TARGETS)
     parser.add_argument("--binary", type=Path)
+    parser.add_argument("--worker-binary", type=Path)
     parser.add_argument("--jsc-lib-dir", type=Path)
     parser.add_argument("--curl-lib-dir", type=Path)
     parser.add_argument("--output", required=True, type=Path)
@@ -292,6 +299,7 @@ def main() -> None:
         / "release"
         / ("brimp.exe" if platform == "windows" else "brimp")
     )
+    worker_binary = arguments.worker_binary or binary.with_name("lite-worker.exe" if platform == "windows" else "lite-worker")
     jsc_library_dir = arguments.jsc_lib_dir or Path(
         os.environ["BRIMP_JSC_LIB_DIR"]
     )
@@ -304,18 +312,19 @@ def main() -> None:
         package = Path(temporary) / package_name
         package.mkdir()
         copy_licenses(root, package, jsc_library_dir)
+        shutil.copy2(binary, package / ("brimp.exe" if platform == "windows" else "brimp"))
         if platform == "linux":
-            package_linux(binary, package)
+            package_linux(worker_binary, package)
         elif platform == "macos":
             package_macos(
-                binary,
+                worker_binary,
                 package,
                 jsc_library_dir,
                 curl_library_dir,
             )
         else:
             package_windows(
-                binary,
+                worker_binary,
                 package,
                 jsc_library_dir,
                 curl_library_dir,

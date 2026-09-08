@@ -560,13 +560,6 @@ pub(super) fn dispatch(
             };
             node_value(state, call, clone)
         }
-        "setCustomElementDefined" => {
-            let id = required_element_target(state, call)?;
-            if !state.document.borrow_mut().set_custom_element_defined(id) {
-                return Err(NativeError::new("element no longer exists"));
-            }
-            Ok(NativeValue::Undefined)
-        }
         "tagName" => {
             let id = required_element_target(state, call)?;
             let document = state.document.borrow();

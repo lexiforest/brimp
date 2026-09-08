@@ -53,6 +53,6 @@ disabled by default. Enable only the required surfaces through
 raw, JSON, and multipart bodies, Basic Auth, redirects/history, referrers,
 cookies, cancellation, and scalar navigation deadlines.
 
-This API is for asynchronous rendered-page extraction. Use `brimp cdp` when a
-Puppeteer or Playwright browser/page interface is required. See `SUPPORT.md`
-for the exact tested surface.
+This API is for asynchronous rendered-page extraction. Use the separate Brimp
+controller with `lite-worker` when a Puppeteer or Playwright browser/page
+interface is required. See `SUPPORT.md` for the exact tested surface.

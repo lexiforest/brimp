@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>input fixture</title>
+<button id="button">click target</button>
+<input id="text" autofocus>
+<pre id="result"></pre>
+<script>
+window.fixtureInput = [];
+function record(event) {
+    fixtureInput.push({ type: event.type, trusted: event.isTrusted, key: event.key || '', x: event.clientX || 0, y: event.clientY || 0 });
+    result.textContent = JSON.stringify(fixtureInput);
+}
+for (const type of ['mousedown', 'mouseup', 'click', 'keydown', 'keyup'])
+    document.addEventListener(type, record, true);
+</script>

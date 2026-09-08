@@ -85,7 +85,7 @@ fn full_page_screenshot_extends_beyond_the_viewport() {
 }
 
 #[test]
-fn bundled_cjk_and_emoji_fonts_paint_visible_glyphs() {
+fn system_cjk_and_emoji_fonts_paint_visible_glyphs() {
     let browser = Browser::new().unwrap();
     let mut page = browser
         .new_page(PageOptions::builder().viewport(160, 64).build())

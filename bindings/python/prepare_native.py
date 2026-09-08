@@ -157,7 +157,7 @@ def append_environment(path: Path, values: dict[str, str]) -> None:
 
 
 def copy_defuddle_licenses(root: Path, destination: Path | None = None) -> None:
-    source = root / "crates/web-runtime/vendor/defuddle/0.19.3"
+    source = root / "crates/worker-api/defuddle/0.19.3"
     if not (source / "NOTICE.md").is_file() or not (source / "licenses").is_dir():
         raise RuntimeError(f"Defuddle notices are missing: {source}")
     destination = destination or root / "bindings/python/python/brimp/licenses/defuddle"

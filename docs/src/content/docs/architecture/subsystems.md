@@ -25,7 +25,7 @@ rules rather than maintaining parallel state.
 | Persona | One resolved identity shared by transport and Web APIs | Always present |
 
 All optional gates default to off and are page-scoped. The CLI, Python, Node,
-CDP server configuration, and Rust `PageOptions` expose the same independent
+CDP worker configuration, and Rust `PageOptions` expose the same independent
 choices.
 
 ## Page lifecycle and ownership
@@ -112,8 +112,8 @@ profile, ordered request headers, Navigator values, language, screen, viewport,
 and Canvas behavior feed the relevant subsystems from one snapshot.
 
 For dependency-backed implementation status, see
-[`SUBSYSTEMS.md`](https://github.com/lexiforest/brimp-lite/blob/main/SUBSYSTEMS.md).
+[`SUBSYSTEMS.md`](https://github.com/lexiforest/brimp/blob/main/SUBSYSTEMS.md).
 That ledger distinguishes completed selected surfaces from full
 browser-standard conformance and records deliberate exclusions such as video.
 Core DOM and JavaScriptCore compatibility checks remain in
-[`PATCH_ENV.md`](https://github.com/lexiforest/brimp-lite/blob/main/PATCH_ENV.md).
+[`PATCH_ENV.md`](https://github.com/lexiforest/brimp/blob/main/PATCH_ENV.md).

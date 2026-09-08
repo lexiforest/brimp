@@ -55,7 +55,7 @@ jobs:
           test "$GITHUB_REF_NAME" = "v$version"
 
       - name: Build CLI
-        run: cargo build --locked --release -p brimp-cli --target "${{ matrix.target }}"
+        run: cargo build --locked --release -p brimp-cli -p lite-worker --target "${{ matrix.target }}"
 
       - name: Package and validate CLI
         run: >-
@@ -116,7 +116,7 @@ jobs:
           test "$GITHUB_REF_NAME" = "v$version"
 
       - name: Build CLI
-        run: cargo build --locked --release -p brimp-cli --target "${{ matrix.target }}"
+        run: cargo build --locked --release -p brimp-cli -p lite-worker --target "${{ matrix.target }}"
 
       - name: Package and validate CLI
         run: >-

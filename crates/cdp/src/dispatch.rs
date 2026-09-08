@@ -1,3 +1,5 @@
+#[path = "cli_support.rs"]
+mod cli_support;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::sync::Arc;
 use std::time::Duration;
@@ -39,6 +41,7 @@ fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
 pub(crate) struct ConnectionState {
     browser: Arc<AutomationBrowser>,
     page_options: PageOptions,
+    navigation_timeout: Duration,
     pages: HashMap<String, PageTarget>,
     sessions: HashMap<String, String>,
     browser_sessions: HashSet<String>,
@@ -71,6 +74,7 @@ impl ConnectionState {
         Self {
             browser,
             page_options,
+            navigation_timeout: Duration::from_secs(30),
             pages: HashMap::new(),
             sessions: HashMap::new(),
             browser_sessions: HashSet::new(),
@@ -102,11 +106,15 @@ impl ConnectionState {
         let result = match request.method.as_str() {
             "Browser.getVersion" => Ok(json!({
                 "protocolVersion": "1.3",
+                "brimpWorker": "lite",
                 "product": "Brimp/0.1.0",
                 "revision": env!("CARGO_PKG_VERSION"),
                 "userAgent": "Brimp/0.1.0",
                 "jsVersion": "JavaScriptCore"
             })),
+            "Brimp.configure" => self.configure_worker(request),
+            "Brimp.doctor" => self.worker_doctor(),
+            "Brimp.waitForNetworkIdle" => self.worker_wait_for_network_idle(request).await,
             "Browser.getWindowForTarget" => self.get_window_for_target(request),
             "Browser.getWindowBounds" => Ok(default_window_bounds()),
             "Browser.setDownloadBehavior" => Ok(json!({})),
@@ -202,7 +210,11 @@ impl ConnectionState {
         };
         match result {
             Ok(value) => Response::success(request, value),
-            Err(error) => Response::error(request, error.code, error.message),
+            Err(error) => {
+                let mut response = Response::error(request, error.code, error.message);
+                response.error.as_mut().unwrap().data = error.data;
+                response
+            }
         }
     }
 
@@ -666,12 +678,33 @@ impl ConnectionState {
         url: String,
         history_action: HistoryAction,
     ) -> Result<Value, DispatchError> {
+        let completion = self.prepare_navigation(session, url)?.complete().await;
+        self.finish_navigation(completion, history_action)
+    }
+
+    pub(crate) fn start_navigation(
+        &self,
+        request: &Request,
+    ) -> Result<NavigationJob, Box<Response>> {
+        let result = (|| {
+            self.prepare_navigation(
+                self.session(request)?.to_owned(),
+                string_param(&request.params, "url")?.to_owned(),
+            )
+        })();
+        result.map_err(|error: DispatchError| Box::new(error.response(request)))
+    }
+
+    fn prepare_navigation(
+        &self,
+        session: String,
+        url: String,
+    ) -> Result<NavigationJob, DispatchError> {
         if !self.enabled_pages.contains(&session) {
             return Err(DispatchError::invalid_request(
                 "Page.enable must be called first",
             ));
         }
-        let navigated_url = url.clone();
         let target = self.page_target_for_session(&session)?;
         let page = target.page.clone();
         let viewport = (
@@ -690,18 +723,52 @@ impl ConnectionState {
             request_headers.push((name, value));
         }
         let event_request_headers = request_headers.clone();
-        let (navigation, title) = tokio::task::spawn_blocking(move || {
+        let navigation_timeout = self.navigation_timeout;
+        let task = tokio::task::spawn_blocking(move || {
             let navigation = page.navigate_with_headers(
                 url,
-                Duration::from_secs(30),
+                navigation_timeout,
                 CancellationToken::new(),
                 request_headers,
             )?;
-            page.set_viewport(viewport.0, viewport.1, viewport.2)?;
-            Ok::<_, AutomationError>((navigation, page.title()?))
+            let title = if navigation.html.is_some() {
+                page.set_viewport(viewport.0, viewport.1, viewport.2)?;
+                page.title()?
+            } else {
+                String::new()
+            };
+            Ok::<_, AutomationError>((navigation, title))
+        });
+        Ok(NavigationJob {
+            session,
+            event_request_headers,
+            task,
         })
-        .await
-        .map_err(internal_join)??;
+    }
+
+    pub(crate) fn complete_navigation(
+        &mut self,
+        request: &Request,
+        completion: NavigationCompletion,
+    ) -> Response {
+        match self.finish_navigation(completion, HistoryAction::Push) {
+            Ok(value) => Response::success(request, value),
+            Err(error) => error.response(request),
+        }
+    }
+
+    fn finish_navigation(
+        &mut self,
+        completion: NavigationCompletion,
+        history_action: HistoryAction,
+    ) -> Result<Value, DispatchError> {
+        let NavigationCompletion {
+            session,
+            event_request_headers,
+            result,
+        } = completion;
+        let (navigation, title) = result?;
+        let navigated_url = navigation.url.clone();
         let frame_id = self.target_for_session(&session)?.to_owned();
         let loader_id = format!("loader-{}", self.next_loader_id);
         self.next_loader_id += 1;
@@ -1933,31 +2000,69 @@ impl Drop for ConnectionState {
 }
 
 #[derive(Debug)]
+pub(crate) struct NavigationJob {
+    session: String,
+    event_request_headers: Vec<(String, String)>,
+    task:
+        tokio::task::JoinHandle<Result<(web_runtime::NavigationResponse, String), AutomationError>>,
+}
+pub(crate) struct NavigationCompletion {
+    session: String,
+    event_request_headers: Vec<(String, String)>,
+    result: Result<(web_runtime::NavigationResponse, String), DispatchError>,
+}
+impl NavigationJob {
+    pub(crate) async fn complete(self) -> NavigationCompletion {
+        let result = self
+            .task
+            .await
+            .map_err(internal_join)
+            .and_then(|result| result.map_err(DispatchError::from));
+        NavigationCompletion {
+            session: self.session,
+            event_request_headers: self.event_request_headers,
+            result,
+        }
+    }
+}
+
+#[derive(Debug)]
 struct DispatchError {
+    data: Option<Value>,
     code: i64,
     message: String,
 }
 impl DispatchError {
+    fn response(self, request: &Request) -> Response {
+        let mut response = Response::error(request, self.code, self.message);
+        response.error.as_mut().unwrap().data = self.data;
+        response
+    }
+
     fn method_not_found(message: impl Into<String>) -> Self {
         Self {
+            data: None,
             code: -32601,
             message: message.into(),
         }
     }
     fn invalid_request(message: impl Into<String>) -> Self {
         Self {
+            data: None,
             code: -32600,
             message: message.into(),
         }
     }
     fn invalid_params(message: impl Into<String>) -> Self {
         Self {
+            data: None,
             code: -32602,
             message: message.into(),
         }
     }
     fn internal(message: impl Into<String>) -> Self {
         Self {
+            data: None,
             code: -32603,
             message: message.into(),
         }
@@ -1965,7 +2070,11 @@ impl DispatchError {
 }
 impl From<AutomationError> for DispatchError {
     fn from(error: AutomationError) -> Self {
-        Self::internal(format!("{}: {error}", error.code()))
+        Self {
+            code: -32603,
+            message: format!("{}: {error}", error.code()),
+            data: serde_json::to_value(error).ok(),
+        }
     }
 }
 

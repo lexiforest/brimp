@@ -1,0 +1,5 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>never complete fixture</title>
+<p id="ready">usable before load</p>
+<script>fetch('/never-responds').catch(() => { });</script>

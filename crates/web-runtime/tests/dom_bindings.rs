@@ -543,11 +543,7 @@ fn validates_and_tracks_custom_element_definitions() {
 #[test]
 fn custom_elements_upgrade_existing_and_new_elements_with_lifecycle_callbacks() {
     let page = page_with(
-        "<html><head><style>example-card:not(:defined) { display: none } example-card:defined { display: block }</style></head><body><example-card count='1'></example-card><private-card></private-card></body></html>",
-    );
-    assert_js(
-        &page,
-        "document.body.matches(':defined') && document.querySelector('example-card').matches(':not(:defined)') && getComputedStyle(document.querySelector('example-card')).display === 'none'",
+        "<html><body><example-card count='1'></example-card><private-card></private-card></body></html>",
     );
     assert_js(
         &page,
@@ -571,7 +567,6 @@ fn custom_elements_upgrade_existing_and_new_elements_with_lifecycle_callbacks() 
             customElements.define("private-card", PrivateCard);
             const existing = document.querySelector("example-card");
             if (!(existing instanceof ExampleCard) || !existing.constructed) return false;
-            if (getComputedStyle(existing).display !== "block") return false;
             if (!document.querySelector("private-card").privateStateWorked) return false;
             const created = document.createElement("example-card");
             created.setAttribute("count", "2");

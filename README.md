@@ -32,7 +32,7 @@ curl_cffi.
 - Page rendered with DOM and JS, so you don't get the empty html placeholder.
 - `curl-impersonate` as the network stack, providing perfect Ja3/TLS, http 2&3 fingerprints.
 - The familiar `curl_cffi` API and experience from the same maintainer.
-- Also supports CDP, drop-in replacement for heavy headless browsers.
+- Provides a CDP worker for the Brimp controller (`brimp serve`).
 - Much faster than playwright with Chromium, on par with popular alternatives.
 - Python and Nodejs bindings.
 - Pre-compiled, so you don't have to compile on your machine.
@@ -81,8 +81,14 @@ checksums for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and Windows x86-64.
 
 ### CLI
 
-Check the native runtime, extract a live page, evaluate JavaScript, or capture a
-PNG from the command line:
+The CLI launches a child worker for browser operations (currently macOS only).
+Select the lite worker or a WebKit worker explicitly:
+
+```sh
+export BRIMP_WORKER_PATH=/path/to/lite-worker
+```
+
+Check the worker, extract a live page, evaluate JavaScript, or capture a PNG:
 
 ```sh
 brimp doctor
@@ -149,10 +155,13 @@ main().catch(error => {
 
 ### With CDP clients
 
-Start the bounded loopback CDP server and connect with `playwright-core`:
+Start the Brimp controller (`brimp serve`) with `lite-worker`, then connect with
+`playwright-core`:
 
 ```sh
-brimp cdp --bind 127.0.0.1:9222
+brimp serve \
+  --worker-path /path/to/lite-worker \
+  --headless --window-size=1280,720 --port=9222
 ```
 
 ```js
@@ -194,18 +203,19 @@ The canonical owner-thread automation API is exposed through:
 
 - the `brimp` CLI for evaluation and screenshots;
 - synchronous Python and asynchronous Node request/response bindings; and
-- a bounded loopback CDP server for the checked Playwright and Puppeteer workflows.
+- the framed CDP worker used by the Brimp controller (`brimp serve`).
 
-All four interfaces delegate navigation, JavaScript, lifecycle, and screenshots
-to `web-runtime`; none contains a second browser implementation.
+The lite worker and language bindings delegate browser operations to `web-runtime`.
+The CLI and controller communicate with worker processes over framed CDP and
+never initialize the browser runtime themselves.
 
 ### Testing
 
 ```sh
+cargo build -p brimp-cli -p lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ./bindings/package-test.sh
-./crates/cdp/puppeteer-test.sh
 ```
 
 Python wheels are built for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and

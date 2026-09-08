@@ -1,0 +1,106 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Source and bindings
+    runs-on: macos-26
+    timeout-minutes: 120
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v9
+
+      - name: Download pinned native SDKs
+        run: >-
+          python bindings/python/prepare_native.py
+          --target aarch64-apple-darwin
+          --output .native/aarch64-apple-darwin
+
+      - name: Provision the Node package runtime library
+        run: |
+          sudo mkdir -p /usr/local/lib
+          sudo cp "$BRIMP_CURL_LIB_DIR/libcurl-impersonate.dylib" \
+            /usr/local/lib/libcurl-impersonate.4.8.0.dylib
+
+      - name: Build worker executable for CLI acceptance tests
+        run: cargo build --locked -p brimp-cli -p lite-worker
+
+      - name: Run workspace tests
+        run: cargo test --locked --workspace
+
+      - name: Test controller acceptance
+        run: |
+          python -m pip install pytest
+          python -m pytest crates/controller/tests crates/cli/test_package_release.py bindings/python/test_packaging.py
+
+      - name: Run Clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+
+      - name: Test packaged Python and Node bindings
+        run: ./bindings/package-test.sh
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install documentation dependencies
+        run: npm ci
+        working-directory: docs
+
+      - name: Build documentation
+        run: npm run build
+        working-directory: docs
+
+  cli-without-runtime:
+    name: CLI without native runtime (${{ matrix.runner }})
+    strategy:
+      matrix:
+        runner: [macos-26, ubuntu-24.04, windows-2025]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build CLI without browser SDKs
+        run: cargo build --locked -p brimp-cli
+      - name: Check CLI help
+        run: cargo run --locked -p brimp-cli -- --help

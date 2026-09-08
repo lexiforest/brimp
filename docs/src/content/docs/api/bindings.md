@@ -4,7 +4,7 @@ description: Public Python and Node.js APIs, lifecycle, options, and result mapp
 ---
 
 The Python and Node.js packages are in-process adapters over the same
-`web-runtime` automation API. Neither starts a CDP server or implements a second
+`web-runtime` automation API. Neither starts a remote endpoint or implements a second
 browser. Sessions own a browser context and shared cookie jar; each page has an
 owner thread and immutable document network scope. Both translate typed
 commands and errors into the conventions of the host language.

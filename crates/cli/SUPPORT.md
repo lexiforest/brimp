@@ -3,7 +3,6 @@
 | Command | Tested behavior |
 | --- | --- |
 | `doctor` | Validates JavaScriptCore, libcurl-impersonate, and the selected curl profile. |
-| `cdp` | Serves the supported Chrome DevTools Protocol subset over HTTP and WebSocket. |
 | `get URL` | Writes the post-JavaScript serialized DOM to stdout. |
 | `get URL --format raw|html|markdown|json|png` | Uses one navigation pipeline for response bytes, rendered DOM, live-DOM Defuddle extraction, and screenshots. |
 | `get URL --eval SOURCE` | Prints one structured JSON evaluation result on stdout. |
@@ -16,3 +15,15 @@ timeout, cancellation-aware fixed/selector/network-idle waits, proxy and request
 state options, atomic output, and overwrite protection. `crawl` shares these
 controls and adds explicit depth, worker, page, origin, path, pacing, and failure
 bounds.
+
+## Worker boundary
+
+All browser commands require `--worker-path` or `BRIMP_WORKER_PATH` and currently
+run only on macOS. `get`, `crawl`, and `doctor` launch a framed-CDP child;
+`serve` owns the public HTTP/WebSocket endpoint and worker pool. The CLI binary
+has no native browser dependency. Python and Node bindings remain in-process.
+
+Lite workers retain the command features above. The current WebKit worker
+supports rendered output, evaluation, extraction, and screenshots; raw bodies,
+robots retrieval, headers/cookies, and lite-specific configuration are rejected.
+Worker death produces a failure without automatically replaying the workload.

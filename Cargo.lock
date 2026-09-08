@@ -217,6 +217,8 @@ dependencies = [
 [[package]]
 name = "blitz-dom"
 version = "0.3.0-beta.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9f438e914c626f4f56cd58cd88045e164e1ac32e12d7c24d09c25121328161e"
 dependencies = [
  "accesskit",
  "anyrender",
@@ -329,14 +331,13 @@ version = "0.1.1"
 dependencies = [
  "async-trait",
  "base64",
- "futures-util",
+ "brimp-worker-api",
  "http",
  "network",
  "serde",
  "serde_json",
  "thiserror",
  "tokio",
- "tokio-tungstenite",
  "url",
  "web-runtime",
 ]
@@ -345,18 +346,28 @@ dependencies = [
 name = "brimp-cli"
 version = "0.1.1"
 dependencies = [
- "brimp-cdp",
+ "brimp-controller",
+ "brimp-worker-api",
  "glob",
  "http",
- "network",
  "persona",
  "pico-args",
  "robotstxt",
  "serde_json",
  "tempfile",
- "tokio",
  "url",
- "web-runtime",
+]
+
+[[package]]
+name = "brimp-controller"
+version = "0.1.1"
+dependencies = [
+ "base64",
+ "brimp-worker-api",
+ "getrandom",
+ "libc",
+ "serde_json",
+ "tungstenite",
 ]
 
 [[package]]
@@ -383,6 +394,16 @@ dependencies = [
  "pyo3-build-config",
  "serde_json",
  "web-runtime",
+]
+
+[[package]]
+name = "brimp-worker-api"
+version = "0.1.1"
+dependencies = [
+ "persona",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]
@@ -1052,23 +1073,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
 
 [[package]]
-name = "futures-macro"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fb9654ba8355388abeb8dcb4fc62f511300867002afc858860463bdd9fe0c44"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 3.0.4",
-]
-
-[[package]]
-name = "futures-sink"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1944426bf7d03f1d14f708785e4b33efd750b36d48a157b836b3efc15ede8e1d"
-
-[[package]]
 name = "futures-task"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1081,8 +1085,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d50a92467f8ba5dd6e3ee5d4bd04d73ab2e4e1c44474a0674821dfce14b79bc"
 dependencies = [
  "futures-core",
- "futures-macro",
- "futures-sink",
  "futures-task",
  "pin-project-lite",
  "slab",
@@ -1587,6 +1589,17 @@ name = "linux-raw-sys"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
+
+[[package]]
+name = "lite-worker"
+version = "0.1.1"
+dependencies = [
+ "brimp-cdp",
+ "libc",
+ "serde_json",
+ "tokio",
+ "web-runtime",
+]
 
 [[package]]
 name = "litemap"
@@ -3521,18 +3534,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tokio-tungstenite"
-version = "0.30.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17a073bfed563fa236697a068031408a93cd9522e08abf9933ead3e73411bd71"
-dependencies = [
- "futures-util",
- "log",
- "tokio",
- "tungstenite",
-]
-
-[[package]]
 name = "toml"
 version = "1.1.4+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3898,6 +3899,7 @@ dependencies = [
  "async-trait",
  "blitz-dom",
  "blitz-traits",
+ "brimp-worker-api",
  "browser-dom",
  "http",
  "jsc",

@@ -1,20 +1,24 @@
 ---
-title: CDP API
-description: HTTP discovery, WebSocket behavior, and supported Chrome DevTools methods.
+title: CDP worker API
+description: Framed worker transport and supported Chrome DevTools methods.
 ---
 
-`brimp cdp` exposes HTTP discovery and a bounded WebSocket server. Protocol
-values are JSON and screenshots are base64 encoded. This is the only Brimp
-interface that crosses a remote server/client boundary.
+`lite-worker` implements CDP over a connected local stream inherited from
+the Brimp controller (`brimp serve`). Messages are JSON prefixed by a four-byte
+big-endian length. The worker does not open a listening socket, serve HTTP
+discovery, or accept WebSocket connections.
 
-## Start the server
+## Start the controller
 
 ```sh
-brimp cdp --bind 127.0.0.1:9222
+brimp serve \
+  --worker-path /path/to/lite-worker \
+  --headless --window-size=1280,720 --port=9222
 ```
 
-The server prints its browser WebSocket URL after binding. Use the HTTP origin
-with Puppeteer's `browserURL` option or connect directly to the WebSocket URL.
+The controller owns HTTP discovery, the public WebSocket endpoint, worker
+pooling, and process supervision. It passes each worker an inherited local
+socket using `--controller-socket-fd`.
 
 ## Connect with Playwright
 
@@ -25,14 +29,15 @@ does not need to download Chromium:
 npm install playwright-core
 ```
 
-Start Brimp in one terminal:
+Start the Brimp controller in one terminal:
 
 ```sh
-brimp cdp --bind 127.0.0.1:9222
+brimp serve \
+  --worker-path /path/to/lite-worker \
+  --headless --window-size=1280,720 --port=9222
 ```
 
-Then connect through Playwright's public CDP API. The endpoint may be the HTTP
-origin shown below or the `ws://.../devtools/browser/...` URL printed by Brimp.
+Then connect through Playwright's public CDP API to the controller endpoint.
 
 ```js
 import { chromium } from 'playwright-core'
@@ -65,9 +70,9 @@ available. See Playwright's official
 
 | Client | Connection API | Status |
 | --- | --- | --- |
-| Playwright | `chromium.connectOverCDP(httpOrWsEndpoint)` | Tested against the repository's locked `playwright-core` workflow. |
-| Puppeteer | `puppeteer.connect({ browserURL })` | Tested against the repository's locked `puppeteer-core` workflow. |
-| Raw CDP | Discovery HTTP plus flattened WebSocket sessions | Tested by the Rust protocol workflow. |
+| Playwright | `chromium.connectOverCDP(httpOrWsEndpoint)` | Connects through the Brimp controller (`brimp serve`). |
+| Puppeteer | `puppeteer.connect({ browserURL })` | Connects through the Brimp controller (`brimp serve`). |
+| Raw CDP | Length-prefixed JSON over an inherited local stream | Tested directly by the Rust protocol workflow. |
 | Chrome DevTools UI and arbitrary CDP tooling | Varies | Not a compatibility target; unsupported methods fail explicitly. |
 
 ## Request interception

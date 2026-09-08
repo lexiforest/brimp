@@ -63,3 +63,38 @@ class PackageReleaseTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_macos_bundles_native_dependencies_with_worker_only(tmp_path, monkeypatch):
+    worker = tmp_path / "custom-worker-build-name"
+    worker.write_bytes(b"worker")
+    package = tmp_path / "package"
+    package.mkdir()
+    cli = package / "brimp"
+    cli.write_bytes(b"runtime-free-cli")
+    jsc = tmp_path / "jsc"
+    (jsc / "JavaScriptCore.framework").mkdir(parents=True)
+    curl = tmp_path / "curl"
+    curl.mkdir()
+    (curl / "libcurl-impersonate.dylib").write_bytes(b"curl")
+    commands = []
+    monkeypatch.setattr(package_release, "otool_dependencies", lambda path: [str(jsc / "JavaScriptCore.framework/JavaScriptCore"), str(curl / "libcurl-impersonate.dylib")])
+    monkeypatch.setattr(package_release, "run", lambda *args, **kwargs: commands.append(args) or "")
+    package_release.package_macos(worker, package, jsc, curl)
+    assert cli.read_bytes() == b"runtime-free-cli"
+    assert (package / "lite-worker").read_bytes() == b"worker"
+    assert all(command[-1] == str(package / "lite-worker") for command in commands)
+
+
+def test_validation_probes_worker_and_rejects_native_cli_linkage(tmp_path, monkeypatch):
+    import pytest
+    (tmp_path / "brimp").write_bytes(b"cli")
+    (tmp_path / "lite-worker").write_bytes(b"worker")
+    commands = []
+    monkeypatch.setattr(package_release, "run", lambda *args, **kwargs: commands.append(args) or "")
+    monkeypatch.setattr(package_release, "otool_dependencies", lambda path: ["/usr/lib/libSystem.B.dylib"])
+    package_release.validate(tmp_path, "macos", [])
+    assert commands[-1] == (str(tmp_path / "brimp"), "doctor", "--worker-path", str(tmp_path / "lite-worker"))
+    monkeypatch.setattr(package_release, "otool_dependencies", lambda path: ["@rpath/JavaScriptCore.framework/JavaScriptCore"])
+    with pytest.raises(RuntimeError, match="must not link browser"):
+        package_release.validate(tmp_path, "macos", [])

@@ -2,16 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use base64::Engine;
-use futures_util::{SinkExt, StreamExt};
 use http::{HeaderValue, StatusCode};
 use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
 use serde_json::{Value, json};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::net::TcpStream;
-use tokio_tungstenite::tungstenite::Message;
-use web_runtime::AutomationBrowser;
+use tokio::task::JoinHandle;
+use web_runtime::{AutomationBrowser, PageOptions};
 
-use brimp_cdp::{ServerConfig, ServerError, start_with_browser};
+use brimp_cdp::serve_framed_with_browser;
 
 struct FixtureLoader;
 
@@ -55,28 +53,21 @@ fn browser() -> Arc<AutomationBrowser> {
     )))
 }
 
-#[tokio::test]
-async fn discovery_and_raw_websocket_workflow() {
-    let server = start_with_browser(ServerConfig::default(), browser())
-        .await
-        .unwrap();
-    let response = http_get(server.local_addr(), "/json/version").await;
-    assert!(response.starts_with("HTTP/1.1 200 OK"));
-    assert!(response.contains(&server.browser_websocket_url()));
-    assert!(
-        http_get(server.local_addr(), "/json/list")
-            .await
-            .ends_with("[]")
-    );
-    assert!(
-        http_get(server.local_addr(), "/missing")
-            .await
-            .starts_with("HTTP/1.1 404 Not Found")
-    );
+type CdpStream = tokio::io::DuplexStream;
 
-    let (mut socket, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
-        .await
-        .unwrap();
+fn connect(browser: Arc<AutomationBrowser>) -> (CdpStream, JoinHandle<()>) {
+    let (client, worker) = tokio::io::duplex(1024 * 1024);
+    let task = tokio::spawn(async move {
+        serve_framed_with_browser(worker, browser, PageOptions::default())
+            .await
+            .unwrap();
+    });
+    (client, task)
+}
+
+#[tokio::test]
+async fn raw_framed_cdp_workflow() {
+    let (mut socket, task) = connect(browser());
 
     assert_eq!(
         command(&mut socket, 1, "Browser.getVersion", json!({}), None).await["result"]["product"],
@@ -91,14 +82,11 @@ async fn discovery_and_raw_websocket_workflow() {
     )
     .await;
     command(&mut socket, 20, "Target.setAutoAttach", json!({"autoAttach": false, "waitForDebuggerOnStart": true, "flatten": true, "filter": [{"type": "page", "exclude": true}, {}]}), None).await;
-    socket
-        .send(Message::Text(
-            json!({"id": 3, "method": "Target.createTarget", "params": {"url": "about:blank"}})
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    send(
+        &mut socket,
+        json!({"id": 3, "method": "Target.createTarget", "params": {"url": "about:blank"}}),
+    )
+    .await;
     let created_event = event(&mut socket).await;
     assert_eq!(created_event["method"], "Target.targetCreated");
     let target_id = created_event["params"]["targetInfo"]["targetId"]
@@ -124,7 +112,7 @@ async fn discovery_and_raw_websocket_workflow() {
         "page"
     );
 
-    socket.send(Message::Text(json!({"id": 4, "method": "Target.attachToTarget", "params": {"targetId": target_id, "flatten": true}}).to_string().into())).await.unwrap();
+    send(&mut socket, json!({"id": 4, "method": "Target.attachToTarget", "params": {"targetId": target_id, "flatten": true}})).await;
     assert_eq!(
         event(&mut socket).await["method"],
         "Target.attachedToTarget"
@@ -801,14 +789,11 @@ async fn discovery_and_raw_websocket_workflow() {
     assert_eq!(event(&mut socket).await["method"], "Target.targetDestroyed");
 
     command(&mut socket, 24, "Target.setAutoAttach", json!({"autoAttach": true, "waitForDebuggerOnStart": true, "flatten": true, "filter": [{}]}), None).await;
-    socket
-        .send(Message::Text(
-            json!({"id": 25, "method": "Target.createTarget", "params": {"url": "about:blank"}})
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    send(
+        &mut socket,
+        json!({"id": 25, "method": "Target.createTarget", "params": {"url": "about:blank"}}),
+    )
+    .await;
     let auto_created = event(&mut socket).await;
     assert_eq!(auto_created["method"], "Target.targetCreated");
     let auto_target = auto_created["params"]["targetInfo"]["targetId"]
@@ -852,18 +837,13 @@ async fn discovery_and_raw_websocket_workflow() {
     )
     .await;
     assert_eq!(event(&mut socket).await["method"], "Target.targetDestroyed");
-    socket.close(None).await.unwrap();
-    server.shutdown().await.unwrap();
+    drop(socket);
+    task.await.unwrap();
 }
 
 #[tokio::test]
 async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
-    let server = start_with_browser(ServerConfig::default(), browser())
-        .await
-        .unwrap();
-    let (mut socket, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
-        .await
-        .unwrap();
+    let (mut socket, task) = connect(browser());
     let target = command(
         &mut socket,
         1,
@@ -875,14 +855,7 @@ async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
         .as_str()
         .unwrap()
         .to_owned();
-    socket
-        .send(Message::Text(
-            json!({"id": 2, "method": "Target.attachToTarget", "params": {"targetId": target, "flatten": true}})
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    send(&mut socket, json!({"id": 2, "method": "Target.attachToTarget", "params": {"targetId": target, "flatten": true}})).await;
     let attached = event(&mut socket).await;
     assert_eq!(attached["method"], "Target.attachedToTarget");
     let session = attached["params"]["sessionId"].as_str().unwrap().to_owned();
@@ -902,14 +875,7 @@ async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
         Some(&session),
     )
     .await;
-    socket
-        .send(Message::Text(
-            json!({"id": 4, "method": "Page.navigate", "params": {"url": "https://fixture.test/fetch"}, "sessionId": session})
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    send(&mut socket, json!({"id": 4, "method": "Page.navigate", "params": {"url": "https://fixture.test/fetch"}, "sessionId": session})).await;
     let paused = event(&mut socket).await;
     assert_eq!(paused["method"], "Fetch.requestPaused", "{paused}");
     assert_eq!(
@@ -962,14 +928,7 @@ async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
         Some(&session),
     )
     .await;
-    socket
-        .send(Message::Text(
-            json!({"id": 9, "method": "Page.navigate", "params": {"url": "https://fixture.test/legacy"}, "sessionId": session})
-                .to_string()
-                .into(),
-        ))
-        .await
-        .unwrap();
+    send(&mut socket, json!({"id": 9, "method": "Page.navigate", "params": {"url": "https://fixture.test/legacy"}, "sessionId": session})).await;
     let intercepted = event(&mut socket).await;
     assert_eq!(intercepted["method"], "Network.requestIntercepted");
     let interception_id = intercepted["params"]["interceptionId"].as_str().unwrap();
@@ -1006,41 +965,14 @@ async fn request_interception_fulfills_fetch_and_legacy_navigation_requests() {
         "legacy response"
     );
 
-    socket.close(None).await.unwrap();
-    server.shutdown().await.unwrap();
-}
-
-#[tokio::test]
-async fn malformed_and_oversized_messages_are_rejected() {
-    let server = start_with_browser(ServerConfig::default(), browser())
-        .await
-        .unwrap();
-    let (mut socket, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
-        .await
-        .unwrap();
-    socket.send(Message::Text("{".into())).await.unwrap();
-    let parse_error = event(&mut socket).await;
-    assert_eq!(parse_error["id"], 0);
-    assert_eq!(parse_error["error"]["code"], -32700);
-    let rejected = match socket
-        .send(Message::Text("x".repeat(1024 * 1024 + 1).into()))
-        .await
-    {
-        Err(_) => true,
-        Ok(()) => socket.next().await.is_some_and(|message| message.is_err()),
-    };
-    assert!(rejected);
-    server.shutdown().await.unwrap();
+    drop(socket);
+    task.await.unwrap();
 }
 
 #[tokio::test]
 async fn disconnect_discards_the_connection_target_registry() {
-    let server = start_with_browser(ServerConfig::default(), browser())
-        .await
-        .unwrap();
-    let (mut first, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
-        .await
-        .unwrap();
+    let browser = browser();
+    let (mut first, first_task) = connect(Arc::clone(&browser));
     command(
         &mut first,
         1,
@@ -1049,34 +981,19 @@ async fn disconnect_discards_the_connection_target_registry() {
         None,
     )
     .await;
-    first.close(None).await.unwrap();
-    let (mut second, _) = tokio_tungstenite::connect_async(server.browser_websocket_url())
-        .await
-        .unwrap();
+    drop(first);
+    first_task.await.unwrap();
+    let (mut second, second_task) = connect(browser);
     assert_eq!(
         command(&mut second, 2, "Target.getTargets", json!({}), None).await["result"]["targetInfos"],
         json!([])
     );
-    second.close(None).await.unwrap();
-    server.shutdown().await.unwrap();
-}
-
-#[tokio::test]
-async fn non_loopback_bind_requires_explicit_permission() {
-    let result = start_with_browser(
-        ServerConfig {
-            bind: "0.0.0.0:0".parse().unwrap(),
-            allow_non_loopback: false,
-            ..ServerConfig::default()
-        },
-        browser(),
-    )
-    .await;
-    assert!(matches!(result, Err(ServerError::NonLoopback(_))));
+    drop(second);
+    second_task.await.unwrap();
 }
 
 async fn command(
-    socket: &mut tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>,
+    socket: &mut CdpStream,
     id: u64,
     method: &str,
     params: Value,
@@ -1086,32 +1003,25 @@ async fn command(
     if let Some(session) = session {
         request["sessionId"] = json!(session);
     }
-    socket
-        .send(Message::Text(request.to_string().into()))
-        .await
-        .unwrap();
+    send(socket, request).await;
     let value = event(socket).await;
     assert_eq!(value["id"], id);
     value
 }
 
-async fn event(
-    socket: &mut tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<TcpStream>>,
-) -> Value {
-    let message = socket.next().await.unwrap().unwrap();
-    serde_json::from_str(message.to_text().unwrap()).unwrap()
-}
-
-async fn http_get(address: std::net::SocketAddr, path: &str) -> String {
-    let mut stream = TcpStream::connect(address).await.unwrap();
-    stream
-        .write_all(
-            format!("GET {path} HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n")
-                .as_bytes(),
-        )
+async fn send(socket: &mut CdpStream, value: Value) {
+    let payload = serde_json::to_vec(&value).unwrap();
+    socket
+        .write_all(&(payload.len() as u32).to_be_bytes())
         .await
         .unwrap();
-    let mut response = Vec::new();
-    stream.read_to_end(&mut response).await.unwrap();
-    String::from_utf8(response).unwrap()
+    socket.write_all(&payload).await.unwrap();
+}
+
+async fn event(socket: &mut CdpStream) -> Value {
+    let mut header = [0; 4];
+    socket.read_exact(&mut header).await.unwrap();
+    let mut payload = vec![0; u32::from_be_bytes(header) as usize];
+    socket.read_exact(&mut payload).await.unwrap();
+    serde_json::from_slice(&payload).unwrap()
 }

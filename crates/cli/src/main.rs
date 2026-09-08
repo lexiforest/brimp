@@ -6,8 +6,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
-use brimp_cdp::{ServerConfig, ServerError, parse_bind, start};
-use web_runtime::{AutomationBrowser, AutomationError, CancellationToken, PageOptions};
+use brimp_controller::browser::Browser as AutomationBrowser;
+use brimp_worker_api::{AutomationError, CancellationToken};
 
 mod common;
 mod crawl;
@@ -25,9 +25,10 @@ extern "C" fn interrupt(_: i32) {
 fn main() -> ExitCode {
     let arguments = std::env::args().skip(1).collect::<Vec<_>>();
     #[cfg(unix)]
-    if arguments.first().map(String::as_str) != Some("cdp") {
+    {
         unsafe {
             signal(2, interrupt);
+            signal(15, interrupt);
         }
     }
     match run(arguments) {
@@ -44,8 +45,8 @@ fn run(arguments: Vec<String>) -> Result<(), AutomationError> {
         return Err(AutomationError::InvalidInput(usage()));
     };
     match command {
-        "doctor" => doctor(),
-        "cdp" => cdp_command(&arguments[1..]),
+        "doctor" => doctor(&arguments[1..]),
+        "serve" => serve(&arguments[1..]),
         "get" => get_command(&arguments[1..]),
         "crawl" => crawl::run(&arguments[1..]),
         "--help" | "-h" => print_help(None),
@@ -62,8 +63,8 @@ fn print_help(command: Option<&str>) -> Result<(), AutomationError> {
         None => usage(),
         Some("get") => get_usage().into(),
         Some("crawl") => crawl::usage().into(),
-        Some("cdp") => cdp_usage().into(),
-        Some("doctor") => "usage: brimp doctor".into(),
+        Some("doctor") => "usage: brimp doctor --worker-path PATH".into(),
+        Some("serve") => brimp_controller::SERVE_USAGE.into(),
         Some(command) => {
             return Err(AutomationError::InvalidInput(format!(
                 "unknown command `{command}`\n{}",
@@ -255,19 +256,22 @@ fn get_command(arguments: &[String]) -> Result<(), AutomationError> {
     let shared = &options.navigation;
     let started = Instant::now();
     let interrupt = InterruptMonitor::new();
-    let browser = AutomationBrowser::with_persona_and_network_config(
-        shared.persona.clone(),
-        shared.network.clone(),
+    let browser = AutomationBrowser::launch(
+        &shared.worker_path,
+        shared.config.clone(),
+        remaining_timeout(started, shared.timeout)?,
+        interrupt.token(),
+        matches!(shared.wait, WaitCondition::DomContentLoaded),
     )?;
     let context = browser.default_context();
     for (name, value) in &shared.cookies {
         context.set_cookie(&options.url, name, value)?;
     }
-    let page = browser.new_page(shared.page.clone())?;
+    let page = browser.new_page()?;
     let navigation = page.navigate_cancellable(
         options.url.clone(),
-        remaining_timeout(started, shared.timeout)?,
         interrupt.token(),
+        matches!(output_format, Some(OutputFormat::Raw)),
     )?;
     match shared.wait {
         WaitCondition::DomContentLoaded | WaitCondition::Load => {}
@@ -357,7 +361,6 @@ struct InterruptMonitor {
 
 impl InterruptMonitor {
     fn new() -> Self {
-        INTERRUPTED.store(false, Ordering::Release);
         let token = CancellationToken::new();
         let monitor_token = token.clone();
         let finished = std::sync::Arc::new(AtomicBool::new(false));
@@ -526,77 +529,53 @@ fn parse_header(value: &str) -> Result<(String, String), AutomationError> {
 }
 
 fn get_usage() -> &'static str {
-    "usage: brimp get URL [--format raw|html|markdown|json|png] [--output PATH|-] [--overwrite] [--timeout DURATION]\n       brimp get URL --eval EXPRESSION\n       brimp get URL --eval-file PATH\n\nEXTRACTION:\n  --content SELECTOR\n  --remove-images\n  --language BCP47\n  --extract-debug\n\nWAITING:\n  --wait domcontentloaded|load|networkidle|SECONDS\n  --wait-selector SELECTOR\n  --network-idle DURATION\n\nNETWORK AND IDENTITY:\n  --proxy URL\n  --header 'NAME: VALUE' (repeatable)\n  --cookie 'NAME=VALUE' (repeatable)\n  --persona PATH\n  --ca-bundle PATH\n\nACTIONS:\n  --script PATH (repeatable)\n  --full-page"
+    "usage: brimp get URL [--worker-path PATH] [--format raw|html|markdown|json|png] [--output PATH|-] [--overwrite] [--timeout DURATION]\n       brimp get URL --eval EXPRESSION\n       brimp get URL --eval-file PATH\n\nWORKER:\n  --worker-path PATH (or BRIMP_WORKER_PATH; macOS only)\n\nEXTRACTION:\n  --content SELECTOR\n  --remove-images\n  --language BCP47\n  --extract-debug\n\nWAITING:\n  --wait domcontentloaded|load|networkidle|SECONDS\n  --wait-selector SELECTOR\n  --network-idle DURATION\n\nNETWORK AND IDENTITY:\n  --proxy URL\n  --header 'NAME: VALUE' (repeatable)\n  --cookie 'NAME=VALUE' (repeatable)\n  --persona PATH\n  --ca-bundle PATH\n\nACTIONS:\n  --script PATH (repeatable)\n  --full-page"
 }
 
-fn cdp_command(arguments: &[String]) -> Result<(), AutomationError> {
-    let mut parser =
-        pico_args::Arguments::from_vec(arguments.iter().map(OsString::from).collect::<Vec<_>>());
+fn doctor(arguments: &[String]) -> Result<(), AutomationError> {
+    let mut parser = pico_args::Arguments::from_vec(arguments.iter().map(OsString::from).collect());
     if parser.contains(["-h", "--help"]) {
-        println!("{}", cdp_usage());
-        return Ok(());
+        return print_help(Some("doctor"));
     }
-    let bind = parser
-        .opt_value_from_str::<_, String>("--bind")
-        .map_err(argument_error)?
-        .unwrap_or_else(|| "127.0.0.1:9222".into());
-    let allow_non_loopback = parser.contains("--allow-non-loopback");
-    let page_options = common::PageFeatures::parse(&mut parser)?.build(Vec::new())?;
-    let remaining = parser.finish();
-    if !remaining.is_empty() {
-        return Err(AutomationError::InvalidInput(format!(
-            "unknown cdp argument `{}`",
-            remaining[0].to_string_lossy()
-        )));
+    let path = common::worker_path(&mut parser)?;
+    if !parser.finish().is_empty() {
+        return Err(AutomationError::InvalidInput(
+            "unknown doctor arguments".into(),
+        ));
     }
-    let bind = parse_bind(&bind).map_err(AutomationError::InvalidInput)?;
-    let runtime = tokio::runtime::Runtime::new()
-        .map_err(|error| AutomationError::Internal(error.to_string()))?;
-    runtime.block_on(async move {
-        let server = start(ServerConfig {
-            bind,
-            allow_non_loopback,
-            page_options,
-        })
-        .await
-        .map_err(cdp_error)?;
-        println!("{}", server.browser_websocket_url());
-        std::future::pending::<()>().await;
-        #[allow(unreachable_code)]
-        Ok(())
-    })
-}
-
-fn cdp_usage() -> &'static str {
-    "usage: brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS]\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas"
-}
-
-fn cdp_error(error: ServerError) -> AutomationError {
-    match error {
-        ServerError::NonLoopback(_) => AutomationError::InvalidInput(error.to_string()),
-        _ => AutomationError::Internal(error.to_string()),
-    }
-}
-
-fn doctor() -> Result<(), AutomationError> {
-    let profile = persona::PersonaConfig::default()
-        .resolve()
-        .transport_profile;
-    let config = network::CurlConfig {
-        impersonation_profile: profile.clone(),
-        ..network::CurlConfig::default()
-    };
-    network::CurlResourceLoader::check_profile(&config)
-        .map_err(|error| AutomationError::Transport(error.to_string()))?;
-    let browser = AutomationBrowser::new()?;
-    let page = browser.new_page(PageOptions::default())?;
-    page.close();
-    browser.close();
-    println!(
-        "{}",
-        serde_json::json!({"javascriptCore": "ok", "libcurlImpersonate": "ok", "profile": profile})
-    );
+    let interrupt = InterruptMonitor::new();
+    let browser = AutomationBrowser::launch(
+        &path,
+        Default::default(),
+        Duration::from_secs(30),
+        interrupt.token(),
+        false,
+    )?;
+    println!("{}", browser.doctor()?);
     Ok(())
+}
+
+fn serve(arguments: &[String]) -> Result<(), AutomationError> {
+    if arguments.iter().any(|arg| arg == "--help" || arg == "-h") {
+        return print_help(Some("serve"));
+    }
+    #[cfg(not(target_os = "macos"))]
+    return Err(AutomationError::Unsupported(
+        "worker-backed commands are supported only on macOS".into(),
+    ));
+    #[cfg(target_os = "macos")]
+    {
+        let interrupt = InterruptMonitor::new();
+        brimp_controller::run(arguments.iter().cloned(), interrupt.token().flag()).map_err(
+            |error| {
+                if interrupt.token().is_cancelled() {
+                    AutomationError::Cancellation
+                } else {
+                    AutomationError::InvalidInput(error)
+                }
+            },
+        )
+    }
 }
 
 fn exit_code(error: &AutomationError) -> u8 {
@@ -616,5 +595,5 @@ fn exit_code(error: &AutomationError) -> u8 {
     }
 }
 fn usage() -> String {
-    "usage: brimp doctor | brimp get URL [OPTIONS] | brimp crawl URL [OPTIONS] | brimp cdp [--bind HOST:PORT] [--allow-non-loopback] [PAGE OPTIONS] | brimp help [COMMAND]\n\nRun `brimp help COMMAND` for command-specific options.\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas".into()
+    "usage: brimp serve [OPTIONS] | brimp doctor --worker-path PATH | brimp get URL [OPTIONS] | brimp crawl URL [OPTIONS] | brimp help [COMMAND]\n\nRun `brimp help COMMAND` for command-specific options.\n\nWORKER:\n  --worker-path PATH (or BRIMP_WORKER_PATH)\n  Worker-backed commands require macOS.\n\nPAGE OPTIONS:\n  --enable-worker\n  --enable-streaming-networking\n  --storage-path PATH [--storage-quota-bytes N]\n  --enable-canvas".into()
 }

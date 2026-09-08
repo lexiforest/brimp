@@ -1,11 +1,19 @@
+#![cfg(target_os = "macos")]
 use std::fs;
-use std::io::{BufRead, Read, Write};
+use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::process::{Command, Stdio};
 use std::time::{Duration, SystemTime};
 
 fn binary() -> Command {
-    Command::new(env!("CARGO_BIN_EXE_brimp"))
+    let mut command = Command::new(env!("CARGO_BIN_EXE_brimp"));
+    let worker = std::env::var_os("BRIMP_TEST_WORKER_PATH")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| {
+            std::path::Path::new(env!("CARGO_BIN_EXE_brimp")).with_file_name("lite-worker")
+        });
+    command.env("BRIMP_WORKER_PATH", worker);
+    command
 }
 
 #[test]
@@ -13,8 +21,8 @@ fn help_dispatches_to_each_public_command() {
     for (command, expected) in [
         ("get", "usage: brimp get"),
         ("crawl", "usage: brimp crawl"),
-        ("cdp", "usage: brimp cdp"),
         ("doctor", "usage: brimp doctor"),
+        ("serve", "usage: brimp serve"),
     ] {
         let output = binary().args(["help", command]).output().unwrap();
         assert!(output.status.success(), "{command}");
@@ -24,6 +32,14 @@ fn help_dispatches_to_each_public_command() {
         );
         assert!(output.stderr.is_empty(), "{command}");
     }
+}
+
+#[test]
+fn removed_cdp_command_is_rejected() {
+    let output = binary().arg("cdp").output().unwrap();
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown command `cdp`"));
 }
 
 #[test]
@@ -55,43 +71,6 @@ fn parser_rejects_conflicts_duplicates_and_ambiguous_stdout_before_launch() {
     }
 }
 
-#[test]
-fn cdp_serves_from_the_brimp_subcommand() {
-    let mut child = binary()
-        .args(["cdp", "--bind", "0.0.0.0:0", "--allow-non-loopback"])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
-    let mut endpoint = String::new();
-    std::io::BufReader::new(child.stdout.take().unwrap())
-        .read_line(&mut endpoint)
-        .unwrap();
-    assert!(endpoint.starts_with("ws://0.0.0.0:"));
-    #[cfg(unix)]
-    unsafe {
-        unsafe extern "C" {
-            fn kill(process: i32, signal: i32) -> i32;
-        }
-        assert_eq!(kill(child.id() as i32, 2), 0);
-    }
-    #[cfg(not(unix))]
-    child.kill().unwrap();
-    let status = child.wait().unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::process::ExitStatusExt;
-        assert_eq!(status.signal(), Some(2));
-    }
-    let mut stderr = String::new();
-    child
-        .stderr
-        .take()
-        .unwrap()
-        .read_to_string(&mut stderr)
-        .unwrap();
-    assert!(stderr.starts_with("WARNING: Brimp CDP is binding to non-loopback address"));
-}
 fn server(body: &'static [u8]) -> (String, std::thread::JoinHandle<()>) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap();

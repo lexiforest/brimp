@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>lifecycle fixture</title>
+<script>
+window.fixtureEvents = ['parser'];
+document.addEventListener('DOMContentLoaded', () => fixtureEvents.push('domcontentloaded'));
+window.addEventListener('load', () => {
+    fixtureEvents.push('load');
+    setTimeout(() => fixtureEvents.push('late'), 50);
+});
+</script>
+<p>lifecycle</p>

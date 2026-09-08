@@ -36,33 +36,7 @@ fn render_script(template: &str, replacements: &[(&str, &str)]) -> String {
     rendered
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum AutomationError {
-    #[error("invalid input: {0}")]
-    InvalidInput(String),
-    #[error("transport failure: {0}")]
-    Transport(String),
-    #[error("HTTP response status {0}")]
-    HttpStatus(u16),
-    #[error("navigation failure: {0}")]
-    Navigation(String),
-    #[error("JavaScript exception: {0}")]
-    JavaScript(String),
-    #[error("operation timed out after {0:?}")]
-    Timeout(Duration),
-    #[error("operation was cancelled")]
-    Cancellation,
-    #[error("unsupported feature: {0}")]
-    Unsupported(String),
-    #[error("object is closed")]
-    Closed,
-    #[error("screenshot failure: {0}")]
-    Screenshot(String),
-    #[error("extraction failure: {0}")]
-    Extraction(String),
-    #[error("runtime failure: {0}")]
-    Internal(String),
-}
+pub use brimp_worker_api::{AutomationError, CancellationToken};
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -76,39 +50,6 @@ pub struct TouchPoint {
     pub force: f64,
     pub tangential_pressure: f64,
 }
-impl AutomationError {
-    pub fn code(&self) -> &'static str {
-        match self {
-            Self::InvalidInput(_) => "invalid_input",
-            Self::Transport(_) => "transport",
-            Self::HttpStatus(_) => "http_status",
-            Self::Navigation(_) => "navigation",
-            Self::JavaScript(_) => "javascript",
-            Self::Timeout(_) => "timeout",
-            Self::Cancellation => "cancelled",
-            Self::Unsupported(_) => "unsupported",
-            Self::Closed => "closed",
-            Self::Screenshot(_) => "screenshot",
-            Self::Extraction(_) => "extraction",
-            Self::Internal(_) => "internal",
-        }
-    }
-}
-
-#[derive(Clone, Default)]
-pub struct CancellationToken(Arc<AtomicBool>);
-impl CancellationToken {
-    pub fn new() -> Self {
-        Self::default()
-    }
-    pub fn cancel(&self) {
-        self.0.store(true, Ordering::Release);
-    }
-    pub fn is_cancelled(&self) -> bool {
-        self.0.load(Ordering::Acquire)
-    }
-}
-
 pub struct AutomationBrowser {
     loader: Arc<dyn ResourceLoader>,
     persona: Option<persona::ResolvedPersona>,
