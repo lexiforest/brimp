@@ -31,6 +31,17 @@ def test_defuddle_notices_are_available_to_wheel_packaging():
         assert (destination / "licenses/defuddle-LICENSE").is_file()
 
 
+def test_font_notices_are_available_to_wheel_packaging(tmp_path):
+    root = Path(__file__).resolve().parents[2]
+    destination = tmp_path / "fonts"
+    prepare_native.copy_font_licenses(root, destination)
+    assert {path.name for path in destination.iterdir()} == {
+        "LICENSE-WQY-MICROHEI-APACHE-2.0.txt",
+        "LICENSE-NOTO-COLOR-EMOJI-OFL-1.1.txt",
+        "PROVENANCE.md",
+    }
+
+
 def test_expected_wheel_name_is_exact():
     with tempfile.TemporaryDirectory() as temporary:
         directory = Path(temporary)

@@ -168,9 +168,18 @@ def copy_defuddle_licenses(root: Path, destination: Path | None = None) -> None:
     shutil.copytree(source / "licenses", destination / "licenses")
 
 
+def copy_font_licenses(root: Path, destination: Path | None = None) -> None:
+    source = root / "crates/browser-dom/assets/fonts"
+    destination = destination or root / "bindings/python/python/brimp/licenses/fonts"
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in ("LICENSE-WQY-MICROHEI-APACHE-2.0.txt", "LICENSE-NOTO-COLOR-EMOJI-OFL-1.1.txt", "PROVENANCE.md"):
+        shutil.copy2(source / name, destination / name)
+
+
 def prepare(target_name: str, output: Path) -> dict[str, str]:
     root = Path(__file__).resolve().parents[2]
     copy_defuddle_licenses(root)
+    copy_font_licenses(root)
     target = TARGETS[target_name]
     cache = output / "downloads"
     cache.mkdir(parents=True, exist_ok=True)

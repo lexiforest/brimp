@@ -65,6 +65,20 @@ if __name__ == "__main__":
     unittest.main()
 
 
+def test_release_includes_bundled_font_notices(tmp_path):
+    root = Path(__file__).resolve().parents[2]
+    package = tmp_path / "package"
+    package.mkdir()
+    sdk = tmp_path / "sdk"
+    (sdk / "share/licenses").mkdir(parents=True)
+    package_release.copy_licenses(root, package, sdk / "lib")
+    assert {path.name for path in (package / "licenses/fonts").iterdir()} == {
+        "LICENSE-WQY-MICROHEI-APACHE-2.0.txt",
+        "LICENSE-NOTO-COLOR-EMOJI-OFL-1.1.txt",
+        "PROVENANCE.md",
+    }
+
+
 def test_macos_bundles_native_dependencies_with_worker_only(tmp_path, monkeypatch):
     worker = tmp_path / "custom-worker-build-name"
     worker.write_bytes(b"worker")

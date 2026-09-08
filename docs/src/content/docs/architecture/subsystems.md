@@ -20,7 +20,7 @@ rules rather than maintaining parallel state.
 | Workers and worklets | Isolated JSC runtimes and a browser-owned coordinator | `worker_system` |
 | WebSocket, EventSource and streaming Fetch | curl-impersonate streaming handles with bounded backpressure | `streaming_networking` |
 | Persistent web storage | Origin partitions, quota enforcement, and filesystem backing | `persistent_storage` |
-| Canvas 2D | Raster-only `skia-safe`; Rustybuzz and system fonts for text | `canvas` |
+| Canvas 2D | Raster-only `skia-safe`; Rustybuzz and bundled fonts for text | `canvas` |
 | Document screenshots | Blitz paint through Vello CPU, encoded as PNG | Always present |
 | Persona | One resolved identity shared by transport and Web APIs | Always present |
 
@@ -92,7 +92,7 @@ paths, clipping, compositing, gradients, patterns, shadows, filters, image
 operations, and encoding. Canvas does not initialize Skia's GPU backends.
 
 Text is shaped with Rustybuzz, Unicode bidi and grapheme handling, using the
-installed system fonts selected for proportional, monospace, and emoji text.
+bundled WQY Micro Hei proportional/monospace faces and Noto Color Emoji for text.
 Canvas maintains origin-clean state for image sources and supplies consistent
 pixels to `getImageData()`, export methods, and document screenshots. Completed
 Canvas rasters enter the document's Vello compositor as images.

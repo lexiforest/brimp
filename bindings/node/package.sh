@@ -16,6 +16,9 @@ mkdir -p "$staging/licenses"
 cp "$workspace/LICENSE" "$staging/licenses/brimp-LICENSE"
 cp "$workspace/bindings/python/python/brimp/licenses/curl-impersonate-LICENSE" \
   "$staging/licenses/"
+mkdir -p "$staging/licenses/fonts"
+cp "$workspace/crates/browser-dom/assets/fonts/"LICENSE-*.txt \
+  "$workspace/crates/browser-dom/assets/fonts/PROVENANCE.md" "$staging/licenses/fonts/"
 mkdir -p "$staging/licenses/defuddle"
 cp "$workspace/crates/worker-api/defuddle/0.19.3/NOTICE.md" \
   "$staging/licenses/defuddle/"

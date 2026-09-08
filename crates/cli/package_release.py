@@ -64,6 +64,10 @@ def copy_licenses(root: Path, package: Path, jsc_library_dir: Path) -> None:
     defuddle = root / "crates/worker-api/defuddle/0.19.3"
     shutil.copytree(defuddle / "licenses", licenses / "defuddle")
     shutil.copy2(defuddle / "NOTICE.md", licenses / "defuddle-NOTICE.md")
+    fonts = root / "crates/browser-dom/assets/fonts"
+    (licenses / "fonts").mkdir()
+    for name in ("LICENSE-WQY-MICROHEI-APACHE-2.0.txt", "LICENSE-NOTO-COLOR-EMOJI-OFL-1.1.txt", "PROVENANCE.md"):
+        shutil.copy2(fonts / name, licenses / "fonts" / name)
     jsc_licenses = jsc_library_dir.parent / "share/licenses"
     if not jsc_licenses.is_dir():
         raise RuntimeError(f"JavaScriptCore licenses are missing: {jsc_licenses}")
