@@ -35,9 +35,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v9
-
       - name: Download pinned native SDKs
         run: >-
           python scripts/prepare_native.py
