@@ -1,6 +1,6 @@
 use std::{marker::PhantomData, ptr};
 
-use jsc_sys::{
+use crate::sys::{
     JSContextRef, JSValueProtect, JSValueRef, JSValueToNumber, JSValueToObject, JSValueUnprotect,
 };
 
@@ -68,7 +68,7 @@ pub(crate) fn value_to_string(
 ) -> Result<String, JsException> {
     let mut exception = ptr::null();
     // SAFETY: the caller supplies a live value from the supplied context.
-    let string = unsafe { jsc_sys::JSValueToStringCopy(context, value, &mut exception) };
+    let string = unsafe { crate::sys::JSValueToStringCopy(context, value, &mut exception) };
     if !exception.is_null() {
         return Err(exception_from_raw(context, exception));
     }

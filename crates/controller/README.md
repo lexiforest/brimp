@@ -43,4 +43,4 @@ BRIMP_TEST_WEBKIT_WORKER="$PWD/../WebKit/WebKitBuild/Release/WebKitAutomationWor
 
 The imported controller and worker contract is documented in
 [docs/PROTOCOL.md](docs/PROTOCOL.md). Lite CDP support is documented separately
-in [../cdp/SUPPORT.md](../cdp/SUPPORT.md).
+in [../worker/SUPPORT.md](../worker/SUPPORT.md).

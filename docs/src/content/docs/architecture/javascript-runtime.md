@@ -22,10 +22,10 @@ web-bindings: Window/DOM/Web API JavaScript plus native dispatch
 jsc: RAII values, protected objects, callbacks, exceptions, promises
         │
         ▼
-jsc-sys: unsafe JavaScriptCore C API and platform linkage
+jsc::sys: unsafe JavaScriptCore C API and platform linkage
 ```
 
-`jsc-sys` is the unsafe ABI boundary. It declares opaque JavaScriptCore handles
+`jsc::sys` is the unsafe ABI boundary. It declares opaque JavaScriptCore handles
 and links the platform library selected by `BRIMP_JSC_LIB_DIR`. The `jsc` crate
 wraps those handles with Rust lifetimes, exception conversion, garbage-collector
 protection, native callbacks, and deferred Promise settlement.

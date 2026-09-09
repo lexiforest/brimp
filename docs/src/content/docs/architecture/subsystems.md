@@ -12,7 +12,7 @@ rules rather than maintaining parallel state.
 
 | Subsystem | Implementation | Page gate |
 | --- | --- | --- |
-| JavaScript | WebKit JavaScriptCore through `jsc-sys` and `jsc` | Always present |
+| JavaScript | WebKit JavaScriptCore through `jsc` | Always present |
 | DOM, HTML parsing, CSS and layout | Blitz DOM/html, Stylo, and `browser-dom` | Always present |
 | Navigation and resources | `web-runtime` policy over `network::ResourceLoader` | Always present |
 | HTTP, TLS, HTTP/2 and HTTP/3 | libcurl-impersonate multi executor | Always present |

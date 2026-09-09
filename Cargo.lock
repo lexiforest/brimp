@@ -326,23 +326,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "brimp-cdp"
-version = "0.1.1"
-dependencies = [
- "async-trait",
- "base64",
- "brimp-worker-api",
- "http",
- "network",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "url",
- "web-runtime",
-]
-
-[[package]]
 name = "brimp-cli"
 version = "0.1.1"
 dependencies = [
@@ -1517,13 +1500,6 @@ dependencies = [
 name = "jsc"
 version = "0.1.1"
 dependencies = [
- "jsc-sys",
-]
-
-[[package]]
-name = "jsc-sys"
-version = "0.1.1"
-dependencies = [
  "libc",
 ]
 
@@ -1594,10 +1570,17 @@ checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
 name = "lite-worker"
 version = "0.1.1"
 dependencies = [
- "brimp-cdp",
+ "async-trait",
+ "base64",
+ "brimp-worker-api",
+ "http",
  "libc",
+ "network",
+ "serde",
  "serde_json",
+ "thiserror",
  "tokio",
+ "url",
  "web-runtime",
 ]
 
@@ -2509,18 +2492,6 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
-
-[[package]]
-name = "screenshot"
-version = "0.1.1"
-dependencies = [
- "anyrender",
- "anyrender_vello_cpu",
- "blitz-dom",
- "blitz-paint",
- "glifo",
- "png 0.18.1",
-]
 
 [[package]]
 name = "selectors"
@@ -3894,17 +3865,20 @@ dependencies = [
 name = "web-runtime"
 version = "0.1.1"
 dependencies = [
+ "anyrender",
+ "anyrender_vello_cpu",
  "async-trait",
  "blitz-dom",
+ "blitz-paint",
  "blitz-traits",
  "brimp-worker-api",
  "browser-dom",
+ "glifo",
  "http",
  "jsc",
  "network",
  "persona",
  "png 0.18.1",
- "screenshot",
  "serde",
  "serde_json",
  "swc_common",

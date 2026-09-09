@@ -1,6 +1,6 @@
-# Brimp CDP
+# lite-worker
 
-`brimp-cdp` implements the worker's deliberately small Chrome DevTools Protocol
+The `lite-worker` package contains the worker executable and its Chrome DevTools Protocol
 subset. It reads length-prefixed CDP JSON from a local stream inherited from the
 Brimp daemon. The daemon owns the public HTTP discovery and WebSocket boundary.
 

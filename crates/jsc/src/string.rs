@@ -1,6 +1,6 @@
 use std::ptr::NonNull;
 
-use jsc_sys::{
+use crate::sys::{
     JSStringCreateWithCharacters, JSStringGetCharactersPtr, JSStringGetLength, JSStringRef,
     JSStringRelease,
 };
@@ -8,7 +8,7 @@ use jsc_sys::{
 use crate::JsException;
 
 pub(crate) struct JsString {
-    raw: NonNull<jsc_sys::OpaqueJSString>,
+    raw: NonNull<crate::sys::OpaqueJSString>,
 }
 
 impl JsString {

@@ -9,7 +9,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::task::JoinHandle;
 use web_runtime::{AutomationBrowser, PageOptions};
 
-use brimp_cdp::serve_framed_with_browser;
+use lite_worker::serve_framed_with_browser;
 
 struct FixtureLoader;
 

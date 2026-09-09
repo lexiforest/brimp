@@ -10,9 +10,8 @@ crates/web-runtime/   Canonical browser automation runtime
 crates/web-bindings/  JavaScript and Web API bindings
 crates/browser-dom/   DOM, style, and layout integration
 crates/network/       curl-impersonate transport
-crates/screenshot/    CPU PNG rendering
 crates/cli/           brimp executable
-crates/cdp/           CDP protocol library and conformance workflow
+crates/worker/        lite-worker executable, CDP dispatch, and protocol tests
 bindings/python/      CPython ABI3 package
 bindings/node/        Node native addon and JavaScript adapter
 persona/              Versioned persona schema
@@ -51,7 +50,7 @@ workflow exercises the same framed transport used by the worker executable.
 For a quicker interface-specific cycle:
 
 ```sh
-cargo test -p brimp-cli -p brimp-cdp
+cargo test -p brimp-cli -p lite-worker
 python3 bindings/python/test_api.py
 ```
 

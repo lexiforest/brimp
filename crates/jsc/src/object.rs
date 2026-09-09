@@ -1,6 +1,6 @@
 use std::{fmt, marker::PhantomData, rc::Rc};
 
-use jsc_sys::{
+use crate::sys::{
     JSContextRef, JSObjectMake, JSObjectRef, JSObjectSetPrototype, JSValueProtect, JSValueUnprotect,
 };
 

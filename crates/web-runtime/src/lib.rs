@@ -5,6 +5,7 @@ mod extraction;
 mod module_script;
 mod page;
 mod request;
+pub mod screenshot;
 mod task;
 mod viewport;
 mod worker;

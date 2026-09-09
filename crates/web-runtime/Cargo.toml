@@ -13,7 +13,12 @@ http = "1"
 jsc = { path = "../jsc" }
 network = { path = "../network" }
 persona = { path = "../persona" }
-screenshot = { path = "../screenshot" }
+anyrender = "=0.11.1"
+anyrender_vello_cpu = { version = "=0.14.0", default-features = false }
+blitz-paint = { version = "=0.3.0-beta.1", default-features = false }
+# Enable PNG bitmap glyph decoding in the Vello CPU renderer (e.g. emoji).
+glifo = { version = "=0.1.1", features = ["png"] }
+png = "=0.18.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 swc_common = "26"
@@ -30,5 +35,4 @@ web-bindings = { path = "../web-bindings" }
 
 [dev-dependencies]
 async-trait = "0.1"
-png = "=0.18.1"
 tungstenite = "0.30"

@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use jsc_sys::{
+use crate::sys::{
     JSClassCreate, JSClassDefinition, JSClassRelease, JSContextGetGlobalObject, JSContextGetGroup,
     JSContextGroupClearExecutionTimeLimit, JSContextGroupSetExecutionTimeLimit, JSContextRef,
     JSEvaluateScript, JSGarbageCollect, JSGlobalContextCreate, JSGlobalContextRef,
@@ -34,7 +34,7 @@ thread_local! {
 }
 
 pub struct JsRuntime {
-    context: NonNull<jsc_sys::OpaqueJSContext>,
+    context: NonNull<crate::sys::OpaqueJSContext>,
     _thread_bound: PhantomData<Rc<()>>,
 }
 
@@ -47,12 +47,12 @@ impl JsRuntime {
             unsafe {
                 #[cfg(target_os = "macos")]
                 {
-                    if !jsc_sys::allow_mach_exception_handlers() {
+                    if !crate::sys::allow_mach_exception_handlers() {
                         return false;
                     }
                 }
-                jsc_sys::JSCInitialize();
-                jsc_sys::JSCSetOptions(c"useSharedArrayBuffer=true".as_ptr())
+                crate::sys::JSCInitialize();
+                crate::sys::JSCSetOptions(c"useSharedArrayBuffer=true".as_ptr())
             }
         });
         if !options_ready {
@@ -400,7 +400,7 @@ impl Drop for JsRuntime {
 
 fn set_property(
     context: JSContextRef,
-    object: jsc_sys::JSObjectRef,
+    object: crate::sys::JSObjectRef,
     name: &JsString,
     value: JSValueRef,
 ) -> Result<(), JsException> {
@@ -425,8 +425,8 @@ fn set_property(
 
 unsafe extern "C" fn console_log(
     context: JSContextRef,
-    _function: jsc_sys::JSObjectRef,
-    _this_object: jsc_sys::JSObjectRef,
+    _function: crate::sys::JSObjectRef,
+    _this_object: crate::sys::JSObjectRef,
     argument_count: usize,
     arguments: *const JSValueRef,
     _exception: *mut JSValueRef,
@@ -487,8 +487,8 @@ fn console_value_to_string(
 
 unsafe extern "C" fn native_dispatch(
     context: JSContextRef,
-    function: jsc_sys::JSObjectRef,
-    this_object: jsc_sys::JSObjectRef,
+    function: crate::sys::JSObjectRef,
+    this_object: crate::sys::JSObjectRef,
     argument_count: usize,
     arguments: *const JSValueRef,
     exception: *mut JSValueRef,
@@ -518,7 +518,7 @@ unsafe extern "C" fn native_dispatch(
             let message = JsString::new(&error.to_string())
                 .expect("native error messages cannot contain embedded NUL bytes");
             // SAFETY: the context and temporary string are live for this conversion.
-            let value = unsafe { jsc_sys::JSValueMakeString(context, message.as_raw()) };
+            let value = unsafe { crate::sys::JSValueMakeString(context, message.as_raw()) };
             if !exception.is_null() {
                 // SAFETY: JSC supplied a writable exception result pointer.
                 unsafe { *exception = value };
@@ -538,7 +538,7 @@ pub(crate) fn exception_from_raw(context: JSContextRef, exception: JSValueRef) -
 
 fn value_to_string_without_exception(context: JSContextRef, value: JSValueRef) -> Option<String> {
     // Avoid recursive exception conversion by deliberately ignoring a conversion exception here.
-    let raw = unsafe { jsc_sys::JSValueToStringCopy(context, value, ptr::null_mut()) };
+    let raw = unsafe { crate::sys::JSValueToStringCopy(context, value, ptr::null_mut()) };
     // SAFETY: a non-null result is an owned string returned by JSC.
     unsafe { JsString::from_owned_raw(raw) }.map(|string| string.to_rust_string())
 }

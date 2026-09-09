@@ -1,6 +1,6 @@
 use std::{error::Error, fmt, marker::PhantomData, ptr, slice};
 
-use jsc_sys::{
+use crate::sys::{
     JSContextRef, JSObjectGetTypedArrayByteLength, JSObjectGetTypedArrayByteOffset,
     JSObjectGetTypedArrayBytesPtr, JSObjectIsFunction, JSObjectMakeArray, JSObjectMakeTypedArray,
     JSObjectRef, JSValueIsNull, JSValueIsObject, JSValueIsUndefined, JSValueMakeBoolean,
@@ -55,7 +55,7 @@ impl<'call> NativeCall<'call> {
         let mut exception = ptr::null();
         // SAFETY: all output pointers are writable and the callback context is live.
         let promise = unsafe {
-            jsc_sys::JSObjectMakeDeferredPromise(
+            crate::sys::JSObjectMakeDeferredPromise(
                 self.context,
                 &mut resolve,
                 &mut reject,

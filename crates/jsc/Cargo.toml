@@ -3,6 +3,8 @@ name = "jsc"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+links = "JavaScriptCore"
+build = "build.rs"
 
 [dependencies]
-jsc-sys = { path = "../jsc-sys" }
+libc = "0.2"

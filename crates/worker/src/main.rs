@@ -43,7 +43,7 @@ async fn main() {
     if let Some((width, height)) = window_size {
         options = options.viewport(width, height);
     }
-    if let Err(error) = brimp_cdp::serve_framed(stream, options.build()).await {
+    if let Err(error) = lite_worker::serve_framed(stream, options.build()).await {
         fail(&error.to_string());
     }
 }

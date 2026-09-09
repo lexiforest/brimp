@@ -10,11 +10,11 @@ use std::{
     time::{Duration, Instant},
 };
 
+use crate::screenshot::{self, ScreenshotError, ScreenshotOptions};
 use blitz_traits::net::NetProvider;
 use browser_dom::{BrowserDocument, HtmlParserSession, NodeId, ParseProgress};
 use jsc::{JsException, JsRuntime, JsValue, ProtectedJsObject};
 use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest};
-use screenshot::{ScreenshotError, ScreenshotOptions};
 use web_bindings::{
     BindingQueues, BindingRuntime, BrowsingContext, CookieJar, FetchQueue, PendingFetch,
     PendingWebSocketOperation, PendingWorkerOperation,

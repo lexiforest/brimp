@@ -2,7 +2,7 @@ use anyrender::render_to_buffer;
 use anyrender_vello_cpu::VelloCpuImageRenderer;
 use blitz_dom::BaseDocument;
 
-use crate::{ScreenshotError, ScreenshotOptions, png::encode_rgba};
+use super::{ScreenshotError, ScreenshotOptions, png::encode_rgba};
 
 pub struct RenderedRgba {
     pub pixels: Vec<u8>,

@@ -1,4 +1,4 @@
-use crate::ScreenshotError;
+use super::ScreenshotError;
 
 pub fn encode_rgba(rgba: &[u8], width: u32, height: u32) -> Result<Vec<u8>, ScreenshotError> {
     let mut output = Vec::new();
