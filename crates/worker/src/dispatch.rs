@@ -5,11 +5,11 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use base64::Engine;
-use serde_json::{Value, json};
-use web_runtime::{
+use brimp_runtime::{
     AutomationBrowser, AutomationBrowserContext, AutomationError, AutomationPage,
     CancellationToken, PageOptions, RemoteArgument, StoredCookie, TouchPoint,
 };
+use serde_json::{Value, json};
 
 use crate::interception::{InterceptionMode, InterceptionRegistry};
 use crate::protocol::{Event, Request, Response};
@@ -2003,13 +2003,14 @@ impl Drop for ConnectionState {
 pub(crate) struct NavigationJob {
     session: String,
     event_request_headers: Vec<(String, String)>,
-    task:
-        tokio::task::JoinHandle<Result<(web_runtime::NavigationResponse, String), AutomationError>>,
+    task: tokio::task::JoinHandle<
+        Result<(brimp_runtime::NavigationResponse, String), AutomationError>,
+    >,
 }
 pub(crate) struct NavigationCompletion {
     session: String,
     event_request_headers: Vec<(String, String)>,
-    result: Result<(web_runtime::NavigationResponse, String), DispatchError>,
+    result: Result<(brimp_runtime::NavigationResponse, String), DispatchError>,
 }
 impl NavigationJob {
     pub(crate) async fn complete(self) -> NavigationCompletion {

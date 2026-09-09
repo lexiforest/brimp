@@ -2,11 +2,11 @@ use std::collections::VecDeque;
 use std::io;
 use std::sync::Arc;
 
+use brimp_runtime::{AutomationBrowser, PageOptions};
 use serde::Serialize;
 use serde_json::Value;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, WriteHalf};
 use tokio::sync::mpsc;
-use web_runtime::{AutomationBrowser, PageOptions};
 
 use crate::dispatch::ConnectionState;
 use crate::interception::{InterceptionRegistry, PausedRequest};
@@ -254,10 +254,10 @@ mod tests {
     use std::sync::Arc;
 
     use async_trait::async_trait;
-    use network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
+    use brimp_network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
+    use brimp_runtime::AutomationBrowser;
     use serde_json::json;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
-    use web_runtime::AutomationBrowser;
 
     use super::*;
 
@@ -355,7 +355,7 @@ mod tests {
             Ok(ResourceResponse {
                 status: http::StatusCode::OK,
                 headers: {
-                    let mut headers = network::HeaderList::new();
+                    let mut headers = brimp_network::HeaderList::new();
                     headers.append("content-type", http::HeaderValue::from_static("text/html"));
                     headers
                 },

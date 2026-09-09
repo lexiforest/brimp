@@ -13,31 +13,31 @@ objects, DOM, networking, event loop integration, and optional subsystems.
 Page and AutomationPage
         │
         ▼
-web-runtime: owner thread, lifecycle, tasks, navigation
+brimp-runtime: owner thread, lifecycle, tasks, navigation
         │
         ▼
-web-bindings: Window/DOM/Web API JavaScript plus native dispatch
+brimp-web-apis: Window/DOM/Web API JavaScript plus native dispatch
         │
         ▼
 jsc: RAII values, protected objects, callbacks, exceptions, promises
         │
         ▼
-jsc::sys: unsafe JavaScriptCore C API and platform linkage
+brimp_jsc::sys: unsafe JavaScriptCore C API and platform linkage
 ```
 
-`jsc::sys` is the unsafe ABI boundary. It declares opaque JavaScriptCore handles
-and links the platform library selected by `BRIMP_JSC_LIB_DIR`. The `jsc` crate
+`brimp_jsc::sys` is the unsafe ABI boundary. It declares opaque JavaScriptCore handles
+and links the platform library selected by `BRIMP_JSC_LIB_DIR`. The `brimp-jsc` crate
 wraps those handles with Rust lifetimes, exception conversion, garbage-collector
 protection, native callbacks, and deferred Promise settlement.
 
-`web-bindings` installs browser-facing JavaScript classes and one native host
+`brimp-web-apis` installs browser-facing JavaScript classes and one native host
 entry point. JavaScript wrappers retain normal Web-IDL-shaped objects while
 native operations dispatch to Rust-owned DOM, Canvas, storage, and networking
 state. DOM wrappers cache native node identities so the
 same native node returns the same JavaScript object.
 
 The shared JavaScript bootstrap is assembled from dependency-ordered files in
-`crates/web-bindings/src/runtime/` and evaluated as one script. This keeps one
+`crates/web-apis/src/runtime/` and evaluated as one script. This keeps one
 lexical scope and deterministic installation order. Optional subsystem scripts
 are evaluated only when their page option is enabled.
 
@@ -58,7 +58,7 @@ microtask checkpoints, timers, and event dispatch.
 For an embedded Rust page, call `Page::eval()`:
 
 ```rust
-use web_runtime::{Browser, PageOptions};
+use brimp_runtime::{Browser, PageOptions};
 
 let browser = Browser::new()?;
 let mut page = browser.new_page(PageOptions::default())?;
@@ -74,7 +74,7 @@ assert_eq!(answer, 42.0);
 # Ok::<(), Box<dyn std::error::Error>>(())
 ```
 
-`Page::eval()` returns a lifetime-bound `jsc::JsValue`. It performs a
+`Page::eval()` returns a lifetime-bound `brimp_jsc::JsValue`. It performs a
 JavaScriptCore microtask checkpoint and starts Fetch operations queued by the
 script before returning. It does not JSON-serialize the result. Convert the
 value while the page/runtime borrow is valid using `to_number()`, `to_string()`,
@@ -84,7 +84,7 @@ Use `AutomationPage::evaluate()` when the caller cannot live on the JavaScript
 owner thread:
 
 ```rust
-use web_runtime::{AutomationBrowser, PageOptions};
+use brimp_runtime::{AutomationBrowser, PageOptions};
 
 let browser = AutomationBrowser::new()?;
 let page = browser.new_page(PageOptions::default())?;

@@ -330,10 +330,10 @@ name = "brimp-cli"
 version = "0.1.1"
 dependencies = [
  "brimp-controller",
+ "brimp-persona",
  "brimp-worker-api",
  "glob",
  "http",
- "persona",
  "pico-args",
  "robotstxt",
  "serde_json",
@@ -354,26 +354,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "brimp-worker-api"
-version = "0.1.1"
-dependencies = [
- "persona",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "brotli-decompressor"
-version = "5.0.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583"
-dependencies = [
- "alloc-no-stdlib",
-]
-
-[[package]]
-name = "browser-dom"
+name = "brimp-dom"
 version = "0.1.1"
 dependencies = [
  "blitz-dom",
@@ -386,6 +367,128 @@ dependencies = [
  "stylo",
  "stylo_traits",
  "xml5ever",
+]
+
+[[package]]
+name = "brimp-jsc"
+version = "0.1.1"
+dependencies = [
+ "libc",
+]
+
+[[package]]
+name = "brimp-lite-worker"
+version = "0.1.1"
+dependencies = [
+ "async-trait",
+ "base64",
+ "brimp-network",
+ "brimp-runtime",
+ "brimp-worker-api",
+ "http",
+ "libc",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "brimp-network"
+version = "0.1.1"
+dependencies = [
+ "async-trait",
+ "data-url",
+ "http",
+ "thiserror",
+ "tokio",
+ "tungstenite",
+ "url",
+]
+
+[[package]]
+name = "brimp-persona"
+version = "0.1.1"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "brimp-runtime"
+version = "0.1.1"
+dependencies = [
+ "anyrender",
+ "anyrender_vello_cpu",
+ "async-trait",
+ "blitz-dom",
+ "blitz-paint",
+ "blitz-traits",
+ "brimp-dom",
+ "brimp-jsc",
+ "brimp-network",
+ "brimp-persona",
+ "brimp-web-apis",
+ "brimp-worker-api",
+ "glifo",
+ "http",
+ "png 0.18.1",
+ "serde",
+ "serde_json",
+ "swc_common",
+ "swc_ecma_ast",
+ "swc_ecma_codegen",
+ "swc_ecma_parser",
+ "swc_ecma_transforms_base",
+ "swc_ecma_transforms_module",
+ "swc_ecma_visit",
+ "thiserror",
+ "tokio",
+ "tungstenite",
+ "url",
+]
+
+[[package]]
+name = "brimp-web-apis"
+version = "0.1.1"
+dependencies = [
+ "base64",
+ "blitz-dom",
+ "brimp-dom",
+ "brimp-jsc",
+ "brimp-network",
+ "cookie_store",
+ "encoding_rs",
+ "getrandom",
+ "http",
+ "rustybuzz",
+ "selectors",
+ "serde_json",
+ "skia-safe",
+ "stylo",
+ "unicode-bidi",
+ "unicode-segmentation",
+ "url",
+]
+
+[[package]]
+name = "brimp-worker-api"
+version = "0.1.1"
+dependencies = [
+ "brimp-persona",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "brotli-decompressor"
+version = "5.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3a32acac15fe1967bc3986b2a6347dffc965602354ea6f450ad07e8bfd253583"
+dependencies = [
+ "alloc-no-stdlib",
 ]
 
 [[package]]
@@ -1452,13 +1555,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "jsc"
-version = "0.1.1"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "keyboard-types"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1520,24 +1616,6 @@ name = "linux-raw-sys"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53"
-
-[[package]]
-name = "lite-worker"
-version = "0.1.1"
-dependencies = [
- "async-trait",
- "base64",
- "brimp-worker-api",
- "http",
- "libc",
- "network",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "url",
- "web-runtime",
-]
 
 [[package]]
 name = "litemap"
@@ -1634,19 +1712,6 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys",
-]
-
-[[package]]
-name = "network"
-version = "0.1.1"
-dependencies = [
- "async-trait",
- "data-url",
- "http",
- "thiserror",
- "tokio",
- "tungstenite",
- "url",
 ]
 
 [[package]]
@@ -1875,14 +1940,6 @@ name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
-
-[[package]]
-name = "persona"
-version = "0.1.1"
-dependencies = [
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "phf"
@@ -3664,63 +3721,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7ef64dbcc55df09c7e5a46182d181c2cfa3e925f3da937ea764728b4bbb9dcbf"
 dependencies = [
  "unicode-ident",
-]
-
-[[package]]
-name = "web-bindings"
-version = "0.1.1"
-dependencies = [
- "base64",
- "blitz-dom",
- "browser-dom",
- "cookie_store",
- "encoding_rs",
- "getrandom",
- "http",
- "jsc",
- "network",
- "rustybuzz",
- "selectors",
- "serde_json",
- "skia-safe",
- "stylo",
- "unicode-bidi",
- "unicode-segmentation",
- "url",
-]
-
-[[package]]
-name = "web-runtime"
-version = "0.1.1"
-dependencies = [
- "anyrender",
- "anyrender_vello_cpu",
- "async-trait",
- "blitz-dom",
- "blitz-paint",
- "blitz-traits",
- "brimp-worker-api",
- "browser-dom",
- "glifo",
- "http",
- "jsc",
- "network",
- "persona",
- "png 0.18.1",
- "serde",
- "serde_json",
- "swc_common",
- "swc_ecma_ast",
- "swc_ecma_codegen",
- "swc_ecma_parser",
- "swc_ecma_transforms_base",
- "swc_ecma_transforms_module",
- "swc_ecma_visit",
- "thiserror",
- "tokio",
- "tungstenite",
- "url",
- "web-bindings",
 ]
 
 [[package]]

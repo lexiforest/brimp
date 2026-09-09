@@ -1,6 +1,6 @@
 # brimp-cli
 
-Command-line frontend for separate browser worker processes. The CLI does not link JavaScriptCore, curl-impersonate, or `web-runtime`.
+Command-line frontend for separate browser worker processes. The CLI does not link JavaScriptCore, curl-impersonate, or `brimp-runtime`.
 
 Tagged releases publish relocatable archives for manylinux 2.28 x86-64/ARM64,
 macOS 11+ ARM64, and Windows x86-64. Each archive includes the required native
@@ -8,7 +8,7 @@ runtimes, their licenses, and a separate SHA-256 checksum.
 
 Browser commands currently require macOS. Select a worker explicitly with
 `--worker-path PATH` or `BRIMP_WORKER_PATH`; no worker is discovered automatically.
-Build both executables with `cargo build -p brimp-cli -p lite-worker`.
+Build both executables with `cargo build -p brimp-cli -p brimp-lite-worker`.
 The CLI alone builds without native SDKs using `cargo build -p brimp-cli`.
 
 ```sh

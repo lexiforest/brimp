@@ -1,0 +1,241 @@
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+use async_trait::async_trait;
+use brimp_network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
+use brimp_runtime::{Browser, PageOptions};
+use http::{HeaderMap, HeaderValue, StatusCode};
+
+#[derive(Default)]
+struct FetchLoader {
+    requests: Mutex<Vec<ResourceRequest>>,
+}
+
+#[async_trait]
+impl ResourceLoader for FetchLoader {
+    async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+        if request.url.ends_with("/failure") {
+            return Err(NetworkError::Transport("offline".to_string()));
+        }
+        let url = request.url.clone();
+        self.requests.lock().unwrap().push(request);
+        let mut headers = HeaderMap::new();
+        headers.insert("content-type", HeaderValue::from_static("application/json"));
+        headers.insert("x-result", HeaderValue::from_static("yes"));
+        Ok(ResourceResponse {
+            status: StatusCode::CREATED,
+            headers: headers.into(),
+            body: br#"{"answer":42}"#.to_vec(),
+            effective_url: url,
+            metadata: brimp_network::ResponseMetadata::default(),
+        })
+    }
+}
+
+#[test]
+fn fetch_resolves_a_response_on_the_page_thread() {
+    let loader = Arc::new(FetchLoader::default());
+    let browser = Browser::with_resource_loader(loader.clone());
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+
+    page.eval(
+        r#"
+        globalThis.fetchResult = "waiting";
+        fetch("https://example.test/api", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain", "X-Test": "one" },
+            body: "hello",
+        }).then(async response => {
+            const json = await response.json();
+            fetchResult = [response.status, response.ok, response.headers.get("x-result"), json.answer].join("|");
+        });
+        "#,
+    )
+    .unwrap();
+    assert_eq!(
+        page.eval("fetchResult").unwrap().to_string().unwrap(),
+        "waiting"
+    );
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+
+    assert_eq!(
+        page.eval("fetchResult").unwrap().to_string().unwrap(),
+        "201|true|yes|42"
+    );
+    let requests = loader.requests.lock().unwrap();
+    let request = &requests[0];
+    assert_eq!(request.method, http::Method::POST);
+    assert_eq!(request.headers["content-type"], "text/plain");
+    assert_eq!(request.headers["x-test"], "one");
+    assert_eq!(request.body.as_deref(), Some(&b"hello"[..]));
+}
+
+#[test]
+fn fetch_rejects_transport_and_invalid_request_failures() {
+    let browser = Browser::with_resource_loader(Arc::new(FetchLoader::default()));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.eval(
+        r#"
+        globalThis.failures = [];
+        fetch("https://example.test/failure").catch(error => failures.push(error instanceof TypeError && error.message.includes("offline")));
+        fetch("https://example.test/api", { method: "GET", body: "invalid" })
+            .catch(error => failures.push(error instanceof TypeError && error.message.includes("cannot have a body")));
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+
+    assert_eq!(
+        page.eval("failures.join(',')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true,true"
+    );
+}
+
+#[test]
+fn fetch_serializes_form_data_as_multipart_bytes() {
+    let loader = Arc::new(FetchLoader::default());
+    let browser = Browser::with_resource_loader(loader.clone());
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+
+    page.eval(
+        r#"
+        const data = new FormData();
+        data.append("message", "hello\nworld");
+        data.append("upload", new Blob([Uint8Array.of(0, 255, 65)], { type: "application/octet-stream" }), "raw.bin");
+        globalThis.formDataFetch = "waiting";
+        fetch("https://example.test/form", { method: "POST", body: data })
+            .then(() => formDataFetch = "done");
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    assert_eq!(
+        page.eval("formDataFetch").unwrap().to_string().unwrap(),
+        "done"
+    );
+
+    let requests = loader.requests.lock().unwrap();
+    let request = &requests[0];
+    let content_type = request.headers["content-type"].to_str().unwrap();
+    let boundary = content_type
+        .strip_prefix("multipart/form-data; boundary=")
+        .expect("FormData supplies a multipart boundary");
+    assert!(boundary.starts_with("----WebKitFormBoundary"));
+    let body = request.body.as_deref().expect("FormData supplies a body");
+    let body_text = String::from_utf8_lossy(body);
+    assert!(body_text.contains(&format!("--{boundary}\r\n")));
+    assert!(body_text.contains("name=\"message\"\r\n\r\nhello\r\nworld\r\n"));
+    assert!(body_text.contains(
+        "name=\"upload\"; filename=\"raw.bin\"\r\nContent-Type: application/octet-stream\r\n\r\n"
+    ));
+    assert!(body.windows(3).any(|bytes| bytes == [0, 255, 65]));
+    assert!(body.ends_with(format!("--{boundary}--\r\n").as_bytes()));
+}
+
+#[test]
+fn xml_http_request_exposes_response_state_headers_and_events() {
+    let loader = Arc::new(FetchLoader::default());
+    let browser = Browser::with_resource_loader(loader.clone());
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+
+    page.eval(
+        r#"
+        globalThis.xhrResult = "waiting";
+        const xhr = new XMLHttpRequest();
+        const events = [];
+        for (const type of ["readystatechange", "loadstart", "progress", "load", "loadend"]) {
+            xhr.addEventListener(type, event => events.push(`${type}:${xhr.readyState}:${event.loaded}`));
+        }
+        xhr.open("POST", "https://example.test/api");
+        xhr.setRequestHeader("X-Test", "one");
+        xhr.responseType = "json";
+        xhr.onloadend = () => {
+            xhrResult = JSON.stringify({
+                status: xhr.status,
+                statusText: xhr.statusText,
+                url: xhr.responseURL,
+                header: xhr.getResponseHeader("X-Result"),
+                allHeaders: xhr.getAllResponseHeaders(),
+                answer: xhr.response.answer,
+                text: xhr.responseText,
+                state: xhr.readyState,
+                events,
+                interfaces: xhr instanceof XMLHttpRequestEventTarget &&
+                    xhr.upload instanceof XMLHttpRequestUpload &&
+                    new ProgressEvent("progress", { loaded: 3, total: 4 }).loaded === 3,
+            });
+        };
+        xhr.send("hello");
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    let result = page.eval("xhrResult").unwrap().to_string().unwrap();
+    let result: serde_json::Value = serde_json::from_str(&result).unwrap();
+    assert_eq!(result["status"], 201);
+    assert_eq!(result["statusText"], "Created");
+    assert_eq!(result["url"], "https://example.test/api");
+    assert_eq!(result["header"], "yes");
+    assert!(
+        result["allHeaders"]
+            .as_str()
+            .unwrap()
+            .contains("x-result: yes\r\n")
+    );
+    assert_eq!(result["answer"], 42);
+    assert_eq!(result["text"], "");
+    assert_eq!(result["state"], 4);
+    assert_eq!(result["interfaces"], true);
+    assert!(
+        result["events"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|event| event == "load:4:13")
+    );
+
+    let requests = loader.requests.lock().unwrap();
+    assert_eq!(requests[0].method, http::Method::POST);
+    assert_eq!(requests[0].headers["x-test"], "one");
+    assert_eq!(requests[0].body.as_deref(), Some(&b"hello"[..]));
+}
+
+#[test]
+fn xml_http_request_reports_network_errors_and_abort() {
+    let browser = Browser::with_resource_loader(Arc::new(FetchLoader::default()));
+    let mut page = browser.new_page(PageOptions::default()).unwrap();
+    page.eval(
+        r#"
+        globalThis.xhrFailures = [];
+        const failed = new XMLHttpRequest();
+        failed.open("GET", "https://example.test/failure");
+        failed.onerror = () => xhrFailures.push(`error:${failed.status}:${failed.readyState}`);
+        failed.onloadend = () => xhrFailures.push("error-end");
+        failed.send();
+
+        const aborted = new XMLHttpRequest();
+        aborted.open("GET", "https://example.test/api");
+        aborted.onabort = () => xhrFailures.push("abort");
+        aborted.onloadend = () => xhrFailures.push("abort-end");
+        aborted.send();
+        aborted.abort();
+        "#,
+    )
+    .unwrap();
+
+    assert!(page.run_until_idle_for(Duration::from_secs(1)).unwrap());
+    assert_eq!(
+        page.eval("xhrFailures.join(',')")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "abort,abort-end,error:0:4,error-end"
+    );
+}

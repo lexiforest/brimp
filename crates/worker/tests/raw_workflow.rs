@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use base64::Engine;
+use brimp_network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
+use brimp_runtime::{AutomationBrowser, PageOptions};
 use http::{HeaderValue, StatusCode};
-use network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
 use serde_json::{Value, json};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::task::JoinHandle;
-use web_runtime::{AutomationBrowser, PageOptions};
 
-use lite_worker::serve_framed_with_browser;
+use brimp_lite_worker::serve_framed_with_browser;
 
 struct FixtureLoader;
 
@@ -42,7 +42,7 @@ impl ResourceLoader for FixtureLoader {
             body: b"<!doctype html><title>CDP</title><main style='height:1200px'>Hello CDP</main>"
                 .to_vec(),
             effective_url: request.url,
-            metadata: network::ResponseMetadata::default(),
+            metadata: brimp_network::ResponseMetadata::default(),
         })
     }
 }

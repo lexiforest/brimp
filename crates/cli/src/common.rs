@@ -73,7 +73,7 @@ impl NavigationOptions {
         let persona = persona_path.map_or_else(
             || Ok(None),
             |path| {
-                persona::PersonaConfig::from_json_file(path)
+                brimp_persona::PersonaConfig::from_json_file(path)
                     .map(Some)
                     .map_err(|error| AutomationError::InvalidInput(error.to_string()))
             },

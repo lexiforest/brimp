@@ -762,31 +762,58 @@ fn interrupt_cancels_crawl_and_finishes_its_manifest() {
     fs::remove_dir_all(output_dir).unwrap();
 }
 
-#[test]
-fn timeout_uses_stable_exit_category() {
+// Keep the response pending until the CLI exits, and stop accepting when it
+// exits before connecting (for example, if worker startup fails).
+fn stalled_server() -> (
+    String,
+    std::sync::mpsc::Sender<()>,
+    std::thread::JoinHandle<bool>,
+) {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let address = listener.local_addr().unwrap();
+    listener.set_nonblocking(true).unwrap();
+    let (stop, stopped) = std::sync::mpsc::channel();
     let worker = std::thread::spawn(move || {
-        let (mut stream, _) = listener.accept().unwrap();
-        stream
-            .set_read_timeout(Some(Duration::from_secs(2)))
-            .unwrap();
-        let mut bytes = [0; 1024];
-        let _ = stream.read(&mut bytes);
-        std::thread::sleep(Duration::from_secs(1));
+        loop {
+            match listener.accept() {
+                Ok((_stream, _)) => {
+                    let _ = stopped.recv_timeout(Duration::from_secs(15));
+                    return true;
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    match stopped.recv_timeout(Duration::from_millis(10)) {
+                        Err(std::sync::mpsc::RecvTimeoutError::Timeout) => continue,
+                        _ => return false,
+                    }
+                }
+                Err(error) => panic!("test server accept failed: {error}"),
+            }
+        }
     });
+    (format!("http://{address}/"), stop, worker)
+}
+
+#[test]
+fn stalled_server_stops_without_a_worker_connection() {
+    let (_url, stop, worker) = stalled_server();
+    drop(stop);
+    assert!(!worker.join().unwrap());
+}
+
+#[test]
+fn timeout_uses_stable_exit_category() {
+    let (url, stop, worker) = stalled_server();
     let output = binary()
-        .args([
-            "get",
-            &format!("http://{address}/"),
-            "--eval",
-            "1",
-            "--timeout",
-            "500ms",
-        ])
+        .args(["get", &url, "--eval", "1", "--timeout", "5s"])
         .output()
         .unwrap();
-    worker.join().unwrap();
+    drop(stop);
+    let connected = worker.join().unwrap();
+    assert!(
+        connected,
+        "worker did not reach the fixture: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert_eq!(output.status.code(), Some(14));
     assert!(output.stdout.is_empty());
     assert!(String::from_utf8_lossy(&output.stderr).contains("timed out"));
@@ -794,14 +821,7 @@ fn timeout_uses_stable_exit_category() {
 
 #[test]
 fn crawl_timeout_uses_stable_exit_category_and_terminal_manifest() {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let address = listener.local_addr().unwrap();
-    let worker = std::thread::spawn(move || {
-        let (mut stream, _) = listener.accept().unwrap();
-        let mut bytes = [0; 1024];
-        let _ = stream.read(&mut bytes);
-        std::thread::sleep(Duration::from_secs(1));
-    });
+    let (url, stop, worker) = stalled_server();
     let unique = SystemTime::now()
         .duration_since(SystemTime::UNIX_EPOCH)
         .unwrap()
@@ -810,16 +830,22 @@ fn crawl_timeout_uses_stable_exit_category_and_terminal_manifest() {
     let output = binary()
         .args([
             "crawl",
-            &format!("http://{address}/"),
+            &url,
             "--output-dir",
             output_dir.to_str().unwrap(),
             "--ignore-robots",
             "--timeout",
-            "500ms",
+            "5s",
         ])
         .output()
         .unwrap();
-    worker.join().unwrap();
+    drop(stop);
+    let connected = worker.join().unwrap();
+    assert!(
+        connected,
+        "worker did not reach the fixture: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert_eq!(output.status.code(), Some(14));
     let manifest = fs::read_to_string(output_dir.join("manifest.jsonl")).unwrap();
     let record: serde_json::Value = serde_json::from_str(manifest.trim()).unwrap();

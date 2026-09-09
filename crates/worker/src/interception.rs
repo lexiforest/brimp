@@ -2,11 +2,11 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use base64::Engine;
-use http::{HeaderName, HeaderValue, Method, StatusCode};
-use network::{
+use brimp_network::{
     HeaderList, NetworkError, ResourceInterception, ResourceInterceptionCallback,
     ResourceInterceptor, ResourceRequest, ResourceResponse,
 };
+use http::{HeaderName, HeaderValue, Method, StatusCode};
 use serde_json::{Map, Value, json};
 use tokio::sync::mpsc;
 
@@ -474,7 +474,7 @@ impl InterceptionRegistry {
             headers,
             body,
             effective_url,
-            metadata: network::ResponseMetadata::default(),
+            metadata: brimp_network::ResponseMetadata::default(),
         }));
         Ok(())
     }
@@ -492,7 +492,7 @@ impl InterceptionRegistry {
                 headers: response.1,
                 body: response.2,
                 effective_url: pending.request.url,
-                metadata: network::ResponseMetadata::default(),
+                metadata: brimp_network::ResponseMetadata::default(),
             }));
             return Ok(());
         }
@@ -669,8 +669,8 @@ mod tests {
     use std::sync::mpsc as std_mpsc;
 
     use base64::Engine;
+    use brimp_network::{ResourceInterception, ResourceRequest};
     use http::Method;
-    use network::{ResourceInterception, ResourceRequest};
     use serde_json::json;
 
     use super::{InterceptionMode, InterceptionRegistry, wildcard};

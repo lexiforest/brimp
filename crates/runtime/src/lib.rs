@@ -1,0 +1,29 @@
+mod automation;
+mod blitz_net;
+mod browser;
+mod extraction;
+mod module_script;
+mod page;
+mod request;
+pub mod screenshot;
+mod task;
+mod viewport;
+mod worker;
+
+pub use automation::{
+    AutomationBrowser, AutomationBrowserContext, AutomationError, AutomationPage,
+    CancellationToken, RemoteArgument, TouchPoint,
+};
+pub use brimp_web_apis::StoredCookie;
+pub use browser::Browser;
+pub use extraction::{
+    DebugInfo, DebugRemoval, ExtractedDocument, ExtractionError, ExtractionOptions, MetaTagItem,
+};
+pub use page::{
+    BrowserSubsystemOptions, LoadState, NavigationError, NavigationHistoryEntry,
+    NavigationRequestInfo, NavigationResponse, Page, PageOptions, PageOptionsBuilder,
+    PersistentStorageOptions,
+};
+pub use screenshot::{ScreenshotError, ScreenshotOptions};
+pub use task::{TaskQueue, TaskSendError, TaskSender};
+pub use viewport::Viewport;

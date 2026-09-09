@@ -19,10 +19,10 @@ impl ConnectionState {
                 "storage quota requires a path and must be positive",
             ));
         }
-        let network = network::CurlConfig {
+        let network = brimp_network::CurlConfig {
             proxy: config
                 .proxy
-                .map(network::Proxy::parse)
+                .map(brimp_network::Proxy::parse)
                 .transpose()
                 .map_err(|e| AutomationError::InvalidInput(e.to_string()))?,
             ca_bundle: config.ca_bundle,
@@ -40,7 +40,7 @@ impl ConnectionState {
             .canvas(config.canvas);
         if let Some(path) = config.storage_path {
             options = options.persistent_storage(
-                web_runtime::PersistentStorageOptions::new(path)
+                brimp_runtime::PersistentStorageOptions::new(path)
                     .quota_bytes(config.storage_quota.unwrap_or(1_073_741_824)),
             );
         }

@@ -1,4 +1,4 @@
-use jsc::JsRuntime;
+use brimp_jsc::JsRuntime;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runtime = JsRuntime::new()?;

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use jsc::{JsRuntime, NativeError, NativeValue};
+use brimp_jsc::{JsRuntime, NativeError, NativeValue};
 
 #[test]
 fn independent_runtime_can_run_on_an_owner_thread() {

@@ -1,5 +1,5 @@
 [package]
-name = "jsc"
+name = "brimp-jsc"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

@@ -624,6 +624,9 @@ mod tests {
 
     #[test]
     fn data_urls_are_decoded_without_entering_curl() {
+        // Loader construction starts an executor even when this request is a
+        // data URL. Keep it out of the other tests' process-wide thread counts.
+        let _guard = EXECUTOR_TEST_LOCK.lock().unwrap();
         let loader = CurlResourceLoader::default();
         let runtime = tokio::runtime::Builder::new_current_thread()
             .build()

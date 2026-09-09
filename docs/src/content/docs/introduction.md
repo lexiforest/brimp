@@ -28,7 +28,7 @@ pages need:
 
 The CLI launches a worker for browser operations. `brimp serve` exposes a CDP
 endpoint and manages workers for connected clients. The lite worker uses
-`web-runtime`; a separately built WebKit worker is another engine option.
+`brimp-runtime`; a separately built WebKit worker is another engine option.
 Neither the CLI nor controller initializes the lite engine in its own process.
 
 ## When to use Brimp

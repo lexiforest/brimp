@@ -6,7 +6,7 @@ description: Shell automation and controller-managed Playwright and Puppeteer wo
 CLI browser commands currently require macOS and a child worker. Set
 `BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
 or pass `--worker-path PATH`. Build both with
-`cargo build -p brimp-cli -p lite-worker`.
+`cargo build -p brimp-cli -p brimp-lite-worker`.
 
 
 ## Check native dependencies

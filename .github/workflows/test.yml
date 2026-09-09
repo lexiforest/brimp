@@ -42,7 +42,7 @@ jobs:
           --output .native/aarch64-apple-darwin
 
       - name: Build worker executable for CLI acceptance tests
-        run: cargo build --locked -p brimp-cli -p lite-worker
+        run: cargo build --locked -p brimp-cli -p brimp-lite-worker
 
       - name: Run workspace tests
         run: cargo test --locked --workspace

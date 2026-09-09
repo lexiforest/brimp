@@ -146,7 +146,7 @@ pub struct DebugRemoval {
 #[derive(Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct WorkerConfig {
-    pub persona: Option<persona::PersonaConfig>,
+    pub persona: Option<brimp_persona::PersonaConfig>,
     pub proxy: Option<String>,
     pub ca_bundle: Option<PathBuf>,
     pub headers: Vec<(String, String)>,

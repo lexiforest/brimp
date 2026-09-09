@@ -29,7 +29,7 @@ error `-32601` rather than a success stub.
 | `Page.addScriptToEvaluateOnNewDocument` | Registers a script that runs after the new realm is installed and before document scripts. Named isolated worlds are not implemented. |
 | `Page.removeScriptToEvaluateOnNewDocument` | Removes a registered preload script. |
 | `Page.createIsolatedWorld` | Creates and recreates a named execution-context identity. Named contexts currently share the page's JavaScript realm. |
-| `Page.navigate` | Navigates through `web-runtime` and emits load events. |
+| `Page.navigate` | Navigates through `brimp-runtime` and emits load events. |
 | `Page.reload` | Navigates the target to its current URL with a fresh loader and execution context. |
 | `Page.getNavigationHistory` | Returns the target's current index and committed main-frame entries. |
 | `Page.navigateToHistoryEntry` | Navigates to a live entry without appending or discarding history. |

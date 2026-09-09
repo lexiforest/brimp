@@ -9,7 +9,7 @@ Browser commands currently require macOS. After configuring the native SDKs
 as described in [Install](/install/), build the CLI and lite worker:
 
 ```sh
-cargo build --release -p brimp-cli -p lite-worker
+cargo build --release -p brimp-cli -p brimp-lite-worker
 export BRIMP_WORKER_PATH="$PWD/target/release/lite-worker"
 ./target/release/brimp doctor
 ```

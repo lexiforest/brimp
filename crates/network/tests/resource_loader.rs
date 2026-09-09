@@ -8,11 +8,11 @@ use std::sync::mpsc;
 use std::task::{Context, Poll, Wake, Waker};
 use std::time::{Duration, Instant};
 
-use http::{HeaderValue, Method};
-use network::{
+use brimp_network::{
     CurlConfig, CurlResourceLoader, NetworkError, Proxy, ResourceLoader, ResourceRequest,
     ResourceStreamDirective, ResourceStreamEvent,
 };
+use http::{HeaderValue, Method};
 
 fn runtime() -> tokio::runtime::Runtime {
     tokio::runtime::Builder::new_current_thread()

@@ -39,11 +39,11 @@ async fn main() {
         .unwrap_or_else(|error| fail(&format!("could not configure controller socket: {error}")));
     let stream = tokio::net::UnixStream::from_std(stream)
         .unwrap_or_else(|error| fail(&format!("could not open controller socket: {error}")));
-    let mut options = web_runtime::PageOptions::builder();
+    let mut options = brimp_runtime::PageOptions::builder();
     if let Some((width, height)) = window_size {
         options = options.viewport(width, height);
     }
-    if let Err(error) = lite_worker::serve_framed(stream, options.build()).await {
+    if let Err(error) = brimp_lite_worker::serve_framed(stream, options.build()).await {
         fail(&error.to_string());
     }
 }

@@ -3,7 +3,7 @@ title: Subsystem implementation
 description: Backends, ownership, data flow, feature gates, and deliberate boundaries.
 ---
 
-Brimp has one page implementation in `web-runtime`. Lite CDP dispatch calls that implementation; the CLI communicates with workers. Browser subsystems share the
+Brimp has one page implementation in `brimp-runtime`. Lite CDP dispatch calls that implementation; the CLI communicates with workers. Browser subsystems share the
 page's canonical DOM, task queue, resource loader, persona, and owner-thread
 rules rather than maintaining parallel state.
 
@@ -11,9 +11,9 @@ rules rather than maintaining parallel state.
 
 | Subsystem | Implementation | Page gate |
 | --- | --- | --- |
-| JavaScript | WebKit JavaScriptCore through `jsc` | Always present |
-| DOM, HTML parsing, CSS and layout | Blitz DOM/html, Stylo, and `browser-dom` | Always present |
-| Navigation and resources | `web-runtime` policy over `network::ResourceLoader` | Always present |
+| JavaScript | WebKit JavaScriptCore through `brimp-jsc` | Always present |
+| DOM, HTML parsing, CSS and layout | Blitz DOM/html, Stylo, and `brimp-dom` | Always present |
+| Navigation and resources | `brimp-runtime` policy over `brimp_network::ResourceLoader` | Always present |
 | HTTP, TLS, HTTP/2 and HTTP/3 | libcurl-impersonate multi executor | Always present |
 | Events, timers and basic Fetch | JavaScript bindings plus the page task queue | Always present |
 | Workers and worklets | Isolated JSC runtimes and a browser-owned coordinator | `worker_system` |
@@ -29,7 +29,7 @@ choices.
 
 ## Page lifecycle and ownership
 
-`web-runtime::Page` owns the JavaScriptCore context, `BrowserDocument`, viewport,
+`brimp-runtime::Page` owns the JavaScriptCore context, `BrowserDocument`, viewport,
 bindings, task queues, loader state, and optional backend stores. Navigation
 creates a fresh document and JavaScript realm, applies the resolved persona,
 loads the main response, pauses parsing for parser-blocking classic scripts,
@@ -41,7 +41,7 @@ send commands to it; they do not duplicate navigation or rendering behavior.
 
 ## DOM, CSSOM, and layout
 
-`browser-dom` owns one canonical Blitz tree. JavaScript `Node`, `Element`, and
+`brimp-dom` owns one canonical Blitz tree. JavaScript `Node`, `Element`, and
 `Document` objects contain stable mappings to Blitz node IDs; there is no mirror
 DOM. Mutations from JavaScript therefore immediately affect parsing, selectors,
 style resolution, layout, and screenshots.
@@ -54,12 +54,12 @@ identity while mutations update the underlying author stylesheets.
 ## Networking and navigation
 
 Every main document, stylesheet, classic script, image, font, and JavaScript
-Fetch request crosses `network::ResourceLoader`. The default
+Fetch request crosses `brimp_network::ResourceLoader`. The default
 `CurlResourceLoader` runs libcurl-impersonate easy handles on one bounded
 curl-multi executor and pools handles for reuse.
 
 libcurl owns transport mechanics and browser-profile TLS/HTTP behavior.
-`web-runtime` owns browser policy: URL resolution, context-owned cookie jars shared
+`brimp-runtime` owns browser policy: URL resolution, context-owned cookie jars shared
 by pages, redirect hops,
 persona headers, response limits, cancellation, and lifecycle events. This
 separation also lets tests or embedders inject deterministic loaders.

@@ -8,7 +8,7 @@ The host adapter currently supports macOS only.
 From the workspace root:
 
 ```sh
-cargo build -p brimp-cli -p lite-worker
+cargo build -p brimp-cli -p brimp-lite-worker
 ./target/debug/brimp serve --worker-path "$PWD/target/debug/lite-worker" --pool-size=2 --port=9222
 ```
 
@@ -34,7 +34,7 @@ session events, bounds frames to 64 MiB, and enforces command deadlines.
 ## Validation
 
 ```sh
-cargo build -p brimp-cli -p lite-worker
+cargo build -p brimp-cli -p brimp-lite-worker
 cargo test --workspace
 python -m pytest crates/controller/tests
 # Optional full WebKit acceptance:

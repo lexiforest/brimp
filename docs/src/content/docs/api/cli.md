@@ -6,7 +6,7 @@ description: Commands, flags, output contracts, and exit codes for brimp.
 CLI browser commands currently require macOS and a child worker. Set
 `BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
 or pass `--worker-path PATH`. Build both with
-`cargo build -p brimp-cli -p lite-worker`.
+`cargo build -p brimp-cli -p brimp-lite-worker`.
 
 
 The CLI writes primary results to standard output or the requested path and

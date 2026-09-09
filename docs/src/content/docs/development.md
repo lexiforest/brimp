@@ -6,9 +6,9 @@ description: Build, test, and work on Brimp and its documentation.
 ## Repository layout
 
 ```text
-crates/web-runtime/   Canonical browser automation runtime
-crates/web-bindings/  JavaScript and Web API bindings
-crates/browser-dom/   DOM, style, and layout integration
+crates/runtime/   Canonical browser automation runtime
+crates/web-apis/  JavaScript and Web API bindings
+crates/dom/   DOM, style, and layout integration
 crates/network/       curl-impersonate transport
 crates/cli/           brimp executable
 crates/worker/        lite-worker executable, CDP dispatch, and protocol tests
@@ -16,7 +16,7 @@ persona/              Versioned persona schema
 docs/                 This Starlight site
 ```
 
-`web-runtime` is the only browser implementation. Every external interface
+`brimp-runtime` is the only browser implementation. Every external interface
 delegates navigation, JavaScript, lifecycle, and screenshots to its owner-thread
 automation API.
 
@@ -37,7 +37,7 @@ export BRIMP_CURL_LIB_DIR=/path/to/curl-impersonate/lib
 From the repository root:
 
 ```sh
-cargo build -p brimp-cli -p lite-worker
+cargo build -p brimp-cli -p brimp-lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
@@ -47,7 +47,7 @@ The Rust CDP workflow exercises the same framed transport used by the worker exe
 For a quicker interface-specific cycle:
 
 ```sh
-cargo test -p brimp-cli -p lite-worker
+cargo test -p brimp-cli -p brimp-lite-worker
 ```
 
 ## Pre-commit formatting
@@ -109,6 +109,6 @@ repository `CNAME` file when deployment uses a custom Actions workflow.
 
 ## Architecture constraints
 
-Keep transport mechanics behind `network::ResourceLoader`; do not let DOM or
-JavaScript bindings depend directly on a concrete HTTP client. Keep lite CDP dispatch as an adapter over `web-runtime`. Remove obsolete paths when interfaces change rather than
+Keep transport mechanics behind `brimp_network::ResourceLoader`; do not let DOM or
+JavaScript bindings depend directly on a concrete HTTP client. Keep lite CDP dispatch as an adapter over `brimp-runtime`. Remove obsolete paths when interfaces change rather than
 maintaining compatibility layers.

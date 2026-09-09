@@ -127,14 +127,14 @@ The canonical owner-thread automation API is exposed through:
 - the `brimp` CLI for evaluation and screenshots;
 - the framed CDP worker used by the Brimp controller (`brimp serve`).
 
-The lite worker delegates browser operations to `web-runtime`.
+The lite worker delegates browser operations to `brimp-runtime`.
 The CLI and controller communicate with worker processes over framed CDP and
 never initialize the browser runtime themselves.
 
 ### Testing
 
 ```sh
-cargo build -p brimp-cli -p lite-worker
+cargo build -p brimp-cli -p brimp-lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```

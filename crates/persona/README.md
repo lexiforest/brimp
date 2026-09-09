@@ -1,11 +1,11 @@
-# persona
+# brimp-persona
 
-`persona` owns Brimp's versioned browser-persona configuration, validation,
+`brimp-persona` owns Brimp's versioned browser-persona configuration, validation,
 preset resolution, and deterministic seeds. It was migrated from Bimp's
 `bimp-persona` crate; obsolete `browser` and `startup_url` aliases were removed.
 
 ```rust
-use persona::PersonaConfig;
+use brimp_persona::PersonaConfig;
 
 let config = PersonaConfig::from_json(r#"{
   "schema_version": 1,
@@ -14,7 +14,7 @@ let config = PersonaConfig::from_json(r#"{
   "viewport": { "width": 1280, "height": 720, "device_scale_factor": 2 }
 }"#)?;
 let resolved = config.resolve();
-# Ok::<(), persona::PersonaConfigError>(())
+# Ok::<(), brimp_persona::PersonaConfigError>(())
 ```
 
 The authoritative JSON schema, complete example, and field-by-field runtime
