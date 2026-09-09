@@ -2,17 +2,17 @@ use std::collections::VecDeque;
 use std::io;
 use std::sync::Arc;
 
-use brimp_runtime::{AutomationBrowser, PageOptions};
+use crate::runtime::{Browser, PageOptions};
 use serde::Serialize;
 use serde_json::Value;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt, WriteHalf};
 use tokio::sync::mpsc;
 
-use crate::dispatch::ConnectionState;
+use crate::cdp::ConnectionState;
 use crate::interception::{InterceptionRegistry, PausedRequest};
-use crate::protocol::{ProtocolError, Request, Response};
+use brimp_protocol::{ProtocolError, Request, Response};
 
-pub const MAX_FRAME_SIZE: usize = 64 * 1024 * 1024;
+pub use brimp_protocol::MAX_FRAME_SIZE;
 
 #[derive(Debug, thiserror::Error)]
 pub enum FramedError {
@@ -32,15 +32,14 @@ pub async fn serve_framed<S>(stream: S, page_options: PageOptions) -> Result<(),
 where
     S: AsyncRead + AsyncWrite + Unpin + Send + 'static,
 {
-    let browser = Arc::new(
-        AutomationBrowser::new().map_err(|error| FramedError::Browser(error.to_string()))?,
-    );
+    let browser =
+        Arc::new(Browser::new().map_err(|error| FramedError::Browser(error.to_string()))?);
     serve_framed_with_browser(stream, browser, page_options).await
 }
 
 pub async fn serve_framed_with_browser<S>(
     stream: S,
-    browser: Arc<AutomationBrowser>,
+    browser: Arc<Browser>,
     page_options: PageOptions,
 ) -> Result<(), FramedError>
 where
@@ -70,7 +69,7 @@ where
         } else {
             tokio::select! {
                 completion = navigations.join_next(), if !navigations.is_empty() => {
-                    let (request, navigation): (Request, crate::dispatch::NavigationCompletion) = completion.unwrap().map_err(|e| FramedError::Browser(e.to_string()))?;
+                    let (request, navigation): (Request, crate::cdp::NavigationCompletion) = completion.unwrap().map_err(|e| FramedError::Browser(e.to_string()))?;
                     navigating_sessions.remove(&request.session_id);
                     let response = state.complete_navigation(&request, navigation);
                     write_frame(&mut writer, &response).await?;
@@ -179,7 +178,7 @@ where
 
 async fn write_events<W>(
     writer: &mut W,
-    events: Vec<crate::protocol::Event>,
+    events: Vec<brimp_protocol::Event>,
 ) -> Result<(), FramedError>
 where
     W: AsyncWrite + Unpin,
@@ -253,9 +252,9 @@ impl Drop for AbortReader {
 mod tests {
     use std::sync::Arc;
 
+    use crate::network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
+    use crate::runtime::Browser;
     use async_trait::async_trait;
-    use brimp_network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
-    use brimp_runtime::AutomationBrowser;
     use serde_json::json;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
@@ -273,9 +272,7 @@ mod tests {
     #[tokio::test]
     async fn framed_transport_runs_the_existing_cdp_dispatcher() {
         let (mut client, server) = tokio::io::duplex(4096);
-        let browser = Arc::new(AutomationBrowser::with_resource_loader(Arc::new(
-            DataLoader,
-        )));
+        let browser = Arc::new(Browser::with_resource_loader(Arc::new(DataLoader)));
         let task = tokio::spawn(serve_framed_with_browser(
             server,
             browser,
@@ -355,7 +352,7 @@ mod tests {
             Ok(ResourceResponse {
                 status: http::StatusCode::OK,
                 headers: {
-                    let mut headers = brimp_network::HeaderList::new();
+                    let mut headers = crate::network::HeaderList::new();
                     headers.append("content-type", http::HeaderValue::from_static("text/html"));
                     headers
                 },
@@ -369,9 +366,9 @@ mod tests {
     #[tokio::test]
     async fn concurrent_navigations_preserve_a_partially_read_next_frame() {
         let (mut client, server) = tokio::io::duplex(65536);
-        let browser = Arc::new(AutomationBrowser::with_resource_loader(Arc::new(
-            ConcurrentLoader(tokio::sync::Barrier::new(2)),
-        )));
+        let browser = Arc::new(Browser::with_resource_loader(Arc::new(ConcurrentLoader(
+            tokio::sync::Barrier::new(2),
+        ))));
         let task = tokio::spawn(serve_framed_with_browser(
             server,
             browser,

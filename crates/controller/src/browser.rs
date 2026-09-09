@@ -1,10 +1,11 @@
-//! Browser operations over an owned worker connection. This module has no native runtime dependency.
-use crate::WorkerConnection;
+//! Remote browser operations and lifecycle, independent of the message transport.
+use crate::connection::Connection;
+use crate::extraction_assets::{DEFUDDLE_BUNDLE, INSTALL_EXTRACTOR};
+#[cfg(target_os = "macos")]
+use crate::transport::{Transport, WebSocketTransport};
+use crate::{AutomationError as Error, CancellationToken};
 use base64::{Engine, engine::general_purpose::STANDARD};
-use brimp_worker_api::{
-    AutomationError as Error, CancellationToken, DEFUDDLE_BUNDLE, ExtractedDocument,
-    ExtractionOptions, INSTALL_EXTRACTOR, WorkerConfig,
-};
+use brimp_protocol::{ExtractedDocument, ExtractionOptions, WorkerConfig};
 use serde_json::{Value, json};
 use std::collections::HashSet;
 use std::sync::{
@@ -14,21 +15,140 @@ use std::sync::{
 use std::time::{Duration, Instant};
 
 pub struct Browser {
-    connection: Arc<WorkerConnection>,
+    connection: Arc<Connection>,
     lite: bool,
     version: Value,
     dom_ready: bool,
     context: String,
+    closed: AtomicBool,
+    #[cfg(target_os = "macos")]
+    worker: OwnedWorker,
+}
+/// A launched worker's protocol. Both modes own the child process.
+#[derive(Clone, Copy, Default)]
+pub enum WorkerProtocol {
+    #[default]
+    FramedCdp,
+    Cdp,
+}
+
+pub struct WorkerOptions {
+    pub path: String,
+    pub protocol: WorkerProtocol,
+    pub arguments: Vec<String>,
+}
+
+impl WorkerOptions {
+    /// Read exact launch arguments from a JSON array. No shell expansion occurs.
+    pub fn read_arguments(path: &std::path::Path) -> Result<Vec<String>, Error> {
+        let bytes = std::fs::read(path).map_err(|error| {
+            Error::InvalidInput(format!(
+                "cannot read worker arguments `{}`: {error}",
+                path.display()
+            ))
+        })?;
+        serde_json::from_slice(&bytes).map_err(|error| {
+            Error::InvalidInput(format!(
+                "worker arguments `{}` must be a JSON array of strings: {error}",
+                path.display()
+            ))
+        })
+    }
+}
+
+#[cfg(target_os = "macos")]
+enum OwnedWorker {
+    Framed(crate::platform::WorkerProcess),
+    Cdp(crate::worker::CdpWorker),
+}
+#[cfg(target_os = "macos")]
+impl OwnedWorker {
+    fn terminate(&self) {
+        match self {
+            Self::Framed(process) => process.terminate(),
+            Self::Cdp(worker) => worker.process.terminate(),
+        }
+    }
 }
 impl Browser {
+    /// Launch and own a browser worker, discovering its connection automatically.
     pub fn launch(
-        path: &str,
+        options: &WorkerOptions,
         config: WorkerConfig,
         timeout: Duration,
         cancellation: CancellationToken,
         dom_ready: bool,
     ) -> Result<Self, Error> {
-        let connection = Arc::new(WorkerConnection::spawn(path, timeout, cancellation)?);
+        if cancellation.is_cancelled() {
+            return Err(Error::Cancellation);
+        }
+        #[cfg(target_os = "macos")]
+        {
+            let started = Instant::now();
+            let remaining = || {
+                timeout
+                    .checked_sub(started.elapsed())
+                    .filter(|time| !time.is_zero())
+                    .ok_or(Error::Timeout(timeout))
+            };
+            let (worker, transport): (OwnedWorker, Arc<dyn Transport>) = match options.protocol {
+                WorkerProtocol::FramedCdp => {
+                    let arguments = if options.arguments.is_empty() {
+                        vec!["--headless".into()]
+                    } else {
+                        options.arguments.clone()
+                    };
+                    let (process, stream) =
+                        crate::platform::spawn_framed_worker(&options.path, &arguments).map_err(
+                            |error| {
+                                Error::Transport(format!(
+                                    "could not launch worker `{}`: {error}",
+                                    options.path
+                                ))
+                            },
+                        )?;
+                    let transport = crate::transport::SocketPair::from_stream(stream)
+                        .map_err(|error| Error::Transport(error.to_string()))?;
+                    (OwnedWorker::Framed(process), Arc::new(transport))
+                }
+                WorkerProtocol::Cdp => {
+                    let worker = crate::worker::CdpWorker::spawn(
+                        &options.path,
+                        &options.arguments,
+                        remaining()?,
+                        cancellation.flag(),
+                    )?;
+                    let transport = WebSocketTransport::connect(
+                        &worker.endpoint(),
+                        remaining()?,
+                        &cancellation,
+                    )
+                    .map_err(|error| match error.kind() {
+                        std::io::ErrorKind::Interrupted => Error::Cancellation,
+                        std::io::ErrorKind::TimedOut => Error::Timeout(timeout),
+                        _ => Error::Transport(error.to_string()),
+                    })?;
+                    (OwnedWorker::Cdp(worker), Arc::new(transport))
+                }
+            };
+            let connection = Arc::new(Connection::new(transport, remaining()?, cancellation));
+            Self::initialize(connection, worker, config, dom_ready)
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            let _ = (options, config, timeout, cancellation, dom_ready);
+            Err(Error::Unsupported(
+                "worker launch is supported only on macOS".into(),
+            ))
+        }
+    }
+    #[cfg(target_os = "macos")]
+    fn initialize(
+        connection: Arc<Connection>,
+        worker: OwnedWorker,
+        config: WorkerConfig,
+        dom_ready: bool,
+    ) -> Result<Self, Error> {
         let version = connection.command("Browser.getVersion", json!({}), None)?;
         if version["protocolVersion"] != "1.3" {
             return Err(Error::Unsupported("worker must speak CDP 1.3".into()));
@@ -44,7 +164,11 @@ impl Browser {
             return Err(Error::Unsupported("selected worker does not support custom headers, lite persona, proxy, trust-root, subsystem, or persistent-storage options".into()));
         }
         let context = field(
-            &connection.command("Target.createBrowserContext", json!({}), None)?,
+            &connection.command(
+                "Target.createBrowserContext",
+                json!({"disposeOnDetach": true}),
+                None,
+            )?,
             "browserContextId",
         )?;
         Ok(Self {
@@ -53,6 +177,9 @@ impl Browser {
             version,
             dom_ready,
             context,
+            closed: AtomicBool::new(false),
+            #[cfg(target_os = "macos")]
+            worker,
         })
     }
     pub fn doctor(&self) -> Result<Value, Error> {
@@ -92,7 +219,17 @@ impl Browser {
         Ok(page)
     }
     pub fn close(&self) {
+        if self.closed.swap(true, Ordering::AcqRel) {
+            return;
+        }
+        let _ = self.connection.command(
+            "Target.disposeBrowserContext",
+            json!({"browserContextId": self.context}),
+            None,
+        );
         self.connection.close();
+        #[cfg(target_os = "macos")]
+        self.worker.terminate();
     }
 }
 impl Drop for Browser {
@@ -100,7 +237,7 @@ impl Drop for Browser {
         self.close();
     }
 }
-pub struct Context(Arc<WorkerConnection>, String, bool);
+pub struct Context(Arc<Connection>, String, bool);
 impl Context {
     pub fn set_cookie(&self, url: &str, name: &str, value: &str) -> Result<(), Error> {
         if !self.2 {
@@ -122,7 +259,7 @@ pub struct NavigationResponse {
     pub content: Vec<u8>,
 }
 pub struct Page {
-    connection: Arc<WorkerConnection>,
+    connection: Arc<Connection>,
     target: String,
     session: String,
     lite: bool,
@@ -218,6 +355,14 @@ impl Page {
             .ok_or_else(|| Error::Unsupported("JavaScript result is not JSON serializable".into()))
     }
     pub fn extract(&self, options: ExtractionOptions) -> Result<ExtractedDocument, Error> {
+        if self.lite {
+            let params =
+                serde_json::to_value(options).map_err(|e| Error::Extraction(e.to_string()))?;
+            return serde_json::from_value(self.command("Brimp.extract", params)?)
+                .map_err(|e| Error::Extraction(e.to_string()));
+        }
+        // External WebKit workers expose extraction through standard evaluation.
+
         let mut options =
             serde_json::to_value(options).map_err(|e| Error::Extraction(e.to_string()))?;
         options["separateMarkdown"] = true.into();

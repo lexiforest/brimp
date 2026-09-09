@@ -8,7 +8,7 @@ description: CLI and CDP interfaces for Brimp.
 | [CLI](/api/cli/) | Commands launch child workers | Extraction, crawling, evaluation, screenshots, and diagnostics |
 | [CDP](/api/cdp/) | Controller-managed workers | Supported Playwright and raw-CDP automation |
 
-The lite worker delegates navigation, JavaScript, and rendering to `brimp-runtime`.
+The lite worker delegates navigation, JavaScript, and rendering to `runtime`.
 The CLI and controller communicate with workers across process boundaries.
 See [JavaScriptCore integration](/architecture/javascript-runtime/) for the
 internal Rust API and [Subsystem implementation](/architecture/subsystems/)

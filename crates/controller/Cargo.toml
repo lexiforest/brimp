@@ -4,12 +4,29 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 
+[[bin]]
+name = "brimp"
+path = "src/main.rs"
+
 [dependencies]
-brimp-worker-api = { path = "../worker-api" }
-base64 = "0.22"
-serde_json = "1"
+brimp-protocol = { path = "../protocol" }
+base64 = { version = "0.22" }
+glob = { version = "0.3" }
+http = { version = "1" }
+pico-args = { version = "0.5", features = ["eq-separator"] }
+robotstxt = { version = "0.3" }
+serde_json = { version = "1" }
+tempfile = { version = "3" }
+tungstenite = "0.30"
+url = { version = "2", features = ["serde"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 getrandom = "0.4"
 libc = "0.2"
-tungstenite = "0.30"
+httparse = "1"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_System_Pipes", "Win32_Foundation"] }
+
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Security", "Win32_Storage_FileSystem", "Win32_System_IO"] }

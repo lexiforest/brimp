@@ -9,7 +9,7 @@ Browser commands currently require macOS. After configuring the native SDKs
 as described in [Install](/install/), build the CLI and lite worker:
 
 ```sh
-cargo build --release -p brimp-cli -p brimp-lite-worker
+cargo build --release -p brimp-controller -p brimp-lite-worker
 export BRIMP_WORKER_PATH="$PWD/target/release/lite-worker"
 ./target/release/brimp doctor
 ```
@@ -17,13 +17,13 @@ export BRIMP_WORKER_PATH="$PWD/target/release/lite-worker"
 ## Extract content and evaluate JavaScript
 
 ```sh
-./target/release/brimp get https://example.com --output example.md
-./target/release/brimp get https://example.com --eval 'document.title'
-./target/release/brimp get https://example.com --output example.png --full-page
+./target/release/brimp fetch https://example.com --output example.md
+./target/release/brimp fetch https://example.com --eval 'document.title'
+./target/release/brimp fetch https://example.com --output example.png --full-page
 ```
 
 Each browser command launches a child worker. See the [CLI reference](/api/cli/)
-for crawl scheduling, output formats, personas, and optional subsystems.
+for crawl scheduling, output formats, personas, and persistent storage.
 
 ## Connect with Playwright
 

@@ -1,13 +1,12 @@
 ---
 title: CLI and CDP examples
-description: Shell automation and controller-managed Playwright and Puppeteer workflows.
+description: Connect Playwright or Puppeteer to a Brimp controller and find command-line guides.
 ---
 
 CLI browser commands currently require macOS and a child worker. Set
 `BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
 or pass `--worker-path PATH`. Build both with
-`cargo build -p brimp-cli -p brimp-lite-worker`.
-
+`cargo build -p brimp-controller -p brimp-lite-worker`.
 
 ## Check native dependencies
 
@@ -18,78 +17,22 @@ brimp doctor
 Successful output is JSON suitable for scripts:
 
 ```json
-{"javascriptCore":"ok","libcurlImpersonate":"ok","profile":"chrome150"}
+{"javascriptCore":"ok","libcurlImpersonate":"ok","worker":"lite-worker"}
 ```
 
-## Extract structured data
+## Retrieve and crawl pages
 
-`brimp get --eval` prints the evaluated JSON value to standard output and diagnostics
-to standard error:
+Use the [fetch guide](/examples/fetch/) to save HTML, extract Markdown and
+metadata, evaluate JavaScript, configure personas, and capture screenshots.
+Use the [crawl guide](/examples/crawl/) to follow links within a defined scope
+and save pages with a manifest.
 
-```sh
-brimp get https://example.com \
-  --eval '({title: document.title, links: document.querySelectorAll("a").length})'
-```
-
-Set an operation timeout when the 30-second default is not
-appropriate:
-
-```sh
-brimp get https://example.com \
-  --timeout 10s \
-  --eval 'document.body.textContent.trim()'
-```
-
-## Use a persona
-
-```sh
-brimp get https://example.com \
-  --persona persona/example.json \
-  --eval '({ua: navigator.userAgent, platform: navigator.platform})'
-```
-
-## Protect screenshot output
-
-```sh
-brimp get https://example.com \
-  --output example.png \
-  --full-page
-```
-
-Brimp refuses to replace an existing file unless `--overwrite` is explicit.
-
-## Connect Puppeteer
-
-Start the Brimp controller (`brimp serve`) with the worker:
+## Start the controller
 
 ```sh
 brimp serve \
   --worker-path /path/to/lite-worker \
   --headless --window-size=1280,720 --port=9222
-```
-
-Puppeteer connects to the controller's HTTP discovery endpoint:
-
-```js
-const fs = require('node:fs/promises')
-const puppeteer = require('puppeteer-core')
-
-const browser = await puppeteer.connect({
-  browserURL: 'http://127.0.0.1:9222',
-})
-
-const [page] = await browser.pages()
-await page.goto('https://example.com')
-
-const result = await page.evaluate(() => ({
-  title: document.title,
-  answer: 6 * 7,
-}))
-const png = await page.screenshot()
-
-console.log(result)
-await fs.writeFile('example.png', png)
-await browser.disconnect()
 ```
 
 ## Connect Playwright
@@ -114,6 +57,32 @@ try {
 
 Use `playwright-core`, not a Playwright browser download: Brimp is the browser
 process being controlled.
+
+## Connect Puppeteer
+
+Puppeteer connects to the controller's HTTP discovery endpoint:
+
+```js
+const fs = require('node:fs/promises')
+const puppeteer = require('puppeteer-core')
+
+const browser = await puppeteer.connect({
+  browserURL: 'http://127.0.0.1:9222',
+})
+
+const [page] = await browser.pages()
+await page.goto('https://example.com')
+
+const result = await page.evaluate(() => ({
+  title: document.title,
+  answer: 6 * 7,
+}))
+const png = await page.screenshot()
+
+console.log(result)
+await fs.writeFile('example.png', png)
+await browser.disconnect()
+```
 
 Do not expose the controller to a network unless you intend to give every
 reachable client control of the browser.

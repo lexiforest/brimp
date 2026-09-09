@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from urllib.parse import urlsplit
 
 from cdp_smoke_test import RawCDPClient, get_json
@@ -23,13 +24,16 @@ async def worker_identity(websocket_url, request_id=1):
 
 async def run_test(controller_path):
     fake_worker = os.path.join(os.path.dirname(__file__), "fake_cdp_worker.py")
+    arguments_file = tempfile.NamedTemporaryFile(mode="w", suffix=".json")
+    json.dump([fake_worker], arguments_file)
+    arguments_file.flush()
     process = subprocess.Popen(
         [
             controller_path,
             "serve",
-            "--worker-protocol=cdp",
+            "--cdp",
             f"--worker-path={sys.executable}",
-            f"--worker-arg={fake_worker}",
+            f"--worker-args={arguments_file.name}",
             "--pool-size=2",
             "--port=0",
             "--operation-timeout=5",
@@ -84,6 +88,7 @@ async def run_test(controller_path):
         direct.writer.close()
         await direct.writer.wait_closed()
     finally:
+        arguments_file.close()
         process.terminate()
         try:
             process.wait(timeout=10)

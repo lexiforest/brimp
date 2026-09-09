@@ -1,8 +1,19 @@
 //! Lite-specific configuration and diagnostics on the same CDP connection.
 use super::*;
-use brimp_worker_api::WorkerConfig;
+use brimp_protocol::WorkerConfig;
 
 impl ConnectionState {
+    pub(super) async fn worker_extract(&self, request: &Request) -> Result<Value, DispatchError> {
+        let options =
+            serde_json::from_value::<brimp_protocol::ExtractionOptions>(request.params.clone())
+                .map_err(|e| DispatchError::invalid_params(e.to_string()))?;
+        let page = self.page_for_session(self.session(request)?)?.clone();
+        let result = tokio::task::spawn_blocking(move || page.extract(options))
+            .await
+            .map_err(internal_join)??;
+        serde_json::to_value(result).map_err(internal_json)
+    }
+
     pub(super) fn configure_worker(&mut self, request: &Request) -> Result<Value, DispatchError> {
         if !self.pages.is_empty() || !self.browser_contexts.is_empty() || !self.sessions.is_empty()
         {
@@ -19,28 +30,30 @@ impl ConnectionState {
                 "storage quota requires a path and must be positive",
             ));
         }
-        let network = brimp_network::CurlConfig {
+        let network = crate::network::CurlConfig {
             proxy: config
                 .proxy
-                .map(brimp_network::Proxy::parse)
+                .map(crate::network::Proxy::parse)
                 .transpose()
                 .map_err(|e| AutomationError::InvalidInput(e.to_string()))?,
             ca_bundle: config.ca_bundle,
             ..Default::default()
         };
-        let persona = config.persona.unwrap_or_default();
-        let viewport = persona.resolve().viewport;
-        let browser = AutomationBrowser::with_persona_and_network_config(persona, network)?;
+        let persona = config
+            .persona
+            .map(serde_json::from_value::<crate::persona::PersonaConfig>)
+            .transpose()
+            .map_err(|e| DispatchError::invalid_params(e.to_string()))?
+            .unwrap_or_default();
+        let viewport = persona.viewport.clone();
+        let browser = Browser::with_persona_and_network_config(persona, network)?;
         let mut options = PageOptions::builder()
             .viewport(viewport.width, viewport.height)
             .device_pixel_ratio(viewport.device_scale_factor)
-            .request_headers(config.headers)
-            .worker_system(config.worker)
-            .streaming_networking(config.streaming_networking)
-            .canvas(config.canvas);
+            .request_headers(config.headers);
         if let Some(path) = config.storage_path {
             options = options.persistent_storage(
-                brimp_runtime::PersistentStorageOptions::new(path)
+                crate::runtime::PersistentStorageOptions::new(path)
                     .quota_bytes(config.storage_quota.unwrap_or(1_073_741_824)),
             );
         }

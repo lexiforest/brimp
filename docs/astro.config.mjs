@@ -26,6 +26,8 @@ export default defineConfig({
           label: 'Examples',
           items: [
             { label: 'Overview', slug: 'examples' },
+            { label: 'Fetch and extract', slug: 'examples/fetch' },
+            { label: 'Crawl a website', slug: 'examples/crawl' },
             { label: 'CLI and CDP', slug: 'examples/cli-and-cdp' },
           ],
         },

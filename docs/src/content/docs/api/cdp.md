@@ -200,3 +200,10 @@ The following list is exhaustive. An absent method returns CDP error `-32601`.
 - Messages and event queues are bounded.
 - The server has no authentication or authorization layer.
 - Browser contexts and the complete Chrome DevTools Protocol are not implemented.
+
+## Lite extraction
+
+`Brimp.extract` accepts the extraction options (`contentSelector`,
+`removeImages`, `language`, `debug`) for an attached page session and returns
+the extracted document, including Markdown. Persona JSON in `Brimp.configure`
+is validated and resolved by the worker.

@@ -42,7 +42,7 @@ jobs:
           --output .native/aarch64-apple-darwin
 
       - name: Build worker executable for CLI acceptance tests
-        run: cargo build --locked -p brimp-cli -p brimp-lite-worker
+        run: cargo build --locked -p brimp-controller -p brimp-lite-worker
 
       - name: Run workspace tests
         run: cargo test --locked --workspace
@@ -50,7 +50,7 @@ jobs:
       - name: Test controller acceptance
         run: |
           python -m pip install pytest
-          python -m pytest crates/controller/tests crates/cli/test_package_release.py scripts/test_prepare_native.py
+          python -m pytest crates/controller/tests crates/controller/test_package_release.py scripts/test_prepare_native.py
 
       - name: Run Clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
@@ -89,6 +89,8 @@ jobs:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
       - name: Build CLI without browser SDKs
-        run: cargo build --locked -p brimp-cli
+        run: cargo build --locked -p brimp-controller
       - name: Check CLI help
-        run: cargo run --locked -p brimp-cli -- --help
+        run: cargo run --locked -p brimp-controller -- --help
+      - name: Test message transports without browser SDKs
+        run: cargo test --locked -p brimp-controller --test connection

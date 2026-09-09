@@ -1,16 +1,5 @@
 [workspace]
-members = [
-    "crates/controller",
-    "crates/worker-api",
-    "crates/jsc",
-    "crates/dom",
-    "crates/web-apis",
-    "crates/runtime",
-    "crates/network",
-    "crates/cli",
-    "crates/persona",
-    "crates/worker",
-]
+members = ["crates/controller", "crates/protocol", "crates/worker"]
 resolver = "3"
 
 [workspace.package]

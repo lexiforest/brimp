@@ -7,7 +7,10 @@ import json
 import os
 import socket
 import struct
+import sys
 import threading
+import time
+from pathlib import Path
 from urllib.parse import urlsplit
 
 
@@ -49,7 +52,10 @@ def send_frame(connection, payload):
     connection.sendall(header + payload)
 
 
-def websocket(connection, request, path):
+def websocket(connection, request, path, options):
+    if options.mode == "handshake-hang":
+        time.sleep(60)
+        return
     headers = {}
     for line in request.split("\r\n")[1:]:
         if ":" in line:
@@ -74,19 +80,39 @@ def websocket(connection, request, path):
         if opcode != 1:
             continue
         message = json.loads(payload)
-        send_frame(
-            connection,
-            json.dumps(
-                {
-                    "id": message.get("id"),
-                    "result": {"workerPid": os.getpid(), "path": path},
-                },
-                separators=(",", ":"),
-            ).encode(),
-        )
+        if options.mode == "command-hang":
+            time.sleep(60)
+            return
+        if options.mode == "command-crash":
+            os._exit(7)
+        method = message.get("method")
+        if options.log:
+            with open(options.log, "a") as log:
+                log.write(json.dumps(message) + "\n")
+        result = {"workerPid": os.getpid(), "path": path}
+        if method == "Browser.getVersion":
+            result["protocolVersion"] = "0.0" if options.mode == "bad-version" else "1.3"
+        elif method == "Target.createBrowserContext":
+            result["browserContextId"] = "context"
+        elif method == "Target.createTarget":
+            result["targetId"] = "target"
+        elif method == "Target.attachToTarget":
+            result["sessionId"] = "session"
+        elif method == "Runtime.evaluate":
+            result["result"] = {"type": "string", "value": "Managed"}
+        elif method == "Page.navigate":
+            result["frameId"] = "main"
+        send_frame(connection, json.dumps({"id": message.get("id"), "result": result}).encode())
+        if method == "Page.navigate":
+            for event, params in [
+                ("Network.responseReceived", {"type": "Document", "requestId": "request", "response": {"url": message["params"]["url"], "status": 200}}),
+                ("Page.loadEventFired", {}),
+            ]:
+                send_frame(connection, json.dumps({"method": event, "params": params, "sessionId": message["sessionId"]}).encode())
 
 
-def handle(connection, address):
+
+def handle(connection, address, options):
     del address
     try:
         data = bytearray()
@@ -95,7 +121,10 @@ def handle(connection, address):
         request = data.decode("ascii")
         path = request.split(" ", 2)[1]
         if "upgrade: websocket" in request.lower():
-            websocket(connection, request, path)
+            websocket(connection, request, path, options)
+            return
+        if options.mode == "discovery-hang":
+            time.sleep(60)
             return
         host = connection.getsockname()
         if path == "/json/version":
@@ -121,6 +150,8 @@ def handle(connection, address):
             f"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {len(body)}\r\nConnection: close\r\n\r\n".encode()
             + body
         )
+        if options.mode == "discovery-keepalive":
+            time.sleep(60)
     except (EOFError, OSError, ValueError):
         pass
     finally:
@@ -130,11 +161,24 @@ def handle(connection, address):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--remote-debugging-port", type=int, required=True)
+    parser.add_argument("--user-data-dir", required=True)
+    parser.add_argument("--headless", action="store_true")
+    parser.add_argument("--record")
+    parser.add_argument("--log")
+    parser.add_argument("--mode", default="normal")
+    parser.add_argument("--label")
     options = parser.parse_args()
+    if options.record:
+        Path(options.record).write_text(json.dumps({"pid": os.getpid(), "profile": options.user_data_dir, "port": options.remote_debugging_port, "arguments": sys.argv[1:]}))
+    if options.mode == "startup-crash":
+        return
+    if options.mode == "startup-hang":
+        time.sleep(60)
+        return
     listener = socket.create_server(("127.0.0.1", options.remote_debugging_port))
     while True:
         connection, address = listener.accept()
-        threading.Thread(target=handle, args=(connection, address), daemon=True).start()
+        threading.Thread(target=handle, args=(connection, address, options), daemon=True).start()
 
 
 if __name__ == "__main__":

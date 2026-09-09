@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use base64::Engine;
-use brimp_network::{
+use crate::network::{
     HeaderList, NetworkError, ResourceInterception, ResourceInterceptionCallback,
     ResourceInterceptor, ResourceRequest, ResourceResponse,
 };
+use base64::Engine;
 use http::{HeaderName, HeaderValue, Method, StatusCode};
 use serde_json::{Map, Value, json};
 use tokio::sync::mpsc;
 
-use crate::protocol::{Event, Request, Response};
+use brimp_protocol::{Event, Request, Response};
 
 const MAX_FULFILL_BODY: usize = 32 * 1024 * 1024;
 const MAX_PENDING_REQUESTS: usize = 256;
@@ -474,7 +474,7 @@ impl InterceptionRegistry {
             headers,
             body,
             effective_url,
-            metadata: brimp_network::ResponseMetadata::default(),
+            metadata: crate::network::ResponseMetadata::default(),
         }));
         Ok(())
     }
@@ -492,7 +492,7 @@ impl InterceptionRegistry {
                 headers: response.1,
                 body: response.2,
                 effective_url: pending.request.url,
-                metadata: brimp_network::ResponseMetadata::default(),
+                metadata: crate::network::ResponseMetadata::default(),
             }));
             return Ok(());
         }
@@ -668,13 +668,13 @@ fn wildcard(pattern: &str, value: &str) -> bool {
 mod tests {
     use std::sync::mpsc as std_mpsc;
 
+    use crate::network::{ResourceInterception, ResourceRequest};
     use base64::Engine;
-    use brimp_network::{ResourceInterception, ResourceRequest};
     use http::Method;
     use serde_json::json;
 
     use super::{InterceptionMode, InterceptionRegistry, wildcard};
-    use crate::protocol::Request;
+    use brimp_protocol::Request;
 
     #[test]
     fn matches_cdp_url_patterns() {

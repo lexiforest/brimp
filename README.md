@@ -1,5 +1,7 @@
 # Brimp
 
+Brimp is a unified browser interface for agents. It has two builtin runtime
+
 Brimp is a lightweight, headless browser for agents. It combines JavaScriptCore with
 Blitz's DOM implementation and curl-impersonate as the network stack.
 
@@ -52,15 +54,30 @@ Notes:
 
 ## Install
 
-Tagged GitHub Releases include self-contained `brimp` archives and SHA-256
-checksums for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and Windows x86-64.
+For humans:
+
+```
+curl https://brimp.ai/install.sh | bash
+```
+
+For agents:
+
+Paste this prompt:
+
+```plain
+Install this tool: https://github.com/lexiforest/brimp
+```
+
+You can also download the prebuilt binary tarballs from github release page.
 
 ## Usage
 
 ### CLI
 
-The CLI launches a child worker for browser operations (currently macOS only).
-Select the lite worker or a WebKit worker explicitly:
+The CLI launches and manages its browser workers. Select a lite or
+WebKit worker with `--worker-path` or `BRIMP_WORKER_PATH`; use
+`--cdp` to launch a WebSocket CDP worker such as Chrome. The
+controller discovers and connects to its child automatically. For a lite worker:
 
 ```sh
 export BRIMP_WORKER_PATH=/path/to/lite-worker
@@ -70,10 +87,10 @@ Check the worker, extract a live page, evaluate JavaScript, or capture a PNG:
 
 ```sh
 brimp doctor
-brimp get https://example.com --output example.md
-brimp get https://example.com --eval 'document.title'
-brimp get https://example.com --output example.png --full-page
-brimp get https://example.com --persona persona/example.json --eval 'navigator.userAgent'
+brimp fetch https://example.com --output example.md
+brimp fetch https://example.com --eval 'document.title'
+brimp fetch https://example.com --output example.png --full-page
+brimp fetch https://example.com --persona crates/worker/src/persona/example.json --eval 'navigator.userAgent'
 ```
 
 ### With CDP clients
@@ -108,7 +125,8 @@ Chrome DevTools Protocol. Puppeteer is also supported through
 
 Source builds dynamically link JavaScriptCore and curl-impersonate. Set
 `BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their platform-specific library
-directories. See `NATIVE.md` for the expected layouts.
+directories. See the [native prerequisites](docs/src/content/docs/development.md#native-prerequisites)
+for SDK preparation and library layouts.
 
 ## Development
 
@@ -127,17 +145,24 @@ The canonical owner-thread automation API is exposed through:
 - the `brimp` CLI for evaluation and screenshots;
 - the framed CDP worker used by the Brimp controller (`brimp serve`).
 
-The lite worker delegates browser operations to `brimp-runtime`.
+The lite worker delegates browser operations to `runtime`.
 The CLI and controller communicate with worker processes over framed CDP and
 never initialize the browser runtime themselves.
+
+### CI
+
+The project is tested and built automatically on GitHub Actions. All PR must pass
+the automatic tests.
 
 ### Testing
 
 ```sh
-cargo build -p brimp-cli -p brimp-lite-worker
+cargo build -p brimp-controller -p brimp-lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Source builds use the configurable native discovery paths described in `NATIVE.md`;
-see the CLI and worker `SUPPORT.md` files for their exact tested surfaces.
+Source builds use the configurable native discovery paths described in the
+[development guide](docs/src/content/docs/development.md#native-prerequisites);
+see the [controller README](crates/controller/README.md#tested-command-support) and
+[worker support matrix](crates/worker/SUPPORT.md) for their exact tested surfaces.

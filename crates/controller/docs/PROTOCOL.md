@@ -27,9 +27,26 @@ causes the controller to kill and replace the entire worker process group.
 Frames are limited to 64 MiB so encoded screenshots remain bounded. Standard
 output and standard error are reserved for diagnostics and cannot corrupt IPC.
 
+## Managed browser connections
+
+All controller browser sessions own their worker process. Direct commands use
+`--worker-path PATH`, optional `--cdp`, `--worker-args PATH`, and repeatable
+`--worker-arg ARG`. Argument files contain a JSON array of strings, passed before
+inline arguments. With `--cdp`, the controller launches a headless child with a
+private temporary profile and loopback port, discovers `/json/version`, and
+connects to its browser WebSocket automatically. Existing WebSocket servers
+are not accepted as browser inputs.
+
+The browser API and server pool share startup and discovery in `worker.rs`.
+Startup, discovery, and handshaking count toward the operation deadline.
+Cancellation, failure, and completion terminate and reap the owned process group;
+normal closure also disposes the session's browser context. Temporary profiles
+are removed after process cleanup. The framed transport also has a Windows
+named-pipe adapter, but Windows worker launch is not implemented.
+
 ## Managed CDP proxy workers
 
-With `--worker-protocol=cdp`, the child process already speaks CDP and the
+With `--cdp`, the child process already speaks CDP and the
 private framed-CDP protocol is not used. The Rust proxy assigns every
 child a unique loopback port, waits for `/json/version`, and exposes rewritten
 discovery URLs from the controller listener. Worker arguments may contain

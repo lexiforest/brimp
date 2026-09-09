@@ -55,11 +55,11 @@ jobs:
           test "$GITHUB_REF_NAME" = "v$version"
 
       - name: Build CLI
-        run: cargo build --locked --release -p brimp-cli -p brimp-lite-worker --target "${{ matrix.target }}"
+        run: cargo build --locked --release -p brimp-controller -p brimp-lite-worker --target "${{ matrix.target }}"
 
       - name: Package and validate CLI
         run: >-
-          python crates/cli/package_release.py
+          python crates/controller/package_release.py
           --target "${{ matrix.target }}"
           --output dist
           --forbid-path "$GITHUB_WORKSPACE"
@@ -116,11 +116,11 @@ jobs:
           test "$GITHUB_REF_NAME" = "v$version"
 
       - name: Build CLI
-        run: cargo build --locked --release -p brimp-cli -p brimp-lite-worker --target "${{ matrix.target }}"
+        run: cargo build --locked --release -p brimp-controller -p brimp-lite-worker --target "${{ matrix.target }}"
 
       - name: Package and validate CLI
         run: >-
-          python crates/cli/package_release.py
+          python crates/controller/package_release.py
           --target "${{ matrix.target }}"
           --output dist
           --forbid-path "${{ github.workspace }}"

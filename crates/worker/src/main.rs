@@ -39,7 +39,7 @@ async fn main() {
         .unwrap_or_else(|error| fail(&format!("could not configure controller socket: {error}")));
     let stream = tokio::net::UnixStream::from_std(stream)
         .unwrap_or_else(|error| fail(&format!("could not open controller socket: {error}")));
-    let mut options = brimp_runtime::PageOptions::builder();
+    let mut options = brimp_lite_worker::runtime::PageOptions::builder();
     if let Some((width, height)) = window_size {
         options = options.viewport(width, height);
     }

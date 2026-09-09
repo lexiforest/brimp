@@ -3,6 +3,7 @@ name = "brimp-lite-worker"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+links = "JavaScriptCore"
 build = "build.rs"
 
 [[bin]]
@@ -10,17 +11,147 @@ name = "lite-worker"
 path = "src/main.rs"
 
 [dependencies]
-brimp-worker-api = { path = "../worker-api" }
-base64 = "0.22"
-http = "1"
-brimp-network = { path = "../network" }
+brimp-protocol = { path = "../protocol" }
+anyrender = { version = "=0.11.1" }
+anyrender_vello_cpu = { version = "=0.14.0", default-features = false }
+async-trait = { version = "0.1" }
+base64 = { version = "0.22" }
+blitz-dom = { version = "=0.3.0-beta.1", features = ["complex-scripts"] }
+blitz-html = { version = "=0.3.0-beta.1" }
+blitz-paint = { version = "=0.3.0-beta.1", default-features = false }
+blitz-traits = { version = "=0.3.0-beta.1" }
+cookie_store = { version = "0.22.1" }
+data-url = { version = "0.3" }
+encoding_rs = { version = "0.8.35" }
+getrandom = { version = "0.4" }
+glifo = { version = "=0.1.1", features = ["png"] }
+html5ever = { version = "=0.39.0" }
+http = { version = "1" }
+image = { version = "=0.25.6", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "ico", "tiff"] }
+libc = { version = "0.2" }
+parley = { version = "=0.10.0" }
+png = { version = "=0.18.1" }
+roxmltree = { version = "=0.21.1" }
+rustybuzz = { version = "=0.20.1" }
+selectors = { version = "0.39.0" }
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-thiserror = "2"
-url = "2"
-tokio = { version = "1", features = ["io-util", "macros", "net", "rt-multi-thread", "sync", "time"] }
-brimp-runtime = { path = "../runtime" }
+serde_json = { version = "1" }
+skia-safe = { version = "=0.99.0", default-features = false, features = ["binary-cache", "jpeg", "webp-encode"] }
+style = { package = "stylo", version = "=0.19.0" }
+stylo_traits = { version = "=0.19.0" }
+swc_common = { version = "26" }
+swc_ecma_ast = { version = "29" }
+swc_ecma_codegen = { version = "32" }
+swc_ecma_parser = { version = "45" }
+swc_ecma_transforms_base = { version = "49", features = ["inline-helpers"] }
+swc_ecma_transforms_module = { version = "55" }
+swc_ecma_visit = { version = "29" }
+thiserror = { version = "2" }
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"] }
+unicode-bidi = { version = "=0.3.18" }
+unicode-segmentation = { version = "=1.13.3" }
+url = { version = "2" }
+xml5ever = { version = "=0.39.0" }
 
 [dev-dependencies]
-async-trait = "0.1"
-libc = "0.2"
+tungstenite = { version = "0.30" }
+
+[[test]]
+name = "runtime_page"
+path = "tests/runtime/page.rs"
+
+[[test]]
+name = "runtime_mvp1"
+path = "tests/runtime/mvp1.rs"
+
+[[test]]
+name = "runtime_persona"
+path = "tests/runtime/persona.rs"
+
+[[test]]
+name = "runtime_events"
+path = "tests/runtime/events.rs"
+
+[[test]]
+name = "runtime_automation"
+path = "tests/runtime/automation.rs"
+
+[[test]]
+name = "runtime_dom_bindings"
+path = "tests/runtime/dom_bindings.rs"
+
+[[test]]
+name = "runtime_subsystem_options"
+path = "tests/runtime/subsystem_options.rs"
+
+[[test]]
+name = "runtime_fetch"
+path = "tests/runtime/fetch.rs"
+
+[[test]]
+name = "runtime_script_loading"
+path = "tests/runtime/script_loading.rs"
+
+[[test]]
+name = "runtime_screenshot"
+path = "tests/runtime/screenshot.rs"
+
+[[test]]
+name = "runtime_navigation"
+path = "tests/runtime/navigation.rs"
+
+[[test]]
+name = "runtime_image_resources"
+path = "tests/runtime/image_resources.rs"
+
+[[test]]
+name = "runtime_timers"
+path = "tests/runtime/timers.rs"
+
+[[test]]
+name = "runtime_layout_bindings"
+path = "tests/runtime/layout_bindings.rs"
+
+[[test]]
+name = "runtime_mvp2"
+path = "tests/runtime/mvp2.rs"
+
+[[test]]
+name = "runtime_extraction"
+path = "tests/runtime/extraction.rs"
+
+[[test]]
+name = "runtime_viewport_bindings"
+path = "tests/runtime/viewport_bindings.rs"
+
+[[test]]
+name = "web_apis_wrapper_identity"
+path = "tests/web-apis/wrapper_identity.rs"
+
+[[test]]
+name = "dom_serialization"
+path = "tests/dom/serialization.rs"
+
+[[test]]
+name = "dom_parse"
+path = "tests/dom/parse.rs"
+
+[[example]]
+name = "dom_parse_html"
+path = "examples/dom/parse_html.rs"
+
+[[test]]
+name = "network_resource_loader"
+path = "tests/network/resource_loader.rs"
+
+[[test]]
+name = "jsc_runtime"
+path = "tests/jsc/runtime.rs"
+
+[[example]]
+name = "jsc_eval_js"
+path = "examples/jsc/eval_js.rs"
+
+[[example]]
+name = "jsc_console"
+path = "examples/jsc/console.rs"

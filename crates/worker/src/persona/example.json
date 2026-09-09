@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "network_profile": "chrome150",
+  "base_headers": {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "accept_language": "en-US,en;q=0.9",
+    "accept_encoding": "gzip, deflate, br, zstd",
+    "sec_ch_ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\", \"Google Chrome\";v=\"150\"",
+    "sec_ch_ua_mobile": "?0",
+    "sec_ch_ua_platform": "\"macOS\"",
+    "sec_ch_ua_full_version": "\"150.0.0.0\"",
+    "sec_ch_ua_full_version_list": "\"Not;A=Brand\";v=\"8.0.0.0\", \"Chromium\";v=\"150.0.0.0\", \"Google Chrome\";v=\"150.0.0.0\"",
+    "sec_ch_ua_arch": "\"x86\"",
+    "sec_ch_ua_bitness": "\"64\"",
+    "sec_ch_ua_platform_version": "\"15.7.0\"",
+    "sec_ch_ua_model": "\"\""
+  },
+  "viewport": {
+    "width": 1710,
+    "height": 896,
+    "device_scale_factor": 2
+  },
+  "screen": {
+    "width": 1710,
+    "height": 1107,
+    "avail_width": 1710,
+    "avail_height": 1017,
+    "avail_left": 0,
+    "avail_top": 25,
+    "left": 0,
+    "top": 0,
+    "color_depth": 30,
+    "pixel_depth": 30,
+    "is_extended": false,
+    "orientation_type": "landscape-primary",
+    "orientation_angle": 0
+  },
+  "window": {
+    "outer_width": 1710,
+    "outer_height": 1017,
+    "screen_x": 0,
+    "screen_y": 0
+  },
+  "navigator": {
+    "platform": "MacIntel",
+    "hardware_concurrency": 8,
+    "device_memory_gb": 8,
+    "max_touch_points": 0,
+    "connection_type": "wifi",
+    "connection_rtt_ms": 100,
+    "connection_downlink_mbps": "10",
+    "connection_effective_type": "4g",
+    "connection_save_data": false,
+    "notification_permission": "default",
+    "do_not_track": "",
+    "expose_global_privacy_control": false,
+    "global_privacy_control": false,
+    "permissions_enabled": true,
+    "bluetooth_enabled": true,
+    "bluetooth_available": true,
+    "media_devices_enabled": true,
+    "offscreen_canvas_enabled": true,
+    "vendor": "Google Inc.",
+    "product_sub": "20030107",
+    "pdf_viewer_enabled": true
+  },
+  "canvas": {
+    "noise_enabled": true,
+    "noise_amplitude": 1
+  },
+  "locale": "en-US",
+  "languages": ["en-US", "en"],
+  "timezone": "America/Los_Angeles"
+}

@@ -2,8 +2,10 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use base64::Engine;
-use brimp_network::{HeaderList, NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
-use brimp_runtime::{AutomationBrowser, PageOptions};
+use brimp_lite_worker::network::{
+    HeaderList, NetworkError, ResourceLoader, ResourceRequest, ResourceResponse,
+};
+use brimp_lite_worker::runtime::{Browser, PageOptions};
 use http::{HeaderValue, StatusCode};
 use serde_json::{Value, json};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
@@ -42,20 +44,18 @@ impl ResourceLoader for FixtureLoader {
             body: b"<!doctype html><title>CDP</title><main style='height:1200px'>Hello CDP</main>"
                 .to_vec(),
             effective_url: request.url,
-            metadata: brimp_network::ResponseMetadata::default(),
+            metadata: brimp_lite_worker::network::ResponseMetadata::default(),
         })
     }
 }
 
-fn browser() -> Arc<AutomationBrowser> {
-    Arc::new(AutomationBrowser::with_resource_loader(Arc::new(
-        FixtureLoader,
-    )))
+fn browser() -> Arc<Browser> {
+    Arc::new(Browser::with_resource_loader(Arc::new(FixtureLoader)))
 }
 
 type CdpStream = tokio::io::DuplexStream;
 
-fn connect(browser: Arc<AutomationBrowser>) -> (CdpStream, JoinHandle<()>) {
+fn connect(browser: Arc<Browser>) -> (CdpStream, JoinHandle<()>) {
     let (client, worker) = tokio::io::duplex(1024 * 1024);
     let task = tokio::spawn(async move {
         serve_framed_with_browser(worker, browser, PageOptions::default())

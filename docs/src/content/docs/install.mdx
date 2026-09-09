@@ -6,7 +6,7 @@ description: Install or build the Brimp CLI and worker.
 CLI browser commands currently require macOS and a child worker. Set
 `BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
 or pass `--worker-path PATH`. Build both with
-`cargo build -p brimp-cli -p brimp-lite-worker`.
+`cargo build -p brimp-controller -p brimp-lite-worker`.
 
 
 ## CLI and CDP worker
@@ -36,7 +36,7 @@ The CLI and the controller-managed CDP worker can also be built from source:
 ```sh
 git clone https://github.com/lexiforest/brimp.git
 cd brimp
-cargo build --release -p brimp-cli
+cargo build --release -p brimp-controller
 cargo build --release -p brimp-lite-worker
 ./target/release/brimp doctor --worker-path ./target/release/lite-worker
 ```
@@ -47,7 +47,7 @@ build at their library directories before invoking Cargo:
 ```sh
 export BRIMP_JSC_LIB_DIR=/path/to/javascriptcore/lib
 export BRIMP_CURL_LIB_DIR=/path/to/curl-impersonate/lib
-cargo build --release -p brimp-cli
+cargo build --release -p brimp-controller
 ```
 
 Expected library layouts vary by platform:

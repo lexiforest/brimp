@@ -1,7 +1,7 @@
 # Linux host adapter
 
-The future Linux process, socket, memory-accounting, and executable entry
-adapter belongs in this directory. It will compile the controller in
-`src/controller.rs`; WebKitGTK-specific browser integration remains in its worker.
-
-WPE should reuse this host adapter when its OS primitives are the same.
+The message transports compile on Linux, including socketpair and WebSocket.
+Browser sessions require owned worker processes; Linux worker launch and
+supervision are not implemented. Their process, memory-accounting, and executable
+entry adapter belongs here. WebKitGTK-specific browser integration remains in
+its worker. WPE can reuse the same OS adapter.

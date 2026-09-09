@@ -326,116 +326,57 @@ dependencies = [
 ]
 
 [[package]]
-name = "brimp-cli"
-version = "0.1.1"
-dependencies = [
- "brimp-controller",
- "brimp-persona",
- "brimp-worker-api",
- "glob",
- "http",
- "pico-args",
- "robotstxt",
- "serde_json",
- "tempfile",
- "url",
-]
-
-[[package]]
 name = "brimp-controller"
 version = "0.1.1"
 dependencies = [
  "base64",
- "brimp-worker-api",
+ "brimp-protocol",
  "getrandom",
+ "glob",
+ "http",
+ "httparse",
  "libc",
+ "pico-args",
+ "robotstxt",
  "serde_json",
+ "tempfile",
  "tungstenite",
-]
-
-[[package]]
-name = "brimp-dom"
-version = "0.1.1"
-dependencies = [
- "blitz-dom",
- "blitz-html",
- "blitz-traits",
- "html5ever",
- "image",
- "parley",
- "roxmltree 0.21.1",
- "stylo",
- "stylo_traits",
- "xml5ever",
-]
-
-[[package]]
-name = "brimp-jsc"
-version = "0.1.1"
-dependencies = [
- "libc",
+ "url",
+ "windows-sys",
 ]
 
 [[package]]
 name = "brimp-lite-worker"
 version = "0.1.1"
 dependencies = [
- "async-trait",
- "base64",
- "brimp-network",
- "brimp-runtime",
- "brimp-worker-api",
- "http",
- "libc",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "brimp-network"
-version = "0.1.1"
-dependencies = [
- "async-trait",
- "data-url",
- "http",
- "thiserror",
- "tokio",
- "tungstenite",
- "url",
-]
-
-[[package]]
-name = "brimp-persona"
-version = "0.1.1"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "brimp-runtime"
-version = "0.1.1"
-dependencies = [
  "anyrender",
  "anyrender_vello_cpu",
  "async-trait",
+ "base64",
  "blitz-dom",
+ "blitz-html",
  "blitz-paint",
  "blitz-traits",
- "brimp-dom",
- "brimp-jsc",
- "brimp-network",
- "brimp-persona",
- "brimp-web-apis",
- "brimp-worker-api",
+ "brimp-protocol",
+ "cookie_store",
+ "data-url",
+ "encoding_rs",
+ "getrandom",
  "glifo",
+ "html5ever",
  "http",
+ "image",
+ "libc",
+ "parley",
  "png 0.18.1",
+ "roxmltree 0.21.1",
+ "rustybuzz",
+ "selectors",
  "serde",
  "serde_json",
+ "skia-safe",
+ "stylo",
+ "stylo_traits",
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_codegen",
@@ -446,37 +387,16 @@ dependencies = [
  "thiserror",
  "tokio",
  "tungstenite",
- "url",
-]
-
-[[package]]
-name = "brimp-web-apis"
-version = "0.1.1"
-dependencies = [
- "base64",
- "blitz-dom",
- "brimp-dom",
- "brimp-jsc",
- "brimp-network",
- "cookie_store",
- "encoding_rs",
- "getrandom",
- "http",
- "rustybuzz",
- "selectors",
- "serde_json",
- "skia-safe",
- "stylo",
  "unicode-bidi",
  "unicode-segmentation",
  "url",
+ "xml5ever",
 ]
 
 [[package]]
-name = "brimp-worker-api"
+name = "brimp-protocol"
 version = "0.1.1"
 dependencies = [
- "brimp-persona",
  "serde",
  "serde_json",
  "thiserror",
