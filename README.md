@@ -161,8 +161,3 @@ cargo build -p brimp-controller -p brimp-lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
-
-Source builds use the configurable native discovery paths described in the
-[development guide](docs/src/content/docs/development.md#native-prerequisites);
-see the [controller README](crates/controller/README.md#tested-command-support) and
-[worker support matrix](crates/worker/SUPPORT.md) for their exact tested surfaces.

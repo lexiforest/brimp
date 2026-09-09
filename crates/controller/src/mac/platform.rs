@@ -65,6 +65,25 @@ pub fn spawn_framed_worker(
         Path::new(executable).to_owned()
     };
     let mut command = Command::new(resolved);
+    if executable.ends_with(".app") {
+        let bundle = Path::new(executable).canonicalize()?;
+        let products = bundle.parent().ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "worker app has no parent directory",
+            )
+        })?;
+        // WebKit apps are built beside their frameworks. Both the host and its
+        // XPC services must load that build instead of the system WebKit.
+        for variable in [
+            "DYLD_FRAMEWORK_PATH",
+            "DYLD_LIBRARY_PATH",
+            "__XPC_DYLD_FRAMEWORK_PATH",
+            "__XPC_DYLD_LIBRARY_PATH",
+        ] {
+            command.env(variable, products);
+        }
+    }
     command
         .args(arguments)
         .arg(format!("--controller-socket-fd={descriptor}"))
