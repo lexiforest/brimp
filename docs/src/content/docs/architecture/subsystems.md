@@ -3,8 +3,7 @@ title: Subsystem implementation
 description: Backends, ownership, data flow, feature gates, and deliberate boundaries.
 ---
 
-Brimp has one page implementation in `web-runtime`. Language bindings, the CLI,
-and CDP are adapters over that implementation. Browser subsystems share the
+Brimp has one page implementation in `web-runtime`. Lite CDP dispatch calls that implementation; the CLI communicates with workers. Browser subsystems share the
 page's canonical DOM, task queue, resource loader, persona, and owner-thread
 rules rather than maintaining parallel state.
 
@@ -24,7 +23,7 @@ rules rather than maintaining parallel state.
 | Document screenshots | Blitz paint through Vello CPU, encoded as PNG | Always present |
 | Persona | One resolved identity shared by transport and Web APIs | Always present |
 
-All optional gates default to off and are page-scoped. The CLI, Python, Node,
+All optional gates default to off and are page-scoped. The CLI,
 CDP worker configuration, and Rust `PageOptions` expose the same independent
 choices.
 

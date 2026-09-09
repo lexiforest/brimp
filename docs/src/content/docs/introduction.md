@@ -24,31 +24,17 @@ pages need:
 - curl-impersonate transport profiles for HTTP/TLS behavior; and
 - coherent, configurable browser personas.
 
-## One runtime, four interfaces
+## CLI and CDP
 
-The CLI, Python binding, Node binding, and controller-managed CDP worker all
-delegate to the same `web-runtime` automation boundary. They do not contain
-separate browser implementations.
-
-```text
-CLI          Python          Node          CDP / Playwright / Puppeteer
- │              │              │                  │
- └──────────────┴──────────────┴──────────────────┘
-                         │
-                  Brimp web runtime
-                         │
-      JavaScriptCore + Blitz DOM/layout + screenshots
-                         │
-                  curl-impersonate
-```
-
-Python and Node run in process. The CDP worker exchanges framed JSON with the
-Brimp controller (`brimp serve`), which owns the remote endpoint.
+The CLI launches a worker for browser operations. `brimp serve` exposes a CDP
+endpoint and manages workers for connected clients. The lite worker uses
+`web-runtime`; a separately built WebKit worker is another engine option.
+Neither the CLI nor controller initializes the lite engine in its own process.
 
 ## When to use Brimp
 
 Brimp is a good fit when you need JavaScript-rendered HTML, structured
-evaluation, screenshots, persistent cookies, or a small Puppeteer-compatible
+evaluation, screenshots, persistent cookies, or a supported Playwright
 workflow without launching Chromium.
 
 Brimp is not a complete replacement for every browser automation workload. It

@@ -44,7 +44,7 @@ jobs:
 
       - name: Download pinned native SDKs
         run: >-
-          python bindings/python/prepare_native.py
+          python scripts/prepare_native.py
           --target "${{ matrix.target }}"
           --output ".native/${{ matrix.target }}"
 
@@ -104,7 +104,7 @@ jobs:
 
       - name: Download pinned native SDKs
         run: >-
-          python bindings/python/prepare_native.py
+          python scripts/prepare_native.py
           --target "${{ matrix.target }}"
           --output ".native/${{ matrix.target }}"
 

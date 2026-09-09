@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   test:
-    name: Source and bindings
+    name: Source and worker
     runs-on: macos-26
     timeout-minutes: 120
     env:
@@ -40,15 +40,9 @@ jobs:
 
       - name: Download pinned native SDKs
         run: >-
-          python bindings/python/prepare_native.py
+          python scripts/prepare_native.py
           --target aarch64-apple-darwin
           --output .native/aarch64-apple-darwin
-
-      - name: Provision the Node package runtime library
-        run: |
-          sudo mkdir -p /usr/local/lib
-          sudo cp "$BRIMP_CURL_LIB_DIR/libcurl-impersonate.dylib" \
-            /usr/local/lib/libcurl-impersonate.4.8.0.dylib
 
       - name: Build worker executable for CLI acceptance tests
         run: cargo build --locked -p brimp-cli -p lite-worker
@@ -59,13 +53,10 @@ jobs:
       - name: Test controller acceptance
         run: |
           python -m pip install pytest
-          python -m pytest crates/controller/tests crates/cli/test_package_release.py bindings/python/test_packaging.py
+          python -m pytest crates/controller/tests crates/cli/test_package_release.py scripts/test_prepare_native.py
 
       - name: Run Clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
-
-      - name: Test packaged Python and Node bindings
-        run: ./bindings/package-test.sh
 
   docs:
     name: Documentation

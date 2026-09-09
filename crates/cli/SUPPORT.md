@@ -21,7 +21,7 @@ bounds.
 All browser commands require `--worker-path` or `BRIMP_WORKER_PATH` and currently
 run only on macOS. `get`, `crawl`, and `doctor` launch a framed-CDP child;
 `serve` owns the public HTTP/WebSocket endpoint and worker pool. The CLI binary
-has no native browser dependency. Python and Node bindings remain in-process.
+has no native browser dependency.
 
 Lite workers retain the command features above. The current WebKit worker
 supports rendered output, evaluation, extraction, and screenshots; raw bodies,

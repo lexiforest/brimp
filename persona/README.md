@@ -15,8 +15,6 @@ not alter browsing behavior.
 
 - Rust: `PersonaConfig::from_json`, `from_json_file`, or `load_default_json`.
 - CLI: pass `--persona PATH` to `brimp get` or `brimp crawl`.
-- Python: pass the JSON text as `persona_json=`.
-- Node: pass the JSON text as `createSession({ personaJson })`.
 - `BRIMP_PERSONA_JSON` selects the opt-in default JSON path used by
   `load_default_json`; creating a browser does not implicitly read a file.
 
@@ -45,7 +43,7 @@ migrated.
 
 Automation exposure is not a persona option. `navigator.webdriver` is always
 present with the value `false`, regardless of agent control, CDP attachment,
-language bindings, headless execution, request interception, or trusted input.
+headless execution, request interception, or trusted input.
 
 ## Emulated structured APIs
 

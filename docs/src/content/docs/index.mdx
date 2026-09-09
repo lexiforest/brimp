@@ -13,21 +13,11 @@ hero:
       variant: minimal
 ---
 
-Brimp is a super lightweight browser for agents and crawlers. 
+Brimp combines JavaScriptCore, Blitz DOM/layout, and curl-impersonate into a
+headless browser worker.
 
-combines JavaScriptCore, Blitz's DOM and layout engine, and
-curl-impersonate into one lightweight browser runtime. Use it from Python,
-Node.js, the command line, or a bounded Chrome DevTools Protocol server.
+- **CLI** for extraction, crawling, JavaScript evaluation, and screenshots.
+- **CDP** for supported Playwright and raw-protocol automation.
 
-## Pick an interface
-
-- **Python** for synchronous, Requests-style navigation and extraction.
-- **Node.js** for asynchronous, Requests-style navigation and extraction.
-- **CLI** for shell scripts, JavaScript evaluation, and screenshots.
-- **CDP** when an existing Playwright or Puppeteer workflow fits Brimp's supported protocol subset.
-
-Let's have a [Quick Start](/quick-start).
-
-Aleady familiar with requests/curl_cffi/Playwright/Puppeteer? See [migration](/migration).
-
-For development, visit [development].
+Start with the [quick start](/quick-start/) or read the
+[development guide](/development/).

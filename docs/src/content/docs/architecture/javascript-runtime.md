@@ -45,7 +45,7 @@ are evaluated only when their page option is enabled.
 
 A JavaScriptCore context is owner-thread-bound and is neither `Send` nor `Sync`.
 The low-level `Page` must remain on its creating thread. `AutomationPage`
-provides the thread-safe command boundary used by the CLI and language bindings:
+provides the thread-safe command boundary used by lite-worker CDP dispatch:
 it owns the low-level page on a dedicated thread and exchanges typed commands
 and results through channels.
 
@@ -102,8 +102,8 @@ cycles, top-level `undefined`, and other non-JSON results return
 `AutomationError::Unsupported`. JavaScript exceptions remain a distinct
 `AutomationError::JavaScript` failure.
 
-Python `Page.evaluate()`, Node `page.evaluate()`, CLI `brimp get --eval`, and CDP
-`Runtime.evaluate` all delegate to this owner-thread machinery. CDP additionally
+CLI `brimp get --eval` sends `Runtime.evaluate` to the worker, whose CDP
+dispatch delegates to this owner-thread machinery. CDP additionally
 supports page-owned remote object handles through `Runtime.callFunctionOn`,
 `Runtime.getProperties`, and the release methods.
 
@@ -116,9 +116,8 @@ browser-trusted event sequences. Page JavaScript cannot call this controller.
 Script-created events and calls such as `element.dispatchEvent(...)` remain
 untrusted, as they are in a browser.
 
-The Python and Node selector methods and CDP `Input` commands use this same
-boundary, so their targeting, ordering, cancellation, editing, and activation
-semantics do not diverge by interface.
+CDP `Input` commands use this boundary for targeting, ordering, cancellation,
+editing, and activation.
 
 ## Native-looking Web APIs
 

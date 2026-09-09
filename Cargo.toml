@@ -10,8 +10,6 @@ members = [
     "crates/cli",
     "crates/persona",
     "crates/worker",
-    "bindings/python",
-    "bindings/node",
 ]
 resolver = "3"
 

@@ -26,8 +26,6 @@ export default defineConfig({
           label: 'Examples',
           items: [
             { label: 'Overview', slug: 'examples' },
-            { label: 'Python', slug: 'examples/python' },
-            { label: 'Node.js', slug: 'examples/node' },
             { label: 'CLI and CDP', slug: 'examples/cli-and-cdp' },
           ],
         },
@@ -35,9 +33,6 @@ export default defineConfig({
           label: 'API',
           items: [
             { label: 'Overview', slug: 'api' },
-            { label: 'Language bindings', slug: 'api/bindings' },
-            { label: 'Python', slug: 'api/python' },
-            { label: 'Node.js', slug: 'api/node' },
             { label: 'CLI', slug: 'api/cli' },
             { label: 'CDP', slug: 'api/cdp' },
           ],

@@ -12,8 +12,6 @@ crates/browser-dom/   DOM, style, and layout integration
 crates/network/       curl-impersonate transport
 crates/cli/           brimp executable
 crates/worker/        lite-worker executable, CDP dispatch, and protocol tests
-bindings/python/      CPython ABI3 package
-bindings/node/        Node native addon and JavaScript adapter
 persona/              Versioned persona schema
 docs/                 This Starlight site
 ```
@@ -39,19 +37,17 @@ export BRIMP_CURL_LIB_DIR=/path/to/curl-impersonate/lib
 From the repository root:
 
 ```sh
+cargo build -p brimp-cli -p lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-./bindings/package-test.sh
 ```
 
-The package test is the combined macOS ARM64 Python and Node check. The Rust CDP
-workflow exercises the same framed transport used by the worker executable.
+The Rust CDP workflow exercises the same framed transport used by the worker executable.
 
 For a quicker interface-specific cycle:
 
 ```sh
 cargo test -p brimp-cli -p lite-worker
-python3 bindings/python/test_api.py
 ```
 
 ## Pre-commit formatting
@@ -105,7 +101,7 @@ repository `CNAME` file when deployment uses a custom Actions workflow.
 
 ## Documentation rules
 
-- Treat each binding's `SUPPORT.md` and public source types as authoritative.
+- Treat the CLI and worker `SUPPORT.md` files and public source types as authoritative.
 - Do not document planned APIs as if they exist.
 - Keep examples runnable against the current release.
 - Update the relevant API page whenever a public interface changes.
@@ -114,7 +110,5 @@ repository `CNAME` file when deployment uses a custom Actions workflow.
 ## Architecture constraints
 
 Keep transport mechanics behind `network::ResourceLoader`; do not let DOM or
-JavaScript bindings depend directly on a concrete HTTP client. Keep native
-bindings and CDP as adapters over `web-runtime`, not alternate browser
-implementations. Remove obsolete paths when interfaces change rather than
+JavaScript bindings depend directly on a concrete HTTP client. Keep lite CDP dispatch as an adapter over `web-runtime`. Remove obsolete paths when interfaces change rather than
 maintaining compatibility layers.

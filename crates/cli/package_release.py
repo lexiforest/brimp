@@ -58,7 +58,7 @@ def copy_licenses(root: Path, package: Path, jsc_library_dir: Path) -> None:
     licenses.mkdir()
     shutil.copy2(root / "LICENSE", licenses / "brimp-LICENSE")
     shutil.copy2(
-        root / "bindings/python/python/brimp/licenses/curl-impersonate-LICENSE",
+        root / "crates/network/licenses/curl-impersonate-LICENSE",
         licenses,
     )
     defuddle = root / "crates/worker-api/defuddle/0.19.3"

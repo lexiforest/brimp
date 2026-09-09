@@ -9,14 +9,8 @@ Key references:
 
 - [CLI commands](https://docs.brimp.ai/api/cli/)
 - [CDP support matrix and Playwright connection](https://docs.brimp.ai/api/cdp/)
-- [Python and Node binding APIs](https://docs.brimp.ai/api/bindings/)
 - [JavaScriptCore integration and direct page evaluation](https://docs.brimp.ai/architecture/javascript-runtime/)
 - [Subsystem implementation](https://docs.brimp.ai/architecture/subsystems/)
-
-If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
-same simple request/response workflow with a JavaScript-rendered HTML result.
-Brimp offers Python and Node.js bindings.
-
 
 ## Why
 
@@ -31,10 +25,8 @@ curl_cffi.
 
 - Page rendered with DOM and JS, so you don't get the empty html placeholder.
 - `curl-impersonate` as the network stack, providing perfect Ja3/TLS, http 2&3 fingerprints.
-- The familiar `curl_cffi` API and experience from the same maintainer.
 - Provides a CDP worker for the Brimp controller (`brimp serve`).
 - Much faster than playwright with Chromium, on par with popular alternatives.
-- Python and Nodejs bindings.
 - Pre-compiled, so you don't have to compile on your machine.
 - MIT licensed.
 
@@ -44,7 +36,6 @@ curl_cffi.
 |http/3|✅|✅|✅|❌|❌|✅|
 |CDP|✅|✅|✅|☑️<sup>1</sup>|☑️<sup>1</sup>|☑️<sup>1</sup>|
 |screenshot|✅|✅|✅|❌|✅|✅|
-|requests-like|❌|❌|❌|❌|❌|✅|
 |JS engine|V8|SpiderMonkey|V8|V8|V8|JSC|
 |open source|✅|✅|❌|☑️<sup>2</sup>️|✅|✅|
 |ja3 fingerprints|☑️<sup>3</sup>️|☑️<sup>3</sup>️|☑️<sup>3</sup>️|❌|✅|✅|
@@ -60,19 +51,6 @@ Notes:
 </small>
 
 ## Install
-
-Python wheels support manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and
-Windows x86-64:
-
-```sh
-pip install brimp
-```
-
-The Node package remains macOS ARM64:
-
-```
-npm install @brimp/brimp
-```
 
 Tagged GitHub Releases include self-contained `brimp` archives and SHA-256
 checksums for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and Windows x86-64.
@@ -96,61 +74,6 @@ brimp get https://example.com --output example.md
 brimp get https://example.com --eval 'document.title'
 brimp get https://example.com --output example.png --full-page
 brimp get https://example.com --persona persona/example.json --eval 'navigator.userAgent'
-```
-
-### Python
-
-The Python binding is synchronous and in-process. Request helpers return a live
-Page carrying the latest main-response metadata.
-
-```python
-import brimp
-
-with brimp.get("https://example.com") as page:
-    print(page.status_code)
-    print(page.text)  # original response text
-    print(page.html)  # current live DOM
-```
-
-Use a Session to share cookies across independently concurrent pages. Each page
-owns its document, connections, and optional immutable proxy:
-
-```python
-import brimp
-
-with brimp.Session(pool_size=8) as session:
-    with session.get("https://example.com", params={"q": "browser"}) as page:
-        page.raise_for_status()
-        print(page.evaluate("document.title"))
-        page.hover("#menu")
-        page.type("#name", "agent")
-        page.click("#submit")
-        page.screenshot("example.png", full_page=True)
-```
-
-### Node.js
-
-```js
-const brimp = require('@brimp/brimp')
-
-async function main() {
-  const session = await brimp.createSession()
-  try {
-    const page = await session.get('https://example.com')
-    console.log(page.statusCode, page.html)
-    console.log(await page.evaluate('document.title'))
-    await page.hover('#menu')
-    await page.type('#name', 'agent')
-    await page.click('#submit')
-  } finally {
-    await session.close()
-  }
-}
-
-main().catch(error => {
-  console.error(error)
-  process.exitCode = 1
-})
 ```
 
 ### With CDP clients
@@ -202,10 +125,9 @@ The implemented runtime supports:
 The canonical owner-thread automation API is exposed through:
 
 - the `brimp` CLI for evaluation and screenshots;
-- synchronous Python and asynchronous Node request/response bindings; and
 - the framed CDP worker used by the Brimp controller (`brimp serve`).
 
-The lite worker and language bindings delegate browser operations to `web-runtime`.
+The lite worker delegates browser operations to `web-runtime`.
 The CLI and controller communicate with worker processes over framed CDP and
 never initialize the browser runtime themselves.
 
@@ -215,11 +137,7 @@ never initialize the browser runtime themselves.
 cargo build -p brimp-cli -p lite-worker
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
-./bindings/package-test.sh
 ```
 
-Python wheels are built for manylinux 2.28 x86-64/ARM64, macOS 11+ ARM64, and
-Windows x86-64, and bundle JavaScriptCore, curl-impersonate, and their required
-non-system runtimes. The Node package remains macOS ARM64. Source builds use the
-configurable native discovery paths described in `NATIVE.md`; see each
-interface's `SUPPORT.md` for its exact tested surface.
+Source builds use the configurable native discovery paths described in `NATIVE.md`;
+see the CLI and worker `SUPPORT.md` files for their exact tested surfaces.
