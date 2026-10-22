@@ -1,0 +1,28 @@
+[package]
+name = "brimp-net"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+links = "curl-impersonate"
+description = "A Rust wrapper around libcurl-impersonate in the shape of hyper."
+repository = "https://github.com/lexiforest/brimp"
+homepage = "https://github.com/lexiforest/brimp"
+documentation = "https://docs.rs/brimp-net"
+readme = "README.md"
+keywords = ["curl", "http", "browser", "tls", "impersonate"]
+categories = ["api-bindings", "web-programming::http-client"]
+
+[dependencies]
+bytes = "1.11"
+http = "1.4"
+http-body-util = "0.1"
+http-body = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2.0"
+tokio = { version = "1", features = ["rt", "sync"] }
+url = "2"
+
+[dev-dependencies]
+tungstenite = "0.30"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }

@@ -1,0 +1,22 @@
+{
+  "name": "brimp",
+  "version": "0.1.1",
+  "license": "MIT",
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "brimp.node",
+    "README.md",
+    "plugins.js",
+    "bundled"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

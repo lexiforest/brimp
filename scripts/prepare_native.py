@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download and verify the native SDKs used to build Brimp workers."""
+"""Download and verify the native SDKs used to build the Brimp runtime."""
 
 from __future__ import annotations
 
@@ -233,6 +233,9 @@ def prepare(target_name: str, output: Path) -> dict[str, str]:
             )
     elif "apple-darwin" in target_name:
         values["DYLD_LIBRARY_PATH"] = values["BRIMP_NATIVE_RUNTIME_DIRS"]
+        # WebKit SDK frameworks may retain the system framework install name.
+        # Select the downloaded framework at runtime as well as at link time.
+        values["DYLD_FRAMEWORK_PATH"] = str(jsc_lib.resolve())
     else:
         values["LD_LIBRARY_PATH"] = values["BRIMP_NATIVE_RUNTIME_DIRS"]
     return values

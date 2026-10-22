@@ -1,16 +1,11 @@
 ---
 title: Examples
-description: Command-line and CDP automation workflows.
+description: Native Python and Node workflows.
 ---
 
 Choose a guide for your task:
 
-- [Fetch and extract pages](/examples/fetch/): save live HTML, extract Markdown,
-  evaluate JavaScript, and capture screenshots.
-- [Crawl a website](/examples/crawl/): set discovery limits, process pages
-  concurrently, and inspect results in a manifest.
-- [CLI and CDP automation](/examples/cli-and-cdp/): check native dependencies
-  and connect Playwright or Puppeteer to the controller.
+- [Fetch and extract pages](/examples/fetch/): edit the DOM, extract content,
+  stream responses and register host callbacks.
 
-For complete option and protocol details, see the [CLI reference](/api/cli/)
-and [CDP reference](/api/cdp/).
+See the [native API overview](/api/) for supported operations.

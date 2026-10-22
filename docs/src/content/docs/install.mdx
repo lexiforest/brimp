@@ -1,59 +1,24 @@
 ---
 title: Install
-description: Install or build the Brimp CLI and worker.
 ---
 
-CLI browser commands currently require macOS and a child worker. Set
-`BRIMP_WORKER_PATH` to the lite worker executable or a WebKit worker bundle,
-or pass `--worker-path PATH`. Build both with
-`cargo build -p brimp-controller -p brimp-lite-worker`.
-
-
-## CLI and CDP worker
-
-Each tagged GitHub Release includes standalone CLI archives for every supported
-native target:
-
-| Operating system | Architecture | Archive target |
-| --- | --- | --- |
-| Linux | x86-64 | `x86_64-unknown-linux-gnu` |
-| Linux | ARM64 | `aarch64-unknown-linux-gnu` |
-| macOS 11+ | ARM64 | `aarch64-apple-darwin` |
-| Windows | x86-64 | `x86_64-pc-windows-msvc` |
-
-Unix archives use `.tar.gz`; Windows uses `.zip`. Every archive has a matching
-`.sha256` file and bundles JavaScriptCore, curl-impersonate, required non-system
-runtime libraries, and licenses. For example, on macOS:
+Native package builds require matching JavaScriptCore and curl-impersonate SDKs.
+Set `BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their library directories.
+Lexbor is pinned and vendored in the repository.
+WebCrypto builds OpenSSL from Cargo-pinned source; source builds require a C
+compiler, make and Perl, with no OpenSSL shared library needed at runtime.
+On macOS, set `DYLD_FRAMEWORK_PATH` to the JSC framework directory at runtime
+when using a WebKit SDK that retains the system framework install name.
 
 ```sh
-shasum -a 256 -c brimp-vVERSION-aarch64-apple-darwin.tar.gz.sha256
-tar -xzf brimp-vVERSION-aarch64-apple-darwin.tar.gz
-./brimp-vVERSION-aarch64-apple-darwin/brimp doctor --worker-path ./brimp-vVERSION-aarch64-apple-darwin/lite-worker
+cargo build -p brimp-python -p brimp-node
+python3 bindings/prepare_local.py
+maturin build --manifest-path bindings/python/Cargo.toml
+npm pack ./bindings/node
 ```
 
-The CLI and the controller-managed CDP worker can also be built from source:
-
-```sh
-git clone https://github.com/lexiforest/brimp.git
-cd brimp
-cargo build --release -p brimp-controller
-cargo build --release -p brimp-lite-worker
-./target/release/brimp doctor --worker-path ./target/release/lite-worker
-```
-
-Source builds dynamically link JavaScriptCore and curl-impersonate. Point the
-build at their library directories before invoking Cargo:
-
-```sh
-export BRIMP_JSC_LIB_DIR=/path/to/javascriptcore/lib
-export BRIMP_CURL_LIB_DIR=/path/to/curl-impersonate/lib
-cargo build --release -p brimp-controller
-```
-
-Expected library layouts vary by platform:
-
-- macOS: `JavaScriptCore.framework` and a curl-impersonate dynamic library;
-- Linux: `libJavaScriptCore.so` and a curl-impersonate shared library;
-- Windows: `JavaScriptCore.lib` and the corresponding curl import/runtime libraries.
-
-After installation, continue with the [quick start](/quick-start/).
+The wheel/npm package includes the native extension and bundled plugin sources.
+Install JSC/curl on the target machine; these are SDK-linked packages, not a
+self-contained browser distribution. On macOS, `python3 bindings/package_native.py`
+assembles relocatable archives with JSC/curl and their notices. Source builds are documented in
+[Development](/development/).

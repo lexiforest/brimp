@@ -6,7 +6,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Brimp',
-      description: 'A lightweight, headless browser for agents.',
+      description: 'A JavaScript runtime for JavaScript from the browser.',
       customCss: ['./src/styles/custom.css'],
       editLink: {
         baseUrl: 'https://github.com/lexiforest/brimp/edit/main/docs/',
@@ -27,23 +27,19 @@ export default defineConfig({
           items: [
             { label: 'Overview', slug: 'examples' },
             { label: 'Fetch and extract', slug: 'examples/fetch' },
-            { label: 'Crawl a website', slug: 'examples/crawl' },
-            { label: 'CLI and CDP', slug: 'examples/cli-and-cdp' },
           ],
         },
         {
           label: 'API',
           items: [
             { label: 'Overview', slug: 'api' },
-            { label: 'CLI', slug: 'api/cli' },
-            { label: 'CDP', slug: 'api/cdp' },
           ],
         },
         {
           label: 'Architecture',
           items: [
             { label: 'JavaScriptCore integration', slug: 'architecture/javascript-runtime' },
-            { label: 'Subsystem implementation', slug: 'architecture/subsystems' },
+            { label: 'Core APIs and plugins', slug: 'architecture/subsystems' },
           ],
         },
         { label: 'Development', slug: 'development' },

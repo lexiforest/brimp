@@ -1,0 +1,9 @@
+[package]
+name = "brimp-jsc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+links = "JavaScriptCore"
+
+[dependencies]
+libc = "0.2"

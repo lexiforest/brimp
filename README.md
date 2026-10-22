@@ -1,163 +1,70 @@
 # Brimp
 
-Brimp is a unified browser interface for agents. It has two builtin runtime
+**A JavaScript runtime for JavaScript from the browser.**
 
-Brimp is a lightweight, headless browser for agents. It combines JavaScriptCore with
-Blitz's DOM implementation and curl-impersonate as the network stack.
+The DOM runtime combines **JavaScriptCore + Lexbor + curl-impersonate** behind
+synchronous Python and asynchronous Node `Session`/`Page` APIs. It fetches pages,
+runs scripts, maintains a live DOM, and exposes requests, handles, events,
+interception, input, extraction, and streaming bodies. Rendering and layout are
+outside its contract. Optional JavaScript plugins add memory storage, deterministic
+Canvas mocks, services, Defuddle, or host storage; none are enabled by default.
+Core APIs include live DOM ranges, FileReader, Web Streams, structured cloning,
+XPath, Shadow DOM, and WebCrypto for signing, encryption, and key derivation.
 
-Documentation: [docs.brimp.ai](https://docs.brimp.ai)
+```python
+from brimp import Session
 
-Key references:
-
-- [CLI commands](https://docs.brimp.ai/api/cli/)
-- [CDP support matrix and Playwright connection](https://docs.brimp.ai/api/cdp/)
-- [JavaScriptCore integration and direct page evaluation](https://docs.brimp.ai/architecture/javascript-runtime/)
-- [Subsystem implementation](https://docs.brimp.ai/architecture/subsystems/)
-
-## Why
-
-Getting the html with `curl_cffi` is easy, but oftentimes, you need to render the page
-with JavaScript, and anti-bot services are consistently probing if you have a valid
-browser environment, hence JavaScript fingerprints.
-
-Brimp, short for browser-impersonate, tries to add the missing JS and DOM layer for
-curl_cffi.
-
-## Features
-
-- Page rendered with DOM and JS, so you don't get the empty html placeholder.
-- `curl-impersonate` as the network stack, providing perfect Ja3/TLS, http 2&3 fingerprints.
-- Provides a CDP worker for the Brimp controller (`brimp serve`).
-- Much faster than playwright with Chromium, on par with popular alternatives.
-- Pre-compiled, so you don't have to compile on your machine.
-- MIT licensed.
-
-||chromium|camoufox|cloakbrowser|lightpanda|obscura|brimp|
-|---|---|---|---|---|---|---|
-|JS & DOM|✅|✅|✅|✅|✅|✅|
-|http/3|✅|✅|✅|❌|❌|✅|
-|CDP|✅|✅|✅|☑️<sup>1</sup>|☑️<sup>1</sup>|☑️<sup>1</sup>|
-|screenshot|✅|✅|✅|❌|✅|✅|
-|JS engine|V8|SpiderMonkey|V8|V8|V8|JSC|
-|open source|✅|✅|❌|☑️<sup>2</sup>️|✅|✅|
-|ja3 fingerprints|☑️<sup>3</sup>️|☑️<sup>3</sup>️|☑️<sup>3</sup>️|❌|✅|✅|
-|fast?|🐢|🐢|🐢|🐇|🐇|🐇|
-
-<small>
-Notes:
-<ol>
-<li>Only a common subset was implemented.</li>
-<li>Lightpanda is under the AGPL license.</li>
-<li>Fingerprints are fixed to the browser version</li>
-</ol>
-</small>
-
-## Install
-
-For humans:
-
-```
-curl https://brimp.ai/install.sh | bash
+with Session() as session:
+    page = session.get("https://example.com")
+    heading = page.query_selector("h1")
+    print(heading.text_content())
+    heading.dispose()
 ```
 
-For agents:
-
-Paste this prompt:
-
-```plain
-Install this tool: https://github.com/lexiforest/brimp
+```javascript
+import { createSession } from 'brimp';
+const session = await createSession();
+try {
+  const page = await session.get('https://example.com');
+  console.log(await page.evaluate('document.title'));
+} finally { await session.close(); }
 ```
 
-You can also download the prebuilt binary tarballs from github release page.
+See [native setup and API](bindings/README.md), [plugin behavior](bindings/PLUGINS.md),
+[runtime architecture](crates/runtime/README.md), and [implementation progress](TODO.md).
+Native package builds require matching JavaScriptCore and curl-impersonate libraries.
+Lexbor and OpenSSL are pinned and built from vendored sources.
 
-## Usage
+The reusable [`brimp-lexbor`](crates/lexbor/README.md) crate owns the vendored
+parser and safe DOM arena API; it builds without JSC, curl or language SDKs.
+[`brimp-jsc`](crates/jsc/README.md) owns the JavaScript engine and native callbacks.
+`brimp-runtime` composes these with networking and browser policy; Python and Node
+bindings depend on the runtime.
 
-### CLI
+The [`brimp-net` crate](crates/net/README.md) supplies the runtime's curl-impersonate
+HTTP transport through standard Rust HTTP types and streaming bodies. Browser
+loading policy remains in the runtime; WebSocket connections use a separate connector.
 
-The CLI launches and manages its browser workers. Select a lite or
-WebKit worker with `--worker-path` or `BRIMP_WORKER_PATH`; use
-`--cdp` to launch a WebSocket CDP worker such as Chrome. The
-controller discovers and connects to its child automatically. For a lite worker:
+[Diagnostics and programmable time](bindings/DEBUGGING.md) provide bounded API
+traces, JSONL output and a controllable realm clock. Optional geometry, CSS Typed
+OM, scheduling, graphics and audio plugins expand the API surface; their
+[coverage table](bindings/PLUGINS.md) distinguishes functionality from mocks.
+See [native packaging](bindings/PACKAGING.md) for relocatable macOS artifacts.
+
 
 ```sh
-export BRIMP_WORKER_PATH=/path/to/lite-worker
-```
-
-Check the worker, extract a live page, evaluate JavaScript, or capture a PNG:
-
-```sh
-brimp doctor
-brimp fetch https://example.com --output example.md
-brimp fetch https://example.com --eval 'document.title'
-brimp fetch https://example.com --output example.png --full-page
-brimp fetch https://example.com --persona crates/worker/src/persona/example.json --eval 'navigator.userAgent'
-```
-
-### With CDP clients
-
-Start the Brimp controller (`brimp serve`) with `lite-worker`, then connect with
-`playwright-core`:
-
-```sh
-brimp serve \
-  --worker-path /path/to/lite-worker \
-  --headless --window-size=1280,720 --port=9222
-```
-
-```js
-import { chromium } from 'playwright-core'
-
-const browser = await chromium.connectOverCDP('http://127.0.0.1:9222')
-const context = browser.contexts()[0] ?? await browser.newContext()
-const page = await context.newPage()
-await page.goto('https://example.com')
-console.log(await page.evaluate(() => document.title))
-await browser.close()
-```
-
-Brimp implements the CDP subset needed by this workflow, not the complete
-Chrome DevTools Protocol. Puppeteer is also supported through
-`puppeteer.connect({ browserURL: 'http://127.0.0.1:9222' })`.
-
-## Building from source
-
-### Prerequisites
-
-Source builds dynamically link JavaScriptCore and curl-impersonate. Set
-`BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their platform-specific library
-directories. See the [native prerequisites](docs/src/content/docs/development.md#native-prerequisites)
-for SDK preparation and library layouts.
-
-## Development
-
-### Architecture
-
-The implemented runtime supports:
-
-- static HTML, JavaScript DOM mutation, style/layout queries, and CPU PNG screenshots;
-- HTTP(S) navigation through a transport-neutral `ResourceLoader`;
-- linked CSS, common raster images, classic inline/external scripts, `defer`, and `async`;
-- parser pausing around blocking scripts;
-- events, timers, microtasks, Promise-based `fetch`, cookies, `Location`, and `Navigator`.
-
-The canonical owner-thread automation API is exposed through:
-
-- the `brimp` CLI for evaluation and screenshots;
-- the framed CDP worker used by the Brimp controller (`brimp serve`).
-
-The lite worker delegates browser operations to `runtime`.
-The CLI and controller communicate with worker processes over framed CDP and
-never initialize the browser runtime themselves.
-
-### CI
-
-The project is tested and built automatically on GitHub Actions. All PR must pass
-the automatic tests.
-
-### Testing
-
-```sh
-cargo build -p brimp-controller -p brimp-lite-worker
-cargo test --workspace
+cargo test -p brimp-runtime
+python3 scripts/test_lexbor_boundary.py
 cargo clippy --workspace --all-targets -- -D warnings
 ```
+
+Tests target supported behavior and local servers. See the [benchmarks](benchmark/native/)
+for measured time and peak memory on the same host/profile; no universal speed or
+browser-conformance claim is made. MIT licensed.
+
+The [browser workload corpus](compatibility/README.md) runs 15 pinned applications,
+libraries and environment checks against Brimp, jsdom, happy-dom and Playwright
+Chromium using the same artifacts. Detector findings are observational and do not expand runtime
+coverage. Reports distinguish compatibility failures from invalid reference runs.
+
+Core DOM and crypto coverage: [supported web APIs](bindings/CORE_WEB.md).

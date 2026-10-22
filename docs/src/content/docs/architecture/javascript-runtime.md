@@ -1,142 +1,20 @@
 ---
 title: JavaScriptCore integration
-description: How Brimp embeds JavaScriptCore, installs Web APIs, and evaluates scripts.
 ---
 
-Brimp embeds WebKit's JavaScriptCore through its public C API. JavaScriptCore
-provides the language engine and garbage collector; Brimp supplies the browser
-objects, DOM, networking, event loop integration, and persistent storage.
+Each page's owner thread contains its JSC realm, GC roots, Lexbor arena, and task
+queue. Typed commands carry copied values between native bindings and that thread.
+JSHandle and ElementHandle refer to rooted values; navigation invalidates prior
+realm tokens. Detached DOM nodes remain usable.
 
-## Integration layers
+The parser pauses after parser-blocking script tokens, executes against the same
+canonical tree, and resumes. Deferred/async scripts and the SWC module loader
+retain their ordering/cancellation rules. Timers, microtasks, networking, and host
+completions continue while native evaluation awaits a Promise. Parser and script
+mutations reach MutationObserver; no layout information is fabricated.
 
-```text
-Page and PageHandle
-        │
-        ▼
-runtime: owner thread, lifecycle, tasks, navigation
-        │
-        ▼
-web_apis: Window/DOM/Web API JavaScript plus native dispatch
-        │
-        ▼
-jsc: RAII values, protected objects, callbacks, exceptions, promises
-        │
-        ▼
-brimp_lite_worker::jsc::ffi: unsafe JavaScriptCore C API and platform linkage
-```
-
-`brimp_lite_worker::jsc::ffi` is the unsafe ABI boundary. It declares opaque JavaScriptCore handles
-and links the platform library selected by `BRIMP_JSC_LIB_DIR`. The `jsc` crate
-wraps those handles with Rust lifetimes, exception conversion, garbage-collector
-protection, native callbacks, and deferred Promise settlement.
-
-`web_apis` installs browser-facing JavaScript classes and one native host
-entry point. JavaScript wrappers retain normal Web-IDL-shaped objects while
-native operations dispatch to Rust-owned DOM, Canvas, storage, and networking
-state. DOM wrappers cache native node identities so the
-same native node returns the same JavaScript object.
-
-The shared JavaScript bootstrap is assembled from dependency-ordered files in
-`crates/worker/js/web_apis/runtime/` and evaluated as one script. This keeps one
-lexical scope and deterministic installation order. Optional subsystem scripts
-are evaluated only when their page option is enabled.
-
-## Thread ownership
-
-A JavaScriptCore context is owner-thread-bound and is neither `Send` nor `Sync`.
-The low-level `Page` must remain on its creating thread. `PageHandle`
-provides the thread-safe command boundary used by lite-worker CDP dispatch:
-it owns the low-level page on a dedicated thread and exchanges typed commands
-and results through channels.
-
-Network and worker callbacks never call JavaScriptCore from arbitrary threads.
-They enqueue work for the page owner thread, which performs JavaScript execution,
-microtask checkpoints, timers, and event dispatch.
-
-## Evaluate directly on a page
-
-For an embedded Rust page, call `Page::eval()`:
-
-```rust
-use brimp_lite_worker::runtime::{Browser, PageOptions};
-
-let browser = Browser::new()?;
-let mut page = browser.new_local_page(PageOptions::default())?;
-
-page.set_content("<title>Direct evaluation</title>")?;
-
-let title = page.eval("document.title")?.to_string()?;
-let answer = page.eval("6 * 7")?.to_number()?;
-
-assert_eq!(title, "Direct evaluation");
-assert_eq!(answer, 42.0);
-
-# Ok::<(), Box<dyn std::error::Error>>(())
-```
-
-`Page::eval()` returns a lifetime-bound `brimp_lite_worker::jsc::JsValue`. It performs a
-JavaScriptCore microtask checkpoint and starts Fetch operations queued by the
-script before returning. It does not JSON-serialize the result. Convert the
-value while the page/runtime borrow is valid using `to_number()`, `to_string()`,
-or `to_object()`.
-
-Use `PageHandle::evaluate()` when the caller cannot live on the JavaScript
-owner thread:
-
-```rust
-use brimp_lite_worker::runtime::{Browser, PageOptions};
-
-let browser = Browser::new()?;
-let page = browser.new_page(PageOptions::default())?;
-let value = page.evaluate("({ title: document.title, answer: 6 * 7 })")?;
-
-println!("{value}");
-page.close();
-browser.close();
-
-# Ok::<(), Box<dyn std::error::Error>>(())
-```
-
-The automation path returns `serde_json::Value`. Functions, symbols, `BigInt`,
-cycles, top-level `undefined`, and other non-JSON results return
-`AutomationError::Unsupported`. JavaScript exceptions remain a distinct
-`AutomationError::JavaScript` failure.
-
-CLI `brimp fetch --eval` sends `Runtime.evaluate` to the worker, whose CDP
-dispatch delegates to this owner-thread machinery. CDP additionally
-supports page-owned remote object handles through `Runtime.callFunctionOn`,
-`Runtime.getProperties`, and the release methods.
-
-## Browser input boundary
-
-Mouse, pointer, keyboard, text, focus, and touch commands enter one private
-owner-thread input state machine. It owns hover, pressed-button, active-touch,
-and focus state; performs hit testing and supported default actions; and emits
-browser-trusted event sequences. Page JavaScript cannot call this controller.
-Script-created events and calls such as `element.dispatchEvent(...)` remain
-untrusted, as they are in a browser.
-
-CDP `Input` commands use this boundary for targeting, ordering, cancellation,
-editing, and activation.
-
-## Native-looking Web APIs
-
-Browser API constructors and methods are implemented partly in JavaScript and
-partly in Rust. During bootstrap, Brimp records browser-provided functions and
-patches `Function.prototype.toString` so those functions expose native-function
-syntax such as `function querySelector() { [native code] }`. Ordinary page
-functions still return their actual source. Persona and integration tests check
-this distinction together with Web-IDL descriptors and prototype tags.
-
-## Linking JavaScriptCore
-
-Source builds set `BRIMP_JSC_LIB_DIR` to a directory containing:
-
-- `JavaScriptCore.framework/JavaScriptCore` on macOS;
-- `JavaScriptCore.lib` on Windows; or
-- `libJavaScriptCore.so` on Linux.
-
-Packaged bindings bundle the expected JavaScriptCore runtime. See the
-[installation guide](/install/) and
-[native prerequisites](/development/#native-prerequisites) for SDK preparation
-and platform layouts.
+The brimp-runtime crate owns browser policy, errors, requests, configuration,
+extraction results, and typed events. brimp-jsc owns engine bindings and protected
+values; brimp-net owns transport. brimp-lexbor exposes a safe arena API, with raw
+FFI private to `crates/lexbor/src/lib.rs` and the C shim in
+`crates/lexbor/native/lexbor.c`. Its arena is thread-confined and sanitizer-tested.

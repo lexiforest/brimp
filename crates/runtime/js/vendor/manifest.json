@@ -1,0 +1,12 @@
+{
+  "packages": {
+    "core-js-pure": "3.51.0",
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "6.2.6",
+    "web-streams-polyfill": "4.3.0",
+    "xpath": "0.0.35"
+  },
+  "lockSha256": "10bb74a0a4c2492fc8b35c346b38f7cd0b50bd6888f2c88a581d99e0e55abf2e",
+  "bundleSha256": "7aaf02740dc08c6e6bf6999820d1c8c4f17bf67702c5626a48e0bf74a3d6184f",
+  "storageSha256": "533b6847999dcc76cb2016e9bd62e55f1131465dcd45b49425f7763f2ee0f235"
+}

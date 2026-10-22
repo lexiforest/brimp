@@ -1,120 +1,98 @@
 ---
-title: Subsystem implementation
-description: Backends, ownership, data flow, feature gates, and deliberate boundaries.
+title: Core APIs and plugins
 ---
 
-Brimp has one page implementation in `runtime`. Lite CDP dispatch calls that implementation; the CLI communicates with workers. Browser subsystems share the
-page's canonical DOM, task queue, resource loader, persona, and owner-thread
-rules rather than maintaining parallel state.
+Brimp combines JavaScriptCore, a canonical Lexbor DOM, and curl-impersonate.
+Common web APIs are available in every page. Specialized capabilities use explicit
+plugins, with none enabled by default.
 
-## Implementation map
+## Core coverage
 
-| Subsystem | Implementation | Page gate |
+| Area | Supported behavior | Limits |
 | --- | --- | --- |
-| JavaScript | WebKit JavaScriptCore through `jsc` | Always present |
-| DOM, HTML parsing, CSS and layout | Blitz DOM/html, Stylo, and `dom` | Always present |
-| Navigation and resources | `runtime` policy over `brimp_lite_worker::network::ResourceLoader` | Always present |
-| HTTP, TLS, HTTP/2 and HTTP/3 | libcurl-impersonate multi executor | Always present |
-| Events, timers and basic Fetch | JavaScript bindings plus the page task queue | Always present |
-| Workers and worklets | Isolated JSC runtimes and a browser-owned coordinator | Always present |
-| WebSocket, EventSource and streaming Fetch | curl-impersonate streaming handles with bounded backpressure | Always present |
-| Persistent web storage | Origin partitions, quota enforcement, and filesystem backing | `persistent_storage` |
-| Canvas 2D | Raster-only `skia-safe`; Rustybuzz and bundled fonts for text | Always present |
-| Document screenshots | Blitz paint through Vello CPU, encoded as PNG | Always present |
-| Persona | One configuration shared by transport and Web APIs | Always present |
+| DOM | HTML/fragment parsing, selectors, mutation, serialization, collections, forms, traversal, XPath, MutationObserver and Shadow DOM | No rendering/layout; XPath iterator mutation invalidation and some Shadow DOM features are unsupported |
+| Lifecycle and ranges | readyState/readystatechange, DOMContentLoaded/load, live Range boundaries, clone/extract/delete/insert/surround contents and contextual fragments | No range geometry |
+| Files and values | Blob/File, asynchronous FileReader, URL/text encoding, structuredClone and message channels | No XML parsing, XMLSerializer or CryptoKey cloning |
+| Scripts and events | Classic/module scripts, parser suspension, timers, microtasks, DOM events and direct-node input | No coordinate hit-testing or browser Worker execution |
+| Network | Fetch/XHR, cookies, redirects, proxies, auth, WebSocket, EventSource, routes and native streaming bodies | No WebTransport; response interception buffers at most 32 MiB |
+| Streams | Readable/Writable/Transform streams, BYOB readers, closure, cancellation and backpressure via web-streams-polyfill | Unread fetch data has a 256 KiB native queue; an unread tee/clone branch can accumulate data |
+| CSS/SVG | Lexbor inline declarations and generic SVG elements | No CSSStyleSheet/CSSRule editing, adopted sheets, cascade, computed style or specialized SVG interfaces |
 
-Canvas, workers, and streaming networking are installed on every page.
-Persistent storage is configured with a backing path through the CLI, CDP
-worker configuration, or Rust `PageOptions`.
+DOM wrappers retain node identity, including detached nodes, until realm teardown.
+Navigation invalidates external handles. Each page owns its JavaScript realm and
+DOM arena on one owner thread.
 
-## Page lifecycle and ownership
+## Core WebCrypto
 
-`brimp_lite_worker::runtime::Page` owns the JavaScriptCore context, `BrowserDocument`, viewport,
-bindings, task queues, loader state, and optional backend stores. Navigation
-creates a fresh document and JavaScript realm, applies the persona,
-loads the main response, pauses parsing for parser-blocking classic scripts,
-runs deferred scripts, and settles the page lifecycle after discovered
-resources finish.
+The same vendored OpenSSL backend serves Python and Node. CryptoKey material and
+usage/extractability policy live in native realm state; JavaScript wrappers hold
+opaque handles. SubtleCrypto operations return Promises and copy binary inputs.
 
-`PageHandle` keeps that state on a dedicated owner thread. External APIs
-send commands to it; they do not duplicate navigation or rendering behavior.
+| Algorithms | Operations |
+| --- | --- |
+| SHA-1/256/384/512 | Digest |
+| HMAC | Key generation/import/export, signing and verification |
+| AES-GCM/CBC/CTR | 128/192/256-bit keys, encryption/decryption and key wrapping |
+| AES-KW | Key wrapping/unwrapping |
+| RSASSA-PKCS1-v1_5, RSA-PSS | Key generation/import/export, signing and verification |
+| RSA-OAEP | Encryption/decryption and key wrapping, including labels |
+| ECDSA | P-256/P-384/P-521 signatures |
+| ECDH | Shared-secret and key derivation on matching curves |
+| HKDF, PBKDF2 | Bit and key derivation |
 
-## DOM, CSSOM, and layout
+RSA/EC keys support SPKI, PKCS8 and JWK; EC public keys also support raw points.
+Symmetric keys support raw and JWK formats; HKDF/PBKDF2 base keys use raw import.
+Ed25519/X25519 and CryptoKey structured cloning are unsupported. Expensive native
+operations occupy the page owner thread. The complete algorithm and parameter
+contract is in [core web coverage](https://github.com/lexiforest/brimp/blob/main/bindings/CORE_WEB.md).
 
-`dom` owns one canonical Blitz tree. JavaScript `Node`, `Element`, and
-`Document` objects contain stable mappings to Blitz node IDs; there is no mirror
-DOM. Mutations from JavaScript therefore immediately affect parsing, selectors,
-style resolution, layout, and screenshots.
+## Bundled plugins
 
-Incremental HTML parsing uses Blitz/html5ever and yields at parser-inserted
-scripts. CSS parsing and computed style use Stylo. Geometry reads resolve style
-and layout before returning values. CSSOM wrappers retain stylesheet/rule
-identity while mutations update the underlying author stylesheets.
+| Plugin | Behavior and limits |
+| --- | --- |
+| Storage | Realm-local Storage, fake-indexeddb transactions and Cache subset; resets on navigation |
+| Host storage | Async hostStorage with atomic origin-partitioned batches; session memory by default, configurable backend for durability |
+| Defuddle | DOM/attribute/inline-style extraction required by page.extract() |
+| Canvas | State and fixed-color readback; no rasterization, fonts or image decoding |
+| Services | Realm-local locks and configurable navigator/device/permission mocks |
+| Geometry | Points, rectangles, quads and 2D matrices; no DOM measurement |
+| CSS Typed OM | Inline value objects and attributeStyleMap; no cascade or compound calc algebra |
+| Scheduling | Prioritized tasks, cancellation and zero-budget idle callbacks |
+| Graphics | WebGL state and optional WebGPU buffer mocks; no shader execution or GPU rendering |
+| Audio | AudioBuffer and graph/lifecycle state; no processing, decoding or output |
 
-## Networking and navigation
+Inspect installer names, capabilities, limits, defaults and lifetimes from the host:
 
-Every main document, stylesheet, classic script, image, font, and JavaScript
-Fetch request crosses `brimp_lite_worker::network::ResourceLoader`. The default
-`CurlResourceLoader` runs libcurl-impersonate easy handles on one bounded
-curl-multi executor and pools handles for reuse.
+```python
+from brimp import plugins
+print(plugins.catalog())
+```
 
-libcurl owns transport mechanics and browser-profile TLS/HTTP behavior.
-`runtime` owns browser policy: URL resolution, context-owned cookie jars shared
-by pages, redirect hops,
-persona headers, response limits, cancellation, and lifecycle events. This
-separation also lets tests or embedders inject deterministic loaders.
+```javascript
+import { pluginCatalog } from 'brimp';
+console.log(pluginCatalog());
+```
 
-The streaming gate adds incremental body delivery, WebSocket, and EventSource.
-Queues are bounded; consumers can pause/resume curl transfers and cancellation
-removes the active transfer.
+Discovery installs nothing in a page. Select `plugins.host_storage()` in Python or
+`hostStoragePlugin()` in Node for data shared by pages of the same origin within a
+session. A `backend_factory` / `backendFactory` supplies custom atomic transactions
+and optional cleanup. The SQLite example supplies durable JSON storage. This API
+is an explicit asynchronous extension; it does not implement browser IndexedDB or
+localStorage persistence.
 
-## Workers
+## Custom plugins
 
-Dedicated workers run isolated JavaScriptCore runtimes. Shared-worker and
-service-worker registrations live in a browser-owned coordinator so named
-realms can outlive a page. Messages and lifecycle events cross queues and are
-delivered on the receiving realm's owner thread. The current worker layer is a
-selected functional surface, not complete Worker/Web Worker WPT conformance.
+Installers receive `{global, host, options}`, run in session order before document
+scripts, and may return Promises and disposers. `host.call` returns a Promise for
+registered handlers. Values are JSON-like or copied binary buffers; nodes, pointers
+and functions stay in the realm. Ordered subscriptions carry host notifications.
+Navigation and closure cancel pending calls and dispose realm resources.
 
-## Persistent storage
+Host setup/dispose factories own session state independently of realms. Trusted
+handler context includes session, page, realm, URL and origin. Use that origin
+for storage partitioning and coordinate shared backend transactions. Host errors
+retain diagnostic details in the embedding application; page code receives a
+generic OperationError.
 
-Supplying a storage root enables origin-partitioned IndexedDB, Cache Storage,
-StorageManager/quota, OPFS, and durable `localStorage`. The storage layer uses
-the page origin as its partition key and enforces the configured quota. Without
-a root, the persistent APIs are absent; ordinary page-lifetime storage remains
-separate.
-
-## Canvas 2D
-
-Canvas uses raster-only Skia surfaces through `skia-safe`. Skia owns pixels,
-paths, clipping, compositing, gradients, patterns, shadows, filters, image
-operations, and encoding. Canvas does not initialize Skia's GPU backends.
-
-Text is shaped with Rustybuzz, Unicode bidi and grapheme handling, using the
-bundled WQY Micro Hei proportional/monospace faces and Noto Color Emoji for text.
-Canvas maintains origin-clean state for image sources and supplies consistent
-pixels to `getImageData()`, export methods, and document screenshots. Completed
-Canvas rasters enter the document's Vello compositor as images.
-
-## Screenshots
-
-Document screenshots resolve the Blitz layout, paint through `blitz-paint` and
-AnyRender's Vello CPU backend, composite Canvas rasters, and encode
-the final RGBA image as PNG. No native window or display server is required.
-Viewport screenshots use the configured viewport; full-page screenshots
-temporarily extend rendering to the document content bounds.
-
-## Persona coherence
-
-A persona is validated when the browser is created. Its `network_profile`,
-`base_headers`, Navigator values, language, screen, and viewport feed the
-relevant subsystems from one configuration. The complete supported schema is
-`crates/worker/src/persona/example.json`; obsolete fields are rejected. Canvas
-noise and timezone settings are retained but not yet applied by the engine.
-
-For dependency-backed implementation status, see
-[`SUBSYSTEMS.md`](https://github.com/lexiforest/brimp/blob/main/SUBSYSTEMS.md).
-That ledger distinguishes completed selected surfaces from full
-browser-standard conformance and records deliberate exclusions such as video.
-Core DOM and JavaScriptCore compatibility checks remain in
-[`PATCH_ENV.md`](https://github.com/lexiforest/brimp/blob/main/PATCH_ENV.md).
+See the [plugin contract and examples](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
+for file loading, options, callbacks, cancellation and storage backends.

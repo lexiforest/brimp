@@ -1,57 +1,31 @@
 ---
 title: Quick start
-description: Render pages with the CLI and connect through CDP.
 ---
 
-## Build and select a worker
+```python
+from brimp import Session
+from brimp.plugins import extraction
 
-Browser commands currently require macOS. After configuring the native SDKs
-as described in [Install](/install/), build the CLI and lite worker:
-
-```sh
-cargo build --release -p brimp-controller -p brimp-lite-worker
-export BRIMP_WORKER_PATH="$PWD/target/release/lite-worker"
-./target/release/brimp doctor
+with Session(plugins=[extraction()]) as session:
+    page = session.get("https://example.com")
+    print(page.status_code, page.url)
+    with page.query_selector("h1") as heading:
+        heading.set_text_content("Updated")
+        print(heading.text_content())
+    print(page.extract()["contentMarkdown"])
 ```
 
-## Extract content and evaluate JavaScript
-
-```sh
-./target/release/brimp fetch https://example.com --output example.md
-./target/release/brimp fetch https://example.com --eval 'document.title'
-./target/release/brimp fetch https://example.com --output example.png --full-page
-```
-
-Each browser command launches a child worker. See the [CLI reference](/api/cli/)
-for crawl scheduling, output formats, personas, and persistent storage.
-
-## Connect with Playwright
-
-Start the controller:
-
-```sh
-./target/release/brimp serve --worker-path "$BRIMP_WORKER_PATH" --port=9222
-```
-
-Install the CDP client in your automation project:
-
-```sh
-npm install playwright-core
-```
-
-```js
-import { chromium } from 'playwright-core';
-
-const browser = await chromium.connectOverCDP('http://127.0.0.1:9222');
+```javascript
+import { createSession, extractionPlugin } from 'brimp';
+const session = await createSession({plugins: [extractionPlugin()]});
 try {
-  const context = browser.contexts()[0] ?? await browser.newContext();
-  const page = await context.newPage();
-  await page.goto('https://example.com');
-  console.log(await page.evaluate(() => document.title));
-} finally {
-  await browser.close();
-}
+  const page = await session.get('https://example.com');
+  console.log(await page.evaluate('document.title'));
+  console.log((await page.extract()).contentMarkdown);
+} finally { await session.close(); }
 ```
 
-Brimp implements a subset of CDP. Check the [CDP support reference](/api/cdp/)
-for supported commands and limitations.
+Plugins are explicit; a default session does not install storage, Canvas,
+services, or extraction. Detached elements retain identity. Navigation invalidates
+handles from the previous realm. Python timeouts use seconds; Node uses milliseconds.
+See [API](/api/) for events, routes, input, and streaming bodies.

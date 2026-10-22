@@ -1,31 +1,12 @@
 # Benchmarks
 
-The deterministic Rust suite is the development and CI regression gate:
+The [native benchmarks](native/README.md) measure DOM
+parse/select/mutate/serialize and complete Python/Node
+request → script → query/edit → result workflows using local fixtures.
+The documentation includes reproduction commands, elapsed time and peak RSS.
 
-```sh
-cargo run -p brimp-lite-worker --example benchmark --release -- --samples 20
-```
+The [network comparison](network/README.md) measures the runtime resource adapter
+against direct brimp-net requests on local HTTP/1.1 workloads.
 
-It uses an in-process resource fixture and reports startup, navigation,
-JavaScript, layout, screenshot, throughput, failure rate, staged RSS, repeated
-page cleanup, correctness, raw samples, median/p95/p99 latency, environment,
-Brimp revision, and fixture revision as one JSON document.
-
-Web-platform conformance is reported separately from performance. After the
-pinned sibling WPT runner has produced `wptreport.json`, render the comparable
-passing-case headline with:
-
-```sh
-python benchmark/wpt_summary.py ../brimp-wpt/results/wptreport.json \
-  --output benchmark/wpt-results.md
-```
-
-The headline counts passing WPT subtests only. Harness-document success is
-reported independently and is not added to the passing-case number.
-
-Generate an actionable failure-cluster report from a completed run with:
-
-```sh
-python benchmark/wpt_triage.py ../brimp-wpt/results/wptreport.json \
-  --output benchmark/wpt-results/triage.md
-```
+Correctness is covered by the focused Rust, Python and Node regression suites.
+See the [development guide](../docs/src/content/docs/development.md) for commands.

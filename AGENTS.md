@@ -26,6 +26,8 @@ Choose the simplest implementation that fully meets the current requirements.
 
 Use TODO.md to track the implementation progress and interact with the user.
 
+DO NOT EDIT HUMAN.md, it's for the maintainer to edit manually.
+
 ## Coding
 
 - Use pytest for python testing

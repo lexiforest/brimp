@@ -1,0 +1,249 @@
+{
+  "storage": {
+    "installers": {
+      "node": "storagePlugin",
+      "python": "storage"
+    },
+    "capabilities": [
+      "Storage",
+      "IndexedDB transactions",
+      "Cache"
+    ],
+    "limitations": [
+      "Memory only; resets on navigation",
+      "No shared-origin IndexedDB, storage events or OPFS"
+    ],
+    "lifetime": "realm",
+    "options": {}
+  },
+  "canvas": {
+    "installers": {
+      "node": "canvasPlugin",
+      "python": "canvas"
+    },
+    "capabilities": [
+      "Canvas state",
+      "ImageData",
+      "Configured readback"
+    ],
+    "limitations": [
+      "No rasterization, fonts or image decoding",
+      "Mock data URL is not an image"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "rgba": {
+        "default": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "characterWidth": {
+        "default": 0.5,
+        "python": "character_width"
+      }
+    }
+  },
+  "services": {
+    "installers": {
+      "node": "servicesPlugin",
+      "python": "services"
+    },
+    "capabilities": [
+      "Realm-local locks",
+      "Configured navigator/device values"
+    ],
+    "limitations": [
+      "No real device or permission services",
+      "Locks do not coordinate different realms"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "hardware_concurrency": {
+        "default": 4
+      },
+      "max_touch_points": {
+        "default": 0
+      },
+      "vendor": {
+        "default": ""
+      },
+      "product_sub": {
+        "default": "20030107"
+      },
+      "pdf_viewer_enabled": {
+        "default": false
+      },
+      "device_memory_gb": {
+        "default": 8
+      },
+      "connection_type": {
+        "default": "unknown"
+      },
+      "connection_rtt_ms": {
+        "default": 0
+      },
+      "connection_downlink_mbps": {
+        "default": 0
+      },
+      "connection_effective_type": {
+        "default": "4g"
+      },
+      "connection_save_data": {
+        "default": false
+      },
+      "notification_permission": {
+        "default": "denied"
+      },
+      "permissions_enabled": {
+        "default": true
+      },
+      "bluetooth_enabled": {
+        "default": true
+      },
+      "bluetooth_available": {
+        "default": false
+      },
+      "media_devices_enabled": {
+        "default": true
+      }
+    }
+  },
+  "extraction": {
+    "installers": {
+      "node": "extractionPlugin",
+      "python": "extraction"
+    },
+    "capabilities": [
+      "Defuddle extraction"
+    ],
+    "limitations": [
+      "DOM/inline styles only; no layout"
+    ],
+    "lifetime": "realm",
+    "options": {}
+  },
+  "geometry": {
+    "installers": {
+      "node": "geometryPlugin",
+      "python": "geometry"
+    },
+    "capabilities": [
+      "DOMPoint/Rect/Quad",
+      "2D DOMMatrix"
+    ],
+    "limitations": [
+      "No layout measurement, 3D matrices or transform-list parsing"
+    ],
+    "lifetime": "realm",
+    "options": {}
+  },
+  "css-typed-om": {
+    "installers": {
+      "node": "cssTypedOmPlugin",
+      "python": "css_typed_om"
+    },
+    "capabilities": [
+      "CSSUnitValue arithmetic",
+      "Inline attributeStyleMap"
+    ],
+    "limitations": [
+      "No cascade, compound calc algebra or computed style"
+    ],
+    "lifetime": "realm",
+    "options": {}
+  },
+  "scheduling": {
+    "installers": {
+      "node": "schedulingPlugin",
+      "python": "scheduling"
+    },
+    "capabilities": [
+      "Prioritized tasks",
+      "Abort and priority changes"
+    ],
+    "limitations": [
+      "Priorities apply within plugin tasks",
+      "Idle budget is zero"
+    ],
+    "lifetime": "realm",
+    "options": {}
+  },
+  "graphics": {
+    "installers": {
+      "node": "graphicsPlugin",
+      "python": "graphics"
+    },
+    "capabilities": [
+      "WebGL state and buffers",
+      "Optional WebGPU buffer mock"
+    ],
+    "limitations": [
+      "Shaders fail; no GPU execution or rasterization",
+      "Install canvas first when combining"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "rgba": {
+        "default": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "renderer": {
+        "default": "Deterministic JavaScript mock"
+      },
+      "webgpu": {
+        "default": false
+      }
+    }
+  },
+  "audio": {
+    "installers": {
+      "node": "audioPlugin",
+      "python": "audio"
+    },
+    "capabilities": [
+      "AudioBuffer",
+      "Graph/lifecycle state"
+    ],
+    "limitations": [
+      "Silent analysis; no processing, decoding or output"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "sampleRate": {
+        "default": 48000,
+        "python": "sample_rate"
+      }
+    }
+  },
+  "host-storage": {
+    "installers": {
+      "node": "hostStoragePlugin",
+      "python": "host_storage"
+    },
+    "capabilities": [
+      "Async hostStorage",
+      "Atomic origin-partitioned operation batches",
+      "Custom backend factory"
+    ],
+    "limitations": [
+      "Not localStorage or IndexedDB",
+      "Durability depends on explicit backend",
+      "Opaque origins rejected"
+    ],
+    "lifetime": "session or explicit backend",
+    "options": {
+      "backendFactory": {
+        "default": "session-memory",
+        "python": "backend_factory",
+        "hostOnly": true
+      }
+    }
+  }
+}

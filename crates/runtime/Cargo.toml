@@ -1,0 +1,100 @@
+[package]
+name = "brimp-runtime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+links = "brimp_runtime"
+build = "build.rs"
+autobins = false
+
+[dependencies]
+brimp-lexbor = { path = "../lexbor" }
+brimp-jsc = { path = "../jsc" }
+brimp-net = { path = "../net" }
+bytes = "1"
+http-body-util = "0.1"
+async-trait = { version = "0.1" }
+base64 = { version = "0.22" }
+cookie_store = { version = "0.22.1" }
+data-url = { version = "0.3" }
+encoding_rs = { version = "0.8.35" }
+getrandom = { version = "0.4" }
+glob = "0.3.4"
+http = { version = "1" }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1" }
+swc_common = { version = "26" }
+swc_ecma_ast = { version = "29" }
+swc_ecma_codegen = { version = "32" }
+swc_ecma_parser = { version = "45" }
+swc_ecma_transforms_base = { version = "49", features = ["inline-helpers"] }
+swc_ecma_transforms_module = { version = "55" }
+swc_ecma_visit = { version = "29" }
+thiserror = { version = "2" }
+tokio = { version = "1", features = ["io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"] }
+url = { version = "2" }
+openssl = { version = "0.10.81", features = ["vendored"] }
+
+[dev-dependencies]
+tungstenite = { version = "0.30" }
+
+[[test]]
+name = "runtime_page"
+path = "tests/runtime/page.rs"
+
+[[test]]
+name = "runtime_persona"
+path = "tests/runtime/persona.rs"
+
+[[test]]
+name = "runtime_events"
+path = "tests/runtime/events.rs"
+
+[[test]]
+name = "runtime_automation"
+path = "tests/runtime/automation.rs"
+
+[[test]]
+name = "runtime_dom_bindings"
+path = "tests/runtime/dom_bindings.rs"
+
+[[test]]
+name = "runtime_fetch"
+path = "tests/runtime/fetch.rs"
+
+[[test]]
+name = "runtime_script_loading"
+path = "tests/runtime/script_loading.rs"
+
+[[test]]
+name = "runtime_navigation"
+path = "tests/runtime/navigation.rs"
+
+[[test]]
+name = "runtime_timers"
+path = "tests/runtime/timers.rs"
+
+[[test]]
+name = "runtime_extraction"
+path = "tests/runtime/extraction.rs"
+
+[[test]]
+name = "web_apis_wrapper_identity"
+path = "tests/web-apis/wrapper_identity.rs"
+
+[[test]]
+name = "dom_serialization"
+path = "tests/dom/serialization.rs"
+
+[[test]]
+name = "dom_parse"
+path = "tests/dom/parse.rs"
+
+[[example]]
+name = "dom_parse_html"
+path = "examples/dom/parse_html.rs"
+
+[[test]]
+name = "network_resource_loader"
+path = "tests/network/resource_loader.rs"
+

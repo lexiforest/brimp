@@ -3,7 +3,6 @@
 /docs/.astro
 /docs/dist
 /out.png
-/examples/cli/artifacts/
 **/__pycache__/
 **/node_modules/
 benchmark/**/.tools/
@@ -11,3 +10,10 @@ benchmark/**/.venv/
 benchmark/**/results/
 .DS_Store
 *.so
+
+/bindings/node/*.node
+/bindings/node/*.tgz
+*.pyd
+
+/bindings/python/python/brimp/bundled/
+/bindings/node/bundled/

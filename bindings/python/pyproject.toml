@@ -1,0 +1,17 @@
+[build-system]
+requires = ["maturin>=1.9,<2"]
+build-backend = "maturin"
+
+[project]
+name = "brimp"
+version = "0.1.1"
+requires-python = ">=3.10"
+description = "In-process DOM automation with JavaScriptCore"
+license = "MIT"
+
+[tool.maturin]
+python-source = "python"
+module-name = "brimp._brimp"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

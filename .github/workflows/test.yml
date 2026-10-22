@@ -14,8 +14,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lexbor:
+    name: Standalone Lexbor
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      BRIMP_JSC_LIB_DIR: /nonexistent/jsc
+      BRIMP_CURL_LIB_DIR: /nonexistent/curl
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test without native SDKs or language bindings
+        run: cargo test --locked -p brimp-lexbor
+      - name: Sanitize Lexbor boundary
+        run: python3 scripts/test_lexbor_boundary.py
+
   test:
-    name: Source and worker
+    name: Runtime and bindings
     runs-on: macos-26
     timeout-minutes: 120
     env:
@@ -35,22 +50,87 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
       - name: Download pinned native SDKs
         run: >-
           python scripts/prepare_native.py
           --target aarch64-apple-darwin
           --output .native/aarch64-apple-darwin
 
-      - name: Build worker executable for CLI acceptance tests
-        run: cargo build --locked -p brimp-controller -p brimp-lite-worker
+      - name: Build native bindings
+        run: cargo build --locked -p brimp-python -p brimp-node
 
       - name: Run workspace tests
         run: cargo test --locked --workspace
 
-      - name: Test controller acceptance
+      - name: Check runtime dependency boundary
+        run: python3 scripts/check_runtime_dependencies.py
+
+      - name: Test Python and Node bindings
         run: |
           python -m pip install pytest
-          python -m pytest crates/controller/tests crates/controller/test_package_release.py scripts/test_prepare_native.py
+          python3 bindings/prepare_local.py
+          PYTHONPATH=bindings/python/python python3 -m pytest bindings/python/tests
+          node --test bindings/node/test/*.test.mjs
+
+      - name: Sanitize Lexbor boundary
+        run: python3 scripts/test_lexbor_boundary.py
+
+      - name: Verify bundled web primitives
+        working-directory: crates/runtime/js/vendor
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          git diff --exit-code -- core.bundle.js manifest.json ../plugins/storage.js
+
+      - name: Prepare browser workload corpus
+        working-directory: compatibility
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright install chromium
+          npm run prepare:fixtures
+
+      - name: Check browser workload corpus
+        working-directory: compatibility
+        run: |
+          npm test
+          npm run check
+
+      - name: Upload browser workload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-workload-report
+          path: compatibility/results/
+          if-no-files-found: ignore
+
+      - name: Build and smoke-test native packages
+        run: |
+          python -m pip install 'maturin>=1.9,<2'
+          mkdir -p "$RUNNER_TEMP/brimp-packages"
+          maturin build --locked --manifest-path bindings/python/Cargo.toml --out "$RUNNER_TEMP/brimp-packages"
+          python -m pip install --no-deps "$RUNNER_TEMP"/brimp-packages/*.whl
+          python -m pytest bindings/python/tests
+          npm pack ./bindings/node --pack-destination "$RUNNER_TEMP/brimp-packages"
+          npm install --prefix "$RUNNER_TEMP/brimp-installed" --ignore-scripts --no-audit --no-fund "$RUNNER_TEMP"/brimp-packages/*.tgz
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {pathToFileURL} from 'node:url';
+          const api = await import(pathToFileURL(`${process.env.RUNNER_TEMP}/brimp-installed/node_modules/brimp/index.js`));
+          const session = await api.createSession({plugins: [api.storagePlugin(), api.canvasPlugin(), api.extractionPlugin()]});
+          try {
+            const page = await session.newPage();
+            assert.equal(await page.evaluate('6 * 7'), 42);
+            assert.equal(await page.evaluate("localStorage.x='installed'; localStorage.x"), 'installed');
+            assert.deepEqual(await page.evaluate("Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)"), [0,0,0,0]);
+            await page.evaluate("document.body.innerHTML='<article><h1>Package check</h1><p>Extracted from the installed package.</p></article>'; null");
+            assert.match((await page.extract({contentSelector: 'article'})).content, /installed package/);
+          } finally { await session.close(); }
+          JS
 
       - name: Run Clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
@@ -78,19 +158,3 @@ jobs:
       - name: Build documentation
         run: npm run build
         working-directory: docs
-
-  cli-without-runtime:
-    name: CLI without native runtime (${{ matrix.runner }})
-    strategy:
-      matrix:
-        runner: [macos-26, ubuntu-24.04, windows-2025]
-    runs-on: ${{ matrix.runner }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Build CLI without browser SDKs
-        run: cargo build --locked -p brimp-controller
-      - name: Check CLI help
-        run: cargo run --locked -p brimp-controller -- --help
-      - name: Test message transports without browser SDKs
-        run: cargo test --locked -p brimp-controller --test connection
