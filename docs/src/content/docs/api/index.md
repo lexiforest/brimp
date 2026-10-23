@@ -1,38 +1,34 @@
 ---
-title: API overview
+title: API reference
+description: References generated from Python source, TypeScript declarations and Clap commands.
 ---
 
-The native packages expose requests-style Session/Page APIs. Sessions isolate
-cookies and plugin descriptors; pages own their realms and DOMs. Python uses
-snake_case, bytes, context managers, and typed exceptions. Node uses camelCase,
-Promises, Buffer/Uint8Array, TypeScript declarations, and request/stream AbortSignal.
+Choose your interface:
 
-| Capability | Python / Node |
+| Reference | Generated from |
 | --- | --- |
-| Navigation | `session.get/post/...`, reusable `page.request` |
-| Evaluation | `evaluate`, `evaluate_handle` / `evaluateHandle` |
-| DOM handles | `query_selector` / `querySelector`, plural forms, attributes, text/HTML, edits/removal |
-| Input | `click`, `hover`, `tap`, `focus`, `fill`, `press`, `type_text` / `typeText`, `drag_to` / `dragTo`, file inputs |
-| Events | `on` returns unsubscribe; console/error, lifecycle, mutation, network, WebSocket/EventSource |
-| Routes | `route` returns removal; request/response/auth stages, exactly one decision |
-| Streams | `page.stream`: Python chunk iterator / Node Readable |
-| Controls | headers, identity, init scripts, cache/offline/latency, bounded retained bodies |
-| Extraction | `extract` requires the explicit Defuddle plugin |
-| Plugin discovery | `plugins.catalog()` / `pluginCatalog()` reports capabilities, options and lifetimes |
-| Host storage | `plugins.host_storage(...)` / `hostStoragePlugin(...)` installs async origin-partitioned storage with a configurable backend |
+| [Python package](/reference/python/) | Python source signatures, properties and docstrings, via mkdocstrings |
+| [Python plugins](/reference/python/plugins/) | Plugin installers, factories and host context |
+| [Node package](/reference/node/) | `bindings/node/index.d.ts`, via TypeDoc |
+| [CLI](/api/cli/) | The executable's Clap command definitions |
 
-Evaluation pumps timers, network and host completions while awaiting Promises.
-Callbacks cannot reenter the same page. Python callbacks run synchronously on a
-managed dispatcher; Node callbacks may return Promises. Routes abort if a handler
-throws or returns without deciding. Response interception buffers at most 32 MiB.
-Native stream consumers buffer at most 256 KiB plus transport buffers. Navigation,
-closure, and cancellation terminate pending operations.
+These references regenerate when the documentation builds. They are not copied
+signature lists. For step-by-step examples, start with the [tutorials](/examples/).
 
-The page realm includes DOM lifecycle and Range operations, FileReader, Web
-Streams, structured cloning, XPath, Shadow DOM and WebCrypto. See
-[core and plugin coverage](/architecture/subsystems/) for supported behavior.
+## Choose the right boundary
 
-Layout, screenshots, coordinate actions, XML, browser Workers, and native
-graphics/audio engines are unsupported. Durable storage requires an explicit
-hostStorage backend; the browser storage plugin is realm-local memory.
-Full source examples and declarations are in `bindings/`.
+| You want to work with | Use |
+| --- | --- |
+| Cookies and request defaults | Session |
+| Navigation, evaluation, input and routes | Page |
+| Original HTTP bytes and metadata | Page's response snapshot |
+| Current serialized DOM | `page.html()`; await it in Node |
+| Rooted DOM/JavaScript objects | ElementHandle / JSHandle; dispose when finished |
+| Specialized APIs and host callbacks | Explicit plugins |
+
+Python timeouts are seconds; Node timeouts are milliseconds. A session owns its
+pages. Navigation invalidates the previous realm's handles.
+
+See [core APIs and plugins](/architecture/subsystems/) for browser API coverage
+and limits. These host references describe the automation interfaces, not the
+entire web platform.

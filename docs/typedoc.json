@@ -1,0 +1,12 @@
+{
+  "entryPoints": ["../bindings/node/index.d.ts"],
+  "tsconfig": "tsconfig.reference.json",
+  "out": "public/reference/node",
+  "name": "@brimp/brimp API",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "disableSources": true,
+  "treatWarningsAsErrors": true,
+  "navigationLinks": { "Tutorials": "/examples/node/", "Brimp docs": "/" }
+}

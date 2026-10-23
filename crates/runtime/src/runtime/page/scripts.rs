@@ -15,7 +15,7 @@ use brimp_jsc::JsException;
 
 impl Page {
     pub(super) async fn parse_navigation_document(
-        &self,
+        &mut self,
         html: &str,
         document_url: &str,
     ) -> Result<(), NavigationError> {
@@ -37,7 +37,6 @@ impl Page {
                 .map_err(|error| NavigationError::Document(error.to_string()))?;
             self.bindings
                 .deliver_parser_mutations(&self.js, &mutations)?;
-            self.perform_microtask_checkpoint()?;
             let ParseProgress::Script(node_id) = progress else {
                 break;
             };
@@ -65,6 +64,39 @@ impl Page {
                         Ok(source) => self.execute_document_script(&source, script.order),
                         Err(error) => self.report_script_load_error(&src, &error),
                     }
+                }
+                (ScriptMode::Async, ScriptSource::External(src)) => {
+                    let script_url = base_url.join(&src)?.to_string();
+                    let request = self.resource_request(&script_url)?;
+                    let sender = self.tasks.sender();
+                    let realm = self.realm_id;
+                    self.pending_navigation_scripts
+                        .set(self.pending_navigation_scripts.get() + 1);
+                    let loader = Arc::clone(&self.network_scope.loader);
+                    let context = Arc::clone(&self.browsing_context);
+                    let job = self.network_scope.executor.spawn(async move {
+                        let result =
+                            crate::runtime::request::fetch(loader.as_ref(), &context, request)
+                                .await;
+                        let _ = sender.post(move |page| {
+                            if page.realm_id != realm {
+                                return;
+                            }
+                            let loaded = LoadedScript {
+                                order: script.order,
+                                mode: ScriptMode::Async,
+                                source: script_url,
+                                result,
+                            };
+                            let _ = page.handle_loaded_script(loaded, &mut BTreeMap::new());
+                            page.pending_navigation_scripts
+                                .set(page.pending_navigation_scripts.get().saturating_sub(1));
+                            if page.document_ready && page.pending_navigation_scripts.get() == 0 {
+                                let _ = page.finish_navigation_load();
+                            }
+                        });
+                    });
+                    self.navigation_jobs.borrow_mut().push(job.abort_handle());
                 }
                 (mode, ScriptSource::External(src)) => {
                     if mode == ScriptMode::Defer {
@@ -102,15 +134,18 @@ impl Page {
             while let Some(result) = pending_loads.try_join_next() {
                 self.handle_loaded_script(result?, &mut loaded_deferred)?;
             }
+            self.run_pending_tasks()?;
         }
 
         self.bindings.script_control(
             &self.js,
             serde_json::json!({"op":"ready", "state":"interactive"}),
         )?;
+        self.run_pending_tasks()?;
         let mut next_deferred = 0;
         self.execute_ready_deferred(&deferred_order, &mut next_deferred, &mut loaded_deferred)?;
         while let Some(result) = pending_loads.join_next().await {
+            self.run_pending_tasks()?;
             self.handle_loaded_script(result?, &mut loaded_deferred)?;
             self.execute_ready_deferred(&deferred_order, &mut next_deferred, &mut loaded_deferred)?;
         }
@@ -397,9 +432,6 @@ impl Page {
     }
 
     fn finish_script_execution(&self) {
-        if let Err(error) = self.perform_microtask_checkpoint() {
-            self.report_page_script_error(&error);
-        }
         if let Err(error) = self.start_pending_fetches() {
             self.report_page_script_error(&error);
         }

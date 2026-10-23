@@ -55,7 +55,7 @@ class ProcessingInstruction extends CharacterData {
 }
 class DocumentFragment extends Node {
     constructor() { return document.createDocumentFragment(); }
-    get children() { return new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element)); }
+    get children() { return __cachedCollection(this, "children", () => new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element))); }
     get childElementCount() { return this.children.length; }
     get firstElementChild() { return this.children.item(0); }
     get lastElementChild() { return this.children.item(this.children.length - 1); }

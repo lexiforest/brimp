@@ -43,6 +43,7 @@ export class StaleHandle extends RuntimeError {}
 export class Closed extends RuntimeError {}
 export class Timeout extends RuntimeError {}
 export class Reentry extends RuntimeError {}
+/** Create an in-process browser session. Close it to release all owned pages. */
 export function createSession(options?: SessionOptions): Promise<Session>;
 declare class Requests {
   request(method: string, url: string, options?: RequestOptions): Promise<Page>;
@@ -54,6 +55,7 @@ declare class Requests {
   head(url: string, options?: RequestOptions): Promise<Page>;
   options(url: string, options?: RequestOptions): Promise<Page>;
 }
+/** Shared cookies, request defaults and plugins. Request methods create new pages. */
 export class Session extends Requests {
   private constructor();
   newPage(): Promise<Page>;
@@ -63,6 +65,7 @@ export class Session extends Requests {
   close(): Promise<void>;
 }
 export interface StreamingResponse { status: number; url: string; headers: [string,string][]; body: import("node:stream").Readable; cancel(): void; }
+/** A reusable browser realm and DOM. Navigation invalidates previous realm handles. */
 export class Page extends Requests {
   advanceTime(milliseconds: number, options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
   runPendingTasks(options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
@@ -77,6 +80,7 @@ export class Page extends Requests {
   readonly url: string;
   readonly headers: [string, string][];
   json(): JSONValue;
+  /** Evaluate browser JavaScript, await Promises, and copy a JSON-compatible result. */
   evaluate(source: string): Promise<JSONValue>;
   evaluateHandle(source: string): Promise<JSHandle>;
   querySelector(selector: string): Promise<ElementHandle | null>;
@@ -94,9 +98,11 @@ export class Page extends Requests {
   dragTo(source: string, destination: string): Promise<void>;
   setInputFiles(selector: string, files: FileUpload[]): Promise<void>;
   extract(options?: ExtractionOptions): Promise<ExtractedDocument>;
+  /** Serialize the current DOM, including page-script and host edits. */
   html(): Promise<string>;
   close(): Promise<void>;
 }
+/** Original HTTP response bytes and metadata. Use Page.html() for the live DOM. */
 export class Response {
   private constructor();
   readonly statusCode: number;
@@ -116,6 +122,7 @@ export class Response {
   readonly text: string;
   json(): JSONValue;
 }
+/** Rooted JavaScript value. Dispose it when finished; navigation makes it stale. */
 export class JSHandle {
   protected constructor();
   jsonValue(): Promise<JSONValue>;
@@ -199,6 +206,7 @@ export interface PageEvents {
   eventSource: {event: 'eventSource'; requestId: number; eventName: string; eventId: string; data: string};
 }
 export type RouteStage = 'request' | 'response' | 'auth';
+/** One intercepted request. Complete it once; callbacks cannot reenter their page. */
 export class Route {
   private constructor();
   readonly stage: RouteStage;

@@ -138,36 +138,21 @@ globalThis.__brimpInputController = (() => {
         }
         if (target instanceof HTMLInputElement) {
             if (target.type === "submit") {
-                submit(target.closest("form"));
+                submit(__formOwner(target));
             } else if (target.type === "reset") {
-                reset(target.closest("form"));
+                reset(__formOwner(target));
             }
         } else if (target instanceof HTMLButtonElement) {
-            if (target.type === "submit") submit(target.closest("form"));
-            else if (target.type === "reset") reset(target.closest("form"));
+            if (target.type === "submit") submit(__formOwner(target));
+            else if (target.type === "reset") reset(__formOwner(target));
         } else if (target instanceof HTMLAnchorElement && target.href) {
             location.href = target.href;
         }
     }
 
-    function submit(form) {
-        if (!form) return;
-        if (dispatch(form, new Event("submit", { bubbles: true, cancelable: true, composed: true }))) {
-            form.submit();
-        }
-    }
+    function submit(form) { if (form) form.requestSubmit(); }
 
-    function reset(form) {
-        if (!form || !dispatch(form, new Event("reset", { bubbles: true, cancelable: true, composed: true }))) return;
-        for (const control of form.querySelectorAll("input,textarea,select")) {
-            if (control instanceof HTMLInputElement) {
-                control.value = control.defaultValue;
-                control.checked = control.defaultChecked;
-            } else if (control instanceof HTMLTextAreaElement) {
-                control.value = control.textContent;
-            }
-        }
-    }
+    function reset(form) { if (form) form.reset(); }
 
     function releaseClick(target, command) {
         const activationTarget = activationElement(target);
@@ -336,7 +321,7 @@ globalThis.__brimpInputController = (() => {
         if (accepted && command.key === "Escape") finishDrag(null, {}, true);
         if (accepted && ["keyDown", "rawKeyDown", "char"].includes(command.eventType)) {
             if (command.key === "Tab") tab(command);
-            else if (command.key === "Enter" && target instanceof HTMLInputElement) submit(target.closest("form"));
+            else if (command.key === "Enter" && target instanceof HTMLInputElement) submit(__formOwner(target));
             else if (command.commands?.length) {
                 const keys = {selectAll:"a",deleteBackward:"Backspace",deleteForward:"Delete",insertNewline:"Enter",moveLeft:"ArrowLeft",moveRight:"ArrowRight",moveToBeginningOfLine:"Home",moveToEndOfLine:"End"};
                 for (const name of command.commands) edit(editableTarget(),keys[name],"",name === "selectAll" ? 2 : 0);

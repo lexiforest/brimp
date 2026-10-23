@@ -70,6 +70,7 @@ function __iteratorMutationBefore(operation, args) {
     let removed = [];
     const [target, child] = args;
     if (operation === 'removeChild' && child?.parentNode === target) removed = [child];
+    if (operation === 'replaceChild') removed = [args[2], ...(child?.nodeType === 11 ? child.childNodes : child?.parentNode ? [child] : [])];
     if (operation === 'appendChild' || operation === 'insertBefore') {
         if (child?.nodeType === 11) removed = [...child.childNodes];
         else if (child?.parentNode) removed = [child];

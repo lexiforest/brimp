@@ -1,13 +1,13 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::HashMap,
     marker::PhantomData,
     panic::{AssertUnwindSafe, catch_unwind},
     ptr::{self, NonNull},
     rc::Rc,
     slice,
-    sync::OnceLock,
-    time::Duration,
+    sync::{Arc, OnceLock},
+    time::{Duration, Instant},
 };
 
 use crate::ffi::{
@@ -33,8 +33,40 @@ thread_local! {
     static NATIVE_CALLBACKS: RefCell<HashMap<(usize, usize), NativeCallback>> = RefCell::new(HashMap::new());
 }
 
+#[derive(Default)]
+struct ExecutionGuard {
+    deadline: Cell<Option<Instant>>,
+    interrupt: RefCell<Option<Arc<dyn Fn() -> bool + Send + Sync>>>,
+}
+unsafe extern "C" fn should_terminate(context: JSContextRef, data: *mut std::ffi::c_void) -> bool {
+    // The guard is boxed and outlives the context's watchdog registration.
+    let guard = unsafe { &*data.cast::<ExecutionGuard>() };
+    let terminate = guard
+        .deadline
+        .get()
+        .is_some_and(|deadline| Instant::now() >= deadline)
+        || guard
+            .interrupt
+            .borrow()
+            .as_ref()
+            .is_some_and(|check| catch_unwind(AssertUnwindSafe(|| check())).unwrap_or(true));
+    if !terminate {
+        // Explicitly rearm after a false callback: the SDK may retain its old CPU deadline.
+        unsafe {
+            JSContextGroupSetExecutionTimeLimit(
+                JSContextGetGroup(context),
+                0.01,
+                should_terminate as *const std::ffi::c_void,
+                data,
+            );
+        }
+    }
+    terminate
+}
+
 pub struct JsRuntime {
     context: NonNull<crate::ffi::OpaqueJSContext>,
+    execution_guard: Box<ExecutionGuard>,
     _thread_bound: PhantomData<Rc<()>>,
 }
 
@@ -99,6 +131,7 @@ impl JsRuntime {
         })?;
         let runtime = Self {
             context,
+            execution_guard: Box::default(),
             _thread_bound: PhantomData,
         };
         runtime.set_console_callback(|message| eprintln!("{message}"))?;
@@ -136,23 +169,43 @@ impl JsRuntime {
         unsafe { JSGarbageCollect(self.as_raw()) };
     }
 
+    /// Poll a thread-safe cancellation predicate while JavaScript executes.
+    pub fn set_interrupt_handler(&self, handler: Arc<dyn Fn() -> bool + Send + Sync>) {
+        *self.execution_guard.interrupt.borrow_mut() = Some(handler);
+        self.update_watchdog();
+    }
+
     pub fn set_execution_time_limit(&self, limit: Duration) {
-        let seconds = limit.as_secs_f64().max(0.001);
-        // SAFETY: the context owns a live group. A null callback requests
-        // unconditional termination when the watchdog expires.
-        unsafe {
-            JSContextGroupSetExecutionTimeLimit(
-                JSContextGetGroup(self.as_raw()),
-                seconds,
-                ptr::null(),
-                ptr::null_mut(),
-            )
-        };
+        self.execution_guard
+            .deadline
+            .set(Instant::now().checked_add(limit));
+        self.update_watchdog();
     }
 
     pub fn clear_execution_time_limit(&self) {
-        // SAFETY: the context and its group remain live for this call.
-        unsafe { JSContextGroupClearExecutionTimeLimit(JSContextGetGroup(self.as_raw())) };
+        self.execution_guard.deadline.set(None);
+        self.update_watchdog();
+    }
+
+    fn update_watchdog(&self) {
+        // SAFETY: the boxed guard has a stable address until after context release.
+        unsafe {
+            let group = JSContextGetGroup(self.as_raw());
+            if self.execution_guard.deadline.get().is_some()
+                || self.execution_guard.interrupt.borrow().is_some()
+            {
+                JSContextGroupSetExecutionTimeLimit(
+                    group,
+                    0.01,
+                    should_terminate as *const std::ffi::c_void,
+                    (&*self.execution_guard as *const ExecutionGuard)
+                        .cast_mut()
+                        .cast(),
+                );
+            } else {
+                JSContextGroupClearExecutionTimeLimit(group);
+            }
+        }
     }
 
     pub fn make_object(&self) -> Result<ProtectedJsObject, JsException> {
@@ -352,7 +405,10 @@ impl Drop for JsRuntime {
                 .retain(|(context, _), _| *context != self.as_raw() as usize);
         });
         // SAFETY: this runtime uniquely owns the global context.
-        unsafe { JSGlobalContextRelease(self.as_raw()) };
+        unsafe {
+            JSContextGroupClearExecutionTimeLimit(JSContextGetGroup(self.as_raw()));
+            JSGlobalContextRelease(self.as_raw());
+        };
     }
 }
 

@@ -1,0 +1,10 @@
+[package]
+name = "brimp-cli-reference"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+clap = { version = "4.6", features = ["derive"] }

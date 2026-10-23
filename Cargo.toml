@@ -1,5 +1,13 @@
 [workspace]
-members = ["crates/lexbor", "crates/jsc", "crates/net", "crates/runtime", "bindings/python", "bindings/node"]
+members = [
+    "crates/lexbor",
+    "crates/jsc",
+    "crates/net",
+    "crates/runtime",
+    "crates/cli",
+    "bindings/python",
+    "bindings/node"
+]
 resolver = "3"
 
 [workspace.package]

@@ -5,10 +5,13 @@ function __removeNode(node) {
 function __replaceNode(node, values) {
     const parent = node.parentNode;
     if (!parent) return;
-    for (const replacement of __nodesFromArguments(values)) {
-        parent.insertBefore(replacement, node);
-    }
-    parent.removeChild(node);
+    const nodes = __nodesFromArguments(values);
+    let reference = node.nextSibling;
+    while (nodes.includes(reference)) reference = reference.nextSibling;
+    const replacement = nodes.length === 1 ? nodes[0] : node.ownerDocument.createDocumentFragment();
+    if (nodes.length !== 1) for (const n of nodes) replacement.appendChild(n);
+    if (node.parentNode === parent) parent.replaceChild(replacement, node);
+    else parent.insertBefore(replacement, reference);
 }
 
 class Document extends Node {
@@ -53,32 +56,66 @@ class Document extends Node {
     get documentElement() { return __callHost("documentElement", this); }
     get head() { return __callHost("head", this); }
     get body() { return __callHost("body", this); }
-    get forms() { return new HTMLCollection(() => [...this.querySelectorAll("form")]); }
-    get images() { return new HTMLCollection(() => [...this.querySelectorAll("img")]); }
-    get embeds() { return new HTMLCollection(() => [...this.querySelectorAll("embed")]); }
+    get forms() { return __cachedCollection(this, "forms", () => new HTMLCollection(() => [...this.querySelectorAll("form")])); }
+    get images() { return __cachedCollection(this, "images", () => new HTMLCollection(() => [...this.querySelectorAll("img")])); }
+    get embeds() { return __cachedCollection(this, "embeds", () => new HTMLCollection(() => [...this.querySelectorAll("embed")])); }
     get plugins() { return this.embeds; }
-    get links() { return new HTMLCollection(() => [...this.querySelectorAll("a[href],area[href]")]); }
-    get scripts() { return new HTMLCollection(() => [...this.querySelectorAll("script")]); }
-    get anchors() { return new HTMLCollection(() => [...this.querySelectorAll("a[name]")]); }
-    get applets() { return new HTMLCollection(() => []); }
+    get links() { return __cachedCollection(this, "links", () => new HTMLCollection(() => [...this.querySelectorAll("a[href],area[href]")])); }
+    get scripts() { return __cachedCollection(this, "scripts", () => new HTMLCollection(() => [...this.querySelectorAll("script")])); }
+    get anchors() { return __cachedCollection(this, "anchors", () => new HTMLCollection(() => [...this.querySelectorAll("a[name]")])); }
+    get applets() { return __cachedCollection(this, "applets", () => new HTMLCollection(() => [])); }
     get activeElement() { return __activeElement || this.body; }
-    get children() { return new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element)); }
+    get children() { return __cachedCollection(this, "children", () => new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element))); }
     get childElementCount() { return this.children.length; }
     get firstElementChild() { return this.children.item(0); }
     get lastElementChild() { return this.children.item(this.children.length - 1); }
     get implementation() { return __domImplementation; }
-    createElement(name) { return __upgradeCustomElement(__callHost("createElement", this, name)); }
+    createElement(name, options = {}) {
+        name = String(name); __validateXmlName(name);
+        const element = __callHost('createElement', this, name);
+        if (options && typeof options === 'object' && options.is !== undefined) {
+            const is = String(options.is); __customElementNames.set(element, is);
+            element.setAttribute('is', is);
+        }
+        return __upgradeCustomElement(element);
+    }
     createElementNS(namespace, qualifiedName) {
-        return __callHost("createElementNS", this, namespace, qualifiedName);
+        const name = __validateQualifiedName(namespace, qualifiedName);
+        return __callHost("createElementNS", this, name.namespaceURI, name.name);
     }
     createTextNode(text) { return __callHost("createTextNode", this, text); }
     createComment(data) { return __callHost("createComment", this, data); }
     createDocumentFragment() { return __callHost("createDocumentFragment", this); }
+    adoptNode(node) {
+        if (!(node instanceof Node)) throw new TypeError('Expected a Node');
+        if (node instanceof Document || node instanceof ShadowRoot) throw new DOMException('Cannot adopt this node', 'NotSupportedError');
+        const previous = node.ownerDocument;
+        if (node instanceof Attr) {
+            if (node.ownerElement) node.ownerElement.removeAttributeNode(node);
+            node.__ownerDocument = this;
+        } else {
+            if (node.parentNode) node.parentNode.removeChild(node);
+            __callHost('adoptNode', this, node);
+            if (previous !== this) for (const e of __customElementTree(node)) {
+                if (__upgradedCustomElements.has(e) && typeof e.adoptedCallback === 'function') e.adoptedCallback(previous, this);
+            }
+        }
+        return node;
+    }
+    createAttribute(name) {
+        name = __asciiLowercase(String(name)); __validateXmlName(name);
+        return new Attr(__attrConstructionToken, null, {name,localName:name,prefix:null,namespaceURI:null,value:''}, this);
+    }
+    createAttributeNS(namespace, name) {
+        const record = __validateQualifiedName(namespace, name);
+        return new Attr(__attrConstructionToken, null, {...record, value:''}, this);
+    }
     importNode(node, deep = false) {
         if (!(node instanceof Node)) throw new TypeError("node must be a Node");
         if (node.nodeType === Node.DOCUMENT_NODE) {
             throw new DOMException("Documents cannot be imported", "NotSupportedError");
         }
+        if (node instanceof Attr) return new Attr(__attrConstructionToken, null, {...node.__record, value:node.value}, this);
         return __callHost("importNode", this, node, Boolean(deep));
     }
     hasFocus() { return true; }
@@ -209,7 +246,17 @@ function __rangeMutationBefore(operation, args) {
         if (node.contains(r[n])) { r[n] = parent; r[o] = index; }
         else if (r[n] === parent && r[o] > index) r[o]--;
     }));
-    if (['appendChild','insertBefore','removeChild'].includes(operation)) {
+    if (operation === 'replaceChild') {
+        const incoming = child.nodeType === 11 ? Array.from(child.childNodes) : [child];
+        let index = target.childNodes.indexOf(reference);
+        for (const node of incoming) if (node.parentNode) {
+            const parent = node.parentNode, oldIndex = parent.childNodes.indexOf(node);
+            remove(node,parent,child.nodeType === 11 ? 0 : oldIndex);
+            if(parent === target && oldIndex < index) index--;
+        }
+        if (child !== reference) remove(reference,target,index);
+        updates.push(() => __rangeBoundaries((r,n,o) => { if(r[n]===target && r[o]>index)r[o]+=incoming.length; }));
+    } else if (['appendChild','insertBefore','removeChild'].includes(operation)) {
         const children = child.nodeType === 11 ? Array.from(child.childNodes) : [child];
         for (const node of children) if (node.parentNode) remove(node,node.parentNode,child.nodeType === 11 ? 0 : node.parentNode.childNodes.indexOf(node));
         if (operation !== 'removeChild') {
@@ -656,9 +703,16 @@ DOMTokenList.prototype.values = Array.prototype.values;
 DOMTokenList.prototype.forEach = Array.prototype.forEach;
 DOMTokenList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
 
+function __liveCollectionItems(read) {
+    let version = -1, items;
+    return () => {
+        if (version !== __domVersion) { items = read(); version = __domVersion; }
+        return items;
+    };
+}
 class HTMLCollection {
     constructor(items) {
-        this.__items = items;
+        this.__items = __liveCollectionItems(items);
         return new Proxy(this, {
             get(target, property, receiver) {
                 if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
@@ -682,7 +736,18 @@ class HTMLCollection {
                         value, configurable: true, enumerable: true, writable: false,
                     };
                 }
+                if (typeof property === 'string' && !Reflect.has(target, property)) {
+                    const value = target.namedItem(property);
+                    if (value !== null) return {value, configurable:true, enumerable:false, writable:false};
+                }
                 return Reflect.getOwnPropertyDescriptor(target, property);
+            },
+            ownKeys(target) {
+                const nodes = target.__items(), keys = nodes.map((_, i) => String(i));
+                for (const node of nodes) for (const name of [node.id, node.namespaceURI === 'http://www.w3.org/1999/xhtml' ? node.getAttribute('name') : null]) {
+                    if (name && !Reflect.has(target, name) && !keys.includes(name)) keys.push(name);
+                }
+                return keys;
             },
         });
     }
@@ -691,7 +756,7 @@ class HTMLCollection {
     namedItem(name) {
         name = String(name);
         if (name === "") return null;
-        return this.__items().find(element => element.id === name || element.getAttribute("name") === name) ?? null;
+        return this.__items().find(element => element.id === name || element.namespaceURI === "http://www.w3.org/1999/xhtml" && element.getAttribute("name") === name) ?? null;
     }
     get [Symbol.toStringTag]() { return "HTMLCollection"; }
     [Symbol.iterator]() { return this.__items()[Symbol.iterator](); }
@@ -706,7 +771,7 @@ class NodeList extends Array {
             this.__items = null;
         } else if (typeof items === "function") {
             super();
-            this.__items = items;
+            this.__items = __liveCollectionItems(items);
         } else {
             super(...items);
             this.__items = null;
@@ -756,11 +821,12 @@ class NodeList extends Array {
 const __attrConstructionToken = {};
 
 class Attr extends Node {
-    constructor(token, element, record) {
+    constructor(token, element, record, owner = element?.ownerDocument ?? document) {
         if (token !== __attrConstructionToken) throw new TypeError("Illegal constructor");
         super();
         this.__element = element;
         this.__record = record;
+        this.__ownerDocument = owner;
     }
     __update(record) { this.__record = record; }
     __currentRecord() {
@@ -782,8 +848,9 @@ class Attr extends Node {
     }
     set value(value) {
         value = String(value);
-        if (this.__element !== null && this.namespaceURI === null) {
-            this.__element.setAttribute(this.name, value);
+        if (this.__element !== null) {
+            if (this.namespaceURI === null) this.__element.setAttribute(this.name, value);
+            else this.__element.setAttributeNS(this.namespaceURI, this.name, value);
         }
         this.__record.value = value;
     }
@@ -791,6 +858,7 @@ class Attr extends Node {
         this.__currentRecord();
         return this.__element;
     }
+    cloneNode() { return new Attr(__attrConstructionToken, null, {...this.__record, value:this.value}, this.ownerDocument); }
     get specified() { return true; }
     get nodeType() { return Node.ATTRIBUTE_NODE; }
     get nodeName() { return this.name; }
@@ -798,10 +866,10 @@ class Attr extends Node {
     set nodeValue(value) { this.value = value == null ? "" : value; }
     get textContent() { return this.value; }
     set textContent(value) { this.value = value == null ? "" : value; }
-    get ownerDocument() { return document; }
+    get ownerDocument() { return this.__element?.ownerDocument ?? this.__ownerDocument; }
     get parentNode() { return null; }
     get parentElement() { return null; }
-    get childNodes() { return new NodeList(); }
+    get childNodes() { return __cachedCollection(this, "childNodes", () => new NodeList()); }
     get firstChild() { return null; }
     get lastChild() { return null; }
     get previousSibling() { return null; }
@@ -878,16 +946,15 @@ class NamedNodeMap {
         return record === undefined ? null : this.__attr(record);
     }
     getNamedItem(name) {
-        name = String(name).toLowerCase();
+        name = String(name);
+        if (this.__element.namespaceURI === __htmlNamespace) name = __asciiLowercase(name);
         const record = __attributeRecords(this.__element).find(item => item.name === name);
         return record === undefined ? null : this.__attr(record);
     }
     removeNamedItem(name) {
         const attr = this.getNamedItem(name);
         if (attr === null) throw new DOMException("attribute was not found", "NotFoundError");
-        this.__element.removeAttribute(attr.name);
-        attr.__element = null;
-        return attr;
+        return this.__element.removeAttributeNode(attr);
     }
     get [Symbol.toStringTag]() { return "NamedNodeMap"; }
     [Symbol.iterator]() {

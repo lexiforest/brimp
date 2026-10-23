@@ -7,12 +7,19 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "generate": "node tools/generate.mjs",
+    "dev": "npm run generate && astro dev",
+    "build": "npm run generate && astro build",
     "preview": "astro preview"
   },
   "dependencies": {
     "@astrojs/starlight": "0.41.9",
     "astro": "7.2.9"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "sharp": "0.35.5",
+    "typedoc": "0.28.20",
+    "typescript": "6.0.3"
   }
 }

@@ -17,3 +17,6 @@ benchmark/**/results/
 
 /bindings/python/python/brimp/bundled/
 /bindings/node/bundled/
+
+/docs/public/reference/
+/docs/tools/cli-reference/target/

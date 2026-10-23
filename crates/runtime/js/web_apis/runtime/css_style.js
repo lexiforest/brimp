@@ -128,8 +128,7 @@ class CSSStyleDeclaration {
         return __callHost("styleRemoveProperty", __requireWritableStyleDeclaration(this), name);
     }
     get parentRule() {
-        __requireStyleDeclaration(this);
-        return null;
+        return __styleRuleOwners.get(__requireStyleDeclaration(this)) ?? null;
     }
     [Symbol.iterator]() { return this.__entries().map(entry => entry[0])[Symbol.iterator](); }
 }

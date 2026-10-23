@@ -80,6 +80,14 @@ unsafe extern "C" {
     fn br_document_new() -> *mut RawDocument;
     fn br_document_free(doc: *mut RawDocument);
     fn br_document_root(doc: *mut RawDocument) -> *mut RawNode;
+    fn br_writer_new(root: *mut RawNode) -> *mut RawParser;
+    fn br_writer_feed(
+        parser: *mut RawParser,
+        input: *const u8,
+        len: usize,
+        offset: *mut usize,
+        script: *mut *mut RawNode,
+    ) -> i32;
     fn br_parser_new(root: *mut RawNode, scripting: bool) -> *mut RawParser;
     fn br_parser_free(parser: *mut RawParser);
     fn br_parser_mutation_count(parser: *mut RawParser) -> usize;
@@ -131,6 +139,22 @@ unsafe extern "C" {
         value_len: usize,
     ) -> i32;
     fn br_node_remove_attribute(node: *mut RawNode, name: *const u8, len: usize) -> i32;
+    fn br_node_set_attribute_ns(
+        node: *mut RawNode,
+        ns: *const u8,
+        ns_len: usize,
+        name: *const u8,
+        name_len: usize,
+        value: *const u8,
+        value_len: usize,
+    ) -> i32;
+    fn br_node_remove_attribute_ns(
+        node: *mut RawNode,
+        ns: *const u8,
+        ns_len: usize,
+        local: *const u8,
+        local_len: usize,
+    ) -> i32;
     fn br_node_attributes(
         node: *mut RawNode,
         callback: unsafe extern "C" fn(
@@ -154,6 +178,12 @@ unsafe extern "C" {
         len: usize,
         matches: bool,
         callback: unsafe extern "C" fn(*mut RawNode, *mut c_void),
+        ctx: *mut c_void,
+    ) -> i32;
+    fn br_stylesheet(
+        css: *const u8,
+        len: usize,
+        callback: unsafe extern "C" fn(u32, u32, *const u8, usize, *const u8, usize, *mut c_void),
         ctx: *mut c_void,
     ) -> i32;
     fn br_declarations(
@@ -234,6 +264,22 @@ impl Document {
             source: html.as_bytes().to_vec(),
             offset: 0,
             done: false,
+        })
+    }
+    pub fn writer_at(&self, root: Node) -> Result<HtmlWriter, Error> {
+        let root = self.raw(root)?;
+        // SAFETY: the shim requires an empty document, retained by the parser.
+        let raw = NonNull::new(unsafe { br_writer_new(root) }).ok_or(Error::Native)?;
+        Ok(HtmlWriter {
+            parser: Parser {
+                raw,
+                document: self.clone(),
+                source: Vec::new(),
+                offset: 0,
+                done: false,
+            },
+            chunks: Vec::new(),
+            pending: Vec::new(),
         })
     }
     pub fn parse(html: &str) -> Result<Self, Error> {
@@ -418,6 +464,34 @@ impl Document {
         // SAFETY: the shim validates the node kind; no node storage is released.
         status(unsafe { br_node_remove_attribute(node, name.as_ptr(), name.len()) })
     }
+    pub fn set_attribute_ns(
+        &self,
+        node: Node,
+        ns: &str,
+        name: &str,
+        value: &str,
+    ) -> Result<(), Error> {
+        let node = self.raw(node)?;
+        // SAFETY: validated arena node, borrowed strings are copied by the shim.
+        status(unsafe {
+            br_node_set_attribute_ns(
+                node,
+                ns.as_ptr(),
+                ns.len(),
+                name.as_ptr(),
+                name.len(),
+                value.as_ptr(),
+                value.len(),
+            )
+        })
+    }
+    pub fn remove_attribute_ns(&self, node: Node, ns: &str, local: &str) -> Result<(), Error> {
+        let node = self.raw(node)?;
+        // SAFETY: validated arena node and strings live for this synchronous call.
+        status(unsafe {
+            br_node_remove_attribute_ns(node, ns.as_ptr(), ns.len(), local.as_ptr(), local.len())
+        })
+    }
     pub fn attributes(&self, node: Node) -> Result<Vec<Attribute>, Error> {
         let node = self.raw(node)?;
         let mut output = Vec::<Attribute>::new();
@@ -548,6 +622,8 @@ impl Drop for Parser {
 
 pub type Declaration = (String, String, bool);
 pub fn declarations(css: &str) -> Result<Vec<Declaration>, Error> {
+    // Lexbor's declaration-list entry point expects the first declaration token.
+    let css = css.trim_start_matches([' ', '\t', '\n', '\r', '\x0c']);
     let mut output = Vec::<Declaration>::new();
     // SAFETY: callback/context match and are valid throughout this synchronous call.
     status(unsafe {
@@ -629,4 +705,94 @@ unsafe extern "C" fn declaration_callback(
             important,
         ))
     };
+}
+
+/// A flattened, preorder CSS rule tree. Depth identifies a rule's parent.
+#[derive(Debug, serde::Serialize)]
+pub struct CssRule {
+    pub depth: u32,
+    pub kind: u32,
+    pub prelude: String,
+    pub declarations: String,
+}
+pub fn stylesheet(css: &str) -> Result<Vec<CssRule>, Error> {
+    let mut rules = Vec::<CssRule>::new();
+    // SAFETY: callback copies parser-owned data synchronously into the live vector.
+    status(unsafe {
+        br_stylesheet(
+            css.as_ptr(),
+            css.len(),
+            rule_callback,
+            (&mut rules as *mut Vec<CssRule>).cast(),
+        )
+    })?;
+    Ok(rules)
+}
+unsafe extern "C" fn rule_callback(
+    depth: u32,
+    kind: u32,
+    prelude: *const u8,
+    prelude_len: usize,
+    declarations: *const u8,
+    declarations_len: usize,
+    ctx: *mut c_void,
+) {
+    // SAFETY: br_stylesheet supplies live byte spans and the matching vector.
+    let (rules, prelude, declarations) = unsafe {
+        (
+            &mut *ctx.cast::<Vec<CssRule>>(),
+            slice(prelude, prelude_len),
+            slice(declarations, declarations_len),
+        )
+    };
+    rules.push(CssRule {
+        depth,
+        kind,
+        prelude: String::from_utf8_lossy(prelude).trim().to_owned(),
+        declarations: String::from_utf8_lossy(declarations).into_owned(),
+    });
+}
+
+/// Incremental HTML document writer. Buffers remain pinned until parser teardown,
+/// including incomplete tokens split across writes and reentrant script writes.
+pub struct HtmlWriter {
+    parser: Parser,
+    chunks: Vec<(Box<[u8]>, usize)>,
+    pending: Vec<usize>,
+}
+impl HtmlWriter {
+    pub fn write(&mut self, html: &str) {
+        self.pending.push(self.chunks.len());
+        self.chunks.push((html.as_bytes().into(), 0));
+    }
+    pub fn resume(&mut self) -> Result<Option<Node>, Error> {
+        let Some(&index) = self.pending.last() else {
+            return Ok(None);
+        };
+        let (source, offset) = &mut self.chunks[index];
+        let mut script = std::ptr::null_mut();
+        // SAFETY: the parser retains the arena and chunks retain stable input buffers.
+        match unsafe {
+            br_writer_feed(
+                self.parser.raw.as_ptr(),
+                source.as_ptr(),
+                source.len(),
+                offset,
+                &mut script,
+            )
+        } {
+            0 => {
+                self.pending.pop();
+                Ok(None)
+            }
+            1 => self.parser.document.token(script).map(Some),
+            _ => Err(Error::Native),
+        }
+    }
+    pub fn finish(&mut self) -> Result<(), Error> {
+        self.parser.resume().map(|_| ())
+    }
+    pub fn take_mutations(&mut self) -> Result<Vec<ParserMutation>, Error> {
+        self.parser.take_mutations()
+    }
 }

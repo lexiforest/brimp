@@ -122,14 +122,6 @@ pub(super) fn dispatch(
             state.timers.borrow_mut().clear(id);
             Ok(NativeValue::Undefined)
         }
-        "queueMicrotask" => {
-            let callback = call
-                .argument(2)
-                .ok_or_else(|| NativeError::new("missing microtask callback"))?
-                .to_function()?;
-            state.timers.borrow_mut().queue_microtask(callback);
-            Ok(NativeValue::Undefined)
-        }
         "location" => {
             let property = required_string(call, 2, "location property")?;
             let raw_url = state

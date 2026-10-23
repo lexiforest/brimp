@@ -32,3 +32,8 @@ DO NOT EDIT HUMAN.md, it's for the maintainer to edit manually.
 
 - Use pytest for python testing
 - Prefer playwright over puppeteer in examples and docs
+
+## Implementation
+
+- For Python binding, we target Python 3.11 and above.
+- For Nodejs binding, we target Node.js 22.19 and above.

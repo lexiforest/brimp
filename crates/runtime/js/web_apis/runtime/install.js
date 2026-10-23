@@ -1,3 +1,4 @@
+Object.assign(globalThis,{ElementInternals,CustomStateSet,CSSStyleSheet,StyleSheet,StyleSheetList,CSSRuleList,MediaList,CSSRule,CSSStyleRule,CSSGroupingRule,CSSConditionRule,CSSMediaRule,CSSSupportsRule,CSSFontFaceRule});
 globalThis.DOMImplementation = DOMImplementation;
 globalThis.CustomElementRegistry = CustomElementRegistry;
 globalThis.customElements = customElements;
@@ -71,6 +72,7 @@ globalThis.HTMLTrackElement = HTMLTrackElement;
 globalThis.HTMLCanvasElement = HTMLCanvasElement;
 globalThis.HTMLMapElement = HTMLMapElement;
 globalThis.HTMLAreaElement = HTMLAreaElement;
+globalThis.ValidityState = ValidityState;
 globalThis.HTMLFormElement = HTMLFormElement;
 globalThis.HTMLFieldSetElement = HTMLFieldSetElement;
 globalThis.HTMLLegendElement = HTMLLegendElement;
@@ -436,7 +438,16 @@ globalThis.setTimeout = (callback, delay = 0) => __callHost("setTimeout", window
 globalThis.clearTimeout = id => __callHost("clearTimeout", window, id);
 globalThis.setInterval = (callback, delay = 0) => __callHost("setInterval", window, callback, delay);
 globalThis.clearInterval = id => __callHost("clearInterval", window, id);
-globalThis.queueMicrotask = callback => __callHost("queueMicrotask", window, callback);
+// Use the engine's Promise job queue, shared with async/await. Capture the
+// intrinsics before page code can replace them. Callback errors are reported as
+// task errors rather than becoming unhandled promise rejections.
+const __enqueueJob = Function.prototype.call.bind(Promise.prototype.then, Promise.resolve());
+globalThis.queueMicrotask = callback => {
+    if (typeof callback !== 'function') throw new TypeError('callback must be callable');
+    __enqueueJob(() => {
+        try { callback(); } catch (error) { setTimeout(() => { throw error; }, 0); }
+    });
+};
 let __nextAnimationFrameId = 1;
 let __animationFrameScheduled = false;
 const __animationFrameCallbacks = new Map();

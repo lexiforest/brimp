@@ -62,7 +62,7 @@ jobs:
           --output .native/aarch64-apple-darwin
 
       - name: Build native bindings
-        run: cargo build --locked -p brimp-python -p brimp-node
+        run: cargo build --locked -p brimp-cli -p brimp-python -p brimp-node
 
       - name: Run workspace tests
         run: cargo test --locked --workspace
@@ -76,6 +76,7 @@ jobs:
           python3 bindings/prepare_local.py
           PYTHONPATH=bindings/python/python python3 -m pytest bindings/python/tests
           node --test bindings/node/test/*.test.mjs
+          PYTHONPATH=bindings/python/python python3 -m pytest docs/tests/test_examples.py
 
       - name: Sanitize Lexbor boundary
         run: python3 scripts/test_lexbor_boundary.py
@@ -120,7 +121,7 @@ jobs:
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
           import {pathToFileURL} from 'node:url';
-          const api = await import(pathToFileURL(`${process.env.RUNNER_TEMP}/brimp-installed/node_modules/brimp/index.js`));
+          const api = await import(pathToFileURL(`${process.env.RUNNER_TEMP}/brimp-installed/node_modules/@brimp/brimp/index.js`));
           const session = await api.createSession({plugins: [api.storagePlugin(), api.canvasPlugin(), api.extractionPlugin()]});
           try {
             const page = await session.newPage();
@@ -151,6 +152,15 @@ jobs:
           cache: npm
           cache-dependency-path: docs/package-lock.json
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install API generators
+        run: python -m pip install -r docs/requirements.txt
+
       - name: Install documentation dependencies
         run: npm ci
         working-directory: docs
@@ -158,3 +168,6 @@ jobs:
       - name: Build documentation
         run: npm run build
         working-directory: docs
+
+      - name: Check generated references and local links
+        run: python -m pytest docs/tests/test_site.py

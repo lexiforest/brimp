@@ -14,9 +14,10 @@ Detached DOM nodes retain identity. Navigation invalidates external JS/DOM
 handles; disposal and closure release roots and cancel pending operations.
 
 The core supports HTML/fragment parsing, selectors, serialization, DOM mutation,
-collections, attribute reflection, forms, events, MutationObserver, and inline
-CSS declarations. Blocking scripts suspend the parser; async/deferred scripts,
-modules, timers, microtasks, and cancellation use the page task loop. Mutation
+live collections, namespace attributes, form validation/reset/association, events,
+MutationObserver, inline CSS and non-rendering stylesheet editing. Blocking scripts suspend the parser; async/deferred scripts,
+modules, timers and cancellation use the page task loop. Promise jobs,
+queueMicrotask and observer delivery share the engine microtask queue. Mutation
 records from the parser are delivered at script boundaries.
 
 Document lifecycle states, live Range content operations, FileReader, XPath,

@@ -16,6 +16,7 @@ pub struct BrowserDocument {
     // Detached nodes retain their logical ownerDocument. Lexbor's memory owner
     // is the shared realm arena, including detached HTML documents.
     owners: RefCell<HashMap<NodeId, NodeId>>,
+    template_owners: RefCell<HashMap<NodeId, NodeId>>,
 }
 #[derive(Default)]
 struct Handles {
@@ -29,6 +30,7 @@ impl BrowserDocument {
             arena,
             handles: RefCell::new(Handles::default()),
             owners: RefCell::new(HashMap::new()),
+            template_owners: RefCell::new(HashMap::new()),
         };
         result.register(result.arena.root());
         result
@@ -117,12 +119,24 @@ impl BrowserDocument {
         Ok(output)
     }
     pub fn template_content(&self, id: NodeId) -> Result<Option<NodeId>, DomError> {
-        Ok(self.arena.template_content(self.token(id)?)?.map(|node| {
-            let content = self.register(node);
-            let owner = self.node_document(id).unwrap_or(0);
-            self.owners.borrow_mut().insert(content, owner);
-            content
-        }))
+        let Some(node) = self.arena.template_content(self.token(id)?)? else {
+            return Ok(None);
+        };
+        let content = self.register(node);
+        let owner = self.node_document(id).unwrap_or(0);
+        let inert = self.template_owners.borrow().get(&owner).copied();
+        let inert = match inert {
+            Some(inert) => inert,
+            None => {
+                let inert = self.create_document()?;
+                let mut owners = self.template_owners.borrow_mut();
+                owners.insert(owner, inert);
+                owners.insert(inert, inert);
+                inert
+            }
+        };
+        self.owners.borrow_mut().insert(content, inert);
+        Ok(Some(content))
     }
     pub fn node_document(&self, id: NodeId) -> Option<NodeId> {
         let mut current = id;
@@ -139,7 +153,22 @@ impl BrowserDocument {
     pub fn adopt_subtree(&self, id: NodeId, owner: NodeId) -> Result<(), DomError> {
         self.token(id)?;
         self.owners.borrow_mut().insert(id, owner);
+        // Template content is outside the child links and has an inert owner.
+        // Update it eagerly so retained content wrappers see adoption immediately.
+        let mut pending = vec![id];
+        while let Some(node) = pending.pop() {
+            pending.extend(self.children(node)?);
+            if let Some(content) = self.template_content(node)? {
+                pending.push(content);
+            }
+        }
         Ok(())
+    }
+    pub fn writer(&self, id: NodeId) -> Result<lexbor::HtmlWriter, DomError> {
+        self.arena.writer_at(self.token(id)?)
+    }
+    pub fn writer_node_id(&self, node: lexbor::Node) -> NodeId {
+        self.register(node)
     }
     pub fn create_document(&self) -> Result<NodeId, DomError> {
         Ok(self.register(self.arena.create_document()?))
@@ -221,6 +250,19 @@ impl BrowserDocument {
             self.adopt_subtree(child, self.node_document(id).unwrap_or(0))?;
         }
         self.arena.set_text(self.token(id)?, text)
+    }
+    pub fn set_attribute_ns(
+        &self,
+        id: NodeId,
+        ns: &str,
+        name: &str,
+        value: &str,
+    ) -> Result<(), DomError> {
+        self.arena
+            .set_attribute_ns(self.token(id)?, ns, name, value)
+    }
+    pub fn remove_attribute_ns(&self, id: NodeId, ns: &str, local: &str) -> Result<(), DomError> {
+        self.arena.remove_attribute_ns(self.token(id)?, ns, local)
     }
     pub fn attribute(&self, id: NodeId, name: &str) -> Option<String> {
         self.arena

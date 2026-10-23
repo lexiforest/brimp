@@ -483,7 +483,7 @@ lxb_html_tree_append_attributes(lxb_html_tree_t *tree,
         }
 
         attr->node.local_name = token_attr->name->attr_id;
-        attr->node.ns = ns;
+        attr->node.ns = LXB_NS__UNDEF;
 
         /* Fix for adjust MathML/SVG attributes */
         if (tree->before_append_attr != NULL) {

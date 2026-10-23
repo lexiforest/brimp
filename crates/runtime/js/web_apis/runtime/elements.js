@@ -97,7 +97,7 @@ class Element extends Node {
     get localName() { return __callHost("localName", this); }
     get namespaceURI() { return __callHost("namespaceURI", this); }
     get prefix() { return __callHost("prefix", this); }
-    get children() { return new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element)); }
+    get children() { return __cachedCollection(this, "children", () => new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element))); }
     get childElementCount() { return this.children.length; }
     get firstElementChild() { return this.children.item(0); }
     get lastElementChild() { return this.children.item(this.children.length - 1); }
@@ -141,7 +141,7 @@ class Element extends Node {
         if (name === "") throw new DOMException("attribute name cannot be empty", "InvalidCharacterError");
         const oldValue = this.getAttribute(name);
         __callHost("setAttribute", this, name, value);
-        const observed = customElements.__observedAttributes.get(this.localName);
+        const observed = customElements.__observedAttributes.get(__customElementNames.get(this) ?? this.localName);
         if (__upgradedCustomElements.has(this) && Array.isArray(observed) && observed.map(String).includes(name) &&
             typeof this.attributeChangedCallback === "function") {
             this.attributeChangedCallback(name, oldValue, String(value));
@@ -150,8 +150,10 @@ class Element extends Node {
     removeAttribute(name) {
         name = String(name);
         const oldValue = this.getAttribute(name);
+        const attr = this.getAttributeNode(name);
+        if (attr) __detachAttribute(this, attr.namespaceURI, attr.localName);
         __callHost("removeAttribute", this, name);
-        const observed = customElements.__observedAttributes.get(this.localName);
+        const observed = customElements.__observedAttributes.get(__customElementNames.get(this) ?? this.localName);
         if (oldValue !== null && __upgradedCustomElements.has(this) && Array.isArray(observed) &&
             observed.map(String).includes(name) && typeof this.attributeChangedCallback === "function") {
             this.attributeChangedCallback(name, oldValue, null);
@@ -161,9 +163,7 @@ class Element extends Node {
     removeAttributeNode(attr) {
         if (!(attr instanceof Attr)) throw new TypeError('Expected an Attr');
         if (attr.ownerElement !== this) throw new DOMException('Attribute does not belong to this element', 'NotFoundError');
-        this.removeAttribute(attr.name);
-        this.attributes.__cache.delete(`${attr.namespaceURI ?? ''}\0${attr.localName}`);
-        attr.__element = null;
+        this.removeAttributeNS(attr.namespaceURI, attr.localName);
         return attr;
     }
     hasAttributes() { return this.attributes.length !== 0; }
@@ -261,7 +261,10 @@ class HTMLElement extends Element {
         if (upgrading !== undefined) return upgrading;
         const name = customElements.getName(new.target);
         if (name === null) throw new TypeError("Illegal constructor");
-        const element = __callHost("createElement", document, name);
+        const localName = customElements.__localNames.get(name);
+        const element = __callHost("createElement", document, localName);
+        __customElementNames.set(element, name);
+        if (name !== localName) element.setAttribute('is', name);
         Object.setPrototypeOf(element, new.target.prototype);
         __upgradedCustomElements.add(element);
         return element;

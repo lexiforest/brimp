@@ -10,7 +10,7 @@ have isolated canonical subtrees, named slots, connected roots and composed even
 retargeting, including closed-root path filtering. Custom element definitions
 read observedAttributes before construction, as required by Lit's initialization.
 There is no CSS cascade, computed geometry or rendering. Manual slot assignment,
-declarative shadow roots, adopted stylesheets and full focus delegation remain
+declarative shadow roots and full focus delegation remain
 outside this implementation. XPath uses the pinned `xpath` library; mutation
 invalidation of XPath iterators is not yet implemented.
 
@@ -86,6 +86,26 @@ contextual fragments, with boundary updates for DOM mutations, character-data
 edits, splitText and normalize. These are non-rendering operations; no range
 rectangles or layout measurements are supplied.
 
+Collections retain identity and update after mutations. Document adoption, Attr
+creation/attachment, namespace-aware attributes and queries, TreeWalker navigation,
+and inert template owner documents use the canonical DOM. queueMicrotask and
+MutationObserver delivery share JavaScriptCore's Promise job queue.
+
+Forms expose association (including controls outside their form), labels, reset,
+constraint validity/custom validity, numeric stepping and text selection replacement.
+Required, email/URL, pattern and number/range constraints are checked. Full input
+state algorithms, date/time stepping and user-edit length validation are not yet
+covered. Reset clears dirty values/checkedness and honors cancellation.
+Customized built-ins support creation and upgrade. ElementInternals supplies default
+ARIA values, custom states and shadow-root access; form-associated custom element
+submission/validation callbacks and an accessibility tree are not implemented.
+
+Explicit document.open/write/writeln/close uses an incremental Lexbor parser;
+retained nodes survive later writes, and inline classic scripts may write reentrantly.
+Writing into an active navigation parser and external scripts supplied by
+document.write are unsupported. These limits do not affect normal navigation's
+external script loader. XML document parsing remains outside this layer.
+
 FileReader supports asynchronous text, ArrayBuffer, binary-string and data-URL
 reads, progress/lifecycle events, abort and reentrant reads. Data-URL reads encode
 actual Blob bytes; Canvas mock output remains explicitly separate.
@@ -100,14 +120,24 @@ Fetch/body conformance.
 
 ## CSS and SVG
 
-Core CSS support covers inline declarations parsed by Lexbor. The optional
-Typed OM plugin provides inline value objects and attributeStyleMap operations.
-Generic SVG elements participate in the DOM tree.
+Core CSS support covers inline declarations and non-rendering stylesheets parsed
+by Lexbor. CSSStyleSheet provides live cssRules, insertRule/deleteRule,
+replace/replaceSync, and rule ownership. Style rules and media/supports groups
+support editing and serialization; declaration values use the same Lexbor-backed
+CSSStyleDeclaration as inline styles. Style elements own sheets; link elements
+load sheets through Fetch and restrict cross-origin rule access. Document and
+ShadowRoot expose styleSheets and mutable adoptedStyleSheets collections, with
+constructed-sheet and owner-document checks.
 
-CSSStyleSheet construction, rule editing, document/shadow-root adoptedStyleSheets,
-and live style/link sheet ownership are not implemented. Cascade, computed style,
-style-dependent geometry, animation timelines and rendering are unsupported.
-Specialized SVG interfaces, XML parsing and XMLSerializer are also unsupported.
+This is not complete CSS grammar coverage: @import loading, namespace rule editing,
+keyframes, layers, full font-face descriptors and media-condition normalization are
+not implemented. Unsupported rules/declarations can be discarded by the parser;
+stylesheets do not participate in a cascade. The optional Typed OM plugin provides
+inline value objects and attributeStyleMap operations.
+
+Cascade, computed style, style-dependent geometry, animation timelines and rendering
+are unsupported. Generic SVG elements participate in the DOM; specialized SVG
+interfaces, XML parsing and XMLSerializer remain unsupported.
 
 ## Structured cloning
 

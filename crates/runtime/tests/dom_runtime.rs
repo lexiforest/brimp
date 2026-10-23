@@ -42,7 +42,7 @@ fn detached_documents_and_templates_keep_canonical_ownership() {
         const parsed = new DOMParser().parseFromString('<main><template><b>inside</b></template><p>other</p></main>', 'text/html');
         const template = parsed.querySelector('template');
         const content = template.content;
-        if (content !== template.content || content.ownerDocument !== parsed || content.firstChild.ownerDocument !== parsed) return false;
+        if (content !== template.content || content.ownerDocument === parsed || content.firstChild.ownerDocument !== content.ownerDocument) return false;
         if (template.childNodes.length !== 0 || parsed.querySelector('b') !== null) return false;
         const child = parsed.querySelector('p'); child.remove();
         if (child.ownerDocument !== parsed) return false;

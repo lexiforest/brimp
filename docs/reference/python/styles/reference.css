@@ -1,0 +1,10 @@
+body { line-height: 1.65; }
+body::before { background-image: none; }
+.navbar { background-image: none; background-color: #2563eb; }
+.doc-signature pre, .doc-signature code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.doc-signature pre { padding: 1rem; line-height: 1.7; }
+.doc-heading { margin-top: 2rem; }
+.mkdocstrings-source { margin-block: 1rem 2rem; }

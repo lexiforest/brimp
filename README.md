@@ -1,28 +1,150 @@
 # Brimp
 
-**A JavaScript runtime for JavaScript from the browser.**
+> [!WARNING]
+> Brimp is in prototyping stage, API is not stable and subject to complete change.
+> The install methods will not work, to test it, clone and build from source.
 
-The DOM runtime combines **JavaScriptCore + Lexbor + curl-impersonate** behind
-synchronous Python and asynchronous Node `Session`/`Page` APIs. It fetches pages,
-runs scripts, maintains a live DOM, and exposes requests, handles, events,
-interception, input, extraction, and streaming bodies. Rendering and layout are
-outside its contract. Optional JavaScript plugins add memory storage, deterministic
-Canvas mocks, services, Defuddle, or host storage; none are enabled by default.
-Core APIs include live DOM ranges, FileReader, Web Streams, structured cloning,
-XPath, Shadow DOM, and WebCrypto for signing, encryption, and key derivation.
+Brimp is a JavaScript runtime for JavaScript from the browser. It combines JavaScriptCore
+with lexbor for DOM and curl-impersonate as the network stack. Brimp is super helpful
+for scripts and agents to access the dynamic web.
 
-```python
-from brimp import Session
+If you are familiar with `requests` or `curl_cffi`, you can treat Brimp as the
+same simple request/response workflow with a JavaScript-rendered HTML result.
+Brimp is written in Rust, and offers both Python and Node.js bindings.
 
-with Session() as session:
-    page = session.get("https://example.com")
-    heading = page.query_selector("h1")
-    print(heading.text_content())
-    heading.dispose()
+Documentation: [docs.brimp.ai](https://docs.brimp.ai)
+
+## Why
+
+Getting the html with `curl_cffi` is easy, but oftentimes, you need to render the page
+with JavaScript, and anti-bot services are consistently probing if you have a valid
+browser environment, hence JavaScript fingerprints.
+
+Brimp, short for browser-impersonate, tries to add the missing JS and DOM layer for
+curl_cffi. So you can get not only static html pages, but also the dynamically rendered
+ones, a more browser-ish experience.
+
+## Features
+
+- Page rendered with DOM and JS, so you don't get the empty html placeholder.
+- `curl-impersonate` as the network stack, providing perfect Ja3/TLS, http 2&3 fingerprints.
+- The familiar `curl_cffi` API and experience from the same maintainer.
+- Much faster than playwright with Chromium, on par with popular alternatives.
+- Plugin system for you to fill the gaps between any website that's blocking you.
+- Python and Nodejs bindings.
+- Pre-compiled, so you don't have to compile on your machine.
+- MIT licensed.
+
+||chromium|camoufox|cloakbrowser|lightpanda|obscura|brimp|
+|---|---|---|---|---|---|---|
+|JS & DOM|✅|✅|✅|✅|✅|✅|
+|http/3|✅|✅|✅|❌|❌|✅|
+|CDP|✅|✅|✅|☑️<sup>1</sup>|☑️<sup>1</sup>|❌<sup>1</sup>|
+|requests-like|❌|❌|❌|❌|❌|✅|
+|screenshot|✅|✅|✅|❌|✅|❌|
+|JS engine|V8|SpiderMonkey|V8|V8|V8|JSC|
+|open source|✅|✅|❌|☑️<sup>2</sup>|✅|✅|
+|ja3 fingerprints|☑️<sup>3</sup>|☑️<sup>3</sup>|☑️<sup>3</sup>|❌|✅|✅|
+|fast?|🐢|🐢|🐢|🐇|🐇|🐇|
+
+<small>
+Notes:
+<ol>
+<li>This is a deliberate decision.</li>
+<li>Lightpanda is under the AGPL license.</li>
+<li>Fingerprints are fixed to the browser version</li>
+</ol>
+</small>
+
+For performance comparisons, see the [benchmark](benchmark/native/README.md).
+
+## Install
+
+> [!WARNING]
+> The install methods is not working now, to test it, clone and build from source.
+
+### For humans
+
+CLI:
+
+```
+curl https://brimp.ai/install.sh | bash
 ```
 
-```javascript
-import { createSession } from 'brimp';
+You can also download the prebuilt binary tarballs from github release page.
+
+Python:
+```sh
+pip install brimp
+```
+
+Node.js:
+
+```
+npm install @brimp/brimp
+```
+
+### For agents
+
+Paste this prompt:
+
+```plain
+Install this tool: https://github.com/lexiforest/brimp
+```
+
+
+## Usage
+
+### CLI
+
+The CLI runs the browser runtime in-process.
+
+Check the runtime, extract a live page, evaluate JavaScript, or save the HTML:
+
+```sh
+brimp doctor
+brimp fetch https://example.com --output example.md
+brimp fetch https://example.com --eval 'document.title'
+brimp fetch https://example.com --output example.html
+brimp fetch https://example.com --persona crates/runtime/src/persona/example.json --eval 'navigator.userAgent'
+```
+
+### Python
+
+The Python binding is synchronous and in-process. `Response.text` is the
+original HTTP response text; `Page.html()` is the live DOM serialized after
+page scripts execute.
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("https://example.com")
+    print(page.status_code)
+    print(page.html())
+```
+
+Use a Session to retain cookies and connections and to access the current
+rendered document:
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("https://example.com/?q=browser")
+    if page.status_code >= 400:
+        raise RuntimeError(f"HTTP {page.status_code}")
+    heading = page.query_selector("h1")
+    if heading is not None:
+        print(heading.text_content())
+        heading.dispose()
+```
+
+### Node.js
+
+```js
+import { createSession } from '@brimp/brimp';
+
 const session = await createSession();
 try {
   const page = await session.get('https://example.com');
@@ -30,41 +152,43 @@ try {
 } finally { await session.close(); }
 ```
 
-See [native setup and API](bindings/README.md), [plugin behavior](bindings/PLUGINS.md),
-[runtime architecture](crates/runtime/README.md), and [implementation progress](TODO.md).
-Native package builds require matching JavaScriptCore and curl-impersonate libraries.
-Lexbor and OpenSSL are pinned and built from vendored sources.
+## Development
 
-The reusable [`brimp-lexbor`](crates/lexbor/README.md) crate owns the vendored
-parser and safe DOM arena API; it builds without JSC, curl or language SDKs.
-[`brimp-jsc`](crates/jsc/README.md) owns the JavaScript engine and native callbacks.
-`brimp-runtime` composes these with networking and browser policy; Python and Node
-bindings depend on the runtime.
+### Architecture
 
-The [`brimp-net` crate](crates/net/README.md) supplies the runtime's curl-impersonate
-HTTP transport through standard Rust HTTP types and streaming bodies. Browser
-loading policy remains in the runtime; WebSocket connections use a separate connector.
+The implemented runtime supports:
 
-[Diagnostics and programmable time](bindings/DEBUGGING.md) provide bounded API
-traces, JSONL output and a controllable realm clock. Optional geometry, CSS Typed
-OM, scheduling, graphics and audio plugins expand the API surface; their
-[coverage table](bindings/PLUGINS.md) distinguishes functionality from mocks.
-See [native packaging](bindings/PACKAGING.md) for relocatable macOS artifacts.
+- static HTML, JavaScript DOM mutation, selectors, inline styles, and non-rendering CSSOM;
+- HTTP(S) navigation through a transport-neutral `ResourceLoader`;
+- linked CSS, classic inline/external scripts, `defer`, and `async`;
+- parser pausing around blocking scripts;
+- events, timers, microtasks, Promise-based `fetch`, cookies, `Location`, and `Navigator`.
 
+The canonical owner-thread automation API is exposed through:
+
+- the `brimp` CLI for evaluation and page extraction;
+- the Python and Node.js Session/Page bindings.
+
+The CLI and bindings delegate browser operations to `brimp-runtime` in-process.
+The runtime uses `brimp-lexbor` for DOM, `brimp-jsc` for JavaScriptCore, and
+`brimp-net` for networking.
+
+### Building from source
+
+Source builds dynamically link JavaScriptCore and curl-impersonate. Set
+`BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their platform-specific library
+directories. See the [native prerequisites](docs/src/content/docs/development.md#native-prerequisites)
+for SDK preparation and library layouts.
+
+### CI
+
+The project is tested and built automatically on GitHub Actions. All PR must pass
+the automatic tests.
+
+### Testing
 
 ```sh
-cargo test -p brimp-runtime
-python3 scripts/test_lexbor_boundary.py
+cargo build -p brimp-cli -p brimp-python -p brimp-node
+cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 ```
-
-Tests target supported behavior and local servers. See the [benchmarks](benchmark/native/)
-for measured time and peak memory on the same host/profile; no universal speed or
-browser-conformance claim is made. MIT licensed.
-
-The [browser workload corpus](compatibility/README.md) runs 15 pinned applications,
-libraries and environment checks against Brimp, jsdom, happy-dom and Playwright
-Chromium using the same artifacts. Detector findings are observational and do not expand runtime
-coverage. Reports distinguish compatibility failures from invalid reference runs.
-
-Core DOM and crypto coverage: [supported web APIs](bindings/CORE_WEB.md).

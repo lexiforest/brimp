@@ -27,6 +27,11 @@ type ConsoleCallback = Rc<dyn Fn(&str)>;
 
 pub struct Page {
     session_id: u64,
+    pub(super) operation_deadline: Option<Instant>,
+    pub(super) cancellation: super::CancellationToken,
+    wait_until: NavigationWait,
+    pending_navigation_scripts: std::cell::Cell<usize>,
+    navigation_jobs: RefCell<Vec<tokio::task::AbortHandle>>,
     clock_options: super::clock::ClockOptions,
     diagnostics: Option<super::diagnostics::Diagnostics>,
     realm_id: u64,
@@ -67,6 +72,7 @@ pub struct Page {
 #[derive(Clone)]
 pub(crate) struct DocumentNetworkScope {
     loader: Arc<dyn ResourceLoader>,
+    executor: tokio::runtime::Handle,
     pub(super) sockets: Arc<dyn crate::network::WebSocketConnector>,
 }
 
@@ -74,8 +80,13 @@ impl DocumentNetworkScope {
     pub(crate) fn new(
         loader: Arc<dyn ResourceLoader>,
         sockets: Arc<dyn crate::network::WebSocketConnector>,
+        executor: tokio::runtime::Handle,
     ) -> Self {
-        Self { loader, sockets }
+        Self {
+            loader,
+            sockets,
+            executor,
+        }
     }
 }
 
@@ -92,6 +103,12 @@ impl Page {
             .map(|options| super::diagnostics::Diagnostics::new(options, realm_id))
             .transpose()?;
         let js = JsRuntime::new()?;
+        install_interrupt(
+            &js,
+            options.operation_deadline,
+            options.cancellation.clone(),
+            options.shutdown.clone(),
+        );
         let browsing_context = Arc::new(BrowsingContext::with_cookie_jar(cookies));
         let mut request_headers = persona_request_headers(&options.persona);
         for (name, value) in &options.request_headers {
@@ -127,6 +144,11 @@ impl Page {
             clock_options: options.clock,
             diagnostics,
             session_id: options.session_id,
+            operation_deadline: options.operation_deadline,
+            cancellation: options.cancellation,
+            wait_until: options.wait_until,
+            pending_navigation_scripts: std::cell::Cell::new(0),
+            navigation_jobs: RefCell::new(Vec::new()),
             realm_id,
             owner_id: realm_id,
             events: options.events,
@@ -194,7 +216,17 @@ impl Page {
         let document = BrowserDocument::empty();
         *self.document.borrow_mut() = document;
         self.document_ready = false;
+        for job in self.navigation_jobs.borrow_mut().drain(..) {
+            job.abort();
+        }
+        self.pending_navigation_scripts.set(0);
         let js = JsRuntime::new()?;
+        install_interrupt(
+            &js,
+            self.operation_deadline,
+            self.cancellation.clone(),
+            self.shutdown.clone(),
+        );
         if let Some(deadline) = self.script_execution_deadline {
             js.set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
         }
@@ -271,6 +303,8 @@ impl Page {
             )?);
             let start = Instant::now();
             loop {
+                self.check_operation()
+                    .map_err(|error| JsException::from_message(error.to_string()))?;
                 if self.shutdown.load(Ordering::Acquire) {
                     return Err(JsException::from_message("page initialization cancelled"));
                 }
@@ -312,6 +346,22 @@ impl Page {
             std::thread::sleep(Duration::from_millis(1));
         }
         self.js.clear_execution_time_limit();
+    }
+
+    pub(crate) fn check_operation(&self) -> Result<(), super::AutomationError> {
+        if self.cancellation.is_cancelled() {
+            return Err(super::AutomationError::Cancellation);
+        }
+        if self.shutdown.load(Ordering::Acquire) {
+            return Err(super::AutomationError::Closed);
+        }
+        if self
+            .operation_deadline
+            .is_some_and(|deadline| Instant::now() >= deadline)
+        {
+            return Err(super::AutomationError::Timeout(Duration::ZERO));
+        }
+        Ok(())
     }
 
     pub(crate) fn set_script_execution_deadline(&mut self, timeout: Duration) {
@@ -460,24 +510,35 @@ impl Page {
                 name: "dom_content_loaded".into(),
                 url: effective_url.clone(),
             });
-            self.bindings.script_control(
-                &self.js,
-                serde_json::json!({"op":"ready", "state":"complete"}),
-            )?;
-            self.execute_page_script("window.dispatchEvent(new Event('load'))");
-            self.process_dynamic_scripts().await;
-            let _ = self.run_pending_tasks();
-            self.process_dynamic_scripts().await;
+            if self.wait_until == NavigationWait::Load {
+                while self.pending_navigation_scripts.get() > 0 {
+                    self.run_pending_tasks()?;
+                    tokio::task::yield_now().await;
+                    self.wait_for_work(Some(Duration::from_millis(5)));
+                }
+                self.finish_navigation_load()?;
+            } else if self.pending_navigation_scripts.get() == 0 {
+                // Leave the load milestone for the next owner turn.
+                let realm = self.realm_id;
+                self.tasks.push(move |page| {
+                    if page.realm_id == realm {
+                        let _ = page.finish_navigation_load();
+                    }
+                });
+            }
+            if self.wait_until == NavigationWait::Load {
+                self.process_dynamic_scripts().await;
+                let _ = self.run_pending_tasks();
+                self.process_dynamic_scripts().await;
+            }
             Some(self.document.borrow().outer_html())
         } else {
             None
         };
         let cookies = response_cookie_pairs(&response.headers);
-        self.load_state = LoadState::Complete;
-        self.events.emit(super::events::PageEvent::Lifecycle {
-            name: "load".into(),
-            url: effective_url.clone(),
-        });
+        if !is_html {
+            self.finish_navigation_load()?;
+        }
         if let Some(destination) = self.browsing_context.take_pending_navigation() {
             return Box::pin(self.goto(&destination)).await;
         }
@@ -497,6 +558,23 @@ impl Page {
             uploaded_bytes: metadata.uploaded_bytes,
             header_bytes: metadata.header_bytes,
         })
+    }
+
+    fn finish_navigation_load(&mut self) -> Result<(), JsException> {
+        if self.load_state == LoadState::Complete {
+            return Ok(());
+        }
+        self.bindings.script_control(
+            &self.js,
+            serde_json::json!({"op":"ready", "state":"complete"}),
+        )?;
+        self.load_state = LoadState::Complete;
+        self.execute_page_script("window.dispatchEvent(new Event('load'))");
+        self.events.emit(super::events::PageEvent::Lifecycle {
+            name: "load".into(),
+            url: self.url().unwrap_or_default(),
+        });
+        Ok(())
     }
 
     pub fn html(&self) -> String {
@@ -632,7 +710,6 @@ impl Page {
 
     pub fn eval(&self, source: &str) -> Result<JsValue<'_>, JsException> {
         let value = self.js.eval(source)?;
-        self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
         Ok(value)
     }
@@ -651,7 +728,6 @@ impl Page {
         let value = self
             .js
             .call_function_with_string_and_object(&function, input, object)?;
-        self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
         Ok(value)
     }
@@ -690,7 +766,6 @@ impl Page {
 
     pub(crate) fn dispatch_input(&self, serialized_command: &str) -> Result<String, JsException> {
         let value = self.bindings.dispatch_input(&self.js, serialized_command)?;
-        self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
         Ok(value)
     }
@@ -703,7 +778,6 @@ impl Page {
         let result = self
             .bindings
             .dispatch_input_object(&self.js, command, target)?;
-        self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
         Ok(result)
     }
@@ -849,7 +923,6 @@ impl Page {
         if max_tasks == 0 || max_tasks > 1_000_000 {
             return Err(JsException::from_message("max_tasks must be 1..1000000"));
         }
-        self.perform_microtask_checkpoint()?;
         let mut tasks = 0;
         loop {
             if self.shutdown.load(Ordering::Acquire) {
@@ -894,14 +967,12 @@ impl Page {
             .transpose()?
             .unwrap_or(false);
         if plugin_progress {
-            self.perform_microtask_checkpoint()?;
             self.start_pending_fetches()?;
         }
         self.start_pending_websockets()?;
         let timer_callback = self.timers.borrow_mut().pop_due();
         if let Some(callback) = timer_callback {
             self.js.call_function(&callback)?;
-            self.perform_microtask_checkpoint()?;
             self.start_pending_fetches()?;
             self.start_pending_websockets()?;
             return Ok(true);
@@ -913,7 +984,6 @@ impl Page {
         if let Some(error) = self.async_error.take() {
             return Err(error);
         }
-        self.perform_microtask_checkpoint()?;
         self.start_pending_fetches()?;
         self.start_pending_websockets()?;
         Ok(true)
@@ -957,16 +1027,6 @@ impl Page {
         self.fetches.borrow().is_empty()
             && self.fetch_streams.borrow().is_empty()
             && self.tasks.is_empty()
-    }
-
-    fn perform_microtask_checkpoint(&self) -> Result<(), JsException> {
-        loop {
-            let callback = self.timers.borrow_mut().pop_microtask();
-            let Some(callback) = callback else {
-                return Ok(());
-            };
-            self.js.call_function(&callback)?;
-        }
     }
 
     fn start_pending_fetches(&self) -> Result<(), JsException> {
@@ -1317,6 +1377,9 @@ fn next_realm_id() -> u64 {
 
 impl Drop for Page {
     fn drop(&mut self) {
+        for job in self.navigation_jobs.borrow_mut().drain(..) {
+            job.abort();
+        }
         self.close_plugins();
         self.close_websockets();
         self.cancel_fetch_streams();
@@ -1449,9 +1512,32 @@ pub enum NavigationError {
     NotLoaded(LoadState),
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum NavigationWait {
+    DomContentLoaded,
+    #[default]
+    Load,
+}
+
+fn install_interrupt(
+    js: &JsRuntime,
+    deadline: Option<Instant>,
+    cancellation: super::CancellationToken,
+    shutdown: Arc<AtomicBool>,
+) {
+    js.set_interrupt_handler(Arc::new(move || {
+        cancellation.is_cancelled()
+            || shutdown.load(Ordering::Acquire)
+            || deadline.is_some_and(|deadline| Instant::now() >= deadline)
+    }));
+}
+
 #[derive(Clone, Debug)]
 pub struct PageOptions {
     pub(crate) session_id: u64,
+    pub(super) operation_deadline: Option<Instant>,
+    pub(super) cancellation: super::CancellationToken,
+    wait_until: NavigationWait,
     clock: super::clock::ClockOptions,
     diagnostics: Option<super::diagnostics::DiagnosticsOptions>,
     events: super::events::EventHub,
@@ -1468,6 +1554,9 @@ impl Default for PageOptions {
         let persona = crate::persona::PersonaConfig::default();
         Self {
             session_id: 0,
+            operation_deadline: None,
+            cancellation: Default::default(),
+            wait_until: Default::default(),
             clock: Default::default(),
             diagnostics: None,
             events: super::events::EventHub::default(),
@@ -1509,6 +1598,19 @@ pub struct PageOptionsBuilder {
 }
 
 impl PageOptionsBuilder {
+    pub fn operation_control(
+        mut self,
+        deadline: Option<Instant>,
+        cancellation: super::CancellationToken,
+    ) -> Self {
+        self.options.operation_deadline = deadline;
+        self.options.cancellation = cancellation;
+        self
+    }
+    pub fn wait_until(mut self, wait_until: NavigationWait) -> Self {
+        self.options.wait_until = wait_until;
+        self
+    }
     pub fn clock(mut self, options: super::clock::ClockOptions) -> Self {
         self.options.clock = options;
         self

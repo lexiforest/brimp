@@ -2,7 +2,8 @@
 
 Safe, thread-bound Rust ownership for vendored Lexbor 3.0.0. This crate owns the
 C shim, static native build, document arenas, parser suspension, node operations,
-selectors, serialization and inline CSS declarations. Raw FFI is private.
+selectors, namespace attributes, incremental document writing, serialization,
+inline CSS declarations and CSS rule-tree parsing. Raw FFI is private.
 
 Nodes carry an arena identity and every operation validates ownership. Detached
 nodes remain alive until their document arena is released; parsers retain their

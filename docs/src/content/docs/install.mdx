@@ -1,24 +1,132 @@
 ---
 title: Install
+description: Build the CLI and native Python/Node packages from the current source.
 ---
 
-Native package builds require matching JavaScriptCore and curl-impersonate SDKs.
-Set `BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` to their library directories.
-Lexbor is pinned and vendored in the repository.
-WebCrypto builds OpenSSL from Cargo-pinned source; source builds require a C
-compiler, make and Perl, with no OpenSSL shared library needed at runtime.
-On macOS, set `DYLD_FRAMEWORK_PATH` to the JSC framework directory at runtime
-when using a WebKit SDK that retains the system framework install name.
+This guide installs the current checkout. Use **Python 3.11+** or **Node.js
+22.19+** for the bindings. The documentation toolchain uses Node.js 24+.
+
+:::note[Native packages]
+The current source workflow links to JavaScriptCore and curl-impersonate SDKs.
+The macOS package assembler can bundle those libraries. The source tree does
+not establish that self-contained packages for every platform are published.
+:::
+
+## 1. Get the source and build tools
+
+```sh
+git clone https://github.com/lexiforest/brimp.git
+cd brimp
+```
+
+You need Rust/Cargo, a C compiler, make and Perl. Lexbor is vendored; WebCrypto
+builds its OpenSSL dependency from Cargo-pinned source.
+
+## 2. Point to your native SDKs
+
+Use the SDK libraries for your target platform:
+
+| Platform | `BRIMP_JSC_LIB_DIR` contains | `BRIMP_CURL_LIB_DIR` contains |
+| --- | --- | --- |
+| macOS | `JavaScriptCore.framework/JavaScriptCore` | curl-impersonate dynamic library |
+| Linux | `libJavaScriptCore.so` | curl-impersonate shared library |
+| Windows | `JavaScriptCore.lib` and runtime DLL | curl import/runtime libraries |
+
+In a POSIX shell, replace these paths with your SDK directories:
+
+```sh
+export BRIMP_JSC_LIB_DIR=/path/to/javascriptcore/lib
+export BRIMP_CURL_LIB_DIR=/path/to/curl-impersonate/lib
+```
+
+On macOS, also select the JSC framework at runtime when its install name points
+to the system framework:
+
+```sh
+export DYLD_FRAMEWORK_PATH="$BRIMP_JSC_LIB_DIR"
+```
+
+On Windows, set the same environment variables in your shell and make the
+runtime DLLs discoverable through `PATH`. See
+[native prerequisites](/development/#native-prerequisites) for the repository's
+SDK download helper and local macOS defaults.
+
+## 3. Build your interface
+
+### CLI
+
+```sh
+cargo install --path crates/cli --locked
+brimp doctor
+```
+
+Expect JSON with `javascriptCore`, `lexbor`, `libcurlImpersonate` and `crypto`
+set to `ok`. The executable still needs the SDK libraries at runtime.
+
+### Python
+
+Create and activate a virtual environment, then build the extension into it:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install maturin
+maturin develop --manifest-path bindings/python/Cargo.toml
+```
+
+On Windows, activate with `.venv\Scripts\Activate.ps1` in PowerShell.
+Check the native runtime without making a network request:
+
+```python
+from brimp import Session
+
+with Session() as session:
+    page = session.new_page()
+    print(page.evaluate("typeof document.querySelector"))
+```
+
+Expect `function`.
+
+### Node.js
+
+The preparation helper copies both native bindings, so build both first:
 
 ```sh
 cargo build -p brimp-python -p brimp-node
 python3 bindings/prepare_local.py
-maturin build --manifest-path bindings/python/Cargo.toml
+npm install ./bindings/node
+```
+
+Save this as `check.mjs` and run `node check.mjs`:
+
+```js
+import { createSession } from '@brimp/brimp';
+
+const session = await createSession();
+try {
+  const page = await session.newPage();
+  console.log(await page.evaluate('typeof document.querySelector'));
+} finally {
+  await session.close();
+}
+```
+
+Expect `function`. The package name is `@brimp/brimp`; it exports ESM APIs.
+
+## 4. Fetch your first page
+
+Continue to the [quick start](/quick-start/) to run a local site and read its
+JavaScript-updated HTML.
+
+## Build archives for another environment
+
+```sh
+maturin build --locked --manifest-path bindings/python/Cargo.toml
 npm pack ./bindings/node
 ```
 
-The wheel/npm package includes the native extension and bundled plugin sources.
-Install JSC/curl on the target machine; these are SDK-linked packages, not a
-self-contained browser distribution. On macOS, `python3 bindings/package_native.py`
-assembles relocatable archives with JSC/curl and their notices. Source builds are documented in
-[Development](/development/).
+These produce SDK-linked packages. For macOS relocation, follow
+[package assembly](https://github.com/lexiforest/brimp/blob/main/bindings/PACKAGING.md).
+Minimum macOS versions come from the actual native libraries; a wheel tag or
+source setting alone does not make a newer SDK run on an older OS. Linux and
+Windows currently use the SDK-linked workflow.

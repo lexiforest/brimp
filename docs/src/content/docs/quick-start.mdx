@@ -1,31 +1,96 @@
 ---
 title: Quick start
+description: Execute a page script and read the updated DOM with your preferred interface.
 ---
+
+In this tutorial, a page starts with **Waiting for JavaScript** and changes its
+heading to **Hello from JavaScript**. You'll read the changed heading through
+Brimp, then extract the article as Markdown.
+
+## 1. Start the example site
+
+Complete [installation](/install/), then run this from the repository root in a
+separate terminal:
+
+```sh
+python3 docs/fixtures/server.py
+```
+
+Keep it running at `http://127.0.0.1:8765`. The examples use this local site so
+that you can reproduce the results without relying on a public website.
+
+## 2. Read the live DOM
+
+Pick one interface. All three use the same runtime.
+
+### Python
+
+Save this as `first_page.py`, then run `python first_page.py`:
 
 ```python
 from brimp import Session
-from brimp.plugins import extraction
 
-with Session(plugins=[extraction()]) as session:
-    page = session.get("https://example.com")
-    print(page.status_code, page.url)
-    with page.query_selector("h1") as heading:
-        heading.set_text_content("Updated")
-        print(heading.text_content())
-    print(page.extract()["contentMarkdown"])
+with Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    print(page.status_code)
+    print(page.evaluate("document.querySelector('h1').textContent"))
 ```
 
-```javascript
-import { createSession, extractionPlugin } from 'brimp';
-const session = await createSession({plugins: [extractionPlugin()]});
+### Node.js
+
+Save this as `first-page.mjs`, then run `node first-page.mjs`:
+
+```js
+import { createSession } from '@brimp/brimp';
+
+const session = await createSession();
 try {
-  const page = await session.get('https://example.com');
-  console.log(await page.evaluate('document.title'));
-  console.log((await page.extract()).contentMarkdown);
-} finally { await session.close(); }
+  const page = await session.get('http://127.0.0.1:8765/');
+  console.log(page.statusCode);
+  console.log(await page.evaluate("document.querySelector('h1').textContent"));
+} finally {
+  await session.close();
+}
 ```
 
-Plugins are explicit; a default session does not install storage, Canvas,
-services, or extraction. Detached elements retain identity. Navigation invalidates
-handles from the previous realm. Python timeouts use seconds; Node uses milliseconds.
-See [API](/api/) for events, routes, input, and streaming bodies.
+Both programs print:
+
+```text
+200
+Hello from JavaScript
+```
+
+### CLI
+
+```sh
+brimp fetch http://127.0.0.1:8765/ --eval 'document.querySelector("h1").textContent'
+```
+
+The CLI writes the evaluated value as JSON: `"Hello from JavaScript"`.
+
+## 3. Extract the article
+
+```sh
+brimp fetch http://127.0.0.1:8765/ --format markdown
+```
+
+The output contains **Hello from JavaScript** and the article text. Markdown and
+extraction JSON output automatically select the bundled Defuddle plugin.
+Python and Node sessions select it explicitly; try the
+[extraction tutorial](/examples/fetch/).
+
+## What you just used
+
+| Object | Job |
+| --- | --- |
+| Session | Owns pages, shared cookies, request defaults and plugins |
+| Page | Holds the current response and live DOM; evaluates browser JavaScript |
+| `page.text` | Original response text, before DOM changes |
+| `page.html()` | Current serialized DOM; await it in Node |
+
+Closing a session closes its pages. Python timeouts use **seconds**; Node uses
+**milliseconds**. Brimp executes scripts and DOM operations without painting a
+screenshot or calculating layout.
+
+Continue with [Python](/examples/python/), [Node](/examples/node/), or
+[CLI](/examples/cli/) tutorials.

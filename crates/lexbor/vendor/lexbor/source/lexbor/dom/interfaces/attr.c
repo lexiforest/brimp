@@ -197,7 +197,7 @@ lxb_dom_attr_set_name_ns(lxb_dom_attr_t *attr, const lxb_char_t *link,
     attr->qualified_name = (lxb_dom_attr_id_t) data;
 
     /* prefix */
-    attr->node.prefix = (lxb_ns_prefix_id_t) lxb_ns_prefix_append(doc->ns, name,
+    attr->node.prefix = (lxb_ns_prefix_id_t) lxb_ns_prefix_append(doc->prefix, name,
                                                                   length);
     if (attr->node.prefix == 0) {
         return LXB_STATUS_ERROR;

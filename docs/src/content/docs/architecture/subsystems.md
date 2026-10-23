@@ -4,7 +4,85 @@ title: Core APIs and plugins
 
 Brimp combines JavaScriptCore, a canonical Lexbor DOM, and curl-impersonate.
 Common web APIs are available in every page. Specialized capabilities use explicit
-plugins, with none enabled by default.
+plugins. Binding sessions start with no plugins; CLI Markdown/JSON extraction
+automatically selects Defuddle.
+
+In this walkthrough, you will use core crypto, inspect plugin options and add a
+host-backed lookup function to page JavaScript.
+
+## 1. Use a core API without a plugin
+
+```python
+from brimp import Session
+
+with Session() as session:
+    page = session.new_page()
+    length = page.evaluate("""
+      crypto.subtle.digest('SHA-256', new TextEncoder().encode('hello'))
+        .then(buffer => buffer.byteLength)
+    """)
+    print(length)
+```
+
+Expect `32`. WebCrypto belongs in core; it does not need an installer.
+
+## 2. Choose a bundled plugin
+
+Inspect capabilities without creating a page:
+
+```python
+from brimp import plugins
+print(plugins.catalog())
+```
+
+Then opt into storage for one realm:
+
+```python
+from brimp import Session, plugins
+
+with Session(plugins=[plugins.storage()]) as session:
+    page = session.new_page()
+    print(page.evaluate("localStorage.setItem('theme', 'dark'); localStorage.getItem('theme')"))
+```
+
+Expect `dark`. This storage resets on navigation. Use `plugins.host_storage()`
+with a backend when state must outlive a realm; session memory is the default.
+The [host-storage contract](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
+includes an example SQLite backend for durable JSON storage.
+
+## 3. Connect page code to a host handler
+
+```python
+from brimp import Session, Plugin
+
+lookup = Plugin(
+    name="lookup",
+    source="""({global, host}) => {
+      global.lookup = value => host.call('lookup', value);
+      return () => { delete global.lookup; };
+    }""",
+    handlers={"lookup": lambda context, value: {"answer": value + 1}},
+)
+with Session(plugins=[lookup]) as session:
+    page = session.new_page()
+    print(page.evaluate("lookup(41)"))
+```
+
+Expect `{'answer': 42}`. The installer runs before document scripts and may return
+a disposer. `host.call()` returns a Promise; Python's synchronous handler receives
+a trusted `HostContext` and copied arguments. Node handlers may be asynchronous.
+
+![Page JavaScript, DOM and queued work remain on the owner thread; a plugin host handler receives copied values and returns its result through the task queue.](/diagrams/page-lifecycle.png)
+
+Host handlers cannot reenter their own page. Navigation cancels pending realm
+calls and runs cleanup. For storage, partition by `context.origin`, not an origin
+supplied by page code.
+
+## 4. Check the boundary before adding a plugin
+
+Use the tables below to decide whether a missing behavior belongs in common web
+core or needs a specialized backend. Constructor presence is not evidence of a
+full graphics, audio or worker implementation.
 
 ## Core coverage
 
@@ -16,7 +94,7 @@ plugins, with none enabled by default.
 | Scripts and events | Classic/module scripts, parser suspension, timers, microtasks, DOM events and direct-node input | No coordinate hit-testing or browser Worker execution |
 | Network | Fetch/XHR, cookies, redirects, proxies, auth, WebSocket, EventSource, routes and native streaming bodies | No WebTransport; response interception buffers at most 32 MiB |
 | Streams | Readable/Writable/Transform streams, BYOB readers, closure, cancellation and backpressure via web-streams-polyfill | Unread fetch data has a 256 KiB native queue; an unread tee/clone branch can accumulate data |
-| CSS/SVG | Lexbor inline declarations and generic SVG elements | No CSSStyleSheet/CSSRule editing, adopted sheets, cascade, computed style or specialized SVG interfaces |
+| CSS/SVG | Lexbor inline declarations, style/media/supports rule editing, style/link sheets, constructed/adopted sheets and generic SVG elements | Partial CSS grammar; no cascade, computed style or specialized SVG interfaces |
 
 DOM wrappers retain node identity, including detached nodes, until realm teardown.
 Navigation invalidates external handles. Each page owns its JavaScript realm and
@@ -61,38 +139,8 @@ contract is in [core web coverage](https://github.com/lexiforest/brimp/blob/main
 | Graphics | WebGL state and optional WebGPU buffer mocks; no shader execution or GPU rendering |
 | Audio | AudioBuffer and graph/lifecycle state; no processing, decoding or output |
 
-Inspect installer names, capabilities, limits, defaults and lifetimes from the host:
-
-```python
-from brimp import plugins
-print(plugins.catalog())
-```
-
-```javascript
-import { pluginCatalog } from 'brimp';
-console.log(pluginCatalog());
-```
-
-Discovery installs nothing in a page. Select `plugins.host_storage()` in Python or
-`hostStoragePlugin()` in Node for data shared by pages of the same origin within a
-session. A `backend_factory` / `backendFactory` supplies custom atomic transactions
-and optional cleanup. The SQLite example supplies durable JSON storage. This API
-is an explicit asynchronous extension; it does not implement browser IndexedDB or
-localStorage persistence.
-
-## Custom plugins
-
-Installers receive `{global, host, options}`, run in session order before document
-scripts, and may return Promises and disposers. `host.call` returns a Promise for
-registered handlers. Values are JSON-like or copied binary buffers; nodes, pointers
-and functions stay in the realm. Ordered subscriptions carry host notifications.
-Navigation and closure cancel pending calls and dispose realm resources.
-
-Host setup/dispose factories own session state independently of realms. Trusted
-handler context includes session, page, realm, URL and origin. Use that origin
-for storage partitioning and coordinate shared backend transactions. Host errors
-retain diagnostic details in the embedding application; page code receives a
-generic OperationError.
-
-See the [plugin contract and examples](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
-for file loading, options, callbacks, cancellation and storage backends.
+See the [generated Python plugin API](/reference/python/plugins/) and
+[Node API](/reference/node/) for installer signatures. The
+[plugin contract](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
+covers file loading, notification subscriptions, per-session setup/disposal,
+cancellation and storage backends.

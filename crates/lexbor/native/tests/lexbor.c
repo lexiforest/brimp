@@ -20,6 +20,10 @@ static void declarations(const unsigned char *name, size_t name_len, const unsig
     (void)name; (void)name_len; (void)value; (void)value_len; (void)important;
     (*(size_t *)ctx)++;
 }
+static void rules(unsigned depth, unsigned kind, const unsigned char *prelude, size_t prelude_len, const unsigned char *body, size_t body_len, void *ctx) {
+    (void)depth; (void)kind; (void)prelude; (void)prelude_len; (void)body; (void)body_len;
+    (*(size_t *)ctx)++;
+}
 int main(void) {
     for (int iteration = 0; iteration < 100; iteration++) {
         const char *source = "<!doctype html><main><p id='first'>before</p>"
@@ -70,7 +74,18 @@ int main(void) {
         assert(br_parser_resume(other_parser, (const unsigned char *)other_source, strlen(other_source), &other_offset, &script) == 0);
         text_is(query(other, "p"), "other");
         br_parser_free(other_parser);
-        br_parser_free(parser); br_document_free(doc);
+        br_parser_free(parser);
+        const char *sheet = "@media screen { b {color:red} } p {color:blue}";
+        count = 0; assert(br_stylesheet((const unsigned char *)sheet,strlen(sheet),rules,&count)==0);assert(count==3);
+        assert(br_node_set_attribute_ns(main,(const unsigned char *)"urn:test",8,(const unsigned char *)"t:Key",5,(const unsigned char *)"value",5)==0);
+        assert(br_node_remove_attribute_ns(main,(const unsigned char *)"urn:test",8,(const unsigned char *)"Key",3)==0);
+        br_node_clear(root);br_parser *writer=br_writer_new(root);assert(writer);
+        const char *first="<!doctype html><p id='sp", *second="lit'>hello<script>run</script><i>end</i>";
+        offset=0;assert(br_writer_feed(writer,(const unsigned char *)first,strlen(first),&offset,&script)==0);
+        offset=0;assert(br_writer_feed(writer,(const unsigned char *)second,strlen(second),&offset,&script)==1);text_is(script,"run");
+        assert(br_writer_feed(writer,(const unsigned char *)second,strlen(second),&offset,&script)==0);
+        offset=0;assert(br_parser_resume(writer,(const unsigned char *)"",0,&offset,&script)==0);assert(query(root,"#split > i"));
+        br_parser_free(writer);br_document_free(doc);
     }
     puts("Lexbor script boundary, nested fragments, detached nodes, selectors, declarations, and teardown passed");
 }

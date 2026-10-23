@@ -55,6 +55,11 @@ class HostContext:
 
 @dataclass(frozen=True)
 class Plugin:
+    """JavaScript installer plus synchronous host handlers and per-session setup.
+
+    The installer receives global, host and options. It may return a Promise
+    and a disposer. Host handlers receive HostContext followed by copied values.
+    """
     name: str
     source: str
     handlers: dict = field(default_factory=dict)

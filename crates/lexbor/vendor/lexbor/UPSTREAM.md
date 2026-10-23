@@ -39,3 +39,12 @@ The document mutation callback struct also has a character-data callback, invoke
 before the HTML tree builder appends to an existing text node. This preserves the
 old value without snapshotting or duplicating the DOM. Other consumers leave this
 zero-initialized callback unset.
+
+## Attribute namespace patch
+
+`html/tree.c` and `dom/interfaces/element.c` assign the null namespace to plain
+attributes; namespace adjustment still assigns XML/XMLNS/XLink namespaces.
+The element's ID/class caches only track null-namespace attributes.
+`dom/interfaces/attr.c` interns prefixes in the prefix table rather than the
+namespace table. The shim exposes namespace-aware attribute mutation against
+this canonical state, with no parallel attribute store.

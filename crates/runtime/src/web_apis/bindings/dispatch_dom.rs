@@ -7,6 +7,45 @@ pub(super) fn dispatch(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "cssParseSheet" => Ok(NativeValue::String(
+            serde_json::to_string(
+                &brimp_lexbor::stylesheet(&required_string(call, 2, "CSS")?).map_err(err)?,
+            )
+            .map_err(err)?,
+        )),
+
+        "documentOpen" => {
+            let id = required_document_target(state, call)?;
+            let writer = state.document.borrow().writer(id).map_err(err)?;
+            state.document_writers.borrow_mut().insert(id, writer);
+            Ok(NativeValue::Undefined)
+        }
+        "documentWrite" | "documentWriteNext" | "documentClose" => {
+            let id = required_document_target(state, call)?;
+            let mut writers = state.document_writers.borrow_mut();
+            let Some(writer) = writers.get_mut(&id) else {
+                return Ok(NativeValue::Null);
+            };
+            if operation == "documentWrite" {
+                writer.write(&required_string(call, 2, "HTML")?);
+            }
+            let script = if operation == "documentClose" {
+                writer.finish().map_err(err)?;
+                None
+            } else {
+                writer.resume().map_err(err)?
+            };
+            let mutations = writer.take_mutations().map_err(err)?;
+            let doc = state.document.borrow();
+            let script = script.map(|node| doc.writer_node_id(node));
+            let records: Vec<_> = mutations.into_iter().map(|r|serde_json::json!({"target":doc.writer_node_id(r.target),"node":doc.writer_node_id(r.node),"previous":r.previous.map(|n|doc.writer_node_id(n)),"next":r.next.map(|n|doc.writer_node_id(n)),"removed":r.removed,"oldValue":r.old_value})).collect();
+            if operation == "documentClose" {
+                writers.remove(&id);
+            }
+            Ok(NativeValue::String(
+                serde_json::json!({"script":script,"records":records}).to_string(),
+            ))
+        }
         "domParserParse" => {
             let input = required_string(call, 2, "input")?;
             if required_string(call, 3, "type")? != "text/html" {
@@ -104,6 +143,19 @@ pub(super) fn dispatch(
             }
             .map_err(err)?;
             drop(doc);
+            node_value(state, call, id)
+        }
+        "adoptNode" => {
+            let owner = required_document_target(state, call)?;
+            let id = state
+                .wrappers
+                .node_id(&required_object(call, 2, "node")?)
+                .ok_or_else(stale_wrapper)?;
+            state
+                .document
+                .borrow()
+                .adopt_subtree(id, owner)
+                .map_err(err)?;
             node_value(state, call, id)
         }
         "cloneNode" | "importNode" => {
@@ -271,6 +323,33 @@ pub(super) fn dispatch(
                 .map_err(err)?;
             Ok(NativeValue::Undefined)
         }
+        "replaceChild" => {
+            let parent = required_parent_node_target(state, call)?;
+            let node = state
+                .wrappers
+                .node_id(&required_object(call, 2, "node")?)
+                .ok_or_else(stale_wrapper)?;
+            let child_object = required_object(call, 3, "child")?;
+            let child = state
+                .wrappers
+                .node_id(&child_object)
+                .ok_or_else(stale_wrapper)?;
+            let doc = state.document.borrow();
+            let children = doc.children(parent).map_err(err)?;
+            let index = children
+                .iter()
+                .position(|n| *n == child)
+                .ok_or_else(|| NativeError::new("Node is not a child"))?;
+            let reference = children[index + 1..].iter().copied().find(|n| *n != node);
+            if doc.parent(node).map_err(err)?.is_some() {
+                doc.detach(node).map_err(err)?;
+            }
+            if node != child {
+                doc.detach(child).map_err(err)?;
+            }
+            doc.insert(parent, node, reference).map_err(err)?;
+            Ok(NativeValue::Object(child_object))
+        }
         "appendChild" => mutate_child(state, call, ChildMutation::Append),
         "removeChild" => mutate_child(state, call, ChildMutation::Remove),
         "insertBefore" => mutate_child(state, call, ChildMutation::InsertBefore),
@@ -299,6 +378,19 @@ pub(super) fn dispatch(
                     None => Ok(NativeValue::Null),
                 },
             }
+        }
+        "setAttributeNS" | "removeAttributeNS" => {
+            let id = required_element_target(state, call)?;
+            let ns = required_string(call, 2, "namespace")?;
+            let name = required_string(call, 3, "name")?;
+            let doc = state.document.borrow();
+            if operation == "setAttributeNS" {
+                doc.set_attribute_ns(id, &ns, &name, &required_string(call, 4, "value")?)
+                    .map_err(err)?;
+            } else {
+                doc.remove_attribute_ns(id, &ns, &name).map_err(err)?;
+            }
+            Ok(NativeValue::Undefined)
         }
         "elementAttributes" => {
             let id = required_element_target(state, call)?;

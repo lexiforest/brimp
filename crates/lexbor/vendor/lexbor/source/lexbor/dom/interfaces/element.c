@@ -270,7 +270,7 @@ lxb_dom_element_set_attribute(lxb_dom_element_t *element,
         return NULL;
     }
 
-    attr->node.ns = element->node.ns;
+    attr->node.ns = LXB_NS__UNDEF;
 
     if (element->node.ns == LXB_NS_HTML
         && element->node.owner_document->type == LXB_DOM_DOCUMENT_DTYPE_HTML)
@@ -354,7 +354,7 @@ lxb_dom_element_attr_append(lxb_dom_element_t *element, lxb_dom_attr_t *attr)
     lxb_dom_attr_t *exist;
     lxb_dom_document_t *doc = lxb_dom_interface_node(element)->owner_document;
 
-    if (attr->node.local_name == LXB_DOM_ATTR_ID) {
+    if (attr->node.local_name == LXB_DOM_ATTR_ID && attr->node.ns == LXB_NS__UNDEF) {
         exist = element->attr_id;
 
         if (exist != NULL) {
@@ -364,7 +364,7 @@ lxb_dom_element_attr_append(lxb_dom_element_t *element, lxb_dom_attr_t *attr)
 
         element->attr_id = attr;
     }
-    else if (attr->node.local_name == LXB_DOM_ATTR_CLASS) {
+    else if (attr->node.local_name == LXB_DOM_ATTR_CLASS && attr->node.ns == LXB_NS__UNDEF) {
         exist = element->attr_class;
 
         if (exist != NULL) {

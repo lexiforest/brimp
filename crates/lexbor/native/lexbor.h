@@ -17,6 +17,8 @@ typedef void (*br_decl_cb)(const unsigned char *, size_t, const unsigned char *,
 br_document *br_document_new(void);
 void br_document_free(br_document *);
 br_node *br_document_root(br_document *);
+br_parser *br_writer_new(br_node *);
+int br_writer_feed(br_parser *, const unsigned char *, size_t, size_t *, br_node **);
 br_parser *br_parser_new(br_node *, bool);
 void br_parser_free(br_parser *);
 /* 0: done; 1: script boundary; -1: parser/allocation error. Input stays live. */
@@ -41,8 +43,12 @@ int br_node_insert(br_node *, br_node *, br_node *);
 int br_node_attribute(br_node *, const unsigned char *, size_t, br_bytes *);
 int br_node_set_attribute(br_node *, const unsigned char *, size_t, const unsigned char *, size_t);
 int br_node_remove_attribute(br_node *, const unsigned char *, size_t);
+int br_node_set_attribute_ns(br_node *, const unsigned char *, size_t, const unsigned char *, size_t, const unsigned char *, size_t);
+int br_node_remove_attribute_ns(br_node *, const unsigned char *, size_t, const unsigned char *, size_t);
 void br_node_attributes(br_node *, br_attr_cb, void *);
 int br_select(br_node *, const unsigned char *, size_t, bool, br_node_cb, void *);
+typedef void (*br_rule_cb)(unsigned, unsigned, const unsigned char *, size_t, const unsigned char *, size_t, void *);
+int br_stylesheet(const unsigned char *, size_t, br_rule_cb, void *);
 int br_declarations(const unsigned char *, size_t, br_decl_cb, void *);
 void br_bytes_free(br_bytes *);
 #endif

@@ -70,7 +70,7 @@ class Node extends EventTarget {
     get lastChild() { return __callHost("lastChild", this); }
     get previousSibling() { return __callHost("previousSibling", this); }
     get nextSibling() { return __callHost("nextSibling", this); }
-    get childNodes() { return __callHost("childNodes", this); }
+    get childNodes() { return __cachedCollection(this, "childNodes", () => new NodeList(() => __callHost("childNodes", this))); }
     hasChildNodes() { return this.firstChild !== null; }
     get isConnected() {
         return this.getRootNode({composed:true}) instanceof Document;
@@ -132,6 +132,7 @@ class Node extends EventTarget {
         }
     }
     appendChild(child) {
+        __validateInsertion(this, child, null);
         const result = __callHost("appendChild", this, child);
         if (child instanceof HTMLIFrameElement) child.__connected();
         __connectCustomElementTree(child);
@@ -139,11 +140,14 @@ class Node extends EventTarget {
         return result;
     }
     removeChild(child) {
+        if (!(child instanceof Node)) throw new TypeError('Expected a Node');
+        if (child.parentNode !== this) throw new DOMException('Node is not a child', 'NotFoundError');
         const result = __callHost("removeChild", this, child);
         __disconnectCustomElementTree(child);
         return result;
     }
     insertBefore(child, reference) {
+        __validateInsertion(this, child, reference);
         const result = __callHost("insertBefore", this, child, reference);
         if (child instanceof HTMLIFrameElement) child.__connected();
         __connectCustomElementTree(child);
@@ -151,9 +155,12 @@ class Node extends EventTarget {
         return result;
     }
     replaceChild(node, child) {
-        if (node === child) return child;
-        this.insertBefore(node, child);
-        return this.removeChild(child);
+        __validateInsertion(this, node, child, true);
+        __callHost('replaceChild', this, node, child);
+        __disconnectCustomElementTree(child);
+        if (node instanceof HTMLIFrameElement) node.__connected();
+        __connectCustomElementTree(node); __queueDynamicScript(node);
+        return child;
     }
     cloneNode(deep = false) { return __callHost("cloneNode", this, Boolean(deep)); }
     normalize() {
@@ -234,10 +241,72 @@ class TreeWalker {
         const shown = (this.whatToShow & (1 << (node.nodeType - 1))) !== 0;
         if (!shown) return NodeFilter.FILTER_SKIP;
         if (this.filter === null) return NodeFilter.FILTER_ACCEPT;
-        const decision = typeof this.filter === "function"
-            ? this.filter(node)
-            : this.filter.acceptNode(node);
-        return Number(decision);
+        if (this.__active) throw new DOMException('Recursive filtering', 'InvalidStateError');
+        this.__active = true;
+        try { return Number(typeof this.filter === 'function' ? this.filter(node) : this.filter.acceptNode(node)); }
+        finally { this.__active = false; }
+    }
+    parentNode() {
+        let node = this.currentNode;
+        while (node !== this.root && (node = node.parentNode)) {
+            if (this.__decision(node) === NodeFilter.FILTER_ACCEPT) return this.currentNode = node;
+        }
+        return null;
+    }
+    __child(forward) {
+        const first = forward ? 'firstChild' : 'lastChild', next = forward ? 'nextSibling' : 'previousSibling';
+        const start = this.currentNode;
+        let node = start[first];
+        while (node) {
+            const result = this.__decision(node);
+            if (result === NodeFilter.FILTER_ACCEPT) return this.currentNode = node;
+            if (result === NodeFilter.FILTER_SKIP && node[first]) { node = node[first]; continue; }
+            while (!node[next]) {
+                node = node.parentNode;
+                if (!node || node === start || node === this.root) return null;
+            }
+            node = node[next];
+        }
+        return null;
+    }
+    firstChild() { return this.__child(true); }
+    lastChild() { return this.__child(false); }
+    __sibling(forward) {
+        let node = this.currentNode;
+        if (node === this.root) return null;
+        const next = forward ? 'nextSibling' : 'previousSibling', first = forward ? 'firstChild' : 'lastChild';
+        while (node) {
+            let sibling = node[next];
+            while (sibling) {
+                node = sibling;
+                const result = this.__decision(node);
+                if (result === NodeFilter.FILTER_ACCEPT) return this.currentNode = node;
+                sibling = result === NodeFilter.FILTER_SKIP ? node[first] : null;
+                if (!sibling) sibling = node[next];
+            }
+            node = node.parentNode;
+            if (!node || node === this.root || this.__decision(node) === NodeFilter.FILTER_ACCEPT) return null;
+        }
+        return null;
+    }
+    nextSibling() { return this.__sibling(true); }
+    previousSibling() { return this.__sibling(false); }
+    previousNode() {
+        let node = this.currentNode;
+        while (node !== this.root) {
+            while (node.previousSibling) {
+                node = node.previousSibling;
+                let result = this.__decision(node);
+                while (result !== NodeFilter.FILTER_REJECT && node.lastChild) {
+                    node = node.lastChild; result = this.__decision(node);
+                }
+                if (result === NodeFilter.FILTER_ACCEPT) return this.currentNode = node;
+            }
+            node = node.parentNode;
+            if (!node) return null;
+            if (this.__decision(node) === NodeFilter.FILTER_ACCEPT) return this.currentNode = node;
+        }
+        return null;
     }
     nextNode() {
         let node = this.currentNode;
@@ -284,6 +353,7 @@ const __reservedCustomElementNames = new Set([
     "font-face-uri", "font-face-format", "font-face-name", "missing-glyph",
 ]);
 const __customElementConstructionStack = [];
+const __customElementNames = new WeakMap();
 const __upgradedCustomElements = new WeakSet();
 const __failedCustomElements = new WeakSet();
 const __connectedCustomElements = new WeakSet();
@@ -300,6 +370,7 @@ function __isValidCustomElementName(name) {
 class CustomElementRegistry {
     constructor() {
         this.__definitions = new Map();
+        this.__localNames = new Map();
         this.__observedAttributes = new Map();
         this.__constructorNames = new Map();
         this.__waiters = new Map();
@@ -313,7 +384,11 @@ class CustomElementRegistry {
         if (this.__definitions.has(name) || this.__constructorNames.has(constructor)) {
             throw new DOMException("Custom element definition already exists", "NotSupportedError");
         }
-        if (options.extends !== undefined) String(options.extends);
+        const localName = options.extends === undefined ? name : String(options.extends);
+        if (options.extends !== undefined && (__isValidCustomElementName(localName) ||
+            Object.getPrototypeOf(__callHost('createElement', document, localName)) === HTMLElement.prototype))
+            throw new DOMException('Unsupported extended element', 'NotSupportedError');
+        this.__localNames.set(name, localName);
         const observed = Array.from(constructor.observedAttributes ?? [], String);
         this.__observedAttributes.set(name, observed);
         this.__definitions.set(name, constructor);
@@ -348,15 +423,18 @@ const customElements = new CustomElementRegistry();
 
 function __upgradeCustomElement(element) {
     if (__upgradedCustomElements.has(element) || __failedCustomElements.has(element)) return element;
-    const constructor = customElements.get(element.localName);
-    if (constructor === undefined) return element;
+    if (!(element instanceof Element) || element.namespaceURI !== 'http://www.w3.org/1999/xhtml') return element;
+    const name = __customElementNames.get(element) ?? element.getAttribute('is') ?? element.localName;
+    const constructor = customElements.get(name);
+    if (constructor === undefined || customElements.__localNames.get(name) !== element.localName) return element;
+    __customElementNames.set(element, name);
     __upgradedCustomElements.add(element);
     Object.setPrototypeOf(element, constructor.prototype);
     __customElementConstructionStack.push(element);
     try {
         const result = Reflect.construct(constructor, []);
         if (result !== element) throw new TypeError("custom element constructor returned another object");
-        const observed = customElements.__observedAttributes.get(element.localName) ?? [];
+        const observed = customElements.__observedAttributes.get(name) ?? [];
         if (typeof element.attributeChangedCallback === "function") {
             for (const name of observed) {
                 if (element.hasAttribute(name)) {
@@ -420,4 +498,33 @@ function __replaceChildren(parent, values) {
     const nodes = __nodesFromArguments(values);
     while (parent.firstChild) parent.removeChild(parent.firstChild);
     for (const node of nodes) parent.appendChild(node);
+}
+
+const __collectionCache = new WeakMap();
+function __cachedCollection(owner, key, create) {
+    let cache = __collectionCache.get(owner);
+    if (!cache) __collectionCache.set(owner, cache = new Map());
+    if (!cache.has(key)) cache.set(key, create());
+    return cache.get(key);
+}
+function __validateInsertion(parent, node, reference, replace = false) {
+    if (!(node instanceof Node)) throw new TypeError('Expected a Node');
+    if (reference != null && !(reference instanceof Node)) throw new TypeError('Expected a Node');
+    if (reference != null && reference.parentNode !== parent || replace && reference == null)
+        throw new DOMException('Node is not a child', 'NotFoundError');
+    if (![1,9,11].includes(parent.nodeType) || node.contains(parent) || ![1,3,7,8,10,11].includes(node.nodeType))
+        throw new DOMException('Invalid tree insertion', 'HierarchyRequestError');
+    const incoming = node.nodeType === 11 ? Array.from(node.childNodes) : [node];
+    if (parent.nodeType !== 9 && incoming.some(n => n.nodeType === 10))
+        throw new DOMException('DocumentType requires a document', 'HierarchyRequestError');
+    if (parent.nodeType === 9) {
+        const children = Array.from(parent.childNodes).filter(n => n !== node);
+        let index = reference == null ? children.length : children.indexOf(reference);
+        if (reference === node) index = Array.from(parent.childNodes).indexOf(node);
+        children.splice(index, replace && reference !== node ? 1 : 0, ...incoming);
+        if (children.some(n => n.nodeType === 3) || children.filter(n => n.nodeType === 1).length > 1 ||
+            children.filter(n => n.nodeType === 10).length > 1 ||
+            children.findIndex(n => n.nodeType === 10) > children.findIndex(n => n.nodeType === 1) && children.some(n => n.nodeType === 1))
+            throw new DOMException('Invalid document children', 'HierarchyRequestError');
+    }
 }

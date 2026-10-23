@@ -86,14 +86,31 @@ function __mutationBefore(operation, args) {
     let target = args[0];
     if (operation.startsWith('style')) target = __styleOwners.get(__styleDeclarationTarget(target));
     if (!(target instanceof Node)) return null;
-    if (operation === 'setAttribute' || operation === 'removeAttribute' || operation.startsWith('style')) {
-        const name = operation.startsWith('style') ? 'style' : String(args[1]);
-        return { type: 'attributes', target, name, value: target.getAttribute(name), operation };
+    if (operation.includes('Attribute') || operation.startsWith('style')) {
+        const namespaced = operation.endsWith('NS');
+        const namespace = namespaced ? args[1] || null : null;
+        const name = operation.startsWith('style') ? 'style' : namespaced ? String(args[2]).split(':').at(-1) : String(args[1]);
+        return { type: 'attributes', target, name, namespace, value: namespaced ? target.getAttributeNS(namespace, name) : target.getAttribute(name), operation };
     }
     if (operation === 'setTextContent' && (target.nodeType === 3 || target.nodeType === 8)) {
         return { type: 'characterData', target, value: target.textContent };
     }
     if (operation === 'setInnerHTML' && target instanceof HTMLTemplateElement) target = target.content;
+    if (operation === 'replaceChild') {
+        const [parent,node,child] = args, added = node.nodeType === 11 ? Array.from(node.childNodes) : [node];
+        const records = [];
+        if(node.parentNode || node.nodeType === 11 && added.length) {
+            const record = new MutationRecord('childList',node.nodeType === 11 ? node : node.parentNode);
+            record.removedNodes = new NodeList(added);
+            if(node.nodeType!==11) { record.previousSibling=node.previousSibling;record.nextSibling=node.nextSibling; }
+            records.push(record);
+        }
+        const record = new MutationRecord('childList',parent);
+        record.addedNodes = new NodeList(added); record.removedNodes = new NodeList(node===child ? [] : [child]);
+        record.previousSibling = child.previousSibling===node ? node.previousSibling : child.previousSibling;
+        record.nextSibling = child.nextSibling===node ? node.nextSibling : child.nextSibling;
+        records.push(record);return {type:'replacement',records};
+    }
     const parents = new Set();
     if (['appendChild', 'insertBefore', 'removeChild'].includes(operation)) {
         const child = args[1];
@@ -107,13 +124,14 @@ function __mutationBefore(operation, args) {
 }
 function __mutationAfter(before) {
     if (!before) return;
+    if (before.type === 'replacement') { for(const record of before.records)__queueMutation(record);return; }
     if (before.type !== 'childList') {
-        if (before.type === 'attributes' && before.operation === 'removeAttribute' && before.value === null) return;
+        if (before.type === 'attributes' && before.operation.startsWith('removeAttribute') && before.value === null) return;
         if (before.type === 'attributes' && before.operation.startsWith('style') &&
             before.target.getAttribute(before.name) === before.value) return;
         const record = new MutationRecord(before.type, before.target);
         record.oldValue = before.value;
-        if (before.type === 'attributes') record.attributeName = before.name;
+        if (before.type === 'attributes') { record.attributeName = before.name; record.attributeNamespace = before.namespace; }
         __queueMutation(record);
         return;
     }
@@ -143,7 +161,9 @@ function __mutationAfter(before) {
     }
 }
 
-globalThis.__brimpParserMutations = serialized => {
+const __deliverParserMutations = serialized => {
+    __domVersion++;
+    __updateStyleSheets();
     if (__liveRanges.size === 0 && __mutationObservers.size === 0 && !__callHost("mutationObserved")) return;
     const node = id => id == null ? null : __callHost('mutationNode', globalThis, String(id));
     for (const item of JSON.parse(serialized)) {
@@ -154,3 +174,5 @@ globalThis.__brimpParserMutations = serialized => {
         __queueMutation(record);
     }
 };
+
+globalThis.__brimpParserMutations = __deliverParserMutations;

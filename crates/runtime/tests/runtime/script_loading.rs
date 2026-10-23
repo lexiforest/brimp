@@ -98,9 +98,30 @@ fn classic_and_module_scripts_follow_their_execution_ordering_rules() {
         "loading,interactive,dom:interactive,complete,load:complete"
     );
     let order = page.eval("order.join(',')").unwrap().to_string().unwrap();
+    // Async fetches run on the session dispatcher. Their completion order is
+    // independent of parser/defer order, including when a fixture yields.
+    let scripts: Vec<_> = order.split(',').collect();
     assert_eq!(
-        order,
-        "inline-start,inline-attribute,blocking,async-fast,async-slow,defer-first,defer-second,module"
+        scripts.iter().filter(|name| **name == "async-fast").count(),
+        1
+    );
+    assert_eq!(
+        scripts.iter().filter(|name| **name == "async-slow").count(),
+        1
+    );
+    assert_eq!(
+        scripts
+            .into_iter()
+            .filter(|name| !name.starts_with("async-"))
+            .collect::<Vec<_>>(),
+        [
+            "inline-start",
+            "inline-attribute",
+            "blocking",
+            "defer-first",
+            "defer-second",
+            "module"
+        ]
     );
     assert_eq!(
         page.eval("currentScripts.every(Boolean) && document.currentScript === null")

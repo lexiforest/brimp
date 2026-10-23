@@ -3,7 +3,7 @@
 See [native binding setup and current scope](../README.md).
 
 ```javascript
-import { createSession } from 'brimp';
+import { createSession } from '@brimp/brimp';
 
 const session = await createSession({ headers: { 'X-Client': 'native-example' } });
 try {

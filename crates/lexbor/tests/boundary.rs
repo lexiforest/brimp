@@ -163,3 +163,74 @@ fn selectors_scope_has_and_boolean_attributes_are_native() {
     assert_eq!(doc.attribute(script, "defer").unwrap().as_deref(), Some(""));
     assert!(doc.attribute(script, "absent").unwrap().is_none());
 }
+
+#[test]
+fn namespace_attributes_are_distinct_and_preserve_case() {
+    let doc = Document::parse(
+        "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'><a xlink:href='old'/></svg>",
+    )
+    .unwrap();
+    let svg = doc.select(doc.root(), "svg").unwrap()[0];
+    doc.set_attribute_ns(svg, "urn:a", "a:Key", "one").unwrap();
+    doc.set_attribute_ns(svg, "urn:b", "b:Key", "two").unwrap();
+    doc.set_attribute_ns(svg, "urn:a", "other:Key", "updated")
+        .unwrap();
+    let attrs = doc.attributes(svg).unwrap();
+    let a = attrs
+        .iter()
+        .find(|a| a.namespace.as_deref() == Some("urn:a"))
+        .unwrap();
+    assert_eq!(a.name, "a:Key");
+    assert_eq!(a.local_name, "Key");
+    assert_eq!(a.prefix.as_deref(), Some("a"));
+    assert_eq!(a.value, "updated");
+    assert!(
+        attrs
+            .iter()
+            .find(|a| a.name == "viewBox")
+            .unwrap()
+            .namespace
+            .is_none()
+    );
+    doc.remove_attribute_ns(svg, "urn:a", "Key").unwrap();
+    assert!(
+        doc.attributes(svg)
+            .unwrap()
+            .iter()
+            .any(|a| a.namespace.as_deref() == Some("urn:b"))
+    );
+    let clone = doc.clone_node(svg, true).unwrap();
+    assert_eq!(
+        doc.attributes(clone).unwrap().len(),
+        doc.attributes(svg).unwrap().len()
+    );
+}
+#[test]
+fn stylesheet_rules_and_incremental_writer_keep_owned_buffers() {
+    let rules =
+        brimp_lexbor::stylesheet("@media screen { b { color:red } } p {color: blue !important}")
+            .unwrap();
+    assert_eq!(
+        rules.iter().map(|r| (r.depth, r.kind)).collect::<Vec<_>>(),
+        vec![(0, 4), (1, 1), (0, 1)]
+    );
+    assert_eq!(rules[1].prelude, "b");
+    assert_eq!(
+        declarations(" \n color: red !important").unwrap(),
+        vec![("color".into(), "red".into(), true)]
+    );
+    let doc = Document::new().unwrap();
+    let mut writer = doc.writer_at(doc.root()).unwrap();
+    writer.write("<!doctype html><p id='sp");
+    assert!(writer.resume().unwrap().is_none());
+    writer.write("lit'>hello<script>run</script><b>end</b>");
+    let script = writer.resume().unwrap().unwrap();
+    assert_eq!(doc.text(script).unwrap(), "run");
+    writer.write("<i>nested</i>");
+    assert!(writer.resume().unwrap().is_none());
+    assert!(doc.select(doc.root(), "b").unwrap().is_empty());
+    assert!(writer.resume().unwrap().is_none());
+    writer.finish().unwrap();
+    drop(writer);
+    assert_eq!(doc.select(doc.root(), "#split i + b").unwrap().len(), 1);
+}

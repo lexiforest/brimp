@@ -307,6 +307,44 @@ int br_node_remove_attribute(br_node *node, const unsigned char *name, size_t le
     if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
     return lxb_dom_element_remove_attribute(lxb_dom_interface_element(node), name, len) == LXB_STATUS_OK ? 0 : -1;
 }
+
+extern lxb_status_t lxb_dom_attr_set_name_ns(lxb_dom_attr_t *, const lxb_char_t *, size_t, const lxb_char_t *, size_t, bool);
+static lxb_dom_attr_t *attribute_ns(br_node *node, const unsigned char *ns, size_t ns_len, const unsigned char *local, size_t local_len) {
+    for (lxb_dom_attr_t *a = lxb_dom_interface_element(node)->first_attr; a; a = a->next) {
+        size_t len; const unsigned char *name = lxb_dom_attr_qualified_name(a, &len);
+        const unsigned char *colon = a->node.prefix ? memchr(name, ':', len) : NULL;
+        if (colon) { len -= (size_t)(colon + 1 - name); name = colon + 1; }
+        if (len != local_len || memcmp(name, local, len)) continue;
+        if (a->node.ns == LXB_NS__UNDEF) { if (!ns_len) return a; continue; }
+        const lxb_ns_data_t *data = lxb_ns_data_by_id(node->owner_document->ns, a->node.ns);
+        if (data && data->entry.length == ns_len && !memcmp(lexbor_hash_entry_str(&data->entry), ns, ns_len)) return a;
+    }
+    return NULL;
+}
+int br_node_set_attribute_ns(br_node *node, const unsigned char *ns, size_t ns_len, const unsigned char *name, size_t name_len, const unsigned char *value, size_t value_len) {
+    if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
+    const unsigned char *colon = memchr(name, ':', name_len), *local = colon ? colon + 1 : name;
+    size_t local_len = name_len - (size_t)(local - name);
+    lxb_dom_attr_t *attr = attribute_ns(node, ns, ns_len, local, local_len);
+    if (attr) return lxb_dom_attr_set_value(attr, value, value_len) == LXB_STATUS_OK ? 0 : -1;
+    attr = lxb_dom_attr_interface_create(node->owner_document);
+    if (!attr) return -1;
+    lxb_status_t status = ns_len
+        ? lxb_dom_attr_set_name_ns(attr, ns, ns_len, name, name_len, false)
+        : lxb_dom_attr_set_name(attr, name, name_len, false);
+    if (status == LXB_STATUS_OK) status = lxb_dom_attr_set_value(attr, value, value_len);
+    if (status == LXB_STATUS_OK) status = lxb_dom_element_attr_append(lxb_dom_interface_element(node), attr);
+    if (status != LXB_STATUS_OK) { lxb_dom_attr_interface_destroy(attr); return -1; }
+    return 0;
+}
+int br_node_remove_attribute_ns(br_node *node, const unsigned char *ns, size_t ns_len, const unsigned char *local, size_t local_len) {
+    if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
+    lxb_dom_attr_t *attr = attribute_ns(node, ns, ns_len, local, local_len);
+    if (!attr) return 0;
+    lxb_dom_element_attr_remove(lxb_dom_interface_element(node), attr);
+    lxb_dom_attr_interface_destroy(attr);
+    return 0;
+}
 void br_node_attributes(br_node *node, br_attr_cb cb, void *ctx) {
     if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return;
     for (lxb_dom_attr_t *attr = lxb_dom_interface_element(node)->first_attr; attr; attr = attr->next) {
@@ -317,8 +355,7 @@ void br_node_attributes(br_node *node, br_attr_cb cb, void *ctx) {
         const unsigned char *local = lxb_dom_attr_local_name(attr, &local_len);
         const lxb_ns_data_t *ns = lxb_ns_data_by_id(node->owner_document->ns, attr->node.ns);
         const unsigned char *ns_name = NULL;
-        if (ns && attr->node.ns != LXB_NS__UNDEF &&
-            (attr->node.prefix || attr->node.ns != node->ns)) {
+        if (ns && attr->node.ns != LXB_NS__UNDEF) {
             ns_name = lexbor_hash_entry_str(&ns->entry); ns_len = ns->entry.length;
         }
         const unsigned char *prefix = NULL;
@@ -326,7 +363,9 @@ void br_node_attributes(br_node *node, br_attr_cb cb, void *ctx) {
             const lxb_ns_prefix_data_t *data = lxb_ns_prefix_data_by_id(node->owner_document->prefix, attr->node.prefix);
             if (data) { prefix = lexbor_hash_entry_str(&data->entry); prefix_len = data->entry.length; }
         }
-        if (!attr->node.prefix) { local = name; local_len = name_len; }
+        const unsigned char *colon = attr->node.prefix ? memchr(name, ':', name_len) : NULL;
+        if (colon) { local = colon + 1; local_len = name_len - (size_t)(local - name); }
+        else if (!attr->node.prefix) { local = name; local_len = name_len; }
         cb(name, name_len, local, local_len, ns_name, ns_len, prefix, prefix_len, value, value_len, ctx);
     }
 }
@@ -384,4 +423,84 @@ done:
     if (memory) lxb_css_memory_destroy(memory, true);
     if (parser) lxb_css_parser_destroy(parser, true);
     return result;
+}
+
+/* Copy the parser's rule tree across the safe boundary. No parser pointers or
+ * partially owned rule objects escape the synchronous call. */
+static int stylesheet_rules(lxb_css_rule_list_t *list, const unsigned char *css, size_t len, unsigned depth, br_rule_cb cb, void *ctx) {
+    if (!list) return 0;
+    for (lxb_css_rule_t *rule = list->first; rule; rule = rule->next) {
+        br_bytes prelude = {0}, body = {0};
+        unsigned type = 0; lxb_css_rule_list_t *children = NULL;
+        lxb_status_t status = LXB_STATUS_OK;
+        if (rule->type == LXB_CSS_RULE_STYLE) {
+            lxb_css_rule_style_t *style = lxb_css_rule_style(rule);
+            type = 1;
+            status = lxb_css_selector_serialize_list_chain(style->selector, append_bytes, &prelude);
+            if (status == LXB_STATUS_OK && style->declarations) status = lxb_css_rule_declaration_list_serialize(style->declarations, append_bytes, &body);
+            children = style->child;
+        } else if (rule->type == LXB_CSS_RULE_AT_RULE) {
+            lxb_css_rule_at_t *at = lxb_css_rule_at(rule);
+            br_bytes name = {0};
+            status = lxb_css_rule_at_serialize_name(at, append_bytes, &name);
+            if (status == LXB_STATUS_OK) {
+                if (name.len == 5 && !memcmp(name.data,"media",5)) type = 4;
+                else if (name.len == 8 && !memcmp(name.data,"supports",8)) type = 12;
+                else if (name.len == 9 && !memcmp(name.data,"font-face",9)) type = 5;
+                else if (name.len == 6 && !memcmp(name.data,"import",6)) type = 3;
+                else if (name.len == 9 && !memcmp(name.data,"namespace",9)) type = 10;
+            }
+            br_bytes_free(&name);
+            if (at->prelude_begin <= at->prelude_end && at->prelude_end <= len)
+                status = append_bytes(css+at->prelude_begin,at->prelude_end-at->prelude_begin,&prelude);
+            if (at->type == LXB_CSS_AT_RULE_MEDIA) children = at->u.media->block;
+            else if (at->type == LXB_CSS_AT_RULE_FONT_FACE) children = at->u.font_face->block;
+            else if (at->type == LXB_CSS_AT_RULE__CUSTOM) children = at->u.custom->block;
+            else if (at->type == LXB_CSS_AT_RULE__UNDEF) children = at->u.undef->block;
+            if (type == 5 && children) { status = lxb_css_rule_list_serialize(children, append_bytes, &body); children = NULL; }
+        }
+        if (status != LXB_STATUS_OK) { br_bytes_free(&prelude); br_bytes_free(&body); return -1; }
+        if (type) cb(depth,type,prelude.data,prelude.len,body.data,body.len,ctx);
+        br_bytes_free(&prelude); br_bytes_free(&body);
+        if (type && stylesheet_rules(children,css,len,depth+1,cb,ctx)) return -1;
+    }
+    return 0;
+}
+int br_stylesheet(const unsigned char *css, size_t len, br_rule_cb cb, void *ctx) {
+    int result = -1;
+    lxb_css_parser_t *parser = lxb_css_parser_create();
+    lxb_css_stylesheet_t *sheet = lxb_css_stylesheet_create(NULL);
+    if (!parser || !sheet) goto done;
+    if (lxb_css_parser_init(parser,NULL) != LXB_STATUS_OK) goto done;
+    if (lxb_css_stylesheet_parse(sheet,parser,css,len) != LXB_STATUS_OK) goto done;
+    if (sheet->root && sheet->root->type == LXB_CSS_RULE_LIST)
+        result = stylesheet_rules(lxb_css_rule_list(sheet->root),css,len,0,cb,ctx);
+    else result = 0;
+done:
+    if (sheet) lxb_css_stylesheet_destroy(sheet,true);
+    if (parser) lxb_css_parser_destroy(parser,true);
+    return result;
+}
+
+br_parser *br_writer_new(br_node *root) {
+    if (root->type != LXB_DOM_NODE_TYPE_DOCUMENT || root->first_child) return NULL;
+    lxb_html_document_t *doc = lxb_html_interface_document(root);
+    doc->head = NULL; doc->body = NULL;
+    doc->dom_document.element = NULL; doc->dom_document.doctype = NULL;
+    return br_parser_new(root,true);
+}
+int br_writer_feed(br_parser *parser, const unsigned char *data, size_t len, size_t *offset, br_node **script) {
+    lxb_dom_document_t *doc = &parser->html->tree->document->dom_document;
+    const lxb_dom_document_mutation_cb_t *previous = doc->mutation; void *user = doc->user;
+    doc->mutation = &parser_callbacks; doc->user = parser;
+    *script = NULL; parser->script = NULL; int result = 0;
+    while (*offset < len) {
+        const unsigned char *start = data+*offset, *end = memchr(start,'>',len-*offset);
+        size_t size = end ? (size_t)(end+1-start) : len-*offset;
+        if (lxb_html_parse_chunk_process(parser->html,start,size) != LXB_STATUS_OK) { result = -1; break; }
+        *offset += size;
+        if (parser->script) { *script = parser->script; result = 1; break; }
+    }
+    doc->mutation = previous; doc->user = user;
+    return parser->mutation_failed ? -1 : result;
 }

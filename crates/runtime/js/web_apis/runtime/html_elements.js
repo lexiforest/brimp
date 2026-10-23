@@ -30,10 +30,6 @@ class HTMLBaseElement extends HTMLElement {
     set href(value) { this.setAttribute("href", value); }
 }
 
-function __illegalHtmlElementConstructor() {
-    throw new TypeError("Illegal constructor");
-}
-
 function __defineStringReflections(prototype, definitions) {
     for (const [property, attribute = property.toLowerCase()] of definitions) {
         Object.defineProperty(prototype, property, {
@@ -247,8 +243,8 @@ function __defineNonceReflection(prototype) {
     });
 }
 
-class HTMLPictureElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLImageElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLPictureElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLImageElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 
 function __decodeDataUrlDocument(href) {
     const comma = href.indexOf(",");
@@ -285,7 +281,7 @@ function __parseChildDocument(source) {
 }
 
 class HTMLIFrameElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get contentWindow() {
         let context = __iframeBrowsingContexts.get(this);
         if (!context) {
@@ -370,9 +366,9 @@ class HTMLIFrameElement extends HTMLElement {
         setTimeout(() => this.dispatchEvent(new Event("load")), 0);
     }
 }
-class HTMLEmbedElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLObjectElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLParamElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLEmbedElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLObjectElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLParamElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 const __mediaElementStates = new WeakMap();
 function __mediaElementState(element) {
     let state = __mediaElementStates.get(element);
@@ -398,7 +394,7 @@ function __trustedMediaEvent(element, type) {
     element.dispatchEvent(event);
 }
 class HTMLMediaElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get currentSrc() { return this.src; }
     get currentTime() {
         return __mediaElementController(this)?.currentTime() ?? __mediaElementState(this).currentTime;
@@ -485,15 +481,15 @@ for (const [name, value] of Object.entries({
     Object.defineProperty(HTMLMediaElement, name, { value });
     Object.defineProperty(HTMLMediaElement.prototype, name, { value });
 }
-class HTMLVideoElement extends HTMLMediaElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLAudioElement extends HTMLMediaElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLSourceElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTrackElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLCanvasElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLMapElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLAreaElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLVideoElement extends HTMLMediaElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLAudioElement extends HTMLMediaElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLSourceElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTrackElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLCanvasElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLMapElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLAreaElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 class HTMLFormElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get elements() {
         return new HTMLFormControlsCollection(() =>
             [...this.querySelectorAll("button,input,object,output,select,textarea")]);
@@ -505,12 +501,12 @@ class HTMLFormElement extends HTMLElement {
             const isInput = submitter instanceof HTMLInputElement &&
                 (submitter.type === "submit" || submitter.type === "image");
             if (!isButton && !isInput) throw new TypeError("submitter is not a submit button");
-            let owner = submitter.parentElement;
-            while (owner !== null && !(owner instanceof HTMLFormElement)) owner = owner.parentElement;
+            const owner = __formOwner(submitter);
             if (owner !== this) {
                 throw new DOMException("The submitter is not owned by this form", "NotFoundError");
             }
         }
+        if (!this.noValidate && !submitter?.formNoValidate && !this.checkValidity()) return;
         const event = new SubmitEvent("submit", {
             bubbles: true,
             cancelable: true,
@@ -547,9 +543,9 @@ class HTMLFormElement extends HTMLElement {
         else location.href = destination.href;
     }
 }
-class HTMLFieldSetElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLLegendElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLLabelElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLFieldSetElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLLegendElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLLabelElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 const __inputFiles = new WeakMap();
 class FileList {
     constructor() { throw new TypeError("Illegal constructor"); }
@@ -577,10 +573,11 @@ class HTMLInputElement extends HTMLElement {
     }
     __setFiles(files) { __inputFiles.set(this, __fileList(files)); }
 
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get value() {
         if (this.type === "file") return this.files.length ? "C:\\fakepath\\" + this.files[0].name : "";
-        return __inputValues.has(this) ? __inputValues.get(this) : (this.getAttribute("value") ?? "");
+        const value = __inputValues.has(this) ? __inputValues.get(this) : (this.getAttribute("value") ?? "");
+        return this.type === 'number' && value !== '' && !Number.isFinite(__numericValue(value)) ? '' : value;
     }
     set value(value) {
         if (this.type === "file") {
@@ -593,19 +590,19 @@ class HTMLInputElement extends HTMLElement {
     }
     set checked(value) { __inputCheckedStates.set(this, Boolean(value)); }
 }
-class HTMLButtonElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLSelectElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDataListElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLOptGroupElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLButtonElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLSelectElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDataListElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLOptGroupElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 class HTMLOptionElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get selected() {
         return __optionSelectedStates.has(this) ? __optionSelectedStates.get(this) : this.defaultSelected;
     }
     set selected(value) { __optionSelectedStates.set(this, Boolean(value)); }
 }
 class HTMLTextAreaElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get value() { return __inputValues.has(this) ? __inputValues.get(this) : this.textContent; }
     set value(value) { __inputValues.set(this, String(value)); __controlSelections.delete(this); }
 }
@@ -618,75 +615,76 @@ function __controlSelection(control) {
 }
 for (const prototype of [HTMLInputElement.prototype, HTMLTextAreaElement.prototype]) {
     Object.defineProperties(prototype, {
-        selectionStart: {configurable:true, get() { return __controlSelection(this).start; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(value, Math.max(Number(value),s.end),s.direction); }},
-        selectionEnd: {configurable:true, get() { return __controlSelection(this).end; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(Math.min(s.start,Number(value)),value,s.direction); }},
-        selectionDirection: {configurable:true, get() { return __controlSelection(this).direction; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(s.start,s.end,value); }},
+        selectionStart: {configurable:true, get() { return __supportsSelection(this) ? __controlSelection(this).start : null; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(value, Math.max(Number(value),s.end),s.direction); }},
+        selectionEnd: {configurable:true, get() { return __supportsSelection(this) ? __controlSelection(this).end : null; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(Math.min(s.start,Number(value)),value,s.direction); }},
+        selectionDirection: {configurable:true, get() { return __supportsSelection(this) ? __controlSelection(this).direction : null; }, set(value) { const s=__controlSelection(this); this.setSelectionRange(s.start,s.end,value); }},
     });
     prototype.setSelectionRange = function(start,end,direction="none") {
+        if (!__supportsSelection(this)) throw new DOMException('Selection is unavailable','InvalidStateError');
         const length = this.value.length;
         end = Math.min(Number(end) >>> 0,length); start = Math.min(Number(start) >>> 0,end);
         __controlSelections.set(this,{start,end,direction:["forward","backward"].includes(direction)?direction:"none"});
     };
     prototype.select = function() { this.setSelectionRange(0,this.value.length); };
 }
-class HTMLOutputElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLProgressElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLMeterElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableCaptionElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableColElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableSectionElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableRowElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTableCellElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLHeadElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTitleElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLOutputElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLProgressElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLMeterElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableCaptionElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableColElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableSectionElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableRowElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTableCellElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLHeadElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTitleElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 class HTMLLinkElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get disabled() { return this.sheet?.disabled ?? false; }
     set disabled(value) {
         const sheet = this.sheet;
         if (sheet !== null) sheet.disabled = Boolean(value);
     }
 }
-class HTMLMetaElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLMetaElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 class HTMLStyleElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get disabled() { return this.sheet?.disabled ?? false; }
     set disabled(value) {
         const sheet = this.sheet;
         if (sheet !== null) sheet.disabled = Boolean(value);
     }
 }
-class HTMLParagraphElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLHRElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLPreElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLQuoteElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLOListElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLUListElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLLIElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDListElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDivElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDataElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLTimeElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLBRElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLBodyElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLHeadingElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLHtmlElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLScriptElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLParagraphElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLHRElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLPreElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLQuoteElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLOListElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLUListElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLLIElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDListElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDivElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDataElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLTimeElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLBRElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLBodyElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLHeadingElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLHtmlElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLScriptElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 class HTMLTemplateElement extends HTMLElement {
-    constructor() { __illegalHtmlElementConstructor(); }
+    constructor() { return Reflect.construct(HTMLElement, [], new.target); }
     get content() { return __callHost("templateContent", this); }
 }
-class HTMLSlotElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLModElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDetailsElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLMenuElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDialogElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLMarqueeElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLFrameSetElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLFrameElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLDirectoryElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
-class HTMLFontElement extends HTMLElement { constructor() { __illegalHtmlElementConstructor(); } }
+class HTMLSlotElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLModElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDetailsElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLMenuElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDialogElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLMarqueeElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLFrameSetElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLFrameElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLDirectoryElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
+class HTMLFontElement extends HTMLElement { constructor() { return Reflect.construct(HTMLElement, [], new.target); } }
 
 __defineStringReflections(HTMLImageElement.prototype, [
     ["alt"], ["srcset"], ["useMap", "usemap"], ["name"], ["align"], ["border"],

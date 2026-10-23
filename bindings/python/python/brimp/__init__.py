@@ -43,6 +43,11 @@ class _Requests:
 
 
 class Session(_Requests):
+    """Own pages, shared cookies, request defaults and explicit plugins.
+
+    Use as a context manager to close all owned pages. Timeouts are seconds.
+    Each request method creates a new Page; use Page.request to reuse a page.
+    """
     def __init__(self, *, headers=None, timeout=30.0, proxy=None, auth=None, plugins=(), user_agent=None, languages=None, platform=None, time_mode="system", time_origin=None, diagnostics=None):
         pairs = _headers(headers)
         if auth is not None:
@@ -78,10 +83,12 @@ class Session(_Requests):
 
 
     def new_page(self):
+        """Create a blank page before attaching routes, listeners or init scripts."""
         _check_session(self._plugin_token)
         return Page(self._inner.new_page(), self)
 
     def request(self, method, url, **kwargs):
+        """Navigate a new page. Keyword arguments are those of Page.request."""
         page = self.new_page()
         try:
             return page.request(method, url, **kwargs)
@@ -102,6 +109,11 @@ class Session(_Requests):
 
 
 class Page(_Requests):
+    """A reusable page with a response snapshot and a live browser realm.
+
+    Obtain pages from Session. Navigation replaces the realm and invalidates
+    old handles. Closing a page cancels its work; the session also owns cleanup.
+    """
     def advance_time(self, milliseconds, *, max_tasks=10000):
         """Advance logical milliseconds, processing tasks in chronological order."""
         return json.loads(self._inner.advance_time(milliseconds, max_tasks))
@@ -122,6 +134,7 @@ class Page(_Requests):
         self._routes = set()
 
     def on(self, event, handler):
+        """Subscribe a synchronous event handler; return an unsubscribe function."""
         callback = _callback(self._session._plugin_token, lambda wire: handler(_event_record(wire)))
         subscription = self._inner.on(event, callback)
         self._subscriptions.add(subscription)
@@ -131,6 +144,11 @@ class Page(_Requests):
         return unsubscribe
 
     def route(self, pattern, handler, *, stage="request"):
+        """Intercept a glob pattern at request, response or auth stage.
+
+        Last matching route wins. Complete the route exactly once. The callback
+        must be synchronous and cannot reenter this page. Returns a remover.
+        """
         callback = _callback(self._session._plugin_token, lambda inner: handler(Route(inner)))
         registration = self._inner.route(pattern, stage, callback)
         self._routes.add(registration)
@@ -154,6 +172,7 @@ class Page(_Requests):
 
     def stream(self, method, url, *, headers=None, body=None, timeout=None,
                allow_redirects=True, max_redirects=20, auth=None):
+        """Stream response bytes without replacing the DOM. Close abandoned streams."""
         pairs = _headers(headers)
         if auth is not None:
             pairs.append(("Authorization", "Basic " + base64.b64encode(f"{auth[0]}:{auth[1]}".encode()).decode()))
@@ -162,6 +181,11 @@ class Page(_Requests):
 
     def request(self, method, url, *, headers=None, body=None, data=None,
                 timeout=None, allow_redirects=True, max_redirects=20, auth=None):
+        """Navigate this page and return it with a new response snapshot.
+
+        body accepts strings or bytes; data encodes a form mapping. Use only one.
+        timeout is seconds. HTTP error statuses remain accessible to the caller.
+        """
         pairs = _headers(headers)
         if body is not None and data is not None:
             raise InvalidInput("specify body or data, not both")
@@ -190,7 +214,9 @@ class Page(_Requests):
     @property
     def headers(self): return self.response.headers
     def json(self): return self.response.json()
-    def evaluate(self, source): return json.loads(self._inner.evaluate(source))
+    def evaluate(self, source):
+        """Evaluate browser JavaScript, await Promises, and copy a JSON result."""
+        return json.loads(self._inner.evaluate(source))
     def evaluate_handle(self, source): return JSHandle(self._inner.evaluate_handle(source))
     def query_selector(self, selector):
         inner = self._inner.query_selector(selector)
@@ -209,13 +235,36 @@ class Page(_Requests):
     def set_input_files(self, selector, files): self._inner.set_input_files(selector, _files(files))
     def extract(self, *, content_selector=None, remove_images=False, language=None, debug=False):
         return json.loads(self._inner.extract(json.dumps({"contentSelector": content_selector, "removeImages": remove_images, "language": language, "debug": debug})))
-    def html(self): return self._inner.html()
+    def html(self):
+        """Serialize the current DOM, including page-script and host edits."""
+        return self._inner.html()
     def close(self): self._inner.close()
     def __enter__(self): return self
     def __exit__(self, *_): self.close()
 
 
 class Response:
+    """Original HTTP response bytes and metadata; created by page navigation.
+
+    headers and cookies are lists of pairs, not mutable session configuration.
+    elapsed is seconds. text decodes content using encoding. html is the optional
+    navigation-time HTML snapshot; use Page.html() for subsequent DOM edits.
+    """
+    html: str | None
+    status_code: int
+    reason: str
+    url: str
+    headers: list[tuple[str, str]]
+    cookies: list[tuple[str, str]]
+    history: list[dict]
+    request: dict
+    elapsed: float
+    http_version: str | None
+    downloaded_bytes: int
+    uploaded_bytes: int
+    header_bytes: int
+    content: bytes
+    encoding: str
     def __init__(self, inner):
         self.__dict__.update(json.loads(inner.metadata_json()))
         self.content = inner.content
@@ -234,6 +283,10 @@ class Response:
 
 
 class JSHandle:
+    """Rooted JavaScript value. Dispose explicitly or use a context manager.
+
+    Navigation invalidates handles from the previous realm.
+    """
     def __init__(self, inner): self._inner = inner
     def json_value(self): return json.loads(self._inner.json_value())
     def call(self, function, *args): return JSHandle(self._inner.call(function, json.dumps(args, allow_nan=False)))
@@ -249,6 +302,7 @@ def _files(files):
 
 
 class ElementHandle(JSHandle):
+    """Rooted DOM node with query, edit and input methods. Detachment keeps identity."""
     def focus(self): self._inner.focus()
     def click(self): self._inner.click()
     def set_input_files(self, files): self._inner.set_input_files(_files(files))
@@ -269,6 +323,14 @@ class ElementHandle(JSHandle):
 
 
 class Route:
+    """One intercepted request. Choose exactly one completion method.
+
+    Response-stage interception is buffered, with a 32 MiB limit.
+    """
+    stage: str
+    request: dict
+    response: dict | None
+    auth_challenge: str | None
     def __init__(self, inner):
         self._inner = inner
         self.__dict__.update(_snake_record(json.loads(inner.info_json())))
@@ -287,6 +349,9 @@ class Route:
 
 class StreamingResponse:
     """A bounded chunk iterator. Close it when abandoning a response body."""
+    status_code: int
+    url: str
+    headers: list[tuple[str, str]]
     def __init__(self, inner, page):
         self._inner, self._page = inner, page
         metadata = json.loads(inner.metadata_json())

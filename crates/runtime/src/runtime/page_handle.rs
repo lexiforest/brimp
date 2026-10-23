@@ -501,10 +501,19 @@ fn run_page(
                 epoch,
                 response,
             } => {
+                let started = Instant::now();
                 page.set_script_execution_deadline(timeout);
-                let result = native_values
-                    .execute(&mut page, operation, timeout, &closed, &interrupt, epoch);
+                let result = page.check_operation().and_then(|()| {
+                    native_values.execute(&mut page, operation, timeout, &closed, &interrupt, epoch)
+                });
                 page.clear_script_execution_deadline();
+                let result = page.check_operation().and_then(|()| {
+                    if started.elapsed() >= timeout {
+                        Err(AutomationError::Timeout(timeout))
+                    } else {
+                        result
+                    }
+                });
                 let _ = response.send(result);
             }
             Command::NetworkOffline { offline, response } => {
@@ -536,9 +545,12 @@ fn run_page(
                 request.body = body;
                 let started = Instant::now();
                 page.set_script_execution_deadline(timeout);
+                let session_cancel = page.cancellation.clone();
+                let session_deadline = page.operation_deadline;
                 let mut result = runtime.block_on(async {
                     tokio::select! {
                         biased;
+                        error = wait_for_operation(session_cancel, session_deadline) => Err(error),
                         () = wait_for_close(&closed) => Err(AutomationError::Closed),
                         () = wait_for_cancellation(cancellation) => Err(AutomationError::Cancellation),
                         () = tokio::time::sleep(timeout) => Err(AutomationError::Timeout(timeout)),
@@ -554,6 +566,7 @@ fn run_page(
                 {
                     result = Err(AutomationError::Timeout(timeout));
                 }
+                let result = page.check_operation().and(result);
                 let _ = response.send(result);
             }
             Command::Text { response } => {
@@ -612,6 +625,7 @@ fn run_page(
                     .map_err(|error| AutomationError::InvalidInput(error.to_string()));
                 let result = encoded.and_then(|encoded| {
                     loop {
+                        page.check_operation()?;
                         if cancellation.is_cancelled() {
                             break Err(AutomationError::Cancellation);
                         }
@@ -642,6 +656,9 @@ fn run_page(
                 let started = Instant::now();
                 let mut idle_since = None;
                 let result = loop {
+                    if let Err(error) = page.check_operation() {
+                        break Err(error);
+                    }
                     if cancellation.is_cancelled() {
                         break Err(AutomationError::Cancellation);
                     }
@@ -688,6 +705,21 @@ fn run_page(
                 break;
             }
         }
+    }
+}
+
+async fn wait_for_operation(
+    cancellation: CancellationToken,
+    deadline: Option<Instant>,
+) -> AutomationError {
+    loop {
+        if cancellation.is_cancelled() {
+            return AutomationError::Cancellation;
+        }
+        if deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+            return AutomationError::Timeout(Duration::ZERO);
+        }
+        tokio::time::sleep(Duration::from_millis(5)).await;
     }
 }
 

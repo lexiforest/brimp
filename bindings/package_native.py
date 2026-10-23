@@ -171,7 +171,8 @@ def main():
         package['files'] = list(dict.fromkeys(package['files'] + ['native']))
         package['os'], package['cpu'] = ['darwin'], [dict(arm64='arm64', x86_64='x64')[platform.machine()]]
         (node / 'package.json').write_text(json.dumps(package, indent=2) + '\n')
-        npm_archive(node, args.out / f"{package['name']}-{package['version']}-darwin-{platform.machine()}.tgz")
+        archive_name = package['name'].removeprefix('@').replace('/', '-')
+        npm_archive(node, args.out / f"{archive_name}-{package['version']}-darwin-{platform.machine()}.tgz")
     for path in sorted(args.out.iterdir()):
         if path.suffix in ('.whl', '.tgz'):
             path.with_name(path.name + '.sha256').write_text(f'{sha(path)}  {path.name}\n')

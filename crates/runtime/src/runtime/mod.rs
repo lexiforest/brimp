@@ -24,7 +24,7 @@ pub use extraction::{
 pub use native::Session;
 pub use page::{
     LoadState, NavigationError, NavigationHistoryEntry, NavigationRequestInfo, NavigationResponse,
-    Page, PageOptions, PageOptionsBuilder,
+    NavigationWait, Page, PageOptions, PageOptionsBuilder,
 };
 pub use page_handle::{AutomationError, PageHandle};
 pub use session::SessionCookies;

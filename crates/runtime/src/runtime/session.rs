@@ -105,18 +105,13 @@ impl Session {
         persona: crate::persona::PersonaConfig,
         network: crate::network::CurlConfig,
     ) -> Result<Self, AutomationError> {
-        persona
-            .validate()
-            .map_err(|e| AutomationError::InvalidInput(e.to_string()))?;
-        Self::create(
-            SessionOptions {
-                network,
-                ..Default::default()
-            },
-            Some(persona),
-            None,
-        )
+        Self::new(SessionOptions {
+            persona: Some(persona),
+            network,
+            ..Default::default()
+        })
     }
+
     pub fn new_page_with_options(
         &self,
         options: PageOptions,
@@ -242,7 +237,11 @@ impl Session {
             .unwrap_or_else(|| self.websocket_connector());
         Ok(PageSetup {
             options,
-            network_scope: DocumentNetworkScope::new(loader, options_sockets),
+            network_scope: DocumentNetworkScope::new(
+                loader,
+                options_sockets,
+                self.network_executor.handle(),
+            ),
             cookies: Arc::clone(&self.cookie_store.cookies),
         })
     }

@@ -59,6 +59,11 @@ impl IdentityOptions {
 
 #[derive(Clone, Debug)]
 pub struct SessionOptions {
+    pub persona: Option<crate::persona::PersonaConfig>,
+    /// Optional wall-clock deadline shared by every operation in this session.
+    pub deadline: Option<Instant>,
+    pub cancellation: CancellationToken,
+    pub wait_until: super::NavigationWait,
     pub clock: super::clock::ClockOptions,
     pub diagnostics: Option<super::diagnostics::DiagnosticsOptions>,
     pub identity: IdentityOptions,
@@ -71,6 +76,10 @@ pub struct SessionOptions {
 impl Default for SessionOptions {
     fn default() -> Self {
         Self {
+            persona: None,
+            deadline: None,
+            cancellation: CancellationToken::new(),
+            wait_until: Default::default(),
             clock: Default::default(),
             diagnostics: None,
             identity: IdentityOptions::default(),
@@ -98,7 +107,7 @@ pub struct Session {
 impl Session {
     pub fn new(options: SessionOptions) -> Result<Self, AutomationError> {
         validate_timeout(options.timeout)?;
-        let mut persona = crate::persona::PersonaConfig::default();
+        let mut persona = options.persona.clone().unwrap_or_default();
         options.identity.apply(&mut persona)?;
         Self::create(options, Some(persona), None)
     }
@@ -108,7 +117,7 @@ impl Session {
         loader: Arc<dyn ResourceLoader>,
     ) -> Result<Self, AutomationError> {
         validate_timeout(options.timeout)?;
-        let mut persona = crate::persona::PersonaConfig::default();
+        let mut persona = options.persona.clone().unwrap_or_default();
         options.identity.apply(&mut persona)?;
         Self::create(options, Some(persona), Some(loader))
     }
@@ -123,6 +132,8 @@ impl Session {
         ));
         let page = self.new_page_with_loader(
             PageOptions::builder()
+                .operation_control(self.options.deadline, self.options.cancellation.clone())
+                .wait_until(self.options.wait_until)
                 .clock(self.options.clock.clone())
                 .diagnostics(self.options.diagnostics.clone())
                 .events(events.clone())
@@ -190,6 +201,24 @@ pub struct NativePage {
 }
 
 impl NativePage {
+    pub fn wait_for_selector(
+        &self,
+        selector: &str,
+        timeout: Duration,
+        cancellation: CancellationToken,
+    ) -> Result<(), AutomationError> {
+        self.page.wait_for_selector(selector, timeout, cancellation)
+    }
+    pub fn wait_for_network_idle(
+        &self,
+        quiet: Duration,
+        timeout: Duration,
+        cancellation: CancellationToken,
+    ) -> Result<(), AutomationError> {
+        self.page
+            .wait_for_network_idle(quiet, timeout, cancellation)
+    }
+
     pub fn advance_time(
         &self,
         milliseconds: f64,
@@ -797,6 +826,7 @@ fn wait(
 ) -> Result<(), AutomationError> {
     let started = Instant::now();
     loop {
+        page.check_operation()?;
         if interrupt.load(Ordering::Acquire) != epoch {
             return Err(AutomationError::Cancellation);
         }
@@ -820,7 +850,11 @@ fn wait(
             return Err(AutomationError::Timeout(timeout));
         }
         if !page.run_one_task()? && !page.advance_to_next_timer() {
-            page.wait_for_work(Some(timeout.saturating_sub(started.elapsed())));
+            page.wait_for_work(Some(
+                timeout
+                    .saturating_sub(started.elapsed())
+                    .min(Duration::from_millis(10)),
+            ));
         }
     }
 }

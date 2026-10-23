@@ -13,9 +13,15 @@ hero:
       variant: minimal
 ---
 
-Brimp combines JavaScriptCore, Lexbor, and curl-impersonate behind Python and Node
-Session/Page APIs. Fetch pages, execute their scripts, and work with a live DOM.
+Brimp combines JavaScriptCore, Lexbor, and curl-impersonate behind an in-process
+CLI and Python/Node Session/Page APIs. Fetch pages, execute their scripts, and work with a live DOM.
 DOM operations, networking, Web Streams, and WebCrypto are core capabilities.
 Optional JavaScript plugins supply storage, extraction, and specialized APIs.
 
 Start with the [quick start](/quick-start/) and [API overview](/api/).
+
+## Pick an interface
+
+- **Python** for synchronous, Requests-style navigation and extraction.
+- **Node.js** for an asynchronous in-process browser API.
+- **CLI** for shell scripts, JavaScript evaluation, and page extraction.

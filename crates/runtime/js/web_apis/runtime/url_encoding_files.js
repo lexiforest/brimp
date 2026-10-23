@@ -430,7 +430,10 @@ function __formDataEntry(name, value, filename = undefined) {
 function __formOwner(control) {
     const formId = control.getAttribute("form");
     if (formId !== null) {
-        const owner = control.ownerDocument?.getElementById(formId);
+        const root = control.getRootNode();
+        const owner = root instanceof Element
+            ? [root,...root.querySelectorAll('[id]')].find(e => e.id === formId)
+            : root.getElementById(formId);
         return owner instanceof HTMLFormElement ? owner : null;
     }
     return control.closest("form");
@@ -438,10 +441,12 @@ function __formOwner(control) {
 
 function __isDisabledFormControl(control) {
     if (control.disabled) return true;
-    const fieldset = control.closest("fieldset[disabled]");
-    if (fieldset === null) return false;
-    const legend = fieldset.querySelector("legend");
-    return legend === null || !legend.contains(control);
+    for (let p = control.parentElement; p; p = p.parentElement) {
+        if (!(p instanceof HTMLFieldSetElement) || !p.disabled) continue;
+        const legend = Array.from(p.children).find(e => e instanceof HTMLLegendElement);
+        if (!legend || !legend.contains(control)) return true;
+    }
+    return false;
 }
 
 function __appendFormControl(entries, control, submitter) {

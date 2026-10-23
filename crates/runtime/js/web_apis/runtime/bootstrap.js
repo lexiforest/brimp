@@ -2,16 +2,20 @@
 "use strict";
 
 const __nativeHost = globalThis.__brimp;
-const __domMutations = new Set(["setTextContent", "appendChild", "removeChild", "insertBefore", "setAttribute", "removeAttribute", "setInnerHTML", "styleSetCssText", "styleSetProperty", "styleRemoveProperty"]);
+let __domVersion = 0;
+const __domMutations = new Set(["setTextContent", "appendChild", "removeChild", "insertBefore", "replaceChild", "setAttribute", "removeAttribute", "setAttributeNS", "removeAttributeNS", "setInnerHTML", "styleSetCssText", "styleSetProperty", "styleRemoveProperty"]);
 function __callHost(operation, ...args) {
     const before = __domMutations.has(operation) ? __mutationBefore(operation, args) : null;
     const iteratorUpdates = __domMutations.has(operation) ? __iteratorMutationBefore(operation, args) : [];
     const updateRanges = __domMutations.has(operation) ? __rangeMutationBefore(operation, args) : null;
+    const updateSheets = __domMutations.has(operation) ? __styleMutationBefore(operation, args) : null;
     const result = __nativeHost(operation, ...args);
+    if (__domMutations.has(operation)) __domVersion++;
     if (updateRanges) updateRanges();
     for (const update of iteratorUpdates) update();
     if (before) __mutationAfter(before);
     if (__domMutations.has(operation)) __updateSlots();
+    if (updateSheets) updateSheets();
     return result;
 }
 delete globalThis.__brimp;
@@ -176,6 +180,5 @@ const __inputValues = new WeakMap();
 const __inputCheckedStates = new WeakMap();
 const __optionSelectedStates = new WeakMap();
 const __iframeBrowsingContexts = new WeakMap();
-const __templateContents = new WeakMap();
 let __activeElement = null;
 let __nextDisconnectedNodeOrder = 1;

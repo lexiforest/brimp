@@ -23,22 +23,29 @@ export default defineConfig({
         { label: 'Install', slug: 'install' },
         { label: 'Quick start', slug: 'quick-start' },
         {
-          label: 'Examples',
+          label: 'Tutorials',
           items: [
             { label: 'Overview', slug: 'examples' },
-            { label: 'Fetch and extract', slug: 'examples/fetch' },
+            { label: 'Python', slug: 'examples/python' },
+            { label: 'Node.js', slug: 'examples/node' },
+            { label: 'CLI', slug: 'examples/cli' },
+            { label: 'Extract, intercept and stream', slug: 'examples/fetch' },
+            { label: 'CLI workflows', slug: 'examples/cli-workflows' },
           ],
         },
         {
           label: 'API',
           items: [
             { label: 'Overview', slug: 'api' },
+            { label: 'Python reference', link: '/reference/python/' },
+            { label: 'Node reference', link: '/reference/node/' },
+            { label: 'CLI reference', slug: 'api/cli' },
           ],
         },
         {
           label: 'Architecture',
           items: [
-            { label: 'JavaScriptCore integration', slug: 'architecture/javascript-runtime' },
+            { label: 'Follow a page', slug: 'architecture/javascript-runtime' },
             { label: 'Core APIs and plugins', slug: 'architecture/subsystems' },
           ],
         },

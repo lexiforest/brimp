@@ -25,6 +25,7 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/runtime/traversal.js"),
     include_str!("../../js/web_apis/runtime/elements.js"),
     include_str!("../../js/web_apis/runtime/html_elements.js"),
+    include_str!("../../js/web_apis/runtime/namespaces.js"),
     include_str!("../../js/web_apis/runtime/window_location.js"),
     include_str!("../../js/web_apis/runtime/shadow_dom.js"),
     include_str!("../../js/web_apis/runtime/navigator_services.js"),
@@ -32,8 +33,12 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/runtime/url_encoding_files.js"),
     include_str!("../../js/web_apis/runtime/file_reader.js"),
     include_str!("../../js/web_apis/runtime/storage_fetch.js"),
+    include_str!("../../js/web_apis/runtime/forms.js"),
+    include_str!("../../js/web_apis/runtime/element_internals.js"),
     include_str!("../../js/web_apis/runtime/css_style.js"),
+    include_str!("../../js/web_apis/runtime/stylesheets.js"),
     include_str!("../../js/web_apis/runtime/observers.js"),
+    include_str!("../../js/web_apis/runtime/document_write.js"),
     include_str!("../../js/web_apis/runtime/drag_drop.js"),
     include_str!("../../js/web_apis/runtime/input.js"),
     include_str!("../../js/web_apis/runtime/install.js"),
@@ -43,7 +48,6 @@ pub struct TimerQueue {
     pub(crate) clock: crate::runtime::clock::Clock,
     next_id: u32,
     timers: Vec<Timer>,
-    microtasks: VecDeque<ProtectedJsObject>,
 }
 
 pub struct FetchQueue {
@@ -143,7 +147,6 @@ impl TimerQueue {
             clock: crate::runtime::clock::Clock::new(options),
             next_id: 1,
             timers: Vec::new(),
-            microtasks: VecDeque::new(),
         }
     }
 }
@@ -197,14 +200,6 @@ impl TimerQueue {
         } else {
             Some(self.timers.remove(index).callback)
         }
-    }
-
-    fn queue_microtask(&mut self, callback: ProtectedJsObject) {
-        self.microtasks.push_back(callback);
-    }
-
-    pub fn pop_microtask(&mut self) -> Option<ProtectedJsObject> {
-        self.microtasks.pop_front()
     }
 }
 
@@ -537,6 +532,7 @@ struct BindingState {
     document: Rc<RefCell<BrowserDocument>>,
     wrappers: WrapperCache,
     style_wrappers: WrapperCache,
+    document_writers: RefCell<HashMap<usize, brimp_lexbor::HtmlWriter>>,
     prototypes: RefCell<Option<Prototypes>>,
     timers: Rc<RefCell<TimerQueue>>,
     browsing_context: Arc<BrowsingContext>,
@@ -577,6 +573,7 @@ impl BindingRuntime {
             document,
             wrappers: WrapperCache::default(),
             style_wrappers: WrapperCache::default(),
+            document_writers: RefCell::new(HashMap::new()),
             prototypes: RefCell::new(None),
             timers: queues.timers,
             browsing_context,
@@ -933,7 +930,6 @@ fn is_platform_operation(operation: &str) -> bool {
                 | "setInterval"
                 | "clearTimeout"
                 | "clearInterval"
-                | "queueMicrotask"
                 | "location"
                 | "locationNavigate"
                 | "historyUpdateUrl"
