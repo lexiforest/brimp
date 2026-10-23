@@ -73,6 +73,20 @@ Install `pytest` in your Python environment first. Tests use local HTTP fixtures
 Re-run `prepare_local.py` after rebuilding bindings so Python and Node load the
 new extensions.
 
+Run the browser workload regressions against those bindings:
+
+```sh
+npm ci --prefix tests --ignore-scripts --no-audit --no-fund
+npm run prepare:fixtures --prefix tests
+npm test --prefix tests
+```
+
+The standalone `tests/` suite runs eleven functional workloads against reviewed
+Chromium expectations. CI runs this suite without the optional full comparison
+directory or a browser installation. See the
+[regression guide](https://github.com/lexiforest/brimp/blob/main/tests/README.md)
+for fixtures, reports, and updating expectations.
+
 ## 4. Check the boundaries and style
 
 ```sh

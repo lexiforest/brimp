@@ -151,13 +151,16 @@ int br_parser_resume(br_parser *parser, const unsigned char *data, size_t len, s
     return parser->mutation_failed ? -1 : result;
 }
 br_node *br_fragment(br_document *doc, br_node *context, const unsigned char *input, size_t len) {
-    (void)doc;
     if (context->type != LXB_DOM_NODE_TYPE_ELEMENT) return NULL;
     lxb_html_parser_t *parser = lxb_html_parser_create();
     if (!parser) return NULL;
     if (lxb_html_parser_init(parser) != LXB_STATUS_OK) { lxb_html_parser_destroy(parser); return NULL; }
     lxb_html_parser_scripting_set(parser, true);
-    br_node *root = lxb_html_parse_fragment(parser, lxb_html_interface_element(context), input, len);
+    /* A fresh parser has no document. Pass our arena explicitly so fragment
+     * nodes and interned names live until br_document_free(), without leaking
+     * a separate document for every fragment. */
+    br_node *root = lxb_html_parse_fragment_by_tag_id(parser, doc->html,
+        context->local_name, context->ns, input, len);
     lxb_html_parser_destroy(parser);
     return root;
 }

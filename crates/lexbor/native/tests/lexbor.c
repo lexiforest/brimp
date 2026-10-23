@@ -1,4 +1,5 @@
 #include "lexbor.h"
+#include "lexbor/dom/interfaces/node.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -44,6 +45,8 @@ int main(void) {
         const char *markup = "<b class='added'>added &amp; text</b>";
         br_node *fragment = br_fragment(doc, main, (const unsigned char *)markup, strlen(markup)); assert(fragment);
         br_node *added = br_node_first(fragment); assert(added);
+        assert(fragment->owner_document == root->owner_document);
+        assert(added->owner_document == root->owner_document);
         assert(br_node_insert(main, added, NULL) == 0);
         text_is(query(root, "b.added"), "added & text");
         assert(br_parser_resume(parser, (const unsigned char *)source, strlen(source), &offset, &script) == 1);

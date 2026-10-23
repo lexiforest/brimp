@@ -7,7 +7,8 @@ import subprocess
 def main():
     root = Path(__file__).resolve().parents[1]
     metadata = json.loads(subprocess.check_output(
-        ["cargo", "metadata", "--format-version=1", "--locked", "--offline"],
+        # Metadata includes every target, even dependencies the host build never fetched.
+        ["cargo", "metadata", "--format-version=1", "--locked"],
         cwd=root,
     ))
     packages = {package["id"]: package for package in metadata["packages"]}

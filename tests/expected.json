@@ -1,0 +1,171 @@
+{
+  "reference": {
+    "engine": "Chromium",
+    "version": "156.0.8078.4",
+    "recordedAt": "2026-10-22T08:56:44.147Z",
+    "reportSha256": "06c7ed94ef0524928f4b68a23ad847a42f0e5106139cb9c2f735579198f242fa"
+  },
+  "dependencies": {
+    "@mozilla/readability": "0.6.0",
+    "axios": "1.20.0",
+    "defuddle": "0.19.5",
+    "dompurify": "3.4.17",
+    "esbuild": "0.28.2",
+    "htmx.org": "2.0.11",
+    "jose": "6.2.13",
+    "jquery": "4.0.0",
+    "lit": "3.3.3"
+  },
+  "sources": {
+    "todomvc": {
+      "repository": "https://github.com/tastejs/todomvc",
+      "revision": "ff43b02e59dfa604386bb382034b2cd07c2bcd8a",
+      "archive": "https://codeload.github.com/tastejs/todomvc/tar.gz/ff43b02e59dfa604386bb382034b2cd07c2bcd8a",
+      "sha256": "22fd7c5251b636773561cc0ab606896f48c8dbcad80e79b427989bfc0e134718",
+      "license": "MIT"
+    }
+  },
+  "cases": {
+    "todomvc-react": {
+      "checkpoints": [
+        "add",
+        "edit",
+        "complete-and-filter",
+        "delete",
+        "reload-reset"
+      ],
+      "observation": {
+        "remainingBeforeReload": [
+          "second observation"
+        ],
+        "remainingAfterReload": []
+      }
+    },
+    "todomvc-vue": {
+      "checkpoints": [
+        "add",
+        "edit",
+        "complete-and-filter",
+        "delete",
+        "reload-reset"
+      ],
+      "observation": {
+        "remainingBeforeReload": [
+          "second observation"
+        ],
+        "remainingAfterReload": []
+      }
+    },
+    "jquery": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "events": [
+          "one"
+        ],
+        "remaining": "two",
+        "form": "name=Ada&active=yes"
+      }
+    },
+    "htmx": {
+      "checkpoints": [
+        "load-form",
+        "submit-and-swap"
+      ],
+      "observation": {
+        "text": "Ada Lovelace ada@example.test"
+      }
+    },
+    "lit": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "initial": "Count: 0",
+        "clicked": "Count: 1",
+        "updated": "Count: 7",
+        "count": 7
+      }
+    },
+    "dompurify": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "clean": "<p>Hello <strong>world</strong><img src=\"x\"><a>link</a></p>",
+        "text": "Hello worldlink"
+      }
+    },
+    "readability": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "title": "The quiet observatory",
+        "text": "By Ada Observer On a cold evening in October, the observatory team opened the dome and prepared its instruments. After several hours of careful measurements, the telescope recorded the first clear image of the distant cluster. The researchers checked the exposure against their notes and agreed that the observations were ready to share. The work began months earlier, when a group of students mapped the surrounding sky. Each student kept a notebook describing the weather, the position of the telescope, and the brightness of nearby stars. Those records helped the team distinguish changes in the atmosphere from changes in the objects they were observing. Recording the results At sunrise, the team reviewed every image together. They retained the original measurements, documented the calibration steps, and prepared a short report for the next group of observers. This patient process made the results useful beyond a single night at the telescope, and gave future students a clear procedure to follow. The observatory will repeat the measurements next month. Comparing several nights of data will help the researchers estimate uncertainty and identify patterns that are difficult to see in any individual photograph. The final report will include the complete observations and a description of how each result was obtained.",
+        "byline": "Ada Observer"
+      }
+    },
+    "axios": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "json": "{\"answer\":42}",
+        "form": "name=Ada+Lovelace",
+        "bytes": [
+          0,
+          127,
+          255
+        ],
+        "cancelled": true
+      }
+    },
+    "jose": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "payload": {
+          "role": "reader",
+          "sub": "corpus",
+          "iat": 1700000000,
+          "exp": 1700003600
+        },
+        "algorithm": "HS256",
+        "invalidRejected": true
+      }
+    },
+    "jose-extended": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "signatures": [
+          "RS256",
+          "PS256",
+          "ES256",
+          "ES384",
+          "ES512"
+        ],
+        "encryption": [
+          "RSA-OAEP-256",
+          "ECDH-ES+A256KW"
+        ],
+        "tamperingRejected": true
+      }
+    },
+    "defuddle": {
+      "checkpoints": [
+        "library-assertions"
+      ],
+      "observation": {
+        "title": "The quiet observatory",
+        "author": "Ada Observer",
+        "content": "<article> <p>On a cold evening in October, the observatory team opened the dome and prepared its instruments. After several hours of careful measurements, the telescope recorded the first clear image of the distant cluster. The researchers checked the exposure against their notes and agreed that the observations were ready to share.</p> <p>The work began months earlier, when a group of students mapped the surrounding sky. Each student kept a notebook describing the weather, the position of the telescope, and the brightness of nearby stars. Those records helped the team distinguish changes in the atmosphere from changes in the objects they were observing.</p> <h2>Recording the results</h2> <p>At sunrise, the team reviewed every image together. They retained the original measurements, documented the calibration steps, and prepared a short report for the next group of observers. This patient process made the results useful beyond a single night at the telescope, and gave future students a clear procedure to follow.</p> <p>The observatory will repeat the measurements next month. Comparing several nights of data will help the researchers estimate uncertainty and identify patterns that are difficult to see in any individual photograph. The final report will include the complete observations and a description of how each result was obtained.</p> </article>",
+        "markdown": "On a cold evening in October, the observatory team opened the dome and prepared its instruments. After several hours of careful measurements, the telescope recorded the first clear image of the distant cluster. The researchers checked the exposure against their notes and agreed that the observations were ready to share.\n\nThe work began months earlier, when a group of students mapped the surrounding sky. Each student kept a notebook describing the weather, the position of the telescope, and the brightness of nearby stars. Those records helped the team distinguish changes in the atmosphere from changes in the objects they were observing.\n\n## Recording the results\n\nAt sunrise, the team reviewed every image together. They retained the original measurements, documented the calibration steps, and prepared a short report for the next group of observers. This patient process made the results useful beyond a single night at the telescope, and gave future students a clear procedure to follow.\n\nThe observatory will repeat the measurements next month. Comparing several nights of data will help the researchers estimate uncertainty and identify patterns that are difficult to see in any individual photograph. The final report will include the complete observations and a description of how each result was obtained."
+      }
+    }
+  }
+}
