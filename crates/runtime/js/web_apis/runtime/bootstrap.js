@@ -9,11 +9,30 @@ function __callHost(operation, ...args) {
     const iteratorUpdates = __domMutations.has(operation) ? __iteratorMutationBefore(operation, args) : [];
     const updateRanges = __domMutations.has(operation) ? __rangeMutationBefore(operation, args) : null;
     const updateSheets = __domMutations.has(operation) ? __styleMutationBefore(operation, args) : null;
+    const updateInput = __domMutations.has(operation) ? __inputMutationBefore(operation, args) : null;
+    const updateInputValidation = __domMutations.has(operation) ? __inputValidationMutationBefore(operation, args) : null;
+    const updateDisabled = __domMutations.has(operation) ? __disabledMutationBefore(operation, args) : null;
+    const updateSelection = __domMutations.has(operation) ? __selectionMutationBefore(operation, args) : null;
+    const updateLabels = __domMutations.has(operation) ? __labelMutationBefore(operation, args) : null;
+    const updateChecked = __domMutations.has(operation) ? __checkedMutationBefore(operation, args) : null;
     const result = __nativeHost(operation, ...args);
+    if ((operation === 'createElement' || operation === 'createElementNS') && result instanceof HTMLScriptElement) {
+        __forceAsyncScripts.add(result);
+    }
+    if (operation === 'cloneNode') {
+        __cloneFormControlState(args[0], result, args[1]);
+    }
+    else if (operation === 'importNode') __cloneFormControlState(args[1], result, args[2]);
     if (__domMutations.has(operation)) __domVersion++;
+    if (updateDisabled) updateDisabled();
+    if (updateLabels) updateLabels();
+    if (updateChecked) updateChecked();
     if (updateRanges) updateRanges();
     for (const update of iteratorUpdates) update();
     if (before) __mutationAfter(before);
+    if (updateInput) updateInput();
+    if (updateInputValidation) updateInputValidation();
+    if (updateSelection) updateSelection();
     if (__domMutations.has(operation)) __updateSlots();
     if (updateSheets) updateSheets();
     return result;
@@ -86,6 +105,7 @@ function __nativeMemberSource(fn, key, kind) {
     return `function ${name}() { [native code] }`;
 }
 
+const __lenientThisFunctions = new WeakSet();
 function __finalizeWebIdlInterfaces() {
     for (const name of Object.getOwnPropertyNames(globalThis)) {
         if (__initialGlobalNames.has(name)) continue;
@@ -93,6 +113,7 @@ function __finalizeWebIdlInterfaces() {
         if (typeof constructor !== "function" || constructor.prototype === undefined) continue;
         const prototype = constructor.prototype;
         if (prototype === null || typeof prototype !== "object" || __finalizedWebIdlPrototypes.has(prototype)) continue;
+        const nativeElement = prototype === Element.prototype || Object.prototype.isPrototypeOf.call(Element.prototype, prototype);
         __finalizedWebIdlPrototypes.add(prototype);
         if (!Object.hasOwn(prototype, Symbol.toStringTag)) {
             Object.defineProperty(prototype, Symbol.toStringTag, {
@@ -108,17 +129,43 @@ function __finalizeWebIdlInterfaces() {
             if (descriptor === undefined) continue;
             if (!descriptor.configurable) continue;
             for (const kind of ["value", "get", "set"]) {
+                // Safari exposes the generic Array iteration functions on DOMTokenList.
+                if ((constructor === DOMTokenList || constructor === NodeList) && kind === 'value' && ['entries', 'keys', 'values', 'forEach', Symbol.iterator].includes(key)) continue;
+                if (constructor === HTMLCollection && kind === 'value' && key === Symbol.iterator) continue;
                 const fn = descriptor[kind];
                 if (typeof fn !== "function") continue;
                 const source = __nativeMemberSource(fn, key, kind);
                 descriptor[kind] = new Proxy(fn, {
                     apply(target, receiver, argumentsList) {
+                        // JSC resolves unqualified inherited global members with
+                        // undefined as receiver. Window globals use this realm.
+                        if (constructor === Window && receiver === undefined) receiver = globalThis;
                         const objectReceiver = (typeof receiver === "object" && receiver !== null)
                             || typeof receiver === "function";
                         const compatible = constructor === Window
-                            ? receiver === globalThis
-                            : objectReceiver && Object.prototype.isPrototypeOf.call(prototype, receiver);
-                        if (!compatible) throw new TypeError("Illegal invocation");
+                            ? __windowEventTargets.has(receiver)
+                            : constructor === Event ? __eventData.has(receiver)
+                            : constructor === CustomEvent ? __customEventData.has(receiver)
+                            : constructor === UIEvent ? __uiEventData.has(receiver)
+                            : constructor === TextEvent ? __textEventData.has(receiver)
+                            : constructor === MouseEvent ? __mouseEventData.has(receiver)
+                            : constructor === KeyboardEvent ? __keyboardEventData.has(receiver)
+                            : constructor === PointerEvent ? __pointerEventData.has(receiver)
+                            : constructor === EventTarget ? objectReceiver && (__eventTargets.has(receiver) || __windowEventTargets.has(receiver) || __nativeHost('isNativeNode', receiver))
+                            : constructor === Document ? objectReceiver && __nativeHost('isNativeNode', receiver) && __nativeHost('nodeType', receiver) === 9
+                            : constructor === Element ? objectReceiver && __nativeHost('isNativeNode', receiver) && __nativeHost('nodeType', receiver) === 1
+                            : constructor === DocumentFragment ? objectReceiver && __nativeHost('isNativeNode', receiver) && __nativeHost('nodeType', receiver) === 11
+                            : constructor === CharacterData ? objectReceiver && __nativeHost('isNativeNode', receiver) && [3, 4, 7, 8].includes(__nativeHost('nodeType', receiver))
+                            : constructor === Text ? objectReceiver && __nativeHost('isNativeNode', receiver) && [3, 4].includes(__nativeHost('nodeType', receiver))
+                            : constructor === DOMTokenList ? __tokenListData.has(receiver)
+                            : constructor === HTMLCollection ? __htmlCollectionData.has(receiver)
+                            : constructor === NodeList ? __nodeListData.has(receiver)
+                            : objectReceiver && Object.prototype.isPrototypeOf.call(prototype, receiver)
+                                && (!nativeElement || __nativeHost('isNativeNode', receiver));
+                        if (!compatible) {
+                            if (__lenientThisFunctions.has(fn)) return undefined;
+                            throw new TypeError("Illegal invocation");
+                        }
                         return Reflect.apply(target, receiver, argumentsList);
                     },
                 });
@@ -178,6 +225,7 @@ const __disconnectedNodeOrder = new WeakMap();
 const __attributeMaps = new WeakMap();
 const __inputValues = new WeakMap();
 const __inputCheckedStates = new WeakMap();
+const __inputIndeterminateStates = new WeakMap();
 const __optionSelectedStates = new WeakMap();
 const __iframeBrowsingContexts = new WeakMap();
 let __activeElement = null;

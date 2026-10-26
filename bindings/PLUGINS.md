@@ -10,10 +10,12 @@ receiving `{global, host, options}`. It may return a Promise, then a disposer fu
 disposers in reverse order. Installation errors name the plugin and original error.
 
 `host.call(name, ...args)` always returns a Promise. Only registered handlers are
-callable. Values are null, booleans, finite numbers, strings, arrays, plain objects,
+callable. Values include undefined/null, booleans, numbers (including NaN/infinities), BigInt, strings, arrays, plain objects,
 and copied binary buffers. Python receives bytes; Node receives Buffer; realm
-JavaScript receives Uint8Array. DOM nodes, functions, raw JSC values, and pointers
-cannot cross the bridge. Use your own opaque resource tokens when needed.
+JavaScript receives Uint8Array. Use `host.ref(value)` for live objects/functions;
+the handler receives a realm-bound JSHandle. `context.function(name)` returns a
+registered handler as a Promise-returning page function. Raw JSC pointers never
+leave the owner thread. See [value bridging](BRIDGING.md) for conversions and ownership.
 
 Failed host calls reject in the page with
 `DOMException("The operation failed.", "OperationError")`. Original adapter
@@ -31,7 +33,8 @@ unsubscribe function. Notifications are bounded to 256 queued messages; pending
 calls to 1024 per realm. Handle backpressure errors in the producer. Late results
 from cancelled realms are discarded. Python uses one managed dispatcher per
 session; Node uses its event loop and accepts Promise results. Callback reentry
-into the same page rejects immediately.
+into the same page rejects immediately, except for queued handle operations.
+Those operations cannot call a host handler recursively.
 
 ```python
 from brimp import Session, Plugin
@@ -48,27 +51,72 @@ with Session(plugins=[plugin]) as session:
 | Python `plugins.storage()` / Node `storagePlugin()` | Realm-local in-memory Storage, library-backed IndexedDB, Cache APIs | Fresh on navigation; no cross-page storage events, persistence, OPFS or filesystem durability |
 | `plugins.host_storage(...)` / `hostStoragePlugin(...)` | Async hostStorage, origin-partitioned atomic batches, session-memory default or custom backend | Explicit extension; does not implement localStorage or IndexedDB; durability depends on the backend |
 | `plugins.canvas(...)` / `canvasPlugin(...)` | Constructors, state, transforms, validation, gradients/paths, ImageData, configured dimensions | Draws do not rasterize; hit tests false; fixed-color readback; deterministic text metrics; no fonts or image decoding |
-| `plugins.services(...)` / `servicesPlugin(...)` | Realm-local LockManager and API validation | Device/media/permission/navigator values are configured mocks; no actual hardware, notification, geolocation, or media services |
+| `plugins.services(...)` / `servicesPlugin(...)` | Realm-local LockManager, MediaEncryptedEvent payloads and API validation | Device/media/permission/navigator values are configured mocks; no actual hardware, notification, geolocation, media services or encrypted-media backend |
 | `plugins.extraction()` / `extractionPlugin()` | Defuddle extraction via `page.extract()` on the current DOM | Uses DOM/attributes/inline style heuristics; no fabricated layout or computed style |
 
 Storage maps belong to the realm. This is a deliberately limited memory-only
 plugin, not a persistent browser profile. IndexedDB uses pinned `fake-indexeddb`, including transactional rollback and
-structured-cloned records. It remains fresh after navigation. Services defaults deny notifications, report unavailable Bluetooth and
+structured-cloned records. Its request/database fields are populated on real
+instances; a prototype-only surface probe cannot verify all of them. CacheStorage
+records empty caches immediately on open and preserves response body bytes.
+CookieStore is a separate legacy placeholder: get/getAll/set/delete return
+undefined without reading or changing document.cookie; onchange supports manual
+events. SQLTransaction is an illegal-constructor interface with a legacy synthetic
+success payload, and openDatabase is undefined as in the saved Safari reference.
+No WebSQL engine or transaction factory is added.
+StorageManager reports cache-map usage and no
+quota, persistence methods resolve false, and getDirectory is a legacy no-op
+returning undefined without creating a filesystem. Storage remains fresh after
+navigation. Services defaults deny notifications, report unavailable Bluetooth and
 empty media devices; options configure responses, not access to real devices.
+
+Canvas drawing and path calls, including drawFocusIfNeeded, support ignored-result
+workflows without rasterization. State, transforms and ImageData allocation remain
+functional; readback, text metrics and hit tests use the documented mock contract.
+The existing filter property remains an opt-in plugin state extension even though
+it is absent from the saved Safari reference; it does not render filters.
 
 Canvas `rgba` configures in-bounds pixels (default transparent); out-of-bounds
 pixels remain transparent, and alpha-disabled contexts return opaque pixels.
 `characterWidth` (Python `character_width`) controls glyph advance relative to
 font size. `toDataURL`/`toBlob` produce **application/x-brimp-canvas-mock** containing
 JSON dimensions/color, never a PNG. Zero-size canvases return `data:,`.
-Readback is capped at 16 million pixels. Image decoding rejects; natural image
-sizes are zero. Canvas does not add document screenshots or layout.
+Readback is capped at 16 million pixels. Bitmap decoding rejects; natural image
+sizes are zero. Canvas preserves the core image placeholders, including the
+undefined-returning decode() no-op. It does not add document screenshots or layout.
 
 The [graphics/audio example](../examples/plugins/graphics-audio.js) illustrates
 JavaScript state plus explicit async backend operations. It does not implement
 browser-complete WebGL/WebGPU/WebAudio. The [Node host worker example](../examples/plugins/node-host-worker.mjs)
 uses worker_threads and subscriptions through an explicit `HostWorker` extension.
-Worker, SharedWorker, service-worker execution, and native coordinators are absent.
+The services plugin exposes a Worker placeholder with local handlers and no-op
+postMessage/terminate. It does not execute source, fetch a URL or start a thread.
+SharedWorker, service-worker execution, and native coordinators are absent.
+The services plugin supplies a ServiceWorkerContainer placeholder, not worker execution.
+
+The services plugin also exposes Clipboard, CredentialsContainer, Geolocation,
+MediaCapabilities, MediaSession and WakeLock. Their heavy operations retain legacy
+no-ops returning undefined: no promises/results, callbacks, permission prompts,
+clipboard access, authentication, location lookup or device work. Sharing, gamepad
+and key-system navigator methods are likewise no-ops. MediaSession stores metadata
+and playbackState locally. ServiceWorkerContainer.controller stays null and ready
+is a stable, permanently pending promise; register does not load a worker.
+MediaDevices retains empty enumeration/constraint results and adds no-op capture
+methods. Permissions retains its configured synthetic query results. EventTarget
+services accept manually dispatched events, without automatic device events.
+PDF plugin/MIME collections retain configured metadata and indexed/named lookup;
+they do not install a PDF viewer. Existing configurable connection, deviceMemory
+and bluetooth surfaces remain services-plugin extensions absent in saved Safari.
+TrustedTypePolicyFactory/trustedTypes in services copy the legacy placeholders:
+policy creation, sink queries and type checks return undefined, defaultPolicy is
+null, and emptyHTML/emptyScript are empty strings. No policies, branded trusted
+values or CSP enforcement are provided. The Safari-absent getTypeMapping stays absent.
+The services plugin also exposes MediaStream with a stable unique id, inactive
+state and manually dispatched track handlers. Its track queries, clone and
+mutation methods retain legacy undefined-returning placeholders; there are no
+tracks or capture. SourceBuffer is an illegal-constructor interface only: its
+methods are legacy no-ops and its property placeholders use empty strings/local
+string assignments. There is no MediaSource factory, buffering or decoder.
 
 ## Additional browser surfaces
 
@@ -80,10 +128,58 @@ combined with storage, services and extraction without adding native engines.
 | `geometry()` / `geometryPlugin()` | DOMPoint/ReadOnly, DOMRect/ReadOnly, DOMQuad; 2D DOMMatrix/ReadOnly multiplication, inverse, translate/scale/rotate, typed arrays | No DOM measurement; non-affine/3D matrices and CSS transform-list parsing reject |
 | `css_typed_om()` / `cssTypedOmPlugin()` | CSSUnitValue conversions/arithmetic, keywords, unparsed values/variable references, inline attributeStyleMap reads/edits | Single inline values; no general calc/compound-unit algebra, cascade, computed style, or layout |
 | `scheduling()` / `schedulingPlugin()` | scheduler.postTask/yield, delayed priority queues, TaskController priority changes and aborts | Priority applies within this plugin's ready tasks; idle callbacks report zero available budget; no rendering-idle prediction or inherited continuation priorities |
-| `graphics(...)` / `graphicsPlugin(...)` | Canvas WebGL/WebGL2 context identity, buffer/state bookkeeping; opt-in WebGPU buffer allocation, mapping and copying | Fixed RGBA readback; shaders report compilation/linking failure; GPU execution rejects; no rasterization or native GPU |
-| `audio(...)` / `audioPlugin(...)` | AudioBuffer channel data, graph connections, Gain/Oscillator/Analyser state, AudioContext lifecycle and realm-clock time | Silent analyser output, immediate parameter-value assignment; automation ramps and decoding reject; no audio processing/output or offline rendering |
+| `graphics(...)` / `graphicsPlugin(...)` | Canvas WebGL/WebGL2 context identity, buffer/state bookkeeping, Safari constants and legacy callable placeholders; opt-in WebGPU buffer allocation, mapping and copying | Fixed RGBA readback; shaders report compilation/linking failure; additional GL methods return undefined without effects; WebGPU execution rejects; no rasterization or native GPU |
+| `audio(...)` / `audioPlugin(...)` | AudioBuffer channel data, graph connections, listener/compressor and Gain/Oscillator/Analyser state, AudioContext lifecycle and realm-clock time | Silent analysis; missing DSP factories, automation ramps and worklet loading are callable no-ops; decoding rejects; offline rendering returns a silent buffer, with no processing/output |
+| `rtc()` / `rtcPlugin()` | Local peer/data-channel objects, description and candidate payload storage, RTC event payloads/handlers | No connection or media transport; legacy no-op operations and a permanently pending createOffer promise |
+
+The RTC plugin is opt-in in Rust (`bundled::rtc()`), Node and Python. Peer and
+channel defaults use the saved Safari reference; sending, closing, negotiation,
+configuration and receiver/statistics calls remain legacy no-ops returning
+undefined. close does not transition state. createOffer never settles and does
+not invoke callbacks. setLocalDescription only stores the supplied value as local
+and pendingLocalDescription and resolves; it does not parse SDP or negotiate.
+Session descriptions and candidate input fields can be serialized with toJSON.
+Candidate-derived network fields are null placeholders, without parsing or a
+fabricated local address. RTCSctpTransport is an illegal-constructor surface with
+legacy empty-string getters; peers never create a transport. The plugin produces
+no network/device events; manually dispatched events use the normal EventTarget.
+Legacy members absent in the saved Safari reference are omitted.
 
 The graphics plugin accepts `rgba`, `renderer`, and `webgpu` (default false).
+
+The audio plugin includes BaseAudioContext, AudioScheduledSourceNode,
+AudioDestinationNode, AudioListener, DynamicsCompressorNode, Worklet/AudioWorklet
+and OfflineAudioContext. Missing DSP factories return undefined; they do not
+construct processing nodes. Worklet.addModule returns undefined and loads no code.
+OfflineAudioContext.startRendering resolves to an AudioBuffer filled with zeros;
+it does not render a graph or emit completion events. Its legacy suspend/resume
+placeholders return promises that remain pending. Existing buffer manipulation,
+graph connections, logical AudioContext time, and host audio.process extensions
+remain available. The legacy numberOfChannels property stays absent on the
+offline context itself, matching Safari; the buffer exposes its channel count.
+SpeechSynthesisUtterance stores local text/language, numeric pitch/rate/volume and
+voice payloads with Safari's empty-utterance defaults. Its event handlers support
+manual dispatch only. Numeric assignments are stored without full Web IDL/range
+validation. speechSynthesis copies the legacy empty object: no speech methods,
+queue, installed voices or audio output are provided.
+The canvas plugin adds legacy captureStream/transferControlToOffscreen no-ops.
+Path2D calls retain validation and opaque path identities without rendering.
+Existing toBlob/toDataURL encode mock metadata, and createImageBitmap supplies
+mock dimensions; these do not imply image codecs or rasterization.
+
+The graphics plugin exposes WEBGL_debug_renderer_info with a stable extension
+object, Safari's two constants and the existing configured renderer/Brimp vendor
+strings. It reports mock identity, not hardware. Its other WebGL constants use
+Safari values and readonly descriptors. The additional
+109 methods listed in `placeholderMethods` in `crates/runtime/js/plugins/graphics.js`
+copy the legacy callable-placeholder contract: they return `undefined` without
+converting arguments, changing GL state or executing GPU work. This includes
+texture/framebuffer creation and queries; scripts can discard these results,
+but cannot use them as real resources or query answers. Method names, arities
+and descriptors match installed Safari. Existing buffer, viewport, clear-color
+and fixed-pixel readback behavior remains available. These are explicit plugin
+contracts, not full WebGL semantics; `COVERAGE.yaml` records them individually.
+
 Without `webgpu: true`, `navigator.gpu.requestAdapter()` returns null. Mock GPU
 buffers are capped at 64 MiB and support full-buffer mappings only; old mapping
 views stop affecting buffer contents after unmap. These are memory mocks, not a

@@ -10,8 +10,10 @@ use crate::ffi::{
 };
 
 use crate::{
-    DeferredPromise, JsObjectIdentity, ProtectedJsObject, runtime::exception_from_raw,
-    string::JsString, value::value_to_string,
+    DeferredPromise, JsObjectIdentity, ProtectedJsObject,
+    runtime::exception_from_raw,
+    string::JsString,
+    value::{value_to_string, value_to_utf16},
 };
 
 pub struct NativeCall<'call> {
@@ -138,8 +140,14 @@ impl NativeArgument<'_> {
         }
     }
 
+    /// Convert to a Unicode scalar string, replacing unpaired UTF-16 surrogates.
     pub fn to_string(&self) -> Result<String, NativeError> {
         value_to_string(self.context, self.value).map_err(NativeError::new)
+    }
+
+    /// Convert to a JavaScript string and preserve every UTF-16 code unit.
+    pub fn to_utf16(&self) -> Result<Vec<u16>, NativeError> {
+        value_to_utf16(self.context, self.value).map_err(NativeError::new)
     }
 
     pub fn as_object(&self) -> Result<Option<JsObjectIdentity>, NativeError> {
@@ -242,6 +250,8 @@ pub enum NativeValue {
     Boolean(bool),
     Number(f64),
     String(String),
+    /// A JavaScript string, including any unpaired UTF-16 surrogates.
+    StringUtf16(Vec<u16>),
     Bytes(Vec<u8>),
     Int32Array(Vec<i32>),
     Float32Array(Vec<f32>),
@@ -260,6 +270,10 @@ impl NativeValue {
                 Self::Number(value) => JSValueMakeNumber(context, *value),
                 Self::String(value) => {
                     let value = JsString::new(value).map_err(NativeError::new)?;
+                    JSValueMakeString(context, value.as_raw())
+                }
+                Self::StringUtf16(value) => {
+                    let value = JsString::from_utf16(value).map_err(NativeError::new)?;
                     JSValueMakeString(context, value.as_raw())
                 }
                 Self::Bytes(value) => {

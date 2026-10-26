@@ -1,0 +1,9980 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "undefined",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "null",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "custom message",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        " \t\n ",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\r\nb\rc\nd",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\u0000b",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "a\ud800b\udc00",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "false",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "NaN",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "123",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "converted",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "before",
+        false,
+        [
+          [
+            false,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "output",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "plain",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "disabled",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "readonly",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "datalist",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "missing",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "null",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "empty",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        false,
+        true,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "text",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "whitespace",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "linebreaks",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "nul",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "surrogate",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "false",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "number",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "NaN",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "bigint",
+      "expected": [
+        null,
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        "undefined",
+        [],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "object",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "string"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "throw",
+      "expected": [
+        "RangeError",
+        "undefined",
+        [
+          "throw"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "object",
+      "state": "barred-type",
+      "kind": "mutate",
+      "expected": [
+        null,
+        "undefined",
+        [
+          "mutate"
+        ],
+        true,
+        false,
+        "",
+        true,
+        []
+      ]
+    }
+  ]
+}

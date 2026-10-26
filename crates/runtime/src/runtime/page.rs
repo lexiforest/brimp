@@ -40,6 +40,7 @@ pub struct Page {
     network: Option<Arc<super::networking::NetworkRuntime>>,
     plugins: Vec<super::plugins::Plugin>,
     plugin_runtime: Option<super::plugins::PluginRuntime>,
+    pub(crate) bridge: super::bridge::BridgeRuntime,
     plugin_timeout: Duration,
     pub(crate) shutdown: Arc<AtomicBool>,
     // Bindings must drop before `js`, because their objects are protected in that context.
@@ -140,7 +141,14 @@ impl Page {
             .eval(include_str!("../../js/runtime/module_loader.js"))?
             .to_object()?;
         let persona_identity_setter = install_persona(&js, &options.persona)?;
+        let bridge = super::bridge::BridgeRuntime::new(
+            &js,
+            realm_id,
+            options.shutdown.clone(),
+            options.plugin_timeout,
+        )?;
         let mut page = Self {
+            bridge,
             clock_options: options.clock,
             diagnostics,
             session_id: options.session_id,
@@ -189,6 +197,18 @@ impl Page {
         Ok(page)
     }
 
+    pub(crate) fn bridge_retain(
+        &self,
+        value: &ProtectedJsObject,
+    ) -> Result<super::bridge::Reference, super::AutomationError> {
+        self.bridge.retain(&self.js, value)
+    }
+    pub(crate) fn bridge_get(
+        &self,
+        token: &super::bridge::Reference,
+    ) -> Result<ProtectedJsObject, super::AutomationError> {
+        self.bridge.get(&self.js, token)
+    }
     pub fn set_content(&mut self, html: &str) -> Result<(), JsException> {
         self.set_content_at(html, None)
     }
@@ -204,6 +224,8 @@ impl Page {
         &mut self,
         base_url: &str,
         cross_origin_isolated: bool,
+        encoding: &'static encoding_rs::Encoding,
+        content_type: &str,
     ) -> Result<(), JsException> {
         self.close_plugins();
         self.browsing_context.set_url(base_url);
@@ -214,6 +236,8 @@ impl Page {
         self.close_websockets();
         self.cancel_fetch_streams();
         let document = BrowserDocument::empty();
+        document.set_encoding(document.root(), encoding);
+        document.set_content_type(document.root(), content_type);
         *self.document.borrow_mut() = document;
         self.document_ready = false;
         for job in self.navigation_jobs.borrow_mut().drain(..) {
@@ -264,6 +288,12 @@ impl Page {
             js.set_console_callback(move |message| callback(message))?;
         }
 
+        self.bridge = super::bridge::BridgeRuntime::new(
+            &js,
+            self.realm_id,
+            self.shutdown.clone(),
+            self.plugin_timeout,
+        )?;
         self.bindings = bindings;
         self.persona_identity_setter = persona_identity_setter;
         self.module_loader = module_loader;
@@ -300,6 +330,7 @@ impl Page {
                 self.session_id,
                 self.browsing_context.clone(),
                 self.events.clone(),
+                &self.bridge,
             )?);
             let start = Instant::now();
             loop {
@@ -384,7 +415,7 @@ impl Page {
         const BLANK_URL: &str = "about:blank";
         const BLANK_DOCUMENT: &str = "<!doctype html><html><head></head><body></body></html>";
         let _ = self.browsing_context.take_pending_navigation();
-        self.reset_page_at(BLANK_URL, false)?;
+        self.reset_page_at(BLANK_URL, false, encoding_rs::UTF_8, "text/html")?;
         self.set_content_at(BLANK_DOCUMENT, Some(BLANK_URL))?;
         self.load_state = LoadState::Idle;
         Ok(())
@@ -482,7 +513,36 @@ impl Page {
             });
         let effective_url = response.effective_url;
         let content = response.body;
-        if let Err(error) = self.reset_page_at(&effective_url, cross_origin_isolated) {
+        let decoded = if is_html {
+            Some(
+                crate::dom::decode_html(
+                    &content,
+                    response
+                        .headers
+                        .get(http::header::CONTENT_TYPE)
+                        .and_then(|value| value.to_str().ok()),
+                )
+                .map_err(|error| {
+                    self.load_state = LoadState::Failed;
+                    JsException::from_message(error.to_string())
+                })?,
+            )
+        } else {
+            None
+        };
+        let document_encoding = decoded
+            .as_ref()
+            .map_or(encoding_rs::UTF_8, |(_, encoding)| *encoding);
+        if let Err(error) = self.reset_page_at(
+            &effective_url,
+            cross_origin_isolated,
+            document_encoding,
+            response
+                .headers
+                .get(http::header::CONTENT_TYPE)
+                .and_then(|value| value.to_str().ok())
+                .unwrap_or("text/html"),
+        ) {
             self.load_state = LoadState::Failed;
             return Err(error.into());
         }
@@ -493,8 +553,7 @@ impl Page {
         for (_, source) in &self.preload_scripts {
             self.execute_page_script(source);
         }
-        let html = if is_html {
-            let source = String::from_utf8_lossy(&content);
+        let html = if let Some((source, _)) = decoded {
             if let Err(error) = self
                 .parse_navigation_document(&source, &effective_url)
                 .await
@@ -714,10 +773,6 @@ impl Page {
         Ok(value)
     }
 
-    pub(crate) fn realm_id(&self) -> u64 {
-        self.realm_id
-    }
-
     pub(crate) fn call_native(
         &self,
         source: &str,
@@ -829,11 +884,12 @@ impl Page {
         self.tasks.sender()
     }
 
-    fn install_diagnostics(&self) -> Result<(), JsException> {
+    fn install_diagnostics(&mut self) -> Result<(), JsException> {
         let Some(log) = self.diagnostics.clone() else {
             return Ok(());
         };
         let stack = log.stack();
+        let recursive = log.mode() == super::diagnostics::TraceMode::Recursive;
         self.js.set_global_function("__brimpTrace", move |call| {
             let text = |index| {
                 call.argument(index)
@@ -851,27 +907,50 @@ impl Page {
             );
             Ok(brimp_jsc::NativeValue::Undefined)
         })?;
-        self.js.eval(&format!(
-            "({})({stack})",
-            include_str!("../../js/runtime/diagnostics.js")
+        let controls = self.js.eval(&format!(
+            "({})({stack}, {})",
+            include_str!("../../js/runtime/diagnostics.js"),
+            if recursive {
+                include_str!("../../js/runtime/recursive-tracing.js")
+            } else {
+                "null"
+            },
         ))?;
+        if recursive {
+            self.bindings
+                .trace_internal_controls(&self.js, &controls.to_object()?)?;
+        }
         Ok(())
     }
 
-    pub(crate) fn take_diagnostics(&self) -> serde_json::Value {
+    pub(crate) fn diagnostics(
+        &self,
+        view: super::diagnostics::DiagnosticsView,
+    ) -> serde_json::Value {
         self.diagnostics
             .as_ref()
-            .map(|log| log.take())
-            .unwrap_or_else(|| serde_json::json!({"records": [], "dropped": 0, "writeError": null}))
+            .map(|log| log.read(view))
+            .unwrap_or_else(|| super::diagnostics::disabled(view))
     }
 
     pub(crate) fn wait_for_work(&self, maximum: Option<Duration>) {
+        // Engine worker completions target the platform loop, not Rust's park
+        // token. Bound the wait so engine jobs also progress without host traffic.
+        let maximum = Some(
+            maximum
+                .unwrap_or(Duration::from_millis(10))
+                .min(Duration::from_millis(10)),
+        );
         let timer = self.timers.borrow().wait_duration();
         match (timer, maximum) {
             (Some(a), Some(b)) => std::thread::park_timeout(a.min(b)),
             (Some(a), None) | (None, Some(a)) => std::thread::park_timeout(a),
             (None, None) => std::thread::park(),
         }
+    }
+
+    pub(crate) fn advance_bridge_timer(&mut self) -> bool {
+        self.bridge.has_pending() && self.advance_to_next_timer()
     }
 
     pub(crate) fn advance_to_next_timer(&mut self) -> bool {
@@ -960,15 +1039,27 @@ impl Page {
     }
 
     pub fn run_one_task(&mut self) -> Result<bool, JsException> {
+        let deadline = self
+            .script_execution_deadline
+            .unwrap_or_else(|| Instant::now() + self.plugin_timeout);
+        self.js
+            .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+        self.js.pump_jobs();
+        let bridge_progress = self.bridge.pump(&self.js);
+        if let Some(deadline) = self.script_execution_deadline {
+            self.js
+                .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+        } else {
+            self.js.clear_execution_time_limit();
+        }
+        let bridge_progress = bridge_progress?;
         let plugin_progress = self
             .plugin_runtime
             .as_ref()
             .map(|runtime| runtime.pump(&self.js))
             .transpose()?
             .unwrap_or(false);
-        if plugin_progress {
-            self.start_pending_fetches()?;
-        }
+        self.start_pending_fetches()?;
         self.start_pending_websockets()?;
         let timer_callback = self.timers.borrow_mut().pop_due();
         if let Some(callback) = timer_callback {
@@ -978,7 +1069,7 @@ impl Page {
             return Ok(true);
         }
         let Some(task) = self.tasks.pop() else {
-            return Ok(plugin_progress);
+            return Ok(plugin_progress || bridge_progress);
         };
         task(self);
         if let Some(error) = self.async_error.take() {
@@ -1061,7 +1152,7 @@ impl Page {
                             _ => 0,
                         };
                         if chunk_length != 0 {
-                            let reserved = callback_buffered_bytes.fetch_update(
+                            let reserved = callback_buffered_bytes.try_update(
                                 Ordering::AcqRel,
                                 Ordering::Acquire,
                                 |current| {
@@ -1260,7 +1351,7 @@ impl Page {
                 }
                 PendingWebSocketOperation::ConsumeFetch { id, bytes } => {
                     if let Some(buffered) = self.fetch_buffered.borrow().get(&id) {
-                        let _ = buffered.fetch_update(Ordering::AcqRel, Ordering::Acquire, |n| {
+                        let _ = buffered.try_update(Ordering::AcqRel, Ordering::Acquire, |n| {
                             n.checked_sub(bytes)
                         });
                         if buffered.load(Ordering::Acquire) <= 128 * 1024

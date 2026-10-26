@@ -47,7 +47,9 @@ streams accept AbortSignal. `html()` serializes the edited DOM.
 
 `evaluate` awaits Promises while pumping timers, networking, and host completions.
 Use `evaluate_handle` / `evaluateHandle` for values that remain in the realm.
-Handles support function calls, properties, JSON conversion, and disposal.
+Handles support function invocation with an explicit receiver, nested handle arguments,
+property reads/writes/deletion, rich value copying, explicit JSON conversion, and disposal.
+See [value bridging](BRIDGING.md) for the Python/Node conversion contract.
 Element handles add attributes, text/HTML, subtree queries, mutation, focus,
 file inputs, and removal. Detachment preserves identity; navigation invalidates
 old handles with `StaleHandle`. Page closure rejects operations with `Closed`.
@@ -76,8 +78,9 @@ handler returning without a decision abort the request. Response/auth routes
 buffer at most 32 MiB. `body()` returns copied bytes. Registered routes bypass
 cache lookup so interception remains effective.
 
-Handlers may use a different page. Reentry into the same page, including through
-its handles, fails immediately with `Reentry`. Python callbacks run on the
+Handlers may use a different page and operate on references from their own realm.
+Same-page lifecycle/evaluation reentry fails with `Reentry`; a callback handle
+operation cannot recursively call another host handler. Python callbacks run on the
 session's managed dispatcher and must return synchronously; asyncio callbacks
 are not supported. Node route and plugin callbacks may return Promises.
 

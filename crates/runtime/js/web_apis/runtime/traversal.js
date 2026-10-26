@@ -5,14 +5,14 @@ function __followingNode(node, root, skipChildren = false) {
     if (!skipChildren && node.firstChild) return node.firstChild;
     while (node !== root) {
         if (node.nextSibling) return node.nextSibling;
-        node = node.parentNode;
+        node = __callHost('parentNode', node);
         if (!node) return null;
     }
     return null;
 }
 function __precedingNode(node, root) {
     if (node === root) return null;
-    if (!node.previousSibling) return node.parentNode;
+    if (!node.previousSibling) return __callHost('parentNode', node);
     node = node.previousSibling;
     while (node.lastChild) node = node.lastChild;
     return node;
@@ -69,13 +69,13 @@ function __iteratorMutationBefore(operation, args) {
     if (!__nodeIterators.size) return [];
     let removed = [];
     const [target, child] = args;
-    if (operation === 'removeChild' && child?.parentNode === target) removed = [child];
+    if (operation === 'removeChild' && child instanceof Node && __callHost('parentNode', child) === target) removed = [child];
     if (operation === 'replaceChild') removed = [args[2], ...(child?.nodeType === 11 ? child.childNodes : child?.parentNode ? [child] : [])];
     if (operation === 'appendChild' || operation === 'insertBefore') {
         if (child?.nodeType === 11) removed = [...child.childNodes];
         else if (child?.parentNode) removed = [child];
     }
-    if (operation === 'setInnerHTML' || (operation === 'setTextContent' && target?.nodeType !== 3 && target?.nodeType !== 8)) {
+    if (operation === 'setInnerHTML' || (operation === 'setTextContent' && ![3,4,7,8].includes(__callHost('nodeType', target)))) {
         removed = [...(target instanceof HTMLTemplateElement ? target.content : target).childNodes];
     }
     const updates = [];

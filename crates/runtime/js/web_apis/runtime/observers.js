@@ -2,8 +2,8 @@ class MutationRecord {
     constructor(type, target) {
         this.type = type;
         this.target = target;
-        this.addedNodes = new NodeList([]);
-        this.removedNodes = new NodeList([]);
+        this.addedNodes = __createNodeList([]);
+        this.removedNodes = __createNodeList([]);
         this.previousSibling = null;
         this.nextSibling = null;
         this.attributeName = null;
@@ -43,7 +43,12 @@ class MutationObserver {
     }
     takeRecords() { return this.__records.splice(0); }
 }
-function __queueMutation(record) {
+function __mutationAncestors(target) {
+    const ancestors = new Set();
+    for (let node = target; node; node = __callHost('parentNode', node)) ancestors.add(node);
+    return ancestors;
+}
+function __queueMutation(record, ancestors = __mutationAncestors(record.target)) {
     if (__callHost('mutationObserved')) {
         const id = node => __callHost('mutationNodeId', node);
         __callHost('mutationEvent', globalThis, JSON.stringify({kind: record.type, target: id(record.target), added: Array.from(record.addedNodes, id), removed: Array.from(record.removedNodes, id), attribute: record.attributeName, oldValue: record.oldValue}));
@@ -51,7 +56,7 @@ function __queueMutation(record) {
     for (const observer of __mutationObservers) {
         let interested = false, oldValue = false;
         for (const [root, options] of [...observer.__targets, ...observer.__transient]) {
-            if (root !== record.target && !(options.subtree && root.contains(record.target))) continue;
+            if (root !== record.target && !(options.subtree && ancestors.has(root))) continue;
             if (record.type === 'childList' && options.subtree) {
                 for (const removed of record.removedNodes) observer.__transient.set(removed, options);
             }
@@ -85,15 +90,18 @@ function __mutationBefore(operation, args) {
     if (__mutationObservers.size === 0 && !__callHost('mutationObserved')) return null;
     let target = args[0];
     if (operation.startsWith('style')) target = __styleOwners.get(__styleDeclarationTarget(target));
-    if (!(target instanceof Node)) return null;
+    if (!__callHost('isNativeNode', target)) return null;
     if (operation.includes('Attribute') || operation.startsWith('style')) {
         const namespaced = operation.endsWith('NS');
         const namespace = namespaced ? args[1] || null : null;
         const name = operation.startsWith('style') ? 'style' : namespaced ? String(args[2]).split(':').at(-1) : String(args[1]);
-        return { type: 'attributes', target, name, namespace, value: namespaced ? target.getAttributeNS(namespace, name) : target.getAttribute(name), operation };
+        const value = namespaced
+            ? __attributeRecords(target).find(attribute => attribute.namespaceURI === namespace && attribute.localName === name)?.value ?? null
+            : __callHost('getAttribute', target, name);
+        return { type: 'attributes', target, name, namespace, value, operation };
     }
-    if (operation === 'setTextContent' && (target.nodeType === 3 || target.nodeType === 8)) {
-        return { type: 'characterData', target, value: target.textContent };
+    if (operation === 'setTextContent' && [3,4,7,8].includes(__callHost('nodeType', target))) {
+        return { type: 'characterData', target, value: __callHost('textContent', target) };
     }
     if (operation === 'setInnerHTML' && target instanceof HTMLTemplateElement) target = target.content;
     if (operation === 'replaceChild') {
@@ -101,20 +109,24 @@ function __mutationBefore(operation, args) {
         const records = [];
         if(node.parentNode || node.nodeType === 11 && added.length) {
             const record = new MutationRecord('childList',node.nodeType === 11 ? node : node.parentNode);
-            record.removedNodes = new NodeList(added);
+            record.removedNodes = __createNodeList(added);
             if(node.nodeType!==11) { record.previousSibling=node.previousSibling;record.nextSibling=node.nextSibling; }
             records.push(record);
         }
         const record = new MutationRecord('childList',parent);
-        record.addedNodes = new NodeList(added); record.removedNodes = new NodeList(node===child ? [] : [child]);
+        record.addedNodes = __createNodeList(added); record.removedNodes = __createNodeList(node===child ? [] : [child]);
         record.previousSibling = child.previousSibling===node ? node.previousSibling : child.previousSibling;
         record.nextSibling = child.nextSibling===node ? node.nextSibling : child.nextSibling;
-        records.push(record);return {type:'replacement',records};
+        records.push(record);
+        // A replacement can detach the ancestor of an earlier removal target.
+        // Preserve that target's observer ancestry while it is still in the tree.
+        return {type:'replacement',records:records.map(record => [record, __mutationAncestors(record.target)])};
     }
     const parents = new Set();
     if (['appendChild', 'insertBefore', 'removeChild'].includes(operation)) {
         const child = args[1];
-        if (child?.parentNode) parents.add(child.parentNode);
+        const parent = child instanceof Node ? __callHost('parentNode', child) : null;
+        if (parent) parents.add(parent);
         if (child?.nodeType === 11) parents.add(child);
     }
     parents.add(target);
@@ -124,7 +136,7 @@ function __mutationBefore(operation, args) {
 }
 function __mutationAfter(before) {
     if (!before) return;
-    if (before.type === 'replacement') { for(const record of before.records)__queueMutation(record);return; }
+    if (before.type === 'replacement') { for(const [record, ancestors] of before.records)__queueMutation(record, ancestors);return; }
     if (before.type !== 'childList') {
         if (before.type === 'attributes' && before.operation.startsWith('removeAttribute') && before.value === null) return;
         if (before.type === 'attributes' && before.operation.startsWith('style') &&
@@ -143,7 +155,7 @@ function __mutationAfter(before) {
         if (before.moved && previousSet.has(before.moved) && currentSet.has(before.moved)) {
             const removal = new MutationRecord('childList', target);
             const index = previous.indexOf(before.moved);
-            removal.removedNodes = new NodeList([before.moved]);
+            removal.removedNodes = __createNodeList([before.moved]);
             removal.previousSibling = previous[index - 1] ?? null;
             removal.nextSibling = previous[index + 1] ?? null;
             __queueMutation(removal);
@@ -151,7 +163,7 @@ function __mutationAfter(before) {
         }
         if (!removed.length && !added.length) continue;
         const record = new MutationRecord('childList', target);
-        record.addedNodes = new NodeList(added); record.removedNodes = new NodeList(removed);
+        record.addedNodes = __createNodeList(added); record.removedNodes = __createNodeList(removed);
         const list = added.length ? current : previous;
         const affected = added.length ? added : removed;
         const first = list.indexOf(affected[0]), last = list.indexOf(affected[affected.length - 1]);
@@ -169,7 +181,7 @@ const __deliverParserMutations = serialized => {
     for (const item of JSON.parse(serialized)) {
         const record = new MutationRecord(item.oldValue == null ? 'childList' : 'characterData', node(item.target));
         record.oldValue = item.oldValue;
-        if (item.oldValue == null) record[item.removed ? 'removedNodes' : 'addedNodes'] = new NodeList([node(item.node)]);
+        if (item.oldValue == null) record[item.removed ? 'removedNodes' : 'addedNodes'] = __createNodeList([node(item.node)]);
         record.previousSibling = node(item.previous); record.nextSibling = node(item.next);
         __queueMutation(record);
     }

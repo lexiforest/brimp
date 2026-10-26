@@ -76,13 +76,13 @@ lxb_dom_document_type_interface_clone(lxb_dom_document_t *document,
         new->name = (lxb_dom_attr_id_t) data;
     }
 
-    if (lexbor_str_copy(&new->public_id,
+    if (dtype->public_id.data != NULL && lexbor_str_copy(&new->public_id,
                         &dtype->public_id, document->text) == NULL)
     {
         return lxb_dom_document_type_interface_destroy(new);
     }
 
-    if (lexbor_str_copy(&new->system_id,
+    if (dtype->system_id.data != NULL && lexbor_str_copy(&new->system_id,
                         &dtype->system_id, document->text) == NULL)
     {
         return lxb_dom_document_type_interface_destroy(new);

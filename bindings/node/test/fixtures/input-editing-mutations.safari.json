@@ -1,0 +1,395 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "type": "text",
+      "action": "none",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "readonly",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "disabled",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "typeSame",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "typeText",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "typeSearch",
+      "expected": [
+        "ab",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "typeNumber",
+      "expected": [
+        "",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "typeRoundtrip",
+      "expected": [
+        "ab",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "defaultValue",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "rangeText",
+      "expected": [
+        "cb",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "adopt",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "remove",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "text",
+      "action": "step",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "text",
+      "action": "numeric",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "email",
+      "action": "none",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "readonly",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "disabled",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "typeSame",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "typeText",
+      "expected": [
+        "ab",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "typeSearch",
+      "expected": [
+        "ab",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "typeNumber",
+      "expected": [
+        "",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "typeRoundtrip",
+      "expected": [
+        "ab",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "defaultValue",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "rangeText",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "email",
+      "action": "adopt",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "remove",
+      "expected": [
+        "ab",
+        true,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "email",
+      "action": "step",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "email",
+      "action": "numeric",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "number",
+      "action": "none",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "readonly",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "disabled",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "typeSame",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "typeText",
+      "expected": [
+        "",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "number",
+      "action": "typeSearch",
+      "expected": [
+        "",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "number",
+      "action": "typeNumber",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "typeRoundtrip",
+      "expected": [
+        "",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "number",
+      "action": "defaultValue",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "rangeText",
+      "expected": "InvalidStateError"
+    },
+    {
+      "type": "number",
+      "action": "adopt",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "remove",
+      "expected": [
+        "",
+        false,
+        false,
+        true
+      ]
+    },
+    {
+      "type": "number",
+      "action": "step",
+      "expected": [
+        "1",
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "type": "number",
+      "action": "numeric",
+      "expected": [
+        "2",
+        false,
+        false,
+        false
+      ]
+    }
+  ]
+}

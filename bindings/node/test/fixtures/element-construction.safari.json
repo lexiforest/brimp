@@ -1,0 +1,3247 @@
+{
+  "browser": "Safari 27.0",
+  "cases": [
+    {
+      "base": "HTMLElement",
+      "options": "undefined",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-0",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-0",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-0",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-0"
+          ],
+          [
+            "construction-case-0",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "null",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-1",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-1",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-1",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-1"
+          ],
+          [
+            "construction-case-1",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "1",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-2",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-2",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-2",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-2"
+          ],
+          [
+            "construction-case-2",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "Symbol()",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-3",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-3",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-3",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-3"
+          ],
+          [
+            "construction-case-3",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "({extends:\"input\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-4",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-4",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-4",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-4"
+          ],
+          [
+            "construction-case-4",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "({extends:\"x-unknown\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-5",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-5",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-5",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-5"
+          ],
+          [
+            "construction-case-5",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLElement",
+      "options": "({get extends(){throw new RangeError(\"ignored option\")}})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "tag": "construction-case-6",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "explicit": {
+          "tag": "construction-case-6",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-6",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-6"
+          ],
+          [
+            "construction-case-6",
+            true,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "undefined",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-7",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-7",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-7"
+          ],
+          [
+            "construction-case-7",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "null",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-8",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-8",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-8"
+          ],
+          [
+            "construction-case-8",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "1",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-9",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-9",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-9"
+          ],
+          [
+            "construction-case-9",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "Symbol()",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-10",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-10",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-10"
+          ],
+          [
+            "construction-case-10",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "({extends:\"input\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-11",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-11",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-11"
+          ],
+          [
+            "construction-case-11",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "({extends:\"x-unknown\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-12",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-12",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-12"
+          ],
+          [
+            "construction-case-12",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLInputElement",
+      "options": "({get extends(){throw new RangeError(\"ignored option\")}})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-13",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-13",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-13"
+          ],
+          [
+            "construction-case-13",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "undefined",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-14",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-14",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-14"
+          ],
+          [
+            "construction-case-14",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "null",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-15",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-15",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-15"
+          ],
+          [
+            "construction-case-15",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "1",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-16",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-16",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-16"
+          ],
+          [
+            "construction-case-16",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "Symbol()",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-17",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-17",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-17"
+          ],
+          [
+            "construction-case-17",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "({extends:\"input\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-18",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-18",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-18"
+          ],
+          [
+            "construction-case-18",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "({extends:\"x-unknown\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-19",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-19",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-19"
+          ],
+          [
+            "construction-case-19",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLButtonElement",
+      "options": "({get extends(){throw new RangeError(\"ignored option\")}})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-20",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-20",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-20"
+          ],
+          [
+            "construction-case-20",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "undefined",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-21",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-21",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-21"
+          ],
+          [
+            "construction-case-21",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "null",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-22",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-22",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-22"
+          ],
+          [
+            "construction-case-22",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "1",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-23",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-23",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-23"
+          ],
+          [
+            "construction-case-23",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "Symbol()",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-24",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-24",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-24"
+          ],
+          [
+            "construction-case-24",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "({extends:\"input\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-25",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-25",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-25"
+          ],
+          [
+            "construction-case-25",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "({extends:\"x-unknown\"})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-26",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-26",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-26"
+          ],
+          [
+            "construction-case-26",
+            false,
+            null
+          ]
+        ]
+      }
+    },
+    {
+      "base": "HTMLAnchorElement",
+      "options": "({get extends(){throw new RangeError(\"ignored option\")}})",
+      "expected": {
+        "registered": null,
+        "direct": {
+          "error": "TypeError"
+        },
+        "explicit": {
+          "tag": "construction-case-27",
+          "is": null,
+          "custom": true,
+          "unknown": false,
+          "owner": true
+        },
+        "created": {
+          "tag": "construction-case-27",
+          "is": null,
+          "custom": false,
+          "unknown": true,
+          "owner": true
+        },
+        "builtin": {
+          "tag": "input",
+          "is": null,
+          "custom": false,
+          "unknown": false,
+          "owner": true
+        },
+        "reads": 0,
+        "upgraded": [
+          [
+            "input",
+            false,
+            "construction-case-27"
+          ],
+          [
+            "construction-case-27",
+            false,
+            null
+          ]
+        ]
+      }
+    }
+  ],
+  "builtins": [
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-0",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLUnknownElement",
+      "shape": [
+        "HTMLUnknownElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-1",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLAnchorElement",
+      "shape": [
+        "HTMLAnchorElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-2",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLBaseElement",
+      "shape": [
+        "HTMLBaseElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-3",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLPictureElement",
+      "shape": [
+        "HTMLPictureElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-4",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLImageElement",
+      "shape": [
+        "HTMLImageElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-5",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLIFrameElement",
+      "shape": [
+        "HTMLIFrameElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-6",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLEmbedElement",
+      "shape": [
+        "HTMLEmbedElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-7",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLObjectElement",
+      "shape": [
+        "HTMLObjectElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-8",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLParamElement",
+      "shape": [
+        "HTMLParamElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-9",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMediaElement",
+      "shape": [
+        "HTMLMediaElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-10",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLVideoElement",
+      "shape": [
+        "HTMLVideoElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-11",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLAudioElement",
+      "shape": [
+        "HTMLAudioElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-12",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLSourceElement",
+      "shape": [
+        "HTMLSourceElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-13",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTrackElement",
+      "shape": [
+        "HTMLTrackElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-14",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLCanvasElement",
+      "shape": [
+        "HTMLCanvasElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-15",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMapElement",
+      "shape": [
+        "HTMLMapElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-16",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLAreaElement",
+      "shape": [
+        "HTMLAreaElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-17",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLFormElement",
+      "shape": [
+        "HTMLFormElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-18",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLFieldSetElement",
+      "shape": [
+        "HTMLFieldSetElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-19",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLLegendElement",
+      "shape": [
+        "HTMLLegendElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-20",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLLabelElement",
+      "shape": [
+        "HTMLLabelElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-21",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLInputElement",
+      "shape": [
+        "HTMLInputElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-22",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLButtonElement",
+      "shape": [
+        "HTMLButtonElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-23",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLSelectElement",
+      "shape": [
+        "HTMLSelectElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-24",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDataListElement",
+      "shape": [
+        "HTMLDataListElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-25",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLOptGroupElement",
+      "shape": [
+        "HTMLOptGroupElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-26",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLOptionElement",
+      "shape": [
+        "HTMLOptionElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-27",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTextAreaElement",
+      "shape": [
+        "HTMLTextAreaElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        [
+          "output",
+          false,
+          false
+        ],
+        [
+          "output",
+          false,
+          false
+        ],
+        [
+          "output",
+          true,
+          false
+        ],
+        [
+          "output",
+          true,
+          false
+        ],
+        [
+          null,
+          false,
+          true
+        ],
+        [
+          "builtin-construction-28",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLOutputElement",
+      "shape": [
+        "HTMLOutputElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-29",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLProgressElement",
+      "shape": [
+        "HTMLProgressElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-30",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMeterElement",
+      "shape": [
+        "HTMLMeterElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-31",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableElement",
+      "shape": [
+        "HTMLTableElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-32",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableCaptionElement",
+      "shape": [
+        "HTMLTableCaptionElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-33",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableColElement",
+      "shape": [
+        "HTMLTableColElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-34",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableSectionElement",
+      "shape": [
+        "HTMLTableSectionElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-35",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableRowElement",
+      "shape": [
+        "HTMLTableRowElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-36",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTableCellElement",
+      "shape": [
+        "HTMLTableCellElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-37",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLHeadElement",
+      "shape": [
+        "HTMLHeadElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-38",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTitleElement",
+      "shape": [
+        "HTMLTitleElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-39",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLLinkElement",
+      "shape": [
+        "HTMLLinkElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-40",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMetaElement",
+      "shape": [
+        "HTMLMetaElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-41",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLStyleElement",
+      "shape": [
+        "HTMLStyleElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-42",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLParagraphElement",
+      "shape": [
+        "HTMLParagraphElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-43",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLHRElement",
+      "shape": [
+        "HTMLHRElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-44",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLPreElement",
+      "shape": [
+        "HTMLPreElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-45",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLQuoteElement",
+      "shape": [
+        "HTMLQuoteElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-46",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLOListElement",
+      "shape": [
+        "HTMLOListElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-47",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLUListElement",
+      "shape": [
+        "HTMLUListElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-48",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLLIElement",
+      "shape": [
+        "HTMLLIElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-49",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDListElement",
+      "shape": [
+        "HTMLDListElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-50",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDivElement",
+      "shape": [
+        "HTMLDivElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-51",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLSpanElement",
+      "shape": [
+        "HTMLSpanElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-52",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDataElement",
+      "shape": [
+        "HTMLDataElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-53",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTimeElement",
+      "shape": [
+        "HTMLTimeElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-54",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLBRElement",
+      "shape": [
+        "HTMLBRElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-55",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLBodyElement",
+      "shape": [
+        "HTMLBodyElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-56",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLHeadingElement",
+      "shape": [
+        "HTMLHeadingElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-57",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLHtmlElement",
+      "shape": [
+        "HTMLHtmlElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-58",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLScriptElement",
+      "shape": [
+        "HTMLScriptElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-59",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLTemplateElement",
+      "shape": [
+        "HTMLTemplateElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-60",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLSlotElement",
+      "shape": [
+        "HTMLSlotElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-61",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLModElement",
+      "shape": [
+        "HTMLModElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-62",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDetailsElement",
+      "shape": [
+        "HTMLDetailsElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-63",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMenuElement",
+      "shape": [
+        "HTMLMenuElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-64",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDialogElement",
+      "shape": [
+        "HTMLDialogElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-65",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLMarqueeElement",
+      "shape": [
+        "HTMLMarqueeElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-66",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLFrameSetElement",
+      "shape": [
+        "HTMLFrameSetElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-67",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLFrameElement",
+      "shape": [
+        "HTMLFrameElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-68",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLDirectoryElement",
+      "shape": [
+        "HTMLDirectoryElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "results": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        [
+          "builtin-construction-69",
+          true,
+          false
+        ]
+      ],
+      "present": true,
+      "name": "HTMLFontElement",
+      "shape": [
+        "HTMLFontElement",
+        0,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ]
+    }
+  ]
+}

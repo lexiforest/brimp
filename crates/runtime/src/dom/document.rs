@@ -1,4 +1,4 @@
-use brimp_lexbor::{self as lexbor, Document, Node};
+use brimp_lexbor::{self as lexbor, Document, DomString, Node};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -17,6 +17,24 @@ pub struct BrowserDocument {
     // is the shared realm arena, including detached HTML documents.
     owners: RefCell<HashMap<NodeId, NodeId>>,
     template_owners: RefCell<HashMap<NodeId, NodeId>>,
+    metadata: RefCell<HashMap<NodeId, DocumentMetadata>>,
+}
+#[derive(Clone)]
+struct DocumentMetadata {
+    encoding: &'static encoding_rs::Encoding,
+    url: String,
+    content_type: String,
+    inert_template: bool,
+}
+impl Default for DocumentMetadata {
+    fn default() -> Self {
+        Self {
+            encoding: encoding_rs::UTF_8,
+            url: "about:blank".into(),
+            content_type: "text/html".into(),
+            inert_template: false,
+        }
+    }
 }
 #[derive(Default)]
 struct Handles {
@@ -31,6 +49,7 @@ impl BrowserDocument {
             handles: RefCell::new(Handles::default()),
             owners: RefCell::new(HashMap::new()),
             template_owners: RefCell::new(HashMap::new()),
+            metadata: RefCell::new(HashMap::new()),
         };
         result.register(result.arena.root());
         result
@@ -46,6 +65,61 @@ impl BrowserDocument {
     }
     pub fn root(&self) -> NodeId {
         0
+    }
+    pub fn encoding(&self, id: NodeId) -> &'static encoding_rs::Encoding {
+        self.metadata
+            .borrow()
+            .get(&id)
+            .map(|metadata| metadata.encoding)
+            .unwrap_or(encoding_rs::UTF_8)
+    }
+    pub fn set_encoding(&self, id: NodeId, encoding: &'static encoding_rs::Encoding) {
+        self.metadata.borrow_mut().entry(id).or_default().encoding = encoding;
+    }
+    pub fn document_url(&self, id: NodeId) -> String {
+        self.metadata
+            .borrow()
+            .get(&id)
+            .map(|metadata| metadata.url.clone())
+            .unwrap_or_else(|| "about:blank".into())
+    }
+    pub fn set_document_url(&self, id: NodeId, url: String) {
+        self.metadata.borrow_mut().entry(id).or_default().url = url;
+    }
+    pub fn content_type(&self, id: NodeId) -> String {
+        self.metadata
+            .borrow()
+            .get(&id)
+            .map(|metadata| metadata.content_type.clone())
+            .unwrap_or_else(|| "text/html".into())
+    }
+    pub fn set_content_type(&self, id: NodeId, content_type: &str) {
+        let essence = content_type
+            .parse::<data_url::mime::Mime>()
+            .map(|mime| format!("{}/{}", mime.type_, mime.subtype))
+            .unwrap_or_else(|_| "text/html".into());
+        self.metadata
+            .borrow_mut()
+            .entry(id)
+            .or_default()
+            .content_type = essence;
+    }
+    pub fn document_write_error(&self, id: NodeId) -> Option<&'static str> {
+        let content_type = self.content_type(id);
+        if matches!(content_type.as_str(), "application/xml" | "text/xml")
+            || content_type.ends_with("+xml")
+        {
+            Some("InvalidStateError")
+        } else if self
+            .metadata
+            .borrow()
+            .get(&id)
+            .is_some_and(|metadata| metadata.inert_template)
+        {
+            Some("SecurityError")
+        } else {
+            None
+        }
     }
     pub(super) fn register(&self, node: Node) -> NodeId {
         let mut handles = self.handles.borrow_mut();
@@ -74,6 +148,22 @@ impl BrowserDocument {
     pub fn name(&self, id: NodeId) -> Result<String, DomError> {
         self.arena.name(self.token(id)?)
     }
+    pub fn doctype_public_id(&self, id: NodeId) -> Result<String, DomError> {
+        self.arena.doctype_public_id(self.token(id)?)
+    }
+    pub fn doctype_system_id(&self, id: NodeId) -> Result<String, DomError> {
+        self.arena.doctype_system_id(self.token(id)?)
+    }
+    pub fn compat_mode(&self, id: NodeId) -> Result<&'static str, DomError> {
+        Ok(if self.arena.document_quirks(self.token(id)?)? {
+            "BackCompat"
+        } else {
+            "CSS1Compat"
+        })
+    }
+    pub fn set_no_quirks(&self, id: NodeId) -> Result<(), DomError> {
+        self.arena.set_document_no_quirks(self.token(id)?)
+    }
     pub fn local_name(&self, id: NodeId) -> Result<String, DomError> {
         self.arena.local_name(self.token(id)?)
     }
@@ -91,6 +181,12 @@ impl BrowserDocument {
     }
     pub fn is_document_fragment(&self, id: NodeId) -> bool {
         self.kind(id).ok() == Some(11)
+    }
+    pub fn parser_form(&self, id: NodeId) -> Result<Option<NodeId>, DomError> {
+        Ok(self
+            .arena
+            .parser_form(self.token(id)?)?
+            .map(|node| self.register(node)))
     }
     pub fn parent(&self, id: NodeId) -> Result<Option<NodeId>, DomError> {
         Ok(self
@@ -129,6 +225,11 @@ impl BrowserDocument {
             Some(inert) => inert,
             None => {
                 let inert = self.create_document()?;
+                self.metadata
+                    .borrow_mut()
+                    .entry(inert)
+                    .or_default()
+                    .inert_template = true;
                 let mut owners = self.template_owners.borrow_mut();
                 owners.insert(owner, inert);
                 owners.insert(inert, inert);
@@ -184,12 +285,20 @@ impl BrowserDocument {
         self.owners.borrow_mut().insert(id, owner);
         Ok(id)
     }
-    pub fn create_text(&self, owner: NodeId, text: &str) -> Result<NodeId, DomError> {
+    pub fn create_text(
+        &self,
+        owner: NodeId,
+        text: impl Into<DomString>,
+    ) -> Result<NodeId, DomError> {
         let id = self.register(self.arena.create_text(text)?);
         self.owners.borrow_mut().insert(id, owner);
         Ok(id)
     }
-    pub fn create_comment(&self, owner: NodeId, text: &str) -> Result<NodeId, DomError> {
+    pub fn create_comment(
+        &self,
+        owner: NodeId,
+        text: impl Into<DomString>,
+    ) -> Result<NodeId, DomError> {
         let id = self.register(self.arena.create_comment(text)?);
         self.owners.borrow_mut().insert(id, owner);
         Ok(id)
@@ -202,6 +311,10 @@ impl BrowserDocument {
     pub fn clone_node(&self, id: NodeId, deep: bool, owner: NodeId) -> Result<NodeId, DomError> {
         if self.is_document(id) {
             let clone = self.create_document()?;
+            let metadata = self.metadata.borrow().get(&id).cloned().unwrap_or_default();
+            self.metadata.borrow_mut().insert(clone, metadata);
+            self.arena
+                .copy_document_mode(self.token(id)?, self.token(clone)?)?;
             if deep {
                 for child in self.children(id)? {
                     let child = self.clone_node(child, true, clone)?;
@@ -241,10 +354,10 @@ impl BrowserDocument {
         self.adopt_subtree(id, owner)?;
         self.arena.detach(self.token(id)?)
     }
-    pub fn text(&self, id: NodeId) -> Result<String, DomError> {
+    pub fn text(&self, id: NodeId) -> Result<DomString, DomError> {
         self.arena.text(self.token(id)?)
     }
-    pub fn set_text(&self, id: NodeId, text: &str) -> Result<(), DomError> {
+    pub fn set_text(&self, id: NodeId, text: impl Into<DomString>) -> Result<(), DomError> {
         // Preserve the owner of children that will be detached by replacement.
         for child in self.children(id)? {
             self.adopt_subtree(child, self.node_document(id).unwrap_or(0))?;
@@ -256,7 +369,7 @@ impl BrowserDocument {
         id: NodeId,
         ns: &str,
         name: &str,
-        value: &str,
+        value: impl Into<lexbor::DomString>,
     ) -> Result<(), DomError> {
         self.arena
             .set_attribute_ns(self.token(id)?, ns, name, value)
@@ -264,7 +377,7 @@ impl BrowserDocument {
     pub fn remove_attribute_ns(&self, id: NodeId, ns: &str, local: &str) -> Result<(), DomError> {
         self.arena.remove_attribute_ns(self.token(id)?, ns, local)
     }
-    pub fn attribute(&self, id: NodeId, name: &str) -> Option<String> {
+    pub fn attribute(&self, id: NodeId, name: &str) -> Option<lexbor::DomString> {
         self.arena
             .attribute(self.token(id).ok()?, name)
             .ok()
@@ -273,17 +386,25 @@ impl BrowserDocument {
     pub fn attributes(&self, id: NodeId) -> Result<Vec<lexbor::Attribute>, DomError> {
         self.arena.attributes(self.token(id)?)
     }
-    pub fn set_attribute(&self, id: NodeId, name: &str, value: &str) -> Result<(), DomError> {
+    pub fn set_attribute(
+        &self,
+        id: NodeId,
+        name: &str,
+        value: impl Into<lexbor::DomString>,
+    ) -> Result<(), DomError> {
         self.arena.set_attribute(self.token(id)?, name, value)
     }
     pub fn remove_attribute(&self, id: NodeId, name: &str) -> Result<(), DomError> {
         self.arena.remove_attribute(self.token(id)?, name)
     }
-    pub fn serialize(&self, id: NodeId, inner: bool) -> Result<String, DomError> {
+    pub fn serialize(&self, id: NodeId, inner: bool) -> Result<lexbor::DomString, DomError> {
         self.arena.serialize(self.token(id)?, inner)
     }
     pub fn outer_html(&self) -> String {
-        self.serialize(0, true).expect("serialize document")
+        self.serialize(0, true)
+            .expect("serialize document")
+            .to_string_lossy()
+            .into_owned()
     }
     pub fn set_inner_html(&self, id: NodeId, html: &str) -> Result<(), DomError> {
         let fragment = self.arena.fragment(self.token(id)?, html)?;
@@ -312,12 +433,12 @@ impl BrowserDocument {
         self.select(0, selector)
     }
     pub fn get_element_by_id(&self, id: &str) -> Option<NodeId> {
-        self.descendants(0)
-            .ok()?
-            .into_iter()
-            .find(|node| self.attribute(*node, "id").as_deref() == Some(id))
+        self.descendants(0).ok()?.into_iter().find(|node| {
+            self.attribute(*node, "id")
+                .is_some_and(|value| value.as_str() == Some(id))
+        })
     }
-    pub fn window_named_properties(&self) -> Vec<String> {
+    pub fn window_named_properties(&self) -> Vec<lexbor::DomString> {
         let mut names = HashSet::new();
         for id in self.descendants(0).unwrap_or_default() {
             for attribute in ["id", "name"] {
@@ -333,7 +454,7 @@ impl BrowserDocument {
     pub fn inline_style_declarations(&self, id: NodeId) -> Option<Vec<lexbor::Declaration>> {
         let css = self.attribute(id, "style").unwrap_or_default();
         let mut result: Vec<lexbor::Declaration> = Vec::new();
-        for declaration in lexbor::declarations(&css).ok()? {
+        for declaration in lexbor::declarations(&css.to_string_lossy()).ok()? {
             if let Some(existing) = result
                 .iter_mut()
                 .find(|(name, _, _)| *name == declaration.0)
@@ -358,7 +479,7 @@ impl BrowserDocument {
     }
     pub fn set_inline_style_css(&self, id: NodeId, css: &str) {
         if let Ok(declarations) = lexbor::declarations(css) {
-            let _ = self.set_attribute(id, "style", &serialize_declarations(&declarations));
+            let _ = self.set_attribute(id, "style", serialize_declarations(&declarations));
         }
     }
     pub fn set_style_property(&self, id: NodeId, name: &str, value: &str) {
@@ -374,12 +495,12 @@ impl BrowserDocument {
         } else {
             entries.extend(parsed);
         }
-        let _ = self.set_attribute(id, "style", &serialize_declarations(&entries));
+        let _ = self.set_attribute(id, "style", serialize_declarations(&entries));
     }
     pub fn remove_style_property(&self, id: NodeId, name: &str) {
         let mut entries = self.inline_style_declarations(id).unwrap_or_default();
         entries.retain(|(key, _, _)| key != name);
-        let _ = self.set_attribute(id, "style", &serialize_declarations(&entries));
+        let _ = self.set_attribute(id, "style", serialize_declarations(&entries));
     }
 }
 fn serialize_declarations(entries: &[lexbor::Declaration]) -> String {

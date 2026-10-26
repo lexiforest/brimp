@@ -1,0 +1,6238 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "interfaces": [
+    [
+      "head",
+      "HTMLHeadElement"
+    ],
+    [
+      "title",
+      "HTMLTitleElement"
+    ],
+    [
+      "meta",
+      "HTMLMetaElement"
+    ],
+    [
+      "div",
+      "HTMLDivElement"
+    ],
+    [
+      "html",
+      "HTMLHtmlElement"
+    ],
+    [
+      "li",
+      "HTMLLIElement"
+    ],
+    [
+      "span",
+      "HTMLSpanElement"
+    ],
+    [
+      "frameset",
+      "HTMLFrameSetElement"
+    ]
+  ],
+  "identity": [
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLHeadElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLHeadElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLHeadElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLTitleElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLTitleElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLTitleElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLMetaElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLMetaElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLMetaElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLDivElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLDivElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLDivElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLHtmlElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLHtmlElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLHtmlElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLLIElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLLIElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLLIElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLSpanElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLSpanElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLSpanElement]"
+      ],
+      "builtIn": "TypeError"
+    },
+    {
+      "autonomous": "TypeError",
+      "construction": [
+        "TypeError",
+        "TypeError",
+        "TypeError",
+        "TypeError"
+      ],
+      "registered": "ok",
+      "shape": [
+        "HTMLFrameSetElement",
+        0,
+        true,
+        true,
+        true,
+        true,
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          "HTMLFrameSetElement",
+          false,
+          false,
+          true
+        ],
+        "[object HTMLFrameSetElement]"
+      ],
+      "builtIn": "TypeError"
+    }
+  ],
+  "cases": [
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "name",
+      "attribute": "name",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "httpEquiv",
+      "attribute": "http-equiv",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "http-equiv",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "content",
+      "attribute": "content",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "content",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "media",
+      "attribute": "media",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "media",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "meta",
+      "property": "scheme",
+      "attribute": "scheme",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "scheme",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "div",
+      "property": "align",
+      "attribute": "align",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "align",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "html",
+      "property": "version",
+      "attribute": "version",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "version",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "type",
+      "attribute": "type",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "cols",
+      "attribute": "cols",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "cols",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "null",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "false",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "true",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "NaN",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "Infinity",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "string",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "frameset",
+      "property": "rows",
+      "attribute": "rows",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "before",
+        [
+          [
+            "attributes",
+            "rows",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        "undefined",
+        "before",
+        "undefined",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        "null",
+        "before",
+        "null",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        "false",
+        "before",
+        "false",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        "true",
+        "before",
+        "true",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "before",
+        "0",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        "0",
+        "before",
+        "0",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        "NaN",
+        "before",
+        "NaN",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        "Infinity",
+        "before",
+        "Infinity",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        null,
+        "1",
+        "before",
+        "1",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        "[object Object]",
+        "before",
+        "[object Object]",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        "string",
+        "before",
+        "string",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        "",
+        "before",
+        "",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            0,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        " Plain VALUE ",
+        "before",
+        " Plain VALUE ",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        "\u0000",
+        "before",
+        "\u0000",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "before",
+        "a\ud800b\udc00",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        "😀",
+        "before",
+        "😀",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "title",
+      "property": "text",
+      "attribute": "text",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        "a\r\nb",
+        "before",
+        "a\r\nb",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            2
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "({[Symbol.toPrimitive](hint){return hint}})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        0,
+        "before",
+        "before",
+        []
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\" Plain VALUE \"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"\\u0000\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"a\\ud800b\\udc00\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"😀\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"a\\r\\nb\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "2147483647",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        -2147483648,
+        "-2147483648",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        -2147483648,
+        "-2147483648",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-2147483649",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "4294967295",
+      "raw": false,
+      "expected": [
+        null,
+        -1,
+        "-1",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "4294967296",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "9007199254740991",
+      "raw": false,
+      "expected": [
+        null,
+        -1,
+        "-1",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "2.9",
+      "raw": false,
+      "expected": [
+        null,
+        2,
+        "2",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "-2.9",
+      "raw": false,
+      "expected": [
+        null,
+        -2,
+        "-2",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "({valueOf(){return 42}})",
+      "raw": false,
+      "expected": [
+        null,
+        42,
+        "42",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 7}})",
+      "raw": false,
+      "expected": [
+        null,
+        7,
+        "7",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"-0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"+0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+0",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"-1\"",
+      "raw": true,
+      "expected": [
+        null,
+        -1,
+        "-1",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"+2\"",
+      "raw": true,
+      "expected": [
+        null,
+        2,
+        "+2",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"  \\t\\n\\r\\f-3tail\"",
+      "raw": true,
+      "expected": [
+        null,
+        -3,
+        "  \t\n\r\f-3tail",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"\\u000b4\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "\u000b4",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\" 5\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        " 5",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"1.5\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1.5",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"2e3\"",
+      "raw": true,
+      "expected": [
+        null,
+        2,
+        "2e3",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"0xff\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0xff",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"--3\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "--3",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"+ 4\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+ 4",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"12px\"",
+      "raw": true,
+      "expected": [
+        null,
+        12,
+        "12px",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"2147483647\"",
+      "raw": true,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "2147483648",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"-2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        -2147483648,
+        "-2147483648",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"-2147483649\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-2147483649",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"4294967296\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967296",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"99999999999999999999999\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "99999999999999999999999",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"0000000000000000000001\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "0000000000000000000001",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"١\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "١",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "li",
+      "property": "value",
+      "attribute": "value",
+      "source": "\"３\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "３",
+        "before",
+        [
+          [
+            "attributes",
+            "value",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    }
+  ]
+}

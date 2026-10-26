@@ -3,6 +3,22 @@
 See [runtime diagnostics](../TRACING.md) for trace fields, coverage, JSONL and
 instrumentation effects. Both bindings expose the same owner-thread operations.
 
+For a complete script/function workflow, see the
+[script-debugging tutorial](../docs/src/content/docs/examples/debugging.md) and
+[runnable examples](../examples/harness/). `peek_diagnostics` / `peekDiagnostics`
+copies retained records, `summarize_diagnostics` / `summarizeDiagnostics` groups
+them by layer/path/operation and reflection target, and `take_diagnostics` /
+`takeDiagnostics` consumes the buffer. Each result includes enabled/filter/coverage
+metadata and loss counts. Summaries are sorted, omit volatile IDs/times, and cover
+only retained records; API and native observations are separate layers.
+
+Set `diagnostics: {mode: 'recursive'}` in Node or
+`diagnostics={"mode": "recursive"}` in Python to follow browser/environment objects
+recursively, including missing reads, writes, callbacks and reflection. The
+CLI uses `--trace-mode recursive`. Default `api` mode keeps descriptor tracing.
+Each report includes `coverage.mode` and limitations; recursive raw-reference
+escapes also emit coverage notes. See [mode boundaries](../TRACING.md#coverage).
+
 ```python
 from brimp import Session, plugins
 with Session(time_mode="logical", time_origin=1700000000000,

@@ -1,5 +1,6 @@
 """Run tutorial fences against a local fixture and the actual built bindings."""
 import importlib.util
+import json
 import os
 from pathlib import Path
 import re
@@ -22,6 +23,19 @@ EXPECTED = {
     'architecture/javascript-runtime.md': ['Hello from JavaScript', 'Hello from JavaScript', 'The previous realm is gone', '42'],
     'architecture/subsystems.md': ['32', 'storage', 'dark', '42'],
 }
+
+
+@pytest.mark.parametrize('runner,filename', [('node', 'run.mjs'), (sys.executable, 'run.py')])
+def test_script_debugging_example(runner, filename):
+    result = subprocess.run([runner, str(ROOT / 'examples/harness' / filename)],
+                            env=dict(os.environ, PYTHONPATH=str(ROOT / 'bindings/python/python')),
+                            text=True, capture_output=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    output = json.loads(result.stdout)
+    assert output['results'] == [dict(text='Hello Ada', calls=1, clicks=1, now=1005),
+                                 dict(text='Hello Grace', calls=2, clicks=1, now=1010)]
+    assert output['report']['coverage']['enabled'] is True
+    assert output['report']['dropped'] == 0
 
 def examples():
     for filename, expected in EXPECTED.items():

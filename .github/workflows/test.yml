@@ -133,6 +133,29 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
 
+  engine:
+    name: JSC deferred work (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Download pinned native SDKs
+        run: python scripts/prepare_native.py --target ${{ matrix.target }} --output .native/${{ matrix.target }}
+      - name: Test engine ownership and asynchronous WASM
+        run: cargo test --locked -p brimp-jsc --test runtime
+
   docs:
     name: Documentation
     runs-on: ubuntu-24.04

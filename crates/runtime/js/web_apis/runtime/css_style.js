@@ -28,13 +28,19 @@ function __requireWritableStyleDeclaration(declaration) {
 function __styleDeclarationProxy(target) {
     let proxy = __styleDeclarationProxies.get(target);
     if (proxy !== undefined) return proxy;
+    // Copy the legacy writable, empty-string property surface for names that
+    // Lexbor does not parse. These values do not participate in CSS declarations.
+    for (const name of __cssPlaceholderPropertyNames) {
+        Object.defineProperty(target, name, {value:'', writable:true, enumerable:true, configurable:true});
+    }
     proxy = new Proxy(target, {
         get(target, property, receiver) {
             if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
                 const name = CSSStyleDeclaration.prototype.item.call(receiver, Number(property));
                 return name === "" ? undefined : name;
             }
-            if (typeof property === "string" && !(property in target)) {
+            if (typeof property === "string" && !(property in target)
+                && __cssNativePropertyNames.has(__cssRulePropertyName(property))) {
                 return CSSStyleDeclaration.prototype.getPropertyValue.call(
                     receiver,
                     __cssRulePropertyName(property),
@@ -43,7 +49,8 @@ function __styleDeclarationProxy(target) {
             return Reflect.get(target, property, receiver);
         },
         set(target, property, value, receiver) {
-            if (typeof property === "string" && !(property in target)) {
+            if (typeof property === "string" && !(property in target)
+                && __cssNativePropertyNames.has(__cssRulePropertyName(property))) {
                 CSSStyleDeclaration.prototype.setProperty.call(
                     receiver,
                     __cssRulePropertyName(property),
@@ -59,7 +66,7 @@ function __styleDeclarationProxy(target) {
             if (/^(0|[1-9][0-9]*)$/.test(property)) {
                 return Number(property) < Reflect.get(target, "length", target);
             }
-            return __cssSupportsDeclaration(__cssRulePropertyName(property), "initial");
+            return __cssNativePropertyNames.has(__cssRulePropertyName(property));
         },
     });
     __styleDeclarations.add(target);
@@ -153,6 +160,8 @@ function __cssSupportsDeclaration(property, value) {
 }
 
 const CSS = {
+    // Legacy placeholder: no custom-property registry or cascade engine.
+    registerProperty() {},
     supports(propertyOrCondition, value = undefined) {
         if (arguments.length >= 2) return __cssSupportsDeclaration(propertyOrCondition, value);
         let condition = String(propertyOrCondition).trim();

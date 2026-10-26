@@ -20,8 +20,8 @@ fn exposes_elements_and_text_from_the_canonical_tree() {
         vec![by_id]
     );
     assert_eq!(document.local_name(by_id).unwrap(), "div");
-    assert_eq!(document.text(by_id).unwrap(), "Hello");
+    assert_eq!(document.text(by_id).unwrap(), "Hello".into());
     let text = document.children(by_id).unwrap()[0];
     assert_eq!(document.kind(text).unwrap(), 3);
-    assert_eq!(document.text(text).unwrap(), "Hello");
+    assert_eq!(document.text(text).unwrap(), "Hello".into());
 }

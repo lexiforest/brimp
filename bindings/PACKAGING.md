@@ -8,7 +8,7 @@ cargo build -p brimp-python -p brimp-node
 python3 bindings/prepare_local.py
 maturin build --locked --manifest-path bindings/python/Cargo.toml --out /tmp/brimp-wheels
 python3 bindings/package_native.py \
-  --wheel /tmp/brimp-wheels/brimp-0.1.1-cp310-abi3-macosx_11_0_arm64.whl \
+  --wheel /tmp/brimp-wheels/brimp-0.1.1-cp311-abi3-macosx_11_0_arm64.whl \
   --jsc ../WebKit/WebKitBuild/Release/JavaScriptCore.framework/JavaScriptCore \
   --curl /usr/local/lib/libcurl-impersonate.dylib \
   --notices ../WebKit/Source/JavaScriptCore \

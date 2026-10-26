@@ -1,0 +1,989 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "type": "text",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "text",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "image",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        [
+          "test.txt"
+        ],
+        true,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "file",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        [],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        [
+          "before.txt"
+        ],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        [
+          "test.txt"
+        ],
+        true,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "FILE",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        [],
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "number",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "null",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "undefined",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "string",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "object",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "array",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "fake",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "proxy",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "file",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "blob",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "symbol",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "poison",
+      "expected": [
+        "TypeError",
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "filelist",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    },
+    {
+      "type": "hidden",
+      "kind": "empty",
+      "expected": [
+        null,
+        0,
+        null,
+        false,
+        [],
+        0
+      ]
+    }
+  ]
+}

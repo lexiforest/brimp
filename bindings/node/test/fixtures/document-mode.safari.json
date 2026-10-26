@@ -1,0 +1,2430 @@
+{
+  "reference": "Installed Safari 27.0 (22625.1.29.11.27), captured 2026-10-26",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15",
+  "results": [
+    {
+      "id": "tag:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:upper:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "tag:body",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:body",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:html",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:html",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:head",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:head",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:title",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:title",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:script",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:script",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:style",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:style",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:svg",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:svg",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:math",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:math",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:table",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:table",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:tr",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:tr",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:td",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:td",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:img",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:img",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:hr",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:hr",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:meta",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:meta",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:link",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:link",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:textarea",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:textarea",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:form",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:form",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:fieldset",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:fieldset",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:section",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:section",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:header",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:header",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:main",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:main",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:nav",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:nav",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:article",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:article",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:h1",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:h1",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:em",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:em",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:u",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:u",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:s",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:s",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:small",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:small",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:pre",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:pre",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:code",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:code",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:dl",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:dl",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:dt",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:dt",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:dd",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:dd",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:datalist",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:datalist",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:optgroup",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:optgroup",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:video",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:video",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:audio",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:audio",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:canvas",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:canvas",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:template",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:template",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:x-custom",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "tag:upper:x-custom",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:a:a",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:a:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:a:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:a:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:b:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:b:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:button:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:button:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:div:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:div:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:div:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:footer:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:footer:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:i:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:i:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:li:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:div",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:footer",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:li:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:li:ol",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:p",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:li:ul",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:label:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:label:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:a",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:b",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:br",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:button",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:i",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:input",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:label",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:select",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:span",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:strong",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:option:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:a",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:b",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:br",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:button",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:i",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:input",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:ol:label",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:select",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:span",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:strong",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ol:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:p:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:p:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:a",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:b",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:br",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:button",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:i",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:input",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:label",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:option",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:select:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:select",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:span",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:strong",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:select:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:span:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:span:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:a",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:br",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:button",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:i",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:input",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:li",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:label",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:strong:select",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:span",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:strong",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:strong:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:a",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:b",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:br",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:button",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:div",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:footer",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:i",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:input",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:li",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "nest:ul:label",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:option",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:ol",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:p",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:select",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:span",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:strong",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "nest:ul:ul",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:id:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:id:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:id:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:id:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:class:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:class:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:class:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:class:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-x:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-x:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-x:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-x:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-X:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-X:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-X:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:data-X:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:onclick:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:onclick:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:onclick:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:onclick:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:ONCLICK:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:ONCLICK:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:ONCLICK:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:ONCLICK:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:on:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:on:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:on:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:on:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:one:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:one:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:one:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:one:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:on_:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:on_:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:on_:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:on_:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:is:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:is:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:is:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:is:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:dir:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:dir:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:dir:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:dir:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:style:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:style:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:style:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:style:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:type:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:type:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:type:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:type:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:disabled:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:disabled:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:disabled:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:disabled:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:0:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:0:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:0:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:0:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:_:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:_:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:_:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:_:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:-:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:-:=x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:-:='x'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:-:=\"&quot;x\r\ny\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute:x:y:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x:y:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x:y:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x:y:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x.y:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x.y:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x.y:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:x.y:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:é:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:é:=x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:é:='x'",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute:é:=\"&quot;x\r\ny\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x= x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x=x/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=x /",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x=x:y",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=a.b",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=&amp;",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=é",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=\"\"y=\"z\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x=\"a<b\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x=\"a>b\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x='a\"b'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x=\"a\" x=\"b\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:X=a x=b",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:a / ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:/ x",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-syntax:x='unterminated",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x==",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=`a`",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x=\"\u0000\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-syntax:x='&#0;'",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onclick:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onclick: ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onclick:/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onclick: /",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onclick:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onclick: = \"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onclick:=\"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onclick:=\"x\"/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onclick:\t",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onerror: ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onerror: /",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:onerror: = \"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:=\"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:=\"x\"/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:onerror:\t",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:on:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on: ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on:/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on: /",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on: = \"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on:=\"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on:=\"x\"/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:on:\t",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is: ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is: /",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is: = \"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:=\"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:=\"x\"/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:is:\t",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id: ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id: /",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:/ ",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id: = \"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:=\"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:=\"x\"/",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:id:\t",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "attribute-ending:data-λ:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ: ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ:/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ: /",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ:/ ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ: = \"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ:=\"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ:=\"x\"/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:data-λ:\t",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é: ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é: /",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:/ ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é: = \"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:=\"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:=\"x\"/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:é:\t",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y: ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y: /",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:/ ",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y: = \"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:=\"x\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:=\"x\"/",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "attribute-ending:x:y:\t",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\" \"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"\\t\\r\\n\\f\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"x\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"é\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"😀\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"a\\r\\nb\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"\\u0000\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"&#0;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&amp;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&bogus;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&notit;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&lt;div&gt;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&#x1F600;\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"&\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"</div>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<div>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<div/>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<div/></div>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<br/>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<br / >\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<input x=y/>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<input x=>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<p>x</P>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<DIV>x</div>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<div>x</div >\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<div>x</div/>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<div>x</div x>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<div>x</ div>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<p><div>x</div></p>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<li><ul><li>x</li></ul></li>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<ul><li><li>x</li></li></ul>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<a><div><a>x</a></div></a>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<p><a><div>x</div></a></p>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<ul>x<li>y</li></ul>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<select>x<option>y</option></select>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<!--x--><p>x</p>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<?xml x?>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<!doctype html>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<!doctype potato>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "literal:\"<!doctype html><p>x</p>\"",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "literal:\"<html><body>x</body></html>\"",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:ascii:65535",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:entities:65535",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:crlf:65535",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:utf16:65535",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:whitespace:65535",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:ascii:65536",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:entities:65536",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:crlf:65536",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:utf16:65536",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:whitespace:65536",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "text-limit:ascii:65537",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:entities:65537",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:crlf:65537",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:utf16:65537",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "text-limit:whitespace:65537",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "depth:510",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "depth:511",
+      "compatMode": "CSS1Compat"
+    },
+    {
+      "id": "depth:512",
+      "compatMode": "BackCompat"
+    },
+    {
+      "id": "depth:513",
+      "compatMode": "BackCompat"
+    }
+  ]
+}

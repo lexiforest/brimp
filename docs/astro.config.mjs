@@ -31,6 +31,7 @@ export default defineConfig({
             { label: 'CLI', slug: 'examples/cli' },
             { label: 'Extract, intercept and stream', slug: 'examples/fetch' },
             { label: 'CLI workflows', slug: 'examples/cli-workflows' },
+            { label: 'Debug page scripts', slug: 'examples/debugging' },
           ],
         },
         {

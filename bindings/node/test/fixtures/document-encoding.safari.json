@@ -1,0 +1,6998 @@
+[
+  {
+    "id": "unlabelled",
+    "head": "",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "unlabelled UTF-8 bytes",
+    "head": "",
+    "header": "text/html",
+    "textHex": "c3a9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "Ã©",
+      "during": "windows-1252",
+      "script": "Ã©"
+    }
+  },
+  {
+    "id": "header utf-8",
+    "head": "",
+    "header": "text/html; charset=utf-8",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "meta utf-8",
+    "head": "<meta charset=\"utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header iso-8859-1",
+    "head": "",
+    "header": "text/html; charset=iso-8859-1",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "meta iso-8859-1",
+    "head": "<meta charset=\"iso-8859-1\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header windows-1252",
+    "head": "",
+    "header": "text/html; charset=windows-1252",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "meta windows-1252",
+    "head": "<meta charset=\"windows-1252\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header utf-16",
+    "head": "",
+    "header": "text/html; charset=utf-16",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "clones": [
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ],
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "aliases": [
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "canonical": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "text": null,
+      "during": null,
+      "script": null
+    }
+  },
+  {
+    "id": "meta utf-16",
+    "head": "<meta charset=\"utf-16\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header utf-16be",
+    "head": "",
+    "header": "text/html; charset=utf-16be",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "clones": [
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ],
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "aliases": [
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "canonical": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "text": null,
+      "during": null,
+      "script": null
+    }
+  },
+  {
+    "id": "meta utf-16be",
+    "head": "<meta charset=\"utf-16be\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header x-user-defined",
+    "head": "",
+    "header": "text/html; charset=x-user-defined",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "x-user-defined",
+        "x-user-defined",
+        "x-user-defined"
+      ],
+      "clones": [
+        [
+          "x-user-defined",
+          "x-user-defined",
+          "x-user-defined"
+        ],
+        [
+          "x-user-defined",
+          "x-user-defined",
+          "x-user-defined"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "x-user-defined",
+        "x-user-defined",
+        "x-user-defined"
+      ],
+      "aliases": [
+        "x-user-defined",
+        "x-user-defined"
+      ],
+      "canonical": [
+        "x-user-defined",
+        "x-user-defined",
+        "x-user-defined"
+      ],
+      "text": "",
+      "during": "x-user-defined",
+      "script": ""
+    }
+  },
+  {
+    "id": "meta x-user-defined",
+    "head": "<meta charset=\"x-user-defined\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header replacement",
+    "head": "",
+    "header": "text/html; charset=replacement",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "clones": [
+        [
+          "replacement",
+          "replacement",
+          "replacement"
+        ],
+        [
+          "replacement",
+          "replacement",
+          "replacement"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "aliases": [
+        "replacement",
+        "replacement"
+      ],
+      "canonical": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "text": null,
+      "during": null,
+      "script": null
+    }
+  },
+  {
+    "id": "meta replacement",
+    "head": "<meta charset=\"replacement\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "clones": [
+        [
+          "replacement",
+          "replacement",
+          "replacement"
+        ],
+        [
+          "replacement",
+          "replacement",
+          "replacement"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "aliases": [
+        "replacement",
+        "replacement"
+      ],
+      "canonical": [
+        "replacement",
+        "replacement",
+        "replacement"
+      ],
+      "text": null,
+      "during": null,
+      "script": null
+    }
+  },
+  {
+    "id": "header bogus",
+    "head": "",
+    "header": "text/html; charset=bogus",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "meta bogus",
+    "head": "<meta charset=\"bogus\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header ascii",
+    "head": "",
+    "header": "text/html; charset=ascii",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "meta ascii",
+    "head": "<meta charset=\"ascii\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header Big5",
+    "head": "",
+    "header": "text/html; charset=Big5",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "clones": [
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ],
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "aliases": [
+        "Big5",
+        "Big5"
+      ],
+      "canonical": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "text": "�",
+      "during": "Big5",
+      "script": "�"
+    }
+  },
+  {
+    "id": "meta Big5",
+    "head": "<meta charset=\"Big5\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "clones": [
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ],
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "aliases": [
+        "Big5",
+        "Big5"
+      ],
+      "canonical": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "text": "�",
+      "during": "Big5",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header ISO-2022-JP",
+    "head": "",
+    "header": "text/html; charset=ISO-2022-JP",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "clones": [
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ],
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "aliases": [
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "canonical": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "text": "�",
+      "during": "ISO-2022-JP",
+      "script": "�"
+    }
+  },
+  {
+    "id": "meta ISO-2022-JP",
+    "head": "<meta charset=\"ISO-2022-JP\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "clones": [
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ],
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "aliases": [
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "canonical": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "text": "�",
+      "during": "ISO-2022-JP",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header Shift_JIS",
+    "head": "",
+    "header": "text/html; charset=Shift_JIS",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "clones": [
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ],
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "aliases": [
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "canonical": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "text": "�",
+      "during": "Shift_JIS",
+      "script": "�"
+    }
+  },
+  {
+    "id": "meta Shift_JIS",
+    "head": "<meta charset=\"Shift_JIS\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "clones": [
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ],
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "aliases": [
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "canonical": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "text": "�",
+      "during": "Shift_JIS",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header EUC-KR",
+    "head": "",
+    "header": "text/html; charset=EUC-KR",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "clones": [
+        [
+          "EUC-KR",
+          "EUC-KR",
+          "EUC-KR"
+        ],
+        [
+          "EUC-KR",
+          "EUC-KR",
+          "EUC-KR"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "aliases": [
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "canonical": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "text": "�",
+      "during": "EUC-KR",
+      "script": "�"
+    }
+  },
+  {
+    "id": "meta EUC-KR",
+    "head": "<meta charset=\"EUC-KR\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "clones": [
+        [
+          "EUC-KR",
+          "EUC-KR",
+          "EUC-KR"
+        ],
+        [
+          "EUC-KR",
+          "EUC-KR",
+          "EUC-KR"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "aliases": [
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "canonical": [
+        "EUC-KR",
+        "EUC-KR",
+        "EUC-KR"
+      ],
+      "text": "�",
+      "during": "EUC-KR",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header precedence text/html; charset=\" UTF-8 \"",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; charset=\" UTF-8 \"",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header precedence text/html; CHARSET=\"utf-8\"",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; CHARSET=\"utf-8\"",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header precedence text/html; charset=bogus",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; charset=bogus",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header precedence text/html; charset=windows-1252; charset=utf-8",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; charset=windows-1252; charset=utf-8",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header precedence text/html; charset=\"\"; charset=utf-8",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; charset=\"\"; charset=utf-8",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "header precedence text/html; foo=\"x;charset=windows-1252\"; charset=utf-8",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html; foo=\"x;charset=windows-1252\"; charset=utf-8",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "nested script",
+    "head": "<script><meta charset=utf-8></script>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested style",
+    "head": "<style><meta charset=utf-8></style>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested title",
+    "head": "<title><meta charset=utf-8></title>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested textarea",
+    "head": "<textarea><meta charset=utf-8></textarea>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested noscript",
+    "head": "<noscript><meta charset=utf-8></noscript>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "nested template",
+    "head": "<template><meta charset=utf-8></template>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "nested svg",
+    "head": "<svg><meta charset=utf-8></svg>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "nested xmp",
+    "head": "<xmp><meta charset=utf-8></xmp>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested iframe",
+    "head": "<iframe><meta charset=utf-8></iframe>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested noembed",
+    "head": "<noembed><meta charset=utf-8></noembed>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "nested noframes",
+    "head": "<noframes><meta charset=utf-8></noframes>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <!-- 990",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <!-- 1000",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <!-- 1010",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <!-- 1024",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <!-- 1100",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <!-- 5000",
+    "head": "<!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        --><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 990",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 1000",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 1010",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 1024",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 1100",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <head> 5000",
+    "head": "<head>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <body> 990",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <body> 1000",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <body> 1010",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body> 1024",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body> 1100",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body> 5000",
+    "head": "<body>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body><p> 990",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "scan <body><p> 1000",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body><p> 1010",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body><p> 1024",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body><p> 1100",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "scan <body><p> 5000",
+    "head": "<body><p>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <meta charset=bogus><meta charset=utf-8>",
+    "head": "<meta charset=bogus><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta charset=\"utf&#45;8\">",
+    "head": "<meta charset=\"utf&#45;8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta charset=bogus charset=utf-8>",
+    "head": "<meta charset=bogus charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <meta charset=utf-8 charset=bogus>",
+    "head": "<meta charset=utf-8 charset=bogus>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta http-equiv=content-type content=\"text/html; charset=utf-8\">",
+    "head": "<meta http-equiv=content-type content=\"text/html; charset=utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta content=\"text/html; charset=utf-8\" http-equiv=CONTENT-TYPE>",
+    "head": "<meta content=\"text/html; charset=utf-8\" http-equiv=CONTENT-TYPE>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta content=\"text/html; charset=utf-8\">",
+    "head": "<meta content=\"text/html; charset=utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <meta http-equiv=\" content-type \" content=\"text/html; charset=utf-8\">",
+    "head": "<meta http-equiv=\" content-type \" content=\"text/html; charset=utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <meta charset=bogus http-equiv=content-type content=\"text/html; charset=utf-8\">",
+    "head": "<meta charset=bogus http-equiv=content-type content=\"text/html; charset=utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <meta content=\"text/html; charset=windows-1252\" http-equiv=content-type charset=utf-8>",
+    "head": "<meta content=\"text/html; charset=windows-1252\" http-equiv=content-type charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta http-equiv=content-type content=\"charset='utf-8'\">",
+    "head": "<meta http-equiv=content-type content=\"charset='utf-8'\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta http-equiv=content-type content=\"xcharset = utf-8; other=x\">",
+    "head": "<meta http-equiv=content-type content=\"xcharset = utf-8; other=x\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <meta http-equiv=content-type content=\"charset=bogus; charset=utf-8\">",
+    "head": "<meta http-equiv=content-type content=\"charset=bogus; charset=utf-8\">",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é",
+      "during": "windows-1252",
+      "script": "é"
+    }
+  },
+  {
+    "id": "markup <!--<meta charset=windows-1252>--><meta charset=utf-8>",
+    "head": "<!--<meta charset=windows-1252>--><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <script>\"<meta charset=windows-1252>\"</script><meta charset=utf-8>",
+    "head": "<script>\"<meta charset=windows-1252>\"</script><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "markup <div data-meta=\"<meta charset=windows-1252>\"></div><meta charset=utf-8>",
+    "head": "<div data-meta=\"<meta charset=windows-1252>\"></div><meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "e9",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "�",
+      "during": "UTF-8",
+      "script": "�"
+    }
+  },
+  {
+    "id": "decoded header windows-1252",
+    "head": "",
+    "header": "text/html; charset=windows-1252",
+    "textHex": "e980",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é€",
+      "during": "windows-1252",
+      "script": "é€"
+    }
+  },
+  {
+    "id": "decoded meta windows-1252",
+    "head": "<meta charset=windows-1252>",
+    "header": "text/html",
+    "textHex": "e980",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "clones": [
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ],
+        [
+          "windows-1252",
+          "windows-1252",
+          "windows-1252"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "aliases": [
+        "windows-1252",
+        "windows-1252"
+      ],
+      "canonical": [
+        "windows-1252",
+        "windows-1252",
+        "windows-1252"
+      ],
+      "text": "é€",
+      "during": "windows-1252",
+      "script": "é€"
+    }
+  },
+  {
+    "id": "decoded header Big5",
+    "head": "",
+    "header": "text/html; charset=Big5",
+    "textHex": "a4a4a4e5",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "clones": [
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ],
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "aliases": [
+        "Big5",
+        "Big5"
+      ],
+      "canonical": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "text": "中文",
+      "during": "Big5",
+      "script": "中文"
+    }
+  },
+  {
+    "id": "decoded meta Big5",
+    "head": "<meta charset=Big5>",
+    "header": "text/html",
+    "textHex": "a4a4a4e5",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "clones": [
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ],
+        [
+          "Big5",
+          "Big5",
+          "Big5"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "aliases": [
+        "Big5",
+        "Big5"
+      ],
+      "canonical": [
+        "Big5",
+        "Big5",
+        "Big5"
+      ],
+      "text": "中文",
+      "during": "Big5",
+      "script": "中文"
+    }
+  },
+  {
+    "id": "decoded header Shift_JIS",
+    "head": "",
+    "header": "text/html; charset=Shift_JIS",
+    "textHex": "93fa967b",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "clones": [
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ],
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "aliases": [
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "canonical": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "text": "日本",
+      "during": "Shift_JIS",
+      "script": "日本"
+    }
+  },
+  {
+    "id": "decoded meta Shift_JIS",
+    "head": "<meta charset=Shift_JIS>",
+    "header": "text/html",
+    "textHex": "93fa967b",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "clones": [
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ],
+        [
+          "Shift_JIS",
+          "Shift_JIS",
+          "Shift_JIS"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "aliases": [
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "canonical": [
+        "Shift_JIS",
+        "Shift_JIS",
+        "Shift_JIS"
+      ],
+      "text": "日本",
+      "during": "Shift_JIS",
+      "script": "日本"
+    }
+  },
+  {
+    "id": "decoded header ISO-2022-JP",
+    "head": "",
+    "header": "text/html; charset=ISO-2022-JP",
+    "textHex": "1b2442467c4b5c1b2842",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "clones": [
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ],
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "aliases": [
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "canonical": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "text": "日本",
+      "during": "ISO-2022-JP",
+      "script": "日本"
+    }
+  },
+  {
+    "id": "decoded meta ISO-2022-JP",
+    "head": "<meta charset=ISO-2022-JP>",
+    "header": "text/html",
+    "textHex": "1b2442467c4b5c1b2842",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "clones": [
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ],
+        [
+          "ISO-2022-JP",
+          "ISO-2022-JP",
+          "ISO-2022-JP"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "aliases": [
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "canonical": [
+        "ISO-2022-JP",
+        "ISO-2022-JP",
+        "ISO-2022-JP"
+      ],
+      "text": "日本",
+      "during": "ISO-2022-JP",
+      "script": "日本"
+    }
+  },
+  {
+    "id": "decoded header utf-8",
+    "head": "",
+    "header": "text/html; charset=utf-8",
+    "textHex": "c3a9e29883f09fa680",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "é☃🦀",
+      "during": "UTF-8",
+      "script": "é☃🦀"
+    }
+  },
+  {
+    "id": "decoded meta utf-8",
+    "head": "<meta charset=utf-8>",
+    "header": "text/html",
+    "textHex": "c3a9e29883f09fa680",
+    "wire": "latin1",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "é☃🦀",
+      "during": "UTF-8",
+      "script": "é☃🦀"
+    }
+  },
+  {
+    "id": "BOM utf8 text/html",
+    "head": "<meta charset=Big5>",
+    "header": "text/html",
+    "textHex": "c3a9",
+    "wire": "utf8",
+    "bom": "efbbbf",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "é",
+      "during": "UTF-8",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf8 text/html; charset=windows-1252",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=windows-1252",
+    "textHex": "c3a9",
+    "wire": "utf8",
+    "bom": "efbbbf",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "é",
+      "during": "UTF-8",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf8 text/html; charset=utf-8",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=utf-8",
+    "textHex": "c3a9",
+    "wire": "utf8",
+    "bom": "efbbbf",
+    "expected": {
+      "before": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "clones": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "aliases": [
+        "UTF-8",
+        "UTF-8"
+      ],
+      "canonical": [
+        "UTF-8",
+        "UTF-8",
+        "UTF-8"
+      ],
+      "text": "é",
+      "during": "UTF-8",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16le text/html",
+    "head": "<meta charset=Big5>",
+    "header": "text/html",
+    "textHex": "e900",
+    "wire": "utf16le",
+    "bom": "fffe",
+    "expected": {
+      "before": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "clones": [
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ],
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "aliases": [
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "canonical": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "text": "é",
+      "during": "UTF-16LE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16le text/html; charset=windows-1252",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=windows-1252",
+    "textHex": "e900",
+    "wire": "utf16le",
+    "bom": "fffe",
+    "expected": {
+      "before": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "clones": [
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ],
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "aliases": [
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "canonical": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "text": "é",
+      "during": "UTF-16LE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16le text/html; charset=utf-8",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=utf-8",
+    "textHex": "e900",
+    "wire": "utf16le",
+    "bom": "fffe",
+    "expected": {
+      "before": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "clones": [
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ],
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "aliases": [
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "canonical": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "text": "é",
+      "during": "UTF-16LE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16be text/html",
+    "head": "<meta charset=Big5>",
+    "header": "text/html",
+    "textHex": "00e9",
+    "wire": "utf16be",
+    "bom": "feff",
+    "expected": {
+      "before": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "clones": [
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ],
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "aliases": [
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "canonical": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "text": "é",
+      "during": "UTF-16BE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16be text/html; charset=windows-1252",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=windows-1252",
+    "textHex": "00e9",
+    "wire": "utf16be",
+    "bom": "feff",
+    "expected": {
+      "before": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "clones": [
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ],
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "aliases": [
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "canonical": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "text": "é",
+      "during": "UTF-16BE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "BOM utf16be text/html; charset=utf-8",
+    "head": "<meta charset=Big5>",
+    "header": "text/html; charset=utf-8",
+    "textHex": "00e9",
+    "wire": "utf16be",
+    "bom": "feff",
+    "expected": {
+      "before": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "clones": [
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ],
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "aliases": [
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "canonical": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "text": "é",
+      "during": "UTF-16BE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header utf16le real bytes",
+    "head": "",
+    "header": "text/html; charset=UTF-16LE",
+    "textHex": "e900",
+    "wire": "utf16le",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "clones": [
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ],
+        [
+          "UTF-16LE",
+          "UTF-16LE",
+          "UTF-16LE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "aliases": [
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "canonical": [
+        "UTF-16LE",
+        "UTF-16LE",
+        "UTF-16LE"
+      ],
+      "text": "é",
+      "during": "UTF-16LE",
+      "script": "é"
+    }
+  },
+  {
+    "id": "header utf16be real bytes",
+    "head": "",
+    "header": "text/html; charset=UTF-16BE",
+    "textHex": "00e9",
+    "wire": "utf16be",
+    "bom": "",
+    "expected": {
+      "before": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "clones": [
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ],
+        [
+          "UTF-16BE",
+          "UTF-16BE",
+          "UTF-16BE"
+        ]
+      ],
+      "created": [
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ],
+        [
+          "UTF-8",
+          "UTF-8",
+          "UTF-8"
+        ]
+      ],
+      "after": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "aliases": [
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "canonical": [
+        "UTF-16BE",
+        "UTF-16BE",
+        "UTF-16BE"
+      ],
+      "text": "é",
+      "during": "UTF-16BE",
+      "script": "é"
+    }
+  }
+]

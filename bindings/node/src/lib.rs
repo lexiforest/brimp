@@ -151,6 +151,16 @@ impl NativePageBinding {
         let page = self.inner.clone();
         blocking(move || page.take_diagnostics()).await
     }
+    #[napi]
+    pub async fn peek_diagnostics(&self) -> Result<Value> {
+        let page = self.inner.clone();
+        blocking(move || page.peek_diagnostics()).await
+    }
+    #[napi]
+    pub async fn summarize_diagnostics(&self) -> Result<Value> {
+        let page = self.inner.clone();
+        blocking(move || page.summarize_diagnostics()).await
+    }
 
     #[napi]
     pub async fn set_identity(&self, identity: Value) -> Result<()> {
@@ -293,9 +303,13 @@ impl NativePageBinding {
         .await
     }
     #[napi]
-    pub async fn evaluate(&self, source: String) -> Result<Value> {
+    pub async fn evaluate(&self, source: String) -> Result<String> {
         let page = self.inner.clone();
-        blocking(move || page.evaluate(&source)).await
+        blocking(move || {
+            serde_json::to_string(&page.evaluate_handle(&source)?.value()?)
+                .map_err(|e| AutomationError::Internal(e.to_string()))
+        })
+        .await
     }
     #[napi]
     pub async fn evaluate_handle(&self, source: String) -> Result<NativeHandle> {
@@ -419,29 +433,27 @@ impl NativeHandle {
     }
 
     #[napi]
-    pub async fn json_value(&self) -> Result<Value> {
-        let handle = self.inner.clone();
-        blocking(move || handle.json_value()).await
-    }
-    #[napi]
-    pub async fn call(&self, source: String, arguments: Vec<Value>) -> Result<NativeHandle> {
+    pub async fn command(&self, command: String) -> Result<String> {
+        let command =
+            serde_json::from_str(&command).map_err(|e| Error::from_reason(e.to_string()))?;
         let handle = self.inner.clone();
         blocking(move || {
-            handle
-                .call(&source, arguments)
-                .map(|inner| NativeHandle { inner })
+            serde_json::to_string(&handle.bridge_command(command)?)
+                .map_err(|e| AutomationError::Internal(e.to_string()))
         })
         .await
     }
     #[napi]
-    pub async fn property(&self, name: String) -> Result<NativeHandle> {
-        let handle = self.inner.clone();
-        blocking(move || handle.property(&name).map(|inner| NativeHandle { inner })).await
+    pub fn reference(&self) -> Result<String> {
+        serde_json::to_string(&self.inner.reference().map_err(error)?)
+            .map_err(|e| Error::from_reason(e.to_string()))
     }
     #[napi]
-    pub async fn property_names(&self) -> Result<Vec<String>> {
-        let handle = self.inner.clone();
-        blocking(move || handle.property_names()).await
+    pub fn bind_reference(&self, token: String) -> Result<NativeHandle> {
+        let token = serde_json::from_str(&token).map_err(|e| Error::from_reason(e.to_string()))?;
+        Ok(NativeHandle {
+            inner: self.inner.peer_handle(token),
+        })
     }
     #[napi]
     pub async fn query_selector(&self, selector: String) -> Result<Option<NativeHandle>> {

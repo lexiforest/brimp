@@ -478,14 +478,15 @@ fn run_page(
         }
     };
     let _ = ready.send(Ok(page.id()));
-    let mut native_values = super::native::NativeValues::default();
     loop {
-        native_values.synchronize(&page);
         let command = match commands.try_recv() {
             Ok(command) => command,
             Err(mpsc::TryRecvError::Empty) => {
                 let _ = page.run_pending_tasks();
                 runtime.block_on(page.process_dynamic_scripts());
+                if page.advance_bridge_timer() {
+                    continue;
+                }
                 page.wait_for_work(None);
                 continue;
             }
@@ -504,7 +505,9 @@ fn run_page(
                 let started = Instant::now();
                 page.set_script_execution_deadline(timeout);
                 let result = page.check_operation().and_then(|()| {
-                    native_values.execute(&mut page, operation, timeout, &closed, &interrupt, epoch)
+                    super::native::execute_operation(
+                        &mut page, operation, timeout, &closed, &interrupt, epoch,
+                    )
                 });
                 page.clear_script_execution_deadline();
                 let result = page.check_operation().and_then(|()| {

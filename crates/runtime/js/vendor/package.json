@@ -10,6 +10,10 @@
     "esbuild": "0.28.2",
     "fake-indexeddb": "6.2.6",
     "web-streams-polyfill": "4.3.0",
-    "xpath": "0.0.35"
+    "xpath": "0.0.35",
+    "@csstools/css-color-parser": "4.2.6",
+    "@csstools/css-parser-algorithms": "4.0.2",
+    "@csstools/css-tokenizer": "4.0.2",
+    "@csstools/color-helpers": "6.1.2"
   }
 }

@@ -2,11 +2,9 @@
 // Installs deterministic API-shape emulation from a fully resolved persona.
 // Rendering, media processing, device access, and network services stay native
 // or absent; this module only owns values that can be represented in JavaScript.
-function installOptional(persona) {
+function installOptional(navigatorValues) {
     "use strict";
 
-    const navigatorValues = persona.navigator;
-    const network = persona.base_headers;
     const markBuiltin = () => {};
     const markNative = (fn, name = undefined) => {
         if (typeof fn === "function") {
@@ -110,49 +108,6 @@ function installOptional(persona) {
     }
     defineNavigatorValue("connection", new NetworkInformation(constructToken));
 
-    const parseBrands = header => {
-        const result = [];
-        const pattern = /"([^"]+)";v="([^"]+)"/g;
-        for (let match; (match = pattern.exec(header)) !== null;) {
-            result.push(Object.freeze({ brand: match[1], version: match[2] }));
-        }
-        return Object.freeze(result);
-    };
-    const unquote = value => value.replace(/^"|"$/g, "");
-    if (network.sec_ch_ua) {
-        const brands = parseBrands(network.sec_ch_ua);
-        const fullVersionList = parseBrands(network.sec_ch_ua_full_version_list);
-        class NavigatorUAData {
-            constructor(...args) {
-                if (args[0] !== constructToken) throw new TypeError("Illegal constructor");
-            }
-            get brands() { return brands; }
-            get mobile() { return network.sec_ch_ua_mobile === "?1"; }
-            get platform() { return unquote(network.sec_ch_ua_platform); }
-            getHighEntropyValues(hints) {
-                const values = {
-                    architecture: unquote(network.sec_ch_ua_arch),
-                    bitness: unquote(network.sec_ch_ua_bitness),
-                    model: unquote(network.sec_ch_ua_model),
-                    platformVersion: unquote(network.sec_ch_ua_platform_version),
-                    uaFullVersion: unquote(network.sec_ch_ua_full_version),
-                    fullVersionList,
-                    wow64: false,
-                };
-                const selected = this.toJSON();
-                for (const hint of hints) {
-                    if (Object.hasOwn(values, hint)) selected[hint] = values[hint];
-                }
-                return Promise.resolve(selected);
-            }
-            toJSON() {
-                return { brands, mobile: this.mobile, platform: this.platform };
-            }
-        }
-        defineGlobalConstructor("NavigatorUAData", NavigatorUAData);
-        defineNavigatorValue("userAgentData", new NavigatorUAData(constructToken));
-    }
-
     const arrayData = new WeakMap();
     class MimeType {
         constructor() { throw new TypeError("Illegal constructor"); }
@@ -227,6 +182,7 @@ function installOptional(persona) {
             names: mimeNames,
         });
         mimeEntries.forEach((item, index) => defineValue(plugin, index, item));
+        for (const [name, item] of Object.entries(mimeNames)) defineValue(plugin, name, item, false);
         pluginByName[pluginConfig.name] = plugin;
         return plugin;
     });
@@ -255,9 +211,9 @@ function installOptional(persona) {
         defineGlobalConstructor("Notification", Notification);
     }
 
-    if (navigatorValues.permissions_enabled) {
-        const permissions = Object.freeze({
-            query(descriptor) {
+    class Permissions {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        query(descriptor) {
                 const state = descriptor && descriptor.name === "notifications"
                     ? (navigatorValues.notification_permission === "default" ? "prompt" : navigatorValues.notification_permission)
                     : "prompt";
@@ -267,9 +223,11 @@ function installOptional(persona) {
                     addEventListener() {},
                     removeEventListener() {},
                 }));
-            },
-        });
-        defineNavigatorValue("permissions", permissions);
+        }
+    }
+    defineGlobalConstructor('Permissions', Permissions);
+    if (navigatorValues.permissions_enabled) {
+        defineNavigatorValue("permissions", new Permissions(constructToken));
     } else {
         delete Navigator.prototype.permissions;
     }
@@ -282,20 +240,186 @@ function installOptional(persona) {
         delete Navigator.prototype.bluetooth;
     }
 
+    class MediaDevices extends EventTarget {
+        constructor(token) {
+            super();
+            if (token !== constructToken) throw new TypeError('Illegal constructor');
+            this.ondevicechange = null;
+        }
+        enumerateDevices() { return Promise.resolve([]); }
+        getSupportedConstraints() { return Object.freeze({}); }
+        getUserMedia() {}
+        getDisplayMedia() {}
+    }
+    defineGlobalConstructor('MediaDevices', MediaDevices);
     if (navigatorValues.media_devices_enabled) {
-        defineNavigatorValue("mediaDevices", Object.freeze({
-            enumerateDevices: () => Promise.resolve([]),
-            getSupportedConstraints: () => Object.freeze({}),
-        }));
+        defineNavigatorValue("mediaDevices", new MediaDevices(constructToken));
     } else {
         delete Navigator.prototype.mediaDevices;
     }
 
+    // Legacy media call coverage without tracks, capture, buffering or decoding.
+    class MediaStream extends EventTarget {
+        #id = crypto.randomUUID();
+        get id() { return this.#id; }
+        get active() { return false; }
+        addTrack() {}
+        removeTrack() {}
+        clone() {}
+        getAudioTracks() {}
+        getVideoTracks() {}
+        getTracks() {}
+        getTrackById() {}
+    }
+    class SourceBuffer extends EventTarget {
+        constructor() { super(); throw new TypeError('Illegal constructor'); }
+        abort() {}
+        appendBuffer() {}
+        changeType() {}
+        remove() {}
+        get buffered() { return ''; }
+        get updating() { return ''; }
+    }
+    for (const name of ['appendWindowEnd', 'appendWindowStart', 'mode', 'timestampOffset']) {
+        const values = new WeakMap();
+        Object.defineProperty(SourceBuffer.prototype, name, {
+            get() { return values.get(this) ?? ''; },
+            set(value) { values.set(this, String(value)); },
+            enumerable: true, configurable: true,
+        });
+    }
+    for (const [constructor, names] of [[MediaStream, ['addtrack', 'removetrack']],
+        [SourceBuffer, ['abort', 'error', 'update', 'updateend', 'updatestart']]]) {
+        for (const type of names) {
+            const handlers = new WeakMap();
+            Object.defineProperty(constructor.prototype, 'on' + type, {
+                get() { return handlers.get(this) ?? null; },
+                set(value) { handlers.set(this, typeof value === 'function' ? value : null); },
+                enumerable: true, configurable: true,
+            });
+        }
+        defineGlobalConstructor(constructor.name, constructor);
+    }
+
+    // Heavy service families retain the legacy ignored-result contracts.
+    class Worker extends EventTarget {
+        constructor(url) { super(); this.onmessage = this.onerror = null; }
+        postMessage() {}
+        terminate() {}
+    }
+    // No inline-code execution, fetch, thread or worker scope is started here.
+    defineGlobalConstructor('Worker', Worker);
+    class TrustedTypePolicyFactory {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        createPolicy() {}
+        getAttributeType() {}
+        getPropertyType() {}
+        isHTML() {}
+        isScript() {}
+        isScriptURL() {}
+        get defaultPolicy() { return null; }
+        get emptyHTML() { return ''; }
+        get emptyScript() { return ''; }
+    }
+    defineGlobalConstructor('TrustedTypePolicyFactory', TrustedTypePolicyFactory);
+    defineValue(globalThis, 'trustedTypes', new TrustedTypePolicyFactory(constructToken));
+    class Clipboard extends EventTarget {
+        constructor(token) { super(); if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        read() {}
+        readText() {}
+        write() {}
+        writeText() {}
+    }
+    class CredentialsContainer {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        create() {}
+        get() {}
+        preventSilentAccess() {}
+        store() {}
+    }
+    class Geolocation {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        clearWatch() {}
+        getCurrentPosition() {}
+        watchPosition() {}
+    }
+    class MediaCapabilities {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        decodingInfo() {}
+    }
+    class MediaSession {
+        #metadata = null;
+        #playbackState = 'none';
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        get metadata() { return this.#metadata; }
+        set metadata(value) { this.#metadata = value; }
+        get playbackState() { return this.#playbackState; }
+        set playbackState(value) {
+            value = String(value);
+            if (!['none', 'paused', 'playing'].includes(value)) throw new TypeError('Invalid playback state');
+            this.#playbackState = value;
+        }
+        setActionHandler() {}
+        setCameraActive() {}
+        setMicrophoneActive() {}
+        setPositionState() {}
+    }
+    class ServiceWorkerContainer extends EventTarget {
+        #ready = new Promise(() => {});
+        constructor(token) {
+            super();
+            if (token !== constructToken) throw new TypeError('Illegal constructor');
+            this.oncontrollerchange = this.onmessage = this.onmessageerror = null;
+        }
+        get controller() { return null; }
+        get ready() { return this.#ready; }
+        getRegistration() {}
+        getRegistrations() {}
+        register() {}
+        startMessages() {}
+    }
+    class WakeLock {
+        constructor(token) { if (token !== constructToken) throw new TypeError('Illegal constructor'); }
+        request() {}
+    }
+    for (const [name, constructor] of Object.entries({clipboard: Clipboard, credentials: CredentialsContainer,
+        geolocation: Geolocation, mediaCapabilities: MediaCapabilities, mediaSession: MediaSession,
+        serviceWorker: ServiceWorkerContainer, wakeLock: WakeLock})) {
+        defineGlobalConstructor(constructor.name, constructor);
+        defineNavigatorValue(name, new constructor(constructToken));
+    }
+    for (const name of ['canShare', 'getGamepads', 'requestMediaKeySystemAccess', 'share']) {
+        Object.defineProperty(Navigator.prototype, name, {
+            value: {[name]() {}}[name], writable: true, configurable: true, enumerable: true,
+        });
+    }
+
 }
 const defaults = {hardware_concurrency: 4, max_touch_points: 0, vendor: '', product_sub: '20030107', pdf_viewer_enabled: false, device_memory_gb: 8, connection_type: 'unknown', connection_rtt_ms: 0, connection_downlink_mbps: 0, connection_effective_type: '4g', connection_save_data: false, notification_permission: 'denied', permissions_enabled: true, bluetooth_enabled: true, bluetooth_available: false, media_devices_enabled: true};
-installOptional({navigator: {...defaults, ...options}, base_headers: {sec_ch_ua: ''}});
+installOptional({...defaults, ...options});
 const __navigatorServiceConstructionToken = Symbol();
 const __lockData = new WeakMap();
+
+// The event payload is useful independently of an encrypted-media backend.
+const __arrayBufferByteLength = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength').get;
+class MediaEncryptedEvent extends Event {
+    #initData;
+    #initDataType;
+    constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError('Event type is required');
+        if (options == null) options = {};
+        super(type, options);
+        const data = options.initData;
+        if (data != null) __arrayBufferByteLength.call(data);
+        this.#initData = data ?? null;
+        this.#initDataType = options.initDataType === undefined ? '' : `${options.initDataType}`;
+    }
+    get initData() { return this.#initData; }
+    get initDataType() { return this.#initDataType; }
+}
+for (const name of ['initData', 'initDataType']) {
+    Object.defineProperty(MediaEncryptedEvent.prototype, name, {enumerable: true});
+}
 
 class Lock {
     constructor(...args) {
@@ -447,6 +571,6 @@ Object.defineProperties(Navigator.prototype, {
 });
 
 
-Object.assign(global, {Lock, LockManager});
+Object.assign(global, {Lock, LockManager, MediaEncryptedEvent});
 return () => { for (const entry of [...__heldLocks, ...__pendingLocks]) __abortLock(entry, new DOMException("Plugin disposed", "AbortError")); };
 }

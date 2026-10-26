@@ -1,0 +1,4517 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "click",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "none",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "self-false",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "rename-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "peer-remove-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "checkbox",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "checkbox-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "text",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "text-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "remove",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "Event",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "click",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "Event",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": false,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "click",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "none",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "self-false",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "rename-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "peer-remove-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "checkbox",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "checkbox-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "text",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "text-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "remove",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "Event",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "MouseEvent",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        false,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": false,
+      "event": "PointerEvent",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "click",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "Event",
+      "action": "reset-cancel",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "MouseEvent",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "none",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "self-false",
+      "expected": [
+        false,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "peer-true",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "rename-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "peer-remove-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "checkbox",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ],
+          [
+            "input",
+            false,
+            true,
+            true,
+            true,
+            true
+          ],
+          [
+            "change",
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "checkbox-cancel",
+      "expected": [
+        false,
+        true,
+        false,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "text",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "text-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "remove",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "reset",
+      "expected": [
+        true,
+        false,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "connected": true,
+      "checked": true,
+      "event": "PointerEvent",
+      "action": "reset-cancel",
+      "expected": [
+        false,
+        true,
+        true,
+        [
+          [
+            "click",
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        ]
+      ]
+    }
+  ]
+}

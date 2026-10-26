@@ -220,3 +220,26 @@ unsafe extern "C" {
     pub fn JSStringGetCharactersPtr(string: JSStringRef) -> *const u16;
     pub fn JSStringRelease(string: JSStringRef);
 }
+
+// The pinned SDK exposes WTF's single nonblocking event-loop iteration on
+// Linux and Windows. Its scalar C++ ABI is the same as an extern C call.
+#[cfg(not(target_os = "macos"))]
+#[link(name = "JavaScriptCore")]
+unsafe extern "C" {
+    #[cfg_attr(
+        target_env = "msvc",
+        link_name = "?cycle@RunLoop@WTF@@SA?AW4CycleResult@12@I@Z"
+    )]
+    #[cfg_attr(not(target_env = "msvc"), link_name = "_ZN3WTF7RunLoop5cycleEj")]
+    pub fn run_loop_cycle(mode: c_uint) -> c_int;
+}
+#[cfg(target_os = "macos")]
+#[link(name = "CoreFoundation", kind = "framework")]
+unsafe extern "C" {
+    pub static kCFRunLoopDefaultMode: *const c_void;
+    pub fn CFRunLoopRunInMode(
+        mode: *const c_void,
+        seconds: c_double,
+        return_after_source: u8,
+    ) -> c_int;
+}

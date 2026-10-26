@@ -1,4 +1,11 @@
 {
+  "rtc": {
+    "installers": {"node": "rtcPlugin", "python": "rtc"},
+    "capabilities": ["Local peer/data-channel shapes", "Description and ICE payload storage", "RTC event payloads and handlers"],
+    "limitations": ["No ICE/SDP negotiation, networking or media transport", "Legacy offer promise never settles; most operations are no-ops", "Candidate parsing and SCTP are placeholders"],
+    "lifetime": "realm",
+    "options": {}
+  },
   "storage": {
     "installers": {
       "node": "storagePlugin",
@@ -7,6 +14,7 @@
     "capabilities": [
       "Storage",
       "IndexedDB transactions",
+      "CookieStore and SQLTransaction legacy placeholders",
       "Cache"
     ],
     "limitations": [
@@ -28,7 +36,8 @@
     ],
     "limitations": [
       "No rasterization, fonts or image decoding",
-      "Mock data URL is not an image"
+      "Mock data URL is not an image",
+      "Capture/offscreen transfer are callable no-ops"
     ],
     "lifetime": "realm",
     "options": {
@@ -53,10 +62,15 @@
     },
     "capabilities": [
       "Realm-local locks",
-      "Configured navigator/device values"
+      "Configured navigator/device values",
+      "MediaEncryptedEvent payloads",
+      "MediaStream identity and legacy media/SourceBuffer placeholders",
+      "Worker and Trusted Types placeholders without execution or enforcement",
+      "Clipboard, credentials, geolocation, media and worker service placeholders"
     ],
     "limitations": [
       "No real device or permission services",
+      "No encrypted-media playback or key-system backend",
       "Locks do not coordinate different realms"
     ],
     "lifetime": "realm",
@@ -178,10 +192,13 @@
     },
     "capabilities": [
       "WebGL state and buffers",
+      "Safari WebGL constants and legacy callable placeholders",
+      "Debug renderer extension with configured mock identity",
       "Optional WebGPU buffer mock"
     ],
     "limitations": [
       "Shaders fail; no GPU execution or rasterization",
+      "Additional WebGL methods return undefined without effects, including resource creation and queries",
       "Install canvas first when combining"
     ],
     "lifetime": "realm",
@@ -209,10 +226,14 @@
     },
     "capabilities": [
       "AudioBuffer",
-      "Graph/lifecycle state"
+      "Graph/lifecycle and listener/compressor state",
+      "Local speech utterance payloads and manual events",
+      "Legacy DSP/worklet call coverage and silent offline buffers"
     ],
     "limitations": [
-      "Silent analysis; no processing, decoding or output"
+      "Silent analysis; no processing, decoding or output",
+      "Speech synthesis is an empty legacy object without a speech engine",
+      "Offline suspend/resume placeholders remain pending; worklet loading is a no-op"
     ],
     "lifetime": "realm",
     "options": {

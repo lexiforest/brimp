@@ -1,8 +1,11 @@
 (() => {
 let previousFrameCount = 0;
 const parse = JSON.parse, define = Object.defineProperty;
+const fromCharCode = String.fromCharCode;
 return serialized => {
-for (const name of parse(serialized)) {
+for (const units of parse(serialized)) {
+    let name = "";
+    for (const unit of units) name += fromCharCode(unit);
     if (!(name in window)) {
         define(window, name, {
             configurable: true,

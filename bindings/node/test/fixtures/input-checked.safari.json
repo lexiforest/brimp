@@ -1,0 +1,7205 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "form",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "template",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow-detached",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "markup",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-defaults",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "a-true",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "a-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "b-false-default",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          true
+        ],
+        [
+          false,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "a-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "b-default-toggle",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          true
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "a-attribute-value",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "b-name-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "b-type-away-back",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "move-a-last",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "remove-append-a",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "parsed",
+      "setup": "script-checked",
+      "operation": "reset",
+      "expected": [
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true
+        ]
+      ]
+    }
+  ]
+}

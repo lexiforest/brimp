@@ -2,7 +2,6 @@
 from dataclasses import dataclass, field, replace
 import inspect
 import json
-import math
 import threading
 
 from ._brimp import Reentry
@@ -10,28 +9,7 @@ from ._brimp import Reentry
 _active = threading.local()
 
 
-def _encode(value):
-    if value is None: return {"type": "null"}
-    if isinstance(value, bool): return {"type": "boolean", "value": value}
-    if isinstance(value, (int, float)):
-        if not math.isfinite(value): raise ValueError("host numbers must be finite")
-        return {"type": "number", "value": value}
-    if isinstance(value, str): return {"type": "string", "value": value}
-    if isinstance(value, (bytes, bytearray, memoryview)):
-        return {"type": "binary", "value": list(bytes(value))}
-    if isinstance(value, (list, tuple)):
-        return {"type": "array", "value": [_encode(item) for item in value]}
-    if isinstance(value, dict) and all(isinstance(key, str) for key in value):
-        return {"type": "object", "value": {key: _encode(item) for key, item in value.items()}}
-    raise TypeError("host values must be JSON-like values or bytes")
-
-
-def _decode(wire):
-    kind, value = wire["type"], wire.get("value")
-    if kind == "binary": return bytes(value)
-    if kind == "array": return [_decode(item) for item in value]
-    if kind == "object": return {key: _decode(item) for key, item in value.items()}
-    return value
+from .values import encode as _encode, decode as _decode, HostFunction
 
 
 class HostContext:
@@ -49,6 +27,10 @@ class HostContext:
     def realm_id(self): return self._inner.realm_id
     @property
     def cancelled(self): return self._inner.cancelled
+    def function(self, name): return HostFunction(name)
+    def _from_reference(self, token):
+        from . import JSHandle
+        return JSHandle(self._inner.bind_reference(json.dumps(token)))
     def emit(self, channel, value):
         self._inner.emit(channel, json.dumps(_encode(value), allow_nan=False))
 
@@ -85,7 +67,8 @@ class Plugin:
                 previous = getattr(_active, "session", None)
                 _active.session = session
                 try:
-                    result = handler(HostContext(context), *[_decode(arg) for arg in json.loads(arguments)])
+                    context = HostContext(context)
+                    result = handler(context, *[_decode(arg, context._from_reference) for arg in json.loads(arguments)])
                     if inspect.isawaitable(result):
                         if inspect.iscoroutine(result): result.close()
                         raise TypeError("Python plugin handlers must be synchronous; asyncio is not supported")
@@ -123,6 +106,11 @@ def canvas(*, rgba=(0, 0, 0, 0), character_width=0.5):
 def services(**options):
     """Realm-local locks and deterministic notification/device-service mocks."""
     return _bundled("services", options)
+
+
+def rtc():
+    """Local WebRTC shapes and legacy placeholders; no network/media transport."""
+    return _bundled("rtc")
 
 
 def extraction():

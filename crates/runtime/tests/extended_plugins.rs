@@ -23,10 +23,23 @@ fn session() -> Session {
     .unwrap()
 }
 #[test]
+fn rtc_installer_provides_local_shapes_without_transport() {
+    let s = Session::new(SessionOptions {
+        plugins: vec![bundled::rtc()],
+        ..Default::default()
+    })
+    .unwrap();
+    let p = s.new_page().unwrap();
+    assert_eq!(
+        p.evaluate("const peer=new RTCPeerConnection(); const channel=peer.createDataChannel('rust'); [channel.label,channel.readyState,peer.sctp,channel.send('ignored')===undefined]").unwrap(),
+        json!(["rust", "connecting", null, true])
+    );
+}
+#[test]
 fn geometry_and_inline_css_are_functional_without_layout() {
     let s = session();
     let p = s.new_page().unwrap();
-    assert_eq!(p.evaluate("const m=new DOMMatrix().translate(10,20).scale(2); const v=m.transformPoint(new DOMPoint(3,4)); const r=DOMQuad.fromRect({x:5,y:6,width:-3,height:2}).getBounds(); [v.x,v.y,m.inverse().transformPoint(v).x,r.left,r.right,typeof getComputedStyle]").unwrap(),json!([16,28,3,2,5,"undefined"]));
+    assert_eq!(p.evaluate("const m=new DOMMatrix().translate(10,20).scale(2); const v=m.transformPoint(new DOMPoint(3,4)); const r=DOMQuad.fromRect({x:5,y:6,width:-3,height:2}).getBounds(); [v.x,v.y,m.inverse().transformPoint(v).x,r.left,r.right,typeof getComputedStyle(document.body)]").unwrap(),json!([16,28,3,2,5,"undefined"]));
     assert_eq!(p.evaluate("const el=document.createElement('div'); el.attributeStyleMap.set('width',CSS.cm(2.54).to('px')); [el.style.width,el.attributeStyleMap.get('width').value,CSS.s(2).to('ms').value,CSS.px(2).add(CSS.in(1)).value,new DOMMatrix(new DOMMatrix().toFloat64Array()).isIdentity]").unwrap(),json!(["96px",96,2000,98,true]));
     assert!(p.evaluate("CSS.px(1).to('s')").is_err());
     assert!(p.evaluate("new DOMMatrix().translate(0,0,1)").is_err());

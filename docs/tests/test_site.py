@@ -67,10 +67,10 @@ def test_node_and_cli_references():
     node = SITE / 'reference/node'
     assert (node / 'functions/createSession.html').is_file()
     page = (node / 'classes/Page.html').read_text()
-    for member in ['evaluate', 'get', 'route', 'advanceTime', 'stream', 'configureNetwork']:
+    for member in ['evaluate', 'get', 'route', 'advanceTime', 'stream', 'configureNetwork', 'peekDiagnostics', 'summarizeDiagnostics']:
         assert f'id="{member.lower()}"' in page or f'id="{member}"' in page
     cli = (SITE / 'api/cli/index.html').read_text()
-    for flag in ['--actions', '--routes', '--persona', '--stream', '--clock']:
+    for flag in ['--actions', '--routes', '--persona', '--stream', '--clock', '--trace-report', '--trace-mode']:
         assert flag in cli
     assert 'Generated from the CLI' in cli
 

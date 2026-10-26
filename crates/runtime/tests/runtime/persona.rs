@@ -41,7 +41,7 @@ fn identity_overrides_apply_to_requests_and_each_realm() {
         .unwrap();
         page.request("GET", "https://identity.test/", Default::default())
             .unwrap();
-        assert_eq!(page.evaluate("[navigator.userAgent,navigator.language,navigator.platform,typeof screen,typeof innerWidth]").unwrap(),serde_json::json!([agent,"fr-CA","Custom","undefined","undefined"]));
+        assert_eq!(page.evaluate("[navigator.userAgent,navigator.language,navigator.platform,typeof screen,typeof innerWidth]").unwrap(),serde_json::json!([agent,"fr-CA","Custom","object","number"]));
         let requests = loader.0.lock().unwrap();
         let request = requests.last().unwrap();
         assert_eq!(request.headers["user-agent"], agent);

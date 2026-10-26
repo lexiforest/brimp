@@ -1,6 +1,6 @@
 use brimp_runtime::runtime::{
     clock::{ClockOptions, TimeMode},
-    diagnostics::DiagnosticsOptions,
+    diagnostics::{DiagnosticsOptions, TraceMode},
     native::{Session, SessionOptions},
 };
 use serde_json::json;
@@ -73,6 +73,7 @@ fn diagnostic_records_filter_bound_and_do_not_read_getters() {
         include: vec!["Document.prototype".into(), "Reflect".into()],
         capacity: 3,
         stack: true,
+        ..Default::default()
     }));
     let page = session.new_page().unwrap();
     assert_eq!(page.evaluate("globalThis.getterCalls=0; const x={get trap(){getterCalls++;throw Error('no')}}; Reflect.ownKeys(x); for(let i=0;i<8;i++) document.querySelector('missing'); getterCalls").unwrap(),json!(0));
@@ -183,4 +184,156 @@ fn navigation_resets_clock_and_tracing_tracks_realms() {
             .iter()
             .any(|record| record["realmId"] != old)
     );
+}
+
+#[test]
+fn diagnostic_summary_separates_layers_and_reflection_dependencies() {
+    let session = logical(Some(DiagnosticsOptions {
+        include: vec![
+            "Document.prototype.querySelector".into(),
+            "native.querySelector".into(),
+            "Reflect.has".into(),
+        ],
+        ..Default::default()
+    }));
+    let page = session.new_page().unwrap();
+    page.take_diagnostics().unwrap();
+    page.evaluate(
+        r#"
+        document.querySelector('body'); document.querySelector('missing');
+        try { document.querySelector('['); } catch (_) {}
+        Reflect.has(navigator, 'userAgent'); Reflect.has(document, 'body');
+        globalThis.unobserved = {value: 1}; unobserved.value; unobserved.value = 2;
+        void window.missing; void ('missing' in window); delete window.missing;
+        null;
+    "#,
+    )
+    .unwrap();
+    let before = page.peek_diagnostics().unwrap();
+    let summary = page.summarize_diagnostics().unwrap();
+    assert_eq!(before, page.peek_diagnostics().unwrap());
+    assert_eq!(summary["retained"], 8);
+    assert_eq!(summary["dropped"], 0);
+    assert_eq!(summary["coverage"], before["coverage"]);
+    assert_eq!(summary["coverage"]["enabled"], true);
+    assert!(
+        !summary["coverage"]["limitations"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+    let dependencies = summary["dependencies"].as_array().unwrap();
+    assert_eq!(dependencies.len(), 4);
+    for layer in ["api", "native"] {
+        let entry = dependencies
+            .iter()
+            .find(|entry| entry["layer"] == layer)
+            .unwrap();
+        assert_eq!(entry["count"], 3);
+        assert_eq!(entry["throws"], 1);
+        assert!(entry["target"].is_null());
+    }
+    for (target, property) in [("navigator", "userAgent"), ("document", "body")] {
+        assert!(
+            dependencies
+                .iter()
+                .any(|entry| entry["layer"] == "reflection"
+                    && entry["path"] == "Reflect.has"
+                    && entry["target"] == target
+                    && entry["property"] == property
+                    && entry["count"] == 1
+                    && entry["throws"] == 0)
+        );
+    }
+    assert_eq!(before, page.take_diagnostics().unwrap());
+    assert_eq!(page.summarize_diagnostics().unwrap()["retained"], 0);
+}
+
+#[test]
+fn diagnostic_inspection_preserves_loss_and_distinguishes_disabled_from_empty() {
+    let session = logical(Some(DiagnosticsOptions {
+        capacity: 3,
+        include: vec!["Document.prototype.querySelector".into()],
+        ..Default::default()
+    }));
+    let page = session.new_page().unwrap();
+    page.take_diagnostics().unwrap();
+    page.evaluate("for(let i=0;i<5;i++) document.querySelector('body'); null")
+        .unwrap();
+    let batch = page.peek_diagnostics().unwrap();
+    let summary = page.summarize_diagnostics().unwrap();
+    assert_eq!(summary["dropped"], 2);
+    assert_eq!(summary["retained"], 3);
+    assert_eq!(summary["dependencies"][0]["count"], 3);
+    assert_eq!(
+        summary["coverage"]["include"],
+        json!(["Document.prototype.querySelector"])
+    );
+    assert_eq!(batch, page.take_diagnostics().unwrap());
+    assert_eq!(page.peek_diagnostics().unwrap()["dropped"], 0);
+    assert_eq!(
+        page.summarize_diagnostics().unwrap()["coverage"]["enabled"],
+        true
+    );
+
+    let disabled = logical(None);
+    let page = disabled.new_page().unwrap();
+    assert_eq!(
+        page.peek_diagnostics().unwrap(),
+        page.take_diagnostics().unwrap()
+    );
+    let summary = page.summarize_diagnostics().unwrap();
+    assert_eq!(summary["coverage"]["enabled"], false);
+    assert_eq!(summary["dependencies"], json!([]));
+    assert_eq!(summary["retained"], 0);
+}
+
+#[test]
+fn recursive_tracing_reinstalls_on_navigation_and_keeps_page_sequences() {
+    use async_trait::async_trait;
+    use brimp_runtime::network::*;
+    struct Fixture;
+    #[async_trait]
+    impl ResourceLoader for Fixture {
+        async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+            Ok(ResourceResponse {
+                status: http::StatusCode::OK,
+                headers: Default::default(),
+                body: b"<body><script>window.fixture={nested:{}};void window.fixture.nested.missing;document.body.dataset.traced='yes'</script>".to_vec(),
+                effective_url: request.url,
+                metadata: Default::default(),
+            })
+        }
+    }
+    let session = Session::with_resource_loader(
+        SessionOptions {
+            diagnostics: Some(DiagnosticsOptions {
+                mode: TraceMode::Recursive,
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        std::sync::Arc::new(Fixture),
+    )
+    .unwrap();
+    let page = session.new_page().unwrap();
+    page.evaluate("void window.beforeNavigation;null").unwrap();
+    let before = page.peek_diagnostics().unwrap();
+    let last = before["records"].as_array().unwrap().last().unwrap();
+    page.request("GET", "https://fixture.invalid/", Default::default())
+        .unwrap();
+    assert_eq!(
+        page.evaluate("document.body.dataset.traced").unwrap(),
+        json!("yes")
+    );
+    let batch = page.peek_diagnostics().unwrap();
+    assert_eq!(batch["coverage"]["mode"], "recursive");
+    let missing = batch["records"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|r| r["path"] == "window.fixture.nested.missing")
+        .unwrap();
+    assert_ne!(missing["realmId"], last["realmId"]);
+    assert!(missing["sequence"].as_u64().unwrap() > last["sequence"].as_u64().unwrap());
 }

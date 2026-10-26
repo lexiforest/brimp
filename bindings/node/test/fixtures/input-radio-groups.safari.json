@@ -1,0 +1,1205 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "context": "detached",
+      "operation": "same",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "empty",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "case",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "surrogate",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "different-forms",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "explicit-form",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "unresolved-form",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "duplicate-id",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "id-change",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "name-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "type-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "adopt",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "insert-fragment",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "replace",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "detached",
+      "operation": "reset-canceled",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "same",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "empty",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "case",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "surrogate",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "different-forms",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "explicit-form",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "unresolved-form",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "duplicate-id",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "id-change",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "name-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "type-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "adopt",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "insert-fragment",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "replace",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "connected",
+      "operation": "reset-canceled",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "same",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "empty",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "case",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "surrogate",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "different-forms",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "explicit-form",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "unresolved-form",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "duplicate-id",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "id-change",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "name-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "type-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "adopt",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "insert-fragment",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "replace",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "shadow",
+      "operation": "reset-canceled",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "same",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "empty",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "case",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "surrogate",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "different-forms",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "explicit-form",
+      "expected": [
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "unresolved-form",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "duplicate-id",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "id-change",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "name-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "type-change",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "adopt",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "insert-fragment",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "replace",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "context": "fragment",
+      "operation": "reset-canceled",
+      "expected": [
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    }
+  ]
+}

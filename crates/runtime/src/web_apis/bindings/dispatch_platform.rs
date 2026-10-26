@@ -191,6 +191,17 @@ pub(super) fn dispatch(
                 .map_err(err)?;
             Ok(NativeValue::String(url_record_json(&parsed)?))
         }
+        "urlSetAnchor" => {
+            let href = required_string(call, 2, "URL href")?;
+            let component = required_string(call, 3, "URL component")?;
+            let value = required_string(call, 4, "URL component value")?;
+            let mut url = url::Url::parse(&href).map_err(err)?;
+            Ok(if mutate_url_component(&mut url, &component, &value) {
+                NativeValue::String(url.into())
+            } else {
+                NativeValue::Null
+            })
+        }
         "urlSet" => {
             let href = required_string(call, 2, "URL href")?;
             let component = required_string(call, 3, "URL component")?;
@@ -222,32 +233,6 @@ pub(super) fn dispatch(
                 Some(encoding) => Ok(NativeValue::String(encoding.name().to_ascii_lowercase())),
                 None => Ok(NativeValue::Null),
             }
-        }
-        "legacyQueryEncodeBlock" => {
-            let label = required_string(call, 2, "encoding label")?;
-            let block_start = call
-                .argument(3)
-                .ok_or_else(|| NativeError::new("missing code point block"))?
-                .to_number()? as u32;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .ok_or_else(|| NativeError::new("invalid document encoding"))?;
-            let encoded = (block_start..block_start.saturating_add(256))
-                .map(|code_point| {
-                    char::from_u32(code_point)
-                        .map(|character| legacy_query_encode(encoding, &character.to_string()))
-                        .unwrap_or_else(|| "%EF%BF%BD".to_owned())
-                })
-                .collect::<Vec<_>>();
-            Ok(NativeValue::String(
-                serde_json::to_string(&encoded).map_err(err)?,
-            ))
-        }
-        "legacyQueryEncode" => {
-            let label = required_string(call, 2, "encoding label")?;
-            let input = required_string(call, 3, "query input")?;
-            let encoding = encoding_rs::Encoding::for_label_no_replacement(label.as_bytes())
-                .ok_or_else(|| NativeError::new("invalid document encoding"))?;
-            Ok(NativeValue::String(legacy_query_encode(encoding, &input)))
         }
         "formUrlEncode" => {
             let label = required_string(call, 2, "form encoding label")?;

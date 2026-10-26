@@ -3,7 +3,6 @@
 use brimp_jsc::ProtectedJsObject;
 
 use std::{
-    collections::HashMap,
     sync::{
         Arc,
         atomic::{AtomicBool, AtomicU64, Ordering},
@@ -13,6 +12,8 @@ use std::{
 
 use serde_json::{Value, json};
 
+use super::bridge::{BridgeEndpoint, BridgeValue, Reference};
+use super::diagnostics::DiagnosticsView;
 use super::{
     AutomationError, CancellationToken, NavigationResponse, Page, PageHandle, PageOptions,
     SessionCookies,
@@ -241,7 +242,19 @@ impl NativePage {
         Ok(value)
     }
     pub fn take_diagnostics(&self) -> Result<Value, AutomationError> {
-        let OperationResult::Value(value) = self.operation(Operation::Diagnostics)? else {
+        self.diagnostics(DiagnosticsView::Take)
+    }
+    /// Inspect retained diagnostic records without consuming them or the loss count.
+    pub fn peek_diagnostics(&self) -> Result<Value, AutomationError> {
+        self.diagnostics(DiagnosticsView::Peek)
+    }
+    /// Group retained observations by layer, path, operation and reflection target.
+    /// This does not consume records and does not imply complete dependency coverage.
+    pub fn summarize_diagnostics(&self) -> Result<Value, AutomationError> {
+        self.diagnostics(DiagnosticsView::Summary)
+    }
+    fn diagnostics(&self, view: DiagnosticsView) -> Result<Value, AutomationError> {
+        let OperationResult::Value(value) = self.operation(Operation::Diagnostics(view))? else {
             unreachable!()
         };
         Ok(value)
@@ -409,14 +422,10 @@ impl NativePage {
         }
     }
 
-    fn handle(&self, token: HandleToken) -> JSHandle {
-        JSHandle(Arc::new(Handle {
-            page: self.clone(),
-            token,
-            disposed: AtomicBool::new(false),
-        }))
+    fn handle(&self, mut handle: JSHandle) -> JSHandle {
+        handle.1 = Some(self.clone());
+        handle
     }
-
     fn operation(&self, operation: Operation) -> Result<OperationResult, AutomationError> {
         self.page.native_operation(operation, self.timeout)
     }
@@ -482,7 +491,7 @@ impl NativePage {
 }
 
 struct Handle {
-    page: NativePage,
+    endpoint: BridgeEndpoint,
     token: HandleToken,
     disposed: AtomicBool,
 }
@@ -490,58 +499,112 @@ struct Handle {
 impl Drop for Handle {
     fn drop(&mut self) {
         if !self.disposed.swap(true, Ordering::AcqRel) {
-            let _ = self.page.operation(Operation::Dispose(self.token));
+            self.endpoint.release(&self.token);
         }
     }
 }
 
 /// A rooted value, including primitives. Clones share explicit disposal.
 #[derive(Clone)]
-pub struct JSHandle(Arc<Handle>);
+pub struct JSHandle(Arc<Handle>, Option<NativePage>);
 
 impl JSHandle {
     fn token(&self) -> Result<HandleToken, AutomationError> {
         if self.0.disposed.load(Ordering::Acquire) {
             return Err(AutomationError::StaleHandle);
         }
+        self.0.endpoint.check()?;
         Ok(self.0.token)
     }
 
+    pub fn from_reference(endpoint: BridgeEndpoint, token: Reference) -> Self {
+        Self(
+            Arc::new(Handle {
+                endpoint,
+                token,
+                disposed: AtomicBool::new(false),
+            }),
+            None,
+        )
+    }
+    pub fn reference(&self) -> Result<Reference, AutomationError> {
+        self.token()
+    }
+    pub fn endpoint(&self) -> BridgeEndpoint {
+        self.0.endpoint.clone()
+    }
+    pub fn peer_handle(&self, token: Reference) -> Self {
+        let mut handle = Self::from_reference(self.endpoint(), token);
+        handle.1 = self.1.clone();
+        handle
+    }
+
+    pub fn bridge_command(&self, mut command: Value) -> Result<BridgeValue, AutomationError> {
+        command["token"] = json!(self.token()?);
+        self.0.endpoint.request(command)
+    }
+    pub fn value(&self) -> Result<BridgeValue, AutomationError> {
+        self.bridge_command(json!({"op":"value"}))
+    }
     pub fn json_value(&self) -> Result<Value, AutomationError> {
-        match self.0.page.operation(Operation::Value(self.token()?))? {
-            OperationResult::Value(value) => Ok(value),
+        match self.bridge_command(json!({"op":"json"}))? {
+            BridgeValue::String(value) => {
+                serde_json::from_str(&value).map_err(|e| AutomationError::Internal(e.to_string()))
+            }
             _ => unreachable!(),
         }
     }
-
-    /// Invokes `function(value, ...arguments)` in the owning realm.
     pub fn call(&self, function: &str, arguments: Vec<Value>) -> Result<JSHandle, AutomationError> {
-        match self.0.page.operation(Operation::Call {
-            token: self.token()?,
-            function: function.into(),
-            arguments,
-        })? {
-            OperationResult::Handle(token) => Ok(self.0.page.handle(token)),
+        self.call_bridge(
+            function,
+            arguments.into_iter().map(BridgeValue::from_json).collect(),
+        )
+    }
+    pub fn call_bridge(
+        &self,
+        function: &str,
+        arguments: Vec<BridgeValue>,
+    ) -> Result<JSHandle, AutomationError> {
+        self.command_handle(json!({"op":"call","source":function,"args":arguments,"handle":true}))
+    }
+    pub fn command_handle(&self, command: Value) -> Result<JSHandle, AutomationError> {
+        match self.bridge_command(command)? {
+            BridgeValue::Reference(token) => Ok(Self(
+                Arc::new(Handle {
+                    endpoint: self.endpoint(),
+                    token,
+                    disposed: AtomicBool::new(false),
+                }),
+                self.1.clone(),
+            )),
+            _ => Err(AutomationError::Internal("expected a reference".into())),
+        }
+    }
+    pub fn property(&self, name: &str) -> Result<JSHandle, AutomationError> {
+        self.command_handle(json!({"op":"property","name":name,"handle":true}))
+    }
+    pub fn property_names(&self) -> Result<Vec<String>, AutomationError> {
+        match self.bridge_command(json!({"op":"names"}))? {
+            BridgeValue::Array(values) => values
+                .into_iter()
+                .map(|value| match value {
+                    BridgeValue::String(v) => Ok(v),
+                    _ => Err(AutomationError::Internal("expected property name".into())),
+                })
+                .collect(),
             _ => unreachable!(),
         }
     }
-
-    pub fn property(&self, name: &str) -> Result<JSHandle, AutomationError> {
-        self.call("(value, name) => value[name]", vec![json!(name)])
-    }
-
-    pub fn property_names(&self) -> Result<Vec<String>, AutomationError> {
-        let value = self
-            .call("value => Object.getOwnPropertyNames(value)", vec![])?
-            .json_value()?;
-        serde_json::from_value(value).map_err(|error| AutomationError::Internal(error.to_string()))
-    }
-
     pub fn dispose(&self) -> Result<(), AutomationError> {
         if !self.0.disposed.swap(true, Ordering::AcqRel) {
-            self.0.page.operation(Operation::Dispose(self.0.token))?;
+            self.0.endpoint.release(&self.0.token);
         }
         Ok(())
+    }
+    fn page(&self) -> Result<&NativePage, AutomationError> {
+        self.1.as_ref().ok_or_else(|| {
+            AutomationError::Unsupported("use reference calls for plugin DOM handles".into())
+        })
     }
 }
 
@@ -550,7 +613,7 @@ pub struct ElementHandle(pub JSHandle);
 
 impl ElementHandle {
     fn input(&self, command: Value) -> Result<(), AutomationError> {
-        self.0.0.page.operation(Operation::Input {
+        self.0.page()?.operation(Operation::Input {
             target: Some(self.0.token()?),
             command,
         })?;
@@ -608,8 +671,7 @@ impl ElementHandle {
     pub fn query_selector(&self, selector: &str) -> Result<Option<ElementHandle>, AutomationError> {
         Ok(self
             .0
-            .0
-            .page
+            .page()?
             .query(Some(self.0.token()?), selector, false)?
             .into_iter()
             .next())
@@ -618,7 +680,7 @@ impl ElementHandle {
         &self,
         selector: &str,
     ) -> Result<Vec<ElementHandle>, AutomationError> {
-        self.0.0.page.query(Some(self.0.token()?), selector, true)
+        self.0.page()?.query(Some(self.0.token()?), selector, true)
     }
 }
 
@@ -631,11 +693,7 @@ fn validate_timeout(timeout: Duration) -> Result<(), AutomationError> {
     Ok(())
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct HandleToken {
-    realm: u64,
-    id: u64,
-}
+pub(crate) type HandleToken = Reference;
 
 pub(crate) enum Operation {
     AdvanceTime {
@@ -645,7 +703,7 @@ pub(crate) enum Operation {
     DrainTasks {
         max_tasks: usize,
     },
-    Diagnostics,
+    Diagnostics(DiagnosticsView),
     NetworkContext,
     Input {
         target: Option<HandleToken>,
@@ -655,13 +713,6 @@ pub(crate) enum Operation {
         source: String,
         by_value: bool,
     },
-    Call {
-        token: HandleToken,
-        function: String,
-        arguments: Vec<Value>,
-    },
-    Value(HandleToken),
-    Dispose(HandleToken),
     Query {
         root: Option<HandleToken>,
         selector: String,
@@ -672,140 +723,101 @@ pub(crate) enum Operation {
 pub(crate) enum OperationResult {
     NetworkContext(Arc<crate::web_apis::BrowsingContext>),
     Value(Value),
-    Handle(HandleToken),
-    Handles(Vec<HandleToken>),
+    Handle(JSHandle),
+    Handles(Vec<JSHandle>),
 }
 
-/// Owner-thread GC roots. The table is cleared as soon as a realm is replaced.
-#[derive(Default)]
-pub(crate) struct NativeValues {
-    realm: u64,
-    next_id: u64,
-    values: HashMap<HandleToken, ProtectedJsObject>,
+/// Commands execute on the owner thread; the shared bridge owns all GC roots.
+fn retain_handle(page: &Page, value: &ProtectedJsObject) -> Result<JSHandle, AutomationError> {
+    Ok(JSHandle::from_reference(
+        page.bridge.endpoint(),
+        page.bridge_retain(value)?,
+    ))
 }
-
-impl NativeValues {
-    pub(crate) fn synchronize(&mut self, page: &Page) {
-        if self.realm != page.realm_id() {
-            self.values.clear();
-            self.realm = page.realm_id();
-        }
+pub(crate) fn execute_operation(
+    page: &mut Page,
+    operation: Operation,
+    timeout: Duration,
+    closed: &AtomicBool,
+    interrupt: &AtomicU64,
+    epoch: u64,
+) -> Result<OperationResult, AutomationError> {
+    if interrupt.load(Ordering::Acquire) != epoch {
+        return Err(AutomationError::Cancellation);
     }
-    fn insert(&mut self, value: ProtectedJsObject) -> HandleToken {
-        self.next_id += 1;
-        let token = HandleToken {
-            realm: self.realm,
-            id: self.next_id,
-        };
-        self.values.insert(token, value);
-        token
-    }
-    fn get(&self, token: HandleToken) -> Result<&ProtectedJsObject, AutomationError> {
-        self.values.get(&token).ok_or(AutomationError::StaleHandle)
-    }
-    pub(crate) fn execute(
-        &mut self,
-        page: &mut Page,
-        operation: Operation,
-        timeout: Duration,
-        closed: &AtomicBool,
-        interrupt: &AtomicU64,
-        epoch: u64,
-    ) -> Result<OperationResult, AutomationError> {
-        if interrupt.load(Ordering::Acquire) != epoch {
-            return Err(AutomationError::Cancellation);
-        }
-        self.synchronize(page);
-        let result = match operation {
-            Operation::Diagnostics => OperationResult::Value(page.take_diagnostics()),
-            Operation::AdvanceTime {
-                milliseconds,
-                max_tasks,
-            } => OperationResult::Value(page.advance_time(milliseconds, max_tasks)?),
-            Operation::DrainTasks { max_tasks } => {
-                OperationResult::Value(page.drain_tasks(max_tasks)?)
-            }
-            Operation::NetworkContext => OperationResult::NetworkContext(page.network_context()),
-            Operation::Input { target, command } => {
-                let command = command.to_string();
-                match target {
-                    Some(token) => {
-                        let target = page
-                            .call_native("(_, box) => box.value", "", self.get(token)?)?
-                            .to_object()?;
-                        page.dispatch_input_object(&command, &target)?;
-                    }
-                    None => {
-                        page.dispatch_input(&command)?;
-                    }
+    let result = match operation {
+        Operation::Diagnostics(view) => OperationResult::Value(page.diagnostics(view)),
+        Operation::AdvanceTime {
+            milliseconds,
+            max_tasks,
+        } => OperationResult::Value(page.advance_time(milliseconds, max_tasks)?),
+        Operation::DrainTasks { max_tasks } => OperationResult::Value(page.drain_tasks(max_tasks)?),
+        Operation::NetworkContext => OperationResult::NetworkContext(page.network_context()),
+        Operation::Input { target, command } => {
+            let command = command.to_string();
+            match target {
+                Some(token) => {
+                    let target = page
+                        .call_native("(_, box) => box.value", "", &page.bridge_get(&token)?)?
+                        .to_object()?;
+                    page.dispatch_input_object(&command, &target)?;
                 }
-                OperationResult::Value(Value::Null)
+                None => {
+                    page.dispatch_input(&command)?;
+                }
             }
-            Operation::Dispose(token) => {
-                self.values.remove(&token);
-                OperationResult::Value(Value::Null)
-            }
-            Operation::Value(token) => OperationResult::Value(json_value(page, self.get(token)?)?),
-            Operation::Evaluate { source, by_value } => {
-                let source = serde_json::to_string(&source).expect("string serialization");
-                let pending = page.eval(&format!(
+            OperationResult::Value(Value::Null)
+        }
+        Operation::Evaluate { source, by_value } => {
+            let source = serde_json::to_string(&source).expect("string serialization");
+            let pending = page.eval(&format!(
                     "(() => {{ const box = {{ done: false }}; Promise.resolve((0, eval)({source})).then(value => {{ box.value = value; box.done = true; }}, error => {{ box.error = String(error); box.failed = true; box.done = true; }}); return box; }})()"
                 ))?.to_object()?;
-                wait(page, &pending, timeout, closed, interrupt, epoch)?;
-                if by_value {
-                    OperationResult::Value(json_value(page, &pending)?)
-                } else {
-                    OperationResult::Handle(self.insert(pending))
+            wait(page, &pending, timeout, closed, interrupt, epoch)?;
+            if by_value {
+                OperationResult::Value(json_value(page, &pending)?)
+            } else {
+                OperationResult::Handle(retain_handle(page, &pending)?)
+            }
+        }
+        Operation::Query {
+            root,
+            selector,
+            all,
+        } => {
+            let document;
+            let root = match root {
+                Some(token) => {
+                    document = page.bridge_get(&token)?;
+                    &document
                 }
-            }
-            Operation::Call {
-                token,
-                function,
-                arguments,
-            } => {
-                let pending = page.call_native(
-                    "(input, receiver) => { const { source, args } = JSON.parse(input); const box = { done: false }; Promise.resolve((0, eval)('(' + source + ')')(receiver.value, ...args)).then(value => { box.value = value; box.done = true; }, error => { box.error = String(error); box.failed = true; box.done = true; }); return box; }",
-                    &json!({ "source": function, "args": arguments }).to_string(), self.get(token)?,
-                )?.to_object()?;
-                wait(page, &pending, timeout, closed, interrupt, epoch)?;
-                OperationResult::Handle(self.insert(pending))
-            }
-            Operation::Query {
-                root,
-                selector,
-                all,
-            } => {
-                let document;
-                let root = match root {
-                    Some(token) => self.get(token)?,
-                    None => {
-                        document = page.eval("({value: document})")?.to_object()?;
-                        &document
-                    }
-                };
-                let nodes = page.call_native(
+                None => {
+                    document = page.eval("({value: document})")?.to_object()?;
+                    &document
+                }
+            };
+            let nodes = page.call_native(
                     "(input, root) => { const { selector, all } = JSON.parse(input); return { value: all ? Array.from(root.value.querySelectorAll(selector)) : [root.value.querySelector(selector)].filter(Boolean) }; }",
                     &json!({ "selector": selector, "all": all }).to_string(), root,
                 )?.to_object()?;
-                let len = page
-                    .call_native("(_, nodes) => nodes.value.length", "", &nodes)?
-                    .to_number()? as usize;
-                let mut tokens = Vec::with_capacity(len);
-                for index in 0..len {
-                    let node = page
-                        .call_native(
-                            "(index, nodes) => ({value: nodes.value[Number(index)]})",
-                            &index.to_string(),
-                            &nodes,
-                        )?
-                        .to_object()?;
-                    tokens.push(self.insert(node));
-                }
-                OperationResult::Handles(tokens)
+            let len = page
+                .call_native("(_, nodes) => nodes.value.length", "", &nodes)?
+                .to_number()? as usize;
+            let mut tokens = Vec::with_capacity(len);
+            for index in 0..len {
+                let node = page
+                    .call_native(
+                        "(index, nodes) => ({value: nodes.value[Number(index)]})",
+                        &index.to_string(),
+                        &nodes,
+                    )?
+                    .to_object()?;
+                tokens.push(retain_handle(page, &node)?);
             }
-        };
-        Ok(result)
-    }
+            OperationResult::Handles(tokens)
+        }
+    };
+    Ok(result)
 }
 
 fn json_value(page: &Page, value: &ProtectedJsObject) -> Result<Value, AutomationError> {

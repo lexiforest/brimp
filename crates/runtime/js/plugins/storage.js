@@ -3498,7 +3498,8 @@ var __BrimpStorage = (() => {
       put(request, response) {
         const key = new Request(request).url;
         if (!(response instanceof Response)) return Promise.reject(new TypeError("response must be a Response"));
-        return response.clone().text().then((body) => {
+        return response.clone().arrayBuffer().then((buffer) => {
+          const body = Array.from(new Uint8Array(buffer));
           const entries = this.__load();
           entries[key] = { body, status: response.status, statusText: response.statusText, headers: [...response.headers], url: response.url };
           save("cache", this.__name, entries);
@@ -3524,7 +3525,9 @@ var __BrimpStorage = (() => {
     }
     class CacheStorage {
       open(name) {
-        return Promise.resolve(new Cache(String(name)));
+        name = String(name);
+        if (call("get", "cache", name) === null) save("cache", name, {});
+        return Promise.resolve(new Cache(name));
       }
       has(name) {
         return Promise.resolve(call("get", "cache", String(name)) !== null);
@@ -3558,12 +3561,50 @@ var __BrimpStorage = (() => {
       persisted() {
         return Promise.resolve(false);
       }
+      // Legacy placeholder: no origin-private filesystem backend.
+      getDirectory() {
+      }
     }
     globalThis.Cache = Cache;
     globalThis.CacheStorage = CacheStorage;
     globalThis.caches = new CacheStorage();
     globalThis.StorageManager = StorageManager;
     Object.defineProperty(Navigator.prototype, "storage", { value: new StorageManager(), enumerable: true, configurable: true });
+    class CookieStore extends EventTarget {
+      constructor(token) {
+        super();
+        if (token !== __storageConstructorToken) throw new TypeError("Illegal constructor");
+      }
+      delete() {
+      }
+      get() {
+      }
+      getAll() {
+      }
+      set() {
+      }
+    }
+    const cookieHandlers = /* @__PURE__ */ new WeakMap();
+    Object.defineProperty(CookieStore.prototype, "onchange", {
+      get() {
+        return cookieHandlers.get(this) ?? null;
+      },
+      set(value) {
+        cookieHandlers.set(this, typeof value === "function" ? value : null);
+      },
+      enumerable: true,
+      configurable: true
+    });
+    class SQLTransaction {
+      constructor() {
+        throw new TypeError("Illegal constructor");
+      }
+      executeSql(sql, args, success) {
+        if (typeof success === "function") return success(this, { insertId: "", rows: { value: "0" }, rowsAffected: "" });
+      }
+    }
+    Object.assign(global, { CookieStore, cookieStore: new CookieStore(__storageConstructorToken), SQLTransaction });
+    Object.defineProperty(global, "openDatabase", { value: void 0, configurable: true });
     return () => {
       localStorage.clear();
       sessionStorage.clear();
@@ -3575,6 +3616,14 @@ var __BrimpStorage = (() => {
   function install(context) {
     for (const [name, value] of Object.entries(esm_exports)) {
       if (name !== "default" && name !== "forceCloseDatabase") context.global[name] = value;
+    }
+    for (const name of ["onabort", "onclose", "onerror", "onversionchange"]) {
+      Object.defineProperty(FDBDatabase_default.prototype, name, {
+        value: null,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
     }
     return storage_base_default(context);
   }

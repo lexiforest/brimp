@@ -5,29 +5,8 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 export const callbackContext = new AsyncLocalStorage();
 
-function encode(value, ancestors = new Set()) {
-  if (value === null) return { type: 'null' };
-  if (typeof value === 'boolean' || typeof value === 'string') return { type: typeof value, value };
-  if (typeof value === 'number' && Number.isFinite(value)) return { type: 'number', value };
-  if (value instanceof ArrayBuffer) return { type: 'binary', value: [...new Uint8Array(value)] };
-  if (ArrayBuffer.isView(value)) return { type: 'binary', value: [...new Uint8Array(value.buffer, value.byteOffset, value.byteLength)] };
-  if (!value || typeof value !== 'object' || ancestors.has(value)) throw new TypeError('host values must be acyclic JSON-like values or binary buffers');
-  ancestors.add(value);
-  try {
-    if (Array.isArray(value)) return { type: 'array', value: value.map(item => encode(item, ancestors)) };
-    if (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null) {
-      return { type: 'object', value: Object.fromEntries(Object.entries(value).map(([key, item]) => [key, encode(item, ancestors)])) };
-    }
-    throw new TypeError('host values must be JSON-like values or binary buffers');
-  } finally { ancestors.delete(value); }
-}
-function decode({ type, value }) {
-  if (type === 'null') return null;
-  if (type === 'binary') return Buffer.from(value);
-  if (type === 'array') return value.map(decode);
-  if (type === 'object') return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decode(item)]));
-  return value;
-}
+import { encode, decode, HostFunction } from './values.js';
+import { JSHandle } from './index.js';
 export class Plugin {
   constructor(name, source, handlers = {}, options = {}, setup = null) {
     const serialized = JSON.stringify(options);
@@ -48,6 +27,8 @@ export class HostContext {
   get pageId() { return this.#call.pageId; }
   get realmId() { return this.#call.realmId; }
   get cancelled() { return this.#call.cancelled; }
+  function(name) { return new HostFunction(name); }
+  _fromReference(token) { return new JSHandle(this.#call.bindReference(JSON.stringify(token)), this.#call.pageId); }
   emit(channel, value) { this.#call.emit(channel, JSON.stringify(encode(value))); }
 }
 export async function configurePlugins(plugins, session) {
@@ -78,7 +59,8 @@ export async function configurePlugins(plugins, session) {
       callbackContext.run({ pageId: call.pageId, session }, async () => {
         try {
           const handler = handlers.get(call.pluginName).get(call.name);
-          const result = await handler(new HostContext(call), ...JSON.parse(call.arguments).map(decode));
+          const context = new HostContext(call);
+          const result = await handler(context, ...JSON.parse(call.arguments).map(arg => decode(arg, token => context._fromReference(token))));
           call.resolve(JSON.stringify(encode(result)));
         } catch (error) { call.reject(String(error?.stack ?? error)); }
       });
@@ -99,6 +81,7 @@ export const extractionPlugin = () => bundled('extraction');
 export const geometryPlugin = () => bundled('geometry');
 export const cssTypedOmPlugin = () => bundled('css-typed-om');
 export const schedulingPlugin = () => bundled('scheduling');
+export const rtcPlugin = () => bundled('rtc');
 export const graphicsPlugin = (options = {}, handlers = {}) => new Plugin('graphics', bundled('graphics', options).source, handlers);
 export const audioPlugin = (options = {}, handlers = {}) => new Plugin('audio', bundled('audio', options).source, handlers);
 

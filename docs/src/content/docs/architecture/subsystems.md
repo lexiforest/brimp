@@ -74,7 +74,8 @@ a trusted `HostContext` and copied arguments. Node handlers may be asynchronous.
 
 ![Page JavaScript, DOM and queued work remain on the owner thread; a plugin host handler receives copied values and returns its result through the task queue.](/diagrams/page-lifecycle.png)
 
-Host handlers cannot reenter their own page. Navigation cancels pending realm
+Host handlers can use realm-bound references; lifecycle/evaluation reentry and
+recursive host calls from callback handle operations are rejected. Navigation cancels pending realm
 calls and runs cleanup. For storage, partition by `context.origin`, not an origin
 supplied by page code.
 
@@ -136,7 +137,7 @@ contract is in [core web coverage](https://github.com/lexiforest/brimp/blob/main
 | Geometry | Points, rectangles, quads and 2D matrices; no DOM measurement |
 | CSS Typed OM | Inline value objects and attributeStyleMap; no cascade or compound calc algebra |
 | Scheduling | Prioritized tasks, cancellation and zero-budget idle callbacks |
-| Graphics | WebGL state and optional WebGPU buffer mocks; no shader execution or GPU rendering |
+| Graphics | WebGL state, Safari constants and legacy callable placeholders; optional WebGPU buffer mocks; no shader execution or GPU rendering |
 | Audio | AudioBuffer and graph/lifecycle state; no processing, decoding or output |
 
 See the [generated Python plugin API](/reference/python/plugins/) and

@@ -185,6 +185,7 @@ impl Page {
         let script_type = document
             .attribute(node_id, "type")
             .unwrap_or_default()
+            .to_string_lossy()
             .trim()
             .to_ascii_lowercase();
         let kind = match script_type.as_str() {
@@ -193,8 +194,10 @@ impl Page {
             _ => return None,
         };
         let source = match document.attribute(node_id, "src") {
-            Some(src) => ScriptSource::External(src.to_owned()),
-            None => ScriptSource::Inline(document.text(node_id).ok()?),
+            Some(src) => ScriptSource::External(src.to_string_lossy().into_owned()),
+            None => {
+                ScriptSource::Inline(document.text(node_id).ok()?.to_string_lossy().into_owned())
+            }
         };
         let mode = match (kind, &source) {
             (ScriptKind::Module, _) if document.attribute(node_id, "async").is_some() => {

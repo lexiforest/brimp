@@ -19,11 +19,18 @@ mod dispatch_platform;
 
 const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/runtime/bootstrap.js"),
+    include_str!("../../js/vendor/input-color.bundle.js"),
     include_str!("../../js/web_apis/runtime/events_messaging.js"),
     include_str!("../../js/web_apis/runtime/dom_core.js"),
+    include_str!("../../js/web_apis/runtime/document_mode.js"),
     include_str!("../../js/web_apis/runtime/document_collections.js"),
+    include_str!("../../js/web_apis/runtime/token_list.js"),
     include_str!("../../js/web_apis/runtime/traversal.js"),
     include_str!("../../js/web_apis/runtime/elements.js"),
+    include_str!("../../js/web_apis/runtime/input_decimal.js"),
+    include_str!("../../js/web_apis/runtime/input_values.js"),
+    include_str!("../../js/web_apis/runtime/input_checked.js"),
+    include_str!("../../js/web_apis/runtime/input_attributes.js"),
     include_str!("../../js/web_apis/runtime/html_elements.js"),
     include_str!("../../js/web_apis/runtime/namespaces.js"),
     include_str!("../../js/web_apis/runtime/window_location.js"),
@@ -31,16 +38,27 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/runtime/navigator_services.js"),
     include_str!("../../js/web_apis/runtime/crypto.js"),
     include_str!("../../js/web_apis/runtime/url_encoding_files.js"),
+    include_str!("../../js/web_apis/runtime/form_disabled.js"),
     include_str!("../../js/web_apis/runtime/file_reader.js"),
     include_str!("../../js/web_apis/runtime/storage_fetch.js"),
     include_str!("../../js/web_apis/runtime/forms.js"),
+    include_str!("../../js/web_apis/runtime/input_value_conversions.js"),
+    include_str!("../../js/web_apis/runtime/input_stepping.js"),
+    include_str!("../../js/web_apis/runtime/input_editing.js"),
+    include_str!("../../js/web_apis/runtime/input_validity.js"),
+    include_str!("../../js/web_apis/runtime/input_validation.js"),
+    include_str!("../../js/web_apis/runtime/label_associations.js"),
+    include_str!("../../js/web_apis/runtime/control_selection.js"),
     include_str!("../../js/web_apis/runtime/element_internals.js"),
+    include_str!("../../js/web_apis/runtime/css_property_names.js"),
     include_str!("../../js/web_apis/runtime/css_style.js"),
     include_str!("../../js/web_apis/runtime/stylesheets.js"),
     include_str!("../../js/web_apis/runtime/observers.js"),
     include_str!("../../js/web_apis/runtime/document_write.js"),
     include_str!("../../js/web_apis/runtime/drag_drop.js"),
     include_str!("../../js/web_apis/runtime/input.js"),
+    include_str!("../../js/web_apis/runtime/dom_placeholders.js"),
+    include_str!("../../js/web_apis/runtime/window_environment.js"),
     include_str!("../../js/web_apis/runtime/install.js"),
 );
 
@@ -545,7 +563,10 @@ struct BindingState {
 struct Prototypes {
     node: ProtectedJsObject,
     element: ProtectedJsObject,
+    svg_element: ProtectedJsObject,
+    svg_graphics_element: ProtectedJsObject,
     document: ProtectedJsObject,
+    document_type: ProtectedJsObject,
     html_element: ProtectedJsObject,
     html_anchor_element: ProtectedJsObject,
     html_base_element: ProtectedJsObject,
@@ -591,6 +612,7 @@ impl BindingRuntime {
             dispatch(&streaming_state, &call)
         })?;
         runtime.eval(include_str!("../../js/web_apis/streaming_networking.js"))?;
+        runtime.eval(include_str!("../../js/web_apis/webassembly.js"))?;
         *state.websocket_delivery.borrow_mut() = Some(
             runtime
                 .eval("globalThis.__brimpDeliverWebSocket")?
@@ -614,7 +636,10 @@ impl BindingRuntime {
         *state.prototypes.borrow_mut() = Some(Prototypes {
             node: runtime.eval("Node.prototype")?.to_object()?,
             element: runtime.eval("Element.prototype")?.to_object()?,
+            svg_element: runtime.eval("SVGElement.prototype")?.to_object()?,
+            svg_graphics_element: runtime.eval("SVGGraphicsElement.prototype")?.to_object()?,
             document: runtime.eval("Document.prototype")?.to_object()?,
+            document_type: runtime.eval("DocumentType.prototype")?.to_object()?,
             html_element: runtime.eval("HTMLElement.prototype")?.to_object()?,
             html_anchor_element: runtime.eval("HTMLAnchorElement.prototype")?.to_object()?,
             html_base_element: runtime.eval("HTMLBaseElement.prototype")?.to_object()?,
@@ -671,6 +696,7 @@ impl BindingRuntime {
                 ("li", "HTMLLIElement"),
                 ("dl", "HTMLDListElement"),
                 ("div", "HTMLDivElement"),
+                ("span", "HTMLSpanElement"),
                 ("data", "HTMLDataElement"),
                 ("time", "HTMLTimeElement"),
                 ("br", "HTMLBRElement"),
@@ -757,6 +783,24 @@ impl BindingRuntime {
         Ok(())
     }
 
+    pub(crate) fn trace_internal_controls(
+        &mut self,
+        runtime: &JsRuntime,
+        wrap: &ProtectedJsObject,
+    ) -> Result<(), JsException> {
+        for controller in [
+            &mut self.input_controller,
+            &mut self.parser_mutations,
+            &mut self.script_controller,
+            &mut self.window_names,
+        ] {
+            *controller = runtime
+                .call_function_with_string_and_object(wrap, "", controller)?
+                .to_object()?;
+        }
+        Ok(())
+    }
+
     pub fn deliver_parser_mutations(
         &self,
         runtime: &JsRuntime,
@@ -812,6 +856,10 @@ impl BindingRuntime {
 
     pub fn sync_window_named_properties(&self, runtime: &JsRuntime) -> Result<(), JsException> {
         let names = self.state.document.borrow().window_named_properties();
+        let names: Vec<_> = names
+            .iter()
+            .map(brimp_lexbor::DomString::to_utf16)
+            .collect();
         let names = serde_json::to_string(&names).expect("window names serialize as JSON");
         runtime.call_function_with_string(&self.window_names, &names)?;
         Ok(())
@@ -920,7 +968,6 @@ fn is_platform_operation(operation: &str) -> bool {
     operation.starts_with("webSocket")
         || operation.starts_with("url")
         || operation.starts_with("encoding")
-        || operation.starts_with("legacyQuery")
         || operation.starts_with("base64")
         || operation.starts_with("crypto")
         || operation.starts_with("fetch")
@@ -1073,6 +1120,18 @@ fn required_string(
         .to_string()
 }
 
+fn required_dom_string(
+    call: &NativeCall<'_>,
+    index: usize,
+    label: &str,
+) -> Result<brimp_lexbor::DomString, NativeError> {
+    let units = call
+        .argument(index)
+        .ok_or_else(|| NativeError::new(format!("missing {label}")))?
+        .to_utf16()?;
+    Ok(brimp_lexbor::DomString::from_utf16(&units))
+}
+
 fn required_object(
     call: &NativeCall<'_>,
     index: usize,
@@ -1107,6 +1166,17 @@ fn required_document_target(
     }
 }
 
+fn document_url(state: &BindingState, id: NodeId) -> String {
+    if id == state.document.borrow().root() {
+        state
+            .browsing_context
+            .current_url()
+            .unwrap_or_else(|| "about:blank".into())
+    } else {
+        state.document.borrow().document_url(id)
+    }
+}
+
 fn required_parent_node_target(
     state: &BindingState,
     call: &NativeCall<'_>,
@@ -1132,38 +1202,83 @@ fn required_element_target(
     }
 }
 
+fn resolve_document_base_url(
+    document: &BrowserDocument,
+    owner: NodeId,
+    fallback: &str,
+    options: url::ParseOptions<'_>,
+) -> Option<url::Url> {
+    let fallback = url::Url::parse(fallback).ok();
+    let base = document.select(owner, "base[href]").ok().and_then(|nodes| {
+        nodes
+            .into_iter()
+            .filter(|id| {
+                document.namespace(*id).ok().as_deref() == Some(crate::dom::HTML_NAMESPACE)
+            })
+            .find_map(|id| {
+                document
+                    .attributes(id)
+                    .ok()?
+                    .into_iter()
+                    .find(|attribute| {
+                        attribute.namespace.is_none() && attribute.local_name == "href"
+                    })
+                    .map(|attribute| attribute.value)
+            })
+    });
+    base.and_then(|base| {
+        options
+            .base_url(fallback.as_ref())
+            .parse(&base.to_string_lossy())
+            .ok()
+            .filter(|url| !matches!(url.scheme(), "data" | "javascript"))
+    })
+    .or(fallback)
+}
+
 fn resolve_element_attribute_url(
     document: &BrowserDocument,
-    browsing_context: &BrowsingContext,
     id: NodeId,
     attribute: &str,
+    document_url: &str,
+    encoding: Option<&str>,
 ) -> Option<String> {
-    let input = document.attribute(id, attribute)?;
-    let document_url = browsing_context
-        .current_url()
-        .and_then(|url| url::Url::parse(&url).ok());
-    let base = if document.local_name(id).ok().as_deref() == Some("base") {
-        None
-    } else {
-        document
-            .query_selector("base[href]")
-            .ok()
-            .flatten()
-            .and_then(|id| document.attribute(id, "href"))
+    let encoding = encoding.and_then(|label| encoding_rs::Encoding::for_label(label.as_bytes()));
+    let encode: &dyn for<'a> Fn(&'a str) -> std::borrow::Cow<'a, [u8]> = &|input| {
+        std::borrow::Cow::Owned(legacy_query_encode(encoding.unwrap(), input).into_bytes())
     };
-    let base_url = base
-        .and_then(|base| {
-            url::Url::options()
-                .base_url(document_url.as_ref())
-                .parse(&base)
-                .ok()
-        })
-        .or(document_url);
-    url::Url::options()
+    let options = url::Url::options().encoding_override(encoding.map(|_| encode));
+    let content_attribute = |id, name: &str| {
+        document
+            .attributes(id)
+            .ok()?
+            .into_iter()
+            .find(|attribute| attribute.namespace.is_none() && attribute.local_name == name)
+            .map(|attribute| attribute.value)
+    };
+    let input = content_attribute(id, attribute)?;
+    let base_url = if document.local_name(id).ok().as_deref() == Some("base") {
+        url::Url::parse(document_url).ok()
+    } else {
+        resolve_document_base_url(document, document.node_document(id)?, document_url, options)
+    };
+    options
         .base_url(base_url.as_ref())
-        .parse(&input)
+        .parse(&input.to_string_lossy())
         .ok()
-        .map(|url| url.to_string())
+        .map(|url| {
+            // Safari escapes the final opaque-path space before a query/fragment.
+            if encoding.is_some()
+                && url.cannot_be_a_base()
+                && url.path().ends_with(' ')
+                && (url.query().is_some() || url.fragment().is_some())
+            {
+                let end = url[..url::Position::AfterPath].len();
+                format!("{}%20{}", &url.as_str()[..end - 1], &url.as_str()[end..])
+            } else {
+                url.to_string()
+            }
+        })
 }
 
 fn required_style_target(
@@ -1198,6 +1313,7 @@ fn node_value(
         let prototypes = prototypes(state);
         match document.kind(node_id).map_err(err)? {
             9 => prototypes.document.identity(),
+            10 => prototypes.document_type.identity(),
             11 => prototypes.document_fragment.identity(),
             3 => prototypes.text.identity(),
             8 => prototypes.comment.identity(),
@@ -1213,6 +1329,16 @@ fn node_value(
                         .get(tag)
                         .unwrap_or(&prototypes.html_element)
                         .identity(),
+                }
+            }
+            1 if document.namespace(node_id).ok().as_deref()
+                == Some("http://www.w3.org/2000/svg") =>
+            {
+                match document.local_name(node_id).map_err(err)?.as_str() {
+                    "svg" | "g" | "a" | "circle" | "ellipse" | "rect" | "path" | "line"
+                    | "polyline" | "polygon" | "text" | "tspan" | "textPath" | "image" | "use"
+                    | "foreignObject" | "switch" => prototypes.svg_graphics_element.identity(),
+                    _ => prototypes.svg_element.identity(),
                 }
             }
             1 => prototypes.element.identity(),
@@ -1304,8 +1430,8 @@ fn url_record_json(url: &url::Url) -> Result<String, NativeError> {
         "hostname": url.host_str().unwrap_or_default(),
         "port": url.port().map(|port| port.to_string()).unwrap_or_default(),
         "pathname": url.path(),
-        "search": url.query().map(|query| format!("?{query}")).unwrap_or_default(),
-        "hash": url.fragment().map(|fragment| format!("#{fragment}")).unwrap_or_default(),
+        "search": url::quirks::search(url),
+        "hash": url::quirks::hash(url),
     }))
     .map_err(err)
 }
@@ -1315,41 +1441,116 @@ fn set_url_component(href: &str, component: &str, value: &str) -> Result<String,
         return url::Url::parse(value).map(|url| url.into()).map_err(err);
     }
     let mut url = url::Url::parse(href).map_err(err)?;
+    mutate_url_component(&mut url, component, value);
+    Ok(url.into())
+}
+
+// Return whether an anchor setter updates its content attribute. Safari writes
+// unchanged protocol/opaque-host values, but aborts rejected host/port writes.
+fn mutate_url_component(url: &mut url::Url, component: &str, value: &str) -> bool {
+    use url::quirks;
     match component {
         "protocol" => {
-            let _ = url.set_scheme(value.trim_end_matches(':'));
-        }
-        "username" => {
-            let _ = url.set_username(value);
-        }
-        "password" => {
-            let _ = url.set_password(Some(value));
-        }
-        "host" => {
-            if let Ok(host_url) = url::Url::parse(&format!("{}://{value}/", url.scheme())) {
-                let _ = url.set_host(host_url.host_str());
-                let _ = url.set_port(host_url.port());
+            let scheme = value
+                .split(':')
+                .next()
+                .unwrap_or("")
+                .replace(['\t', '\n', '\r'], "");
+            if scheme.eq_ignore_ascii_case("file")
+                && matches!(url.scheme(), "http" | "https" | "ftp" | "ws" | "wss")
+                && url.username().is_empty()
+                && url.password().is_none()
+                && url.port().is_none()
+            {
+                if let Ok(next) =
+                    url::Url::parse(&format!("file{}", &url[url::Position::AfterScheme..]))
+                {
+                    *url = next;
+                }
+            } else {
+                let _ = quirks::set_protocol(url, value);
             }
         }
-        "hostname" => {
-            let _ = url.set_host(Some(value));
+        "username" => return quirks::set_username(url, value).is_ok(),
+        "password" => return quirks::set_password(url, value).is_ok(),
+        "host" | "hostname" => return mutate_anchor_host(url, component == "host", value),
+        "port" => return quirks::set_port(url, value).is_ok(),
+        "pathname" => {
+            if url.cannot_be_a_base() {
+                return false;
+            }
+            quirks::set_pathname(url, value);
         }
-        "port" => {
-            let port = if value.is_empty() {
-                None
-            } else if let Ok(port) = value.parse::<u16>() {
-                Some(port)
-            } else {
-                return Ok(url.into());
-            };
-            let _ = url.set_port(port);
-        }
-        "pathname" => url.set_path(value),
-        "search" => url.set_query((!value.is_empty()).then(|| value.trim_start_matches('?'))),
-        "hash" => url.set_fragment((!value.is_empty()).then(|| value.trim_start_matches('#'))),
-        _ => return Err(NativeError::new("unknown URL component")),
+        "search" => quirks::set_search(url, value),
+        "hash" => quirks::set_hash(url, value),
+        _ => return false,
     }
-    Ok(url.into())
+    true
+}
+
+// Adapt the dependency's setters to measured Safari host mutation behavior.
+// See WebKit Source/WebCore/html/URLDecomposition.cpp and Source/WTF/wtf/URL.cpp.
+fn mutate_anchor_host(url: &mut url::Url, include_port: bool, value: &str) -> bool {
+    if url.cannot_be_a_base() {
+        return true;
+    }
+    let special = matches!(
+        url.scheme(),
+        "http" | "https" | "ftp" | "ws" | "wss" | "file"
+    );
+    let value = value
+        .split(|c| matches!(c, '/' | '?' | '#') || (special && c == '\\'))
+        .next()
+        .unwrap_or("");
+    if value.contains('@') {
+        return true;
+    }
+    let colon = value
+        .rfind(':')
+        .filter(|&i| value.rfind(']').is_none_or(|end| end < i));
+    if let Some(colon) = colon {
+        if !include_port && value.starts_with('[') {
+            let candidate = format!(
+                "{}{}{}{}",
+                &url[..url::Position::BeforeHost],
+                if url.has_authority() { "" } else { "//" },
+                value,
+                &url[url::Position::AfterHost..],
+            );
+            return match url::Url::parse(&candidate) {
+                Ok(next) => {
+                    *url = next;
+                    true
+                }
+                Err(_) => false,
+            };
+        }
+        if !include_port || colon == 0 || (value[..colon].contains(':') && !value.starts_with('['))
+        {
+            return true;
+        }
+        let host = &value[..colon];
+        let digits: String = value[colon + 1..]
+            .chars()
+            .take_while(char::is_ascii_digit)
+            .collect();
+        if digits.is_empty() {
+            return url::quirks::set_hostname(url, host).is_ok();
+        }
+        if digits.parse::<u16>().is_err() {
+            if url::quirks::set_hostname(url, host).is_err() {
+                return false;
+            }
+            let _ = url.set_port(None);
+            return true;
+        }
+        return url::quirks::set_host(url, &format!("{host}:{digits}")).is_ok();
+    }
+    if include_port {
+        url::quirks::set_host(url, value).is_ok()
+    } else {
+        url::quirks::set_hostname(url, value).is_ok()
+    }
 }
 
 fn stale_wrapper() -> NativeError {

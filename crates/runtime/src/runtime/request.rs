@@ -105,9 +105,7 @@ pub(crate) async fn fetch_with_redirects(
             .map_err(|_| NetworkError::InvalidRequest("redirect Location is not ASCII".into()))?;
         let base = url::Url::parse(&requested_url)
             .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
-        let target = base
-            .join(location)
-            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        let target = redirect_target(&base, location)?;
         let rewrite_to_get = ((response.status == http::StatusCode::MOVED_PERMANENTLY
             || response.status == http::StatusCode::FOUND)
             && request.method == http::Method::POST)
@@ -157,6 +155,18 @@ pub(crate) fn supplied_cookie(request: &ResourceRequest) -> Option<String> {
         .get(http::header::COOKIE)
         .and_then(|value| value.to_str().ok())
         .map(str::to_owned)
+}
+
+fn redirect_target(base: &url::Url, location: &str) -> Result<url::Url, NetworkError> {
+    let mut target = base
+        .join(location)
+        .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+    // HTTP redirects inherit the current fragment when Location omits one.
+    // An explicit empty fragment is distinct and must remain empty.
+    if target.fragment().is_none() {
+        target.set_fragment(base.fragment());
+    }
+    Ok(target)
 }
 
 fn origin(url: &url::Url) -> (&str, Option<&str>, Option<u16>) {
@@ -230,9 +240,7 @@ impl RedirectTask {
             })?;
             let base = url::Url::parse(&requested_url)
                 .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
-            let target = base
-                .join(location)
-                .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+            let target = redirect_target(&base, location)?;
             let rewrite = ((response.status == http::StatusCode::MOVED_PERMANENTLY
                 || response.status == http::StatusCode::FOUND)
                 && self.request.method == http::Method::POST)
@@ -299,9 +307,7 @@ pub(crate) fn redirect_request(
         .map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
     let base =
         url::Url::parse(&request.url).map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
-    let target = base
-        .join(location)
-        .map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
+    let target = redirect_target(&base, location)?;
     if !["http", "https"].contains(&target.scheme()) {
         return Err(NetworkError::InvalidRequest(
             "redirect requires HTTP(S)".into(),

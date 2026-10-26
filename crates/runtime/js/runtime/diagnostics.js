@@ -1,4 +1,4 @@
-(stackEnabled) => {
+(stackEnabled, installRecursive) => {
     const emit = globalThis.__brimpTrace;
     delete globalThis.__brimpTrace;
     const ownKeys = Reflect.ownKeys;
@@ -13,20 +13,27 @@
     const create = Object.create;
     const setPrototypeOf = Object.setPrototypeOf;
     const substring = String.prototype.slice;
+    const minimum = Math.min;
     let reporting = false;
-    function report(kind, path, outcome, args=[]) {
+    function report(kind, path, outcome, args=[], metadata=null) {
         if (reporting) return;
         reporting = true;
         try {
             const details = create(null), summaries = [];
             setPrototypeOf(summaries, null);
-            for (let i=0;i<Math.min(args.length,8);i++) {
+            for (let i=0;i<minimum(args.length,8);i++) {
                 const v=args[i], type=typeof v;
                 if(v===null || type==='number' || type==='boolean') summaries[i]=v;
                 else if(type==='string') summaries[i]=apply(substring,v,[0,256]);
                 else { const summary=create(null);summary.type=type;summaries[i]=summary; }
             }
             details.arguments=summaries;
+            if (metadata) {
+                details.layer = metadata.layer;
+                details.target = metadata.target;
+                details.property = metadata.property;
+                if (metadata.note) details.note = metadata.note;
+            }
             if (kind === 'reflection') {
                 details.target = paths.get(args[0]) ?? null;
                 details.property = typeof args[1] === 'string' ? apply(substring,args[1],[0,256]) : null;
@@ -35,6 +42,7 @@
         }
         finally { reporting = false; }
     }
+    if (installRecursive) return installRecursive(report);
     function wrap(fn, kind, path) {
         return new Proxy(fn, {
             apply(target, receiver, args) {

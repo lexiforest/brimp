@@ -194,11 +194,12 @@ function __styleMutationBefore(operation, args) {
     const owners = new Set();
     const add = node => {
         if (node instanceof HTMLStyleElement || node instanceof HTMLLinkElement) owners.add(node);
-        if (node?.parentNode instanceof HTMLStyleElement) owners.add(node.parentNode);
+        const parent = __callHost('isNativeNode', node) ? __callHost('parentNode', node) : null;
+        if (parent instanceof HTMLStyleElement) owners.add(parent);
     };
     const subtree = node => {
         add(node);
-        if (node instanceof Element || node instanceof DocumentFragment) for (const owner of node.querySelectorAll('style,link')) owners.add(owner);
+        if (node instanceof Element || node instanceof DocumentFragment) for (const owner of __callHost('querySelectorAll', node, 'style,link')) owners.add(owner);
     };
     const [target,child,reference] = args;
     add(target);

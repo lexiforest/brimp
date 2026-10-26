@@ -1,6 +1,8 @@
+import { encode, decode, referenceValue } from './values.js';
+export { HostFunction } from './values.js';
 import { Readable } from 'node:stream';
 import { callbackContext, configurePlugins } from './plugins.js';
-export { Plugin, HostContext, pluginCatalog, hostStoragePlugin, storagePlugin, canvasPlugin, servicesPlugin, extractionPlugin, geometryPlugin, cssTypedOmPlugin, schedulingPlugin, graphicsPlugin, audioPlugin } from './plugins.js';
+export { Plugin, HostContext, pluginCatalog, hostStoragePlugin, storagePlugin, canvasPlugin, servicesPlugin, extractionPlugin, geometryPlugin, cssTypedOmPlugin, schedulingPlugin, graphicsPlugin, audioPlugin, rtcPlugin } from './plugins.js';
 import { createRequire } from 'node:module';
 const native = createRequire(import.meta.url)('./brimp.node');
 const eventNames = {requestFinished:'request_finished',requestFailed:'request_failed',webSocket:'websocket',eventSource:'eventsource'};
@@ -24,14 +26,15 @@ export class StaleHandle extends RuntimeError {}
 export class Closed extends RuntimeError {}
 export class Timeout extends RuntimeError {}
 export class Reentry extends RuntimeError {}
+function nativeError(error) {
+  const code = error.message.split(':', 1)[0];
+  const Type = { javascript: JavaScriptError, stale_handle: StaleHandle, closed: Closed, timeout: Timeout, reentry: Reentry }[code] ?? RuntimeError;
+  return new Type(error.message, code);
+}
 async function invoke(operation, pageId) {
   if (pageId !== undefined && callbackContext.getStore()?.pageId === pageId) throw new Reentry('callback cannot reenter the same page', 'reentry');
   try { return await operation(); }
-  catch (error) {
-    const code = error.message.split(':', 1)[0];
-    const Type = { javascript: JavaScriptError, stale_handle: StaleHandle, closed: Closed, timeout: Timeout, reentry: Reentry }[code] ?? RuntimeError;
-    throw new Type(error.message, code);
-  }
+  catch (error) { throw nativeError(error); }
 }
 function authHeaders(headers, auth) {
   let entries = pairs(headers);
@@ -72,6 +75,8 @@ export class Page extends Requests {
   advanceTime(milliseconds, {maxTasks = 10000} = {}) { return invoke(() => this._inner.advanceTime(milliseconds, maxTasks), this._pageId); }
   runPendingTasks({maxTasks = 10000} = {}) { return invoke(() => this._inner.runPendingTasks(maxTasks), this._pageId); }
   takeDiagnostics() { return invoke(() => this._inner.takeDiagnostics(), this._pageId); }
+  peekDiagnostics() { return invoke(() => this._inner.peekDiagnostics(), this._pageId); }
+  summarizeDiagnostics() { return invoke(() => this._inner.summarizeDiagnostics(), this._pageId); }
 
   constructor(inner, session) { super(); this._inner = inner; this._session = session; this._pageId = inner.id; this.response = null; this._subscriptions = new Set(); this._routes = new Set(); }
   _checkCallback() { if (callbackContext.getStore()?.pageId === this._pageId) throw new Reentry('callback cannot reenter the same page', 'reentry'); }
@@ -144,7 +149,7 @@ export class Page extends Requests {
   get url() { return this.response.url; }
   get headers() { return this.response.headers; }
   json() { return this.response.json(); }
-  evaluate(source) { return invoke(() => this._inner.evaluate(source), this._pageId); }
+  async evaluate(source) { return decode(JSON.parse(await invoke(() => this._inner.evaluate(source), this._pageId))); }
   async evaluateHandle(source) { return new JSHandle(await invoke(() => this._inner.evaluateHandle(source), this._pageId), this._pageId); }
   async querySelector(selector) { const inner = await invoke(() => this._inner.querySelector(selector), this._pageId); return inner == null ? null : new ElementHandle(inner, this._pageId); }
   async querySelectorAll(selector) { return (await invoke(() => this._inner.querySelectorAll(selector), this._pageId)).map(inner => new ElementHandle(inner, this._pageId)); }
@@ -183,11 +188,21 @@ export class Response {
 }
 export class JSHandle {
   constructor(inner, pageId) { this._inner = inner; this._pageId = pageId; }
-  jsonValue() { return invoke(() => this._inner.jsonValue(), this._pageId); }
-  async call(source, ...args) { return new JSHandle(await invoke(() => this._inner.call(source, args), this._pageId), this._pageId); }
-  async property(name) { return new JSHandle(await invoke(() => this._inner.property(name), this._pageId), this._pageId); }
-  propertyNames() { return invoke(() => this._inner.propertyNames(), this._pageId); }
-  dispose() { return invoke(() => this._inner.dispose(), this._pageId); }
+  [referenceValue]() { try { return JSON.parse(this._inner.reference()); } catch (error) { throw nativeError(error); } }
+  _fromReference(token) { return new JSHandle(this._inner.bindReference(JSON.stringify(token)), this._pageId); }
+  async _command(command) {
+    command.callback = callbackContext.getStore()?.pageId === this._pageId;
+    return decode(JSON.parse(await invoke(() => this._inner.command(JSON.stringify(command)))), token => this._fromReference(token));
+  }
+  value() { return this._command({op: 'value'}); }
+  async jsonValue() { return JSON.parse(await this._command({op: 'json'})); }
+  async call(source, ...args) { return this._command({op: 'call', source, args: args.map(arg => encode(arg)), handle: true}); }
+  async invoke(args = [], {thisArg} = {}) { return this._command({op: 'invoke', args: args.map(arg => encode(arg)), receiver: encode(thisArg), handle: true}); }
+  property(name) { return this._command({op: 'property', name, handle: true}); }
+  async setProperty(name, value) { return this._command({op: 'set', name, args: [encode(value)]}); }
+  deleteProperty(name) { return this._command({op: 'delete', name}); }
+  propertyNames() { return this._command({op: 'names'}); }
+  dispose() { return invoke(() => this._inner.dispose()); }
 }
 const fileRecords = files => files.map(({name, content, mimeType = '', lastModified = 0}) => ({name, bytes: [...content], mimeType, lastModified}));
 export class ElementHandle extends JSHandle {

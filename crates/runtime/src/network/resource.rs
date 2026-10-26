@@ -99,15 +99,9 @@ pub trait ResourceLoader: Send + Sync {
         callback: ResourceCallback,
     ) -> Result<(), NetworkError> {
         use std::future::Future;
-        use std::sync::Arc;
-        use std::task::{Context, Poll, Wake, Waker};
-        struct Noop;
-        impl Wake for Noop {
-            fn wake(self: Arc<Self>) {}
-        }
+        use std::task::{Context, Poll, Waker};
         let mut future = Box::pin(self.fetch(request));
-        let waker = Waker::from(Arc::new(Noop));
-        match Future::poll(future.as_mut(), &mut Context::from_waker(&waker)) {
+        match Future::poll(future.as_mut(), &mut Context::from_waker(Waker::noop())) {
             Poll::Ready(result) => {
                 callback(result);
                 Ok(())

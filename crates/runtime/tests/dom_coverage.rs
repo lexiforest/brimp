@@ -93,15 +93,16 @@ fn forms_validate_reset_and_preserve_selection() {
     );
 }
 #[test]
-fn customized_elements_and_internals_lifecycle() {
+fn safari_element_construction_and_internals_lifecycle() {
     check(
         r#"(()=>{
       class Button extends HTMLButtonElement{constructor(){super();this.marker=true}}
       customElements.define('test-button',Button,{extends:'button'});
-      const direct=new Button(), created=document.createElement('button',{is:'test-button'});
-      if(!(direct instanceof Button)||direct.localName!=='button'||!created.marker)throw Error('construction');
+      try { new Button(); return false; } catch(error) { if(error.name !== 'TypeError') return false; }
+      const created=document.createElement('button',{is:'test-button'});
+      if(created instanceof Button || created.hasAttribute('is') || created.marker)throw Error('unsupported customized built-in');
       const root=document.createElement('div');root.innerHTML='<button is="test-button"></button>';customElements.upgrade(root);
-      if(!(root.firstChild instanceof Button))throw Error('upgrade');
+      if(root.firstChild instanceof Button)throw Error('unsupported upgrade');
       class Autonomous extends HTMLElement{constructor(){super();this.internals=this.attachInternals()}}
       customElements.define('test-autonomous',Autonomous);const e=new Autonomous();e.internals.role='button';e.internals.states.add('expanded');
       const shadow=e.attachShadow({mode:'closed'});if(e.internals.shadowRoot!==shadow||e.hasAttribute('role')||!e.internals.states.has('expanded'))throw Error('internals');

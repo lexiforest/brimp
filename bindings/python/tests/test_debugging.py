@@ -4,6 +4,41 @@ from brimp import Session, JavaScriptError
 from brimp import plugins
 
 
+def test_recursive_diagnostics_nested_reads_writes_and_calls(tmp_path):
+    trace = tmp_path / 'recursive.jsonl'
+    with Session(time_mode='logical', diagnostics={'mode': 'recursive', 'path': str(trace)}) as session:
+        page = session.new_page()
+        assert page.evaluate('''window.fixture = {nested: {value: 1}};
+            window.fixture.nested.value = 2; void window.fixture.nested.missing;
+            new Promise(resolve => setTimeout(() => resolve(document.body.tagName), 1))''') == 'BODY'
+        summary = page.summarize_diagnostics()
+        assert summary['coverage']['mode'] == 'recursive'
+        assert any(entry['layer'] == 'recursive' and entry['kind'] == 'set'
+                   and entry['path'] == 'window.fixture.nested.value' for entry in summary['dependencies'])
+        assert any(record['path'] == 'window.fixture.nested.missing' and record['outcome'] == 'undefined'
+                   for record in page.peek_diagnostics()['records'])
+    assert any(json.loads(line)['details'].get('layer') == 'recursive'
+               for line in trace.read_text().splitlines() if json.loads(line)['details'])
+
+
+def test_retained_function_diagnostic_inspection():
+    with Session(time_mode='logical', time_origin=1000,
+                 diagnostics={'include': ['Document.prototype.querySelector']}) as session:
+        page = session.new_page()
+        with page.evaluate_handle('(() => { let calls = 0; return async n => { await new Promise(r => setTimeout(r, 5)); document.querySelector("body"); return [n + ++calls, Date.now()]; }; })()') as fn:
+            page.take_diagnostics()
+            for expected in [[41, 1005], [42, 1010]]:
+                with fn.call('(fn, n) => fn(n)', 40) as result:
+                    assert result.json_value() == expected
+            before = page.peek_diagnostics()
+            summary = page.summarize_diagnostics()
+            assert summary['coverage']['enabled'] is True
+            assert summary['write_error'] is None
+            assert summary['dependencies'] == [dict(layer='api', path='Document.prototype.querySelector', kind='call', target=None, property=None, count=2, throws=0)]
+            assert page.take_diagnostics() == before
+            assert page.summarize_diagnostics()['retained'] == 0
+
+
 def test_clock_diagnostics_and_plugins(tmp_path):
     path = tmp_path / 'trace.jsonl'
     with Session(time_mode='logical', time_origin=1000,

@@ -1,0 +1,5737 @@
+[
+  {
+    "parent": "document",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3"
+        ],
+        "count": 1,
+        "first": "svg:3",
+        "last": "svg:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "document",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "html",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "svg",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "foreign",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "fragment",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "template-content",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "text"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1"
+        ],
+        "count": 1,
+        "first": "svg:1",
+        "last": "svg:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "text",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:2"
+        ],
+        "count": 1,
+        "first": "svg:2",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:3"
+        ],
+        "count": 1,
+        "first": "html:3",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:1",
+          "html:0"
+        ],
+        "count": 2,
+        "first": "svg:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:2"
+        ],
+        "count": 1,
+        "first": "html:2",
+        "last": "html:2",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "text",
+      "html",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:3",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "svg:3",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1"
+        ],
+        "count": 1,
+        "first": "html:1",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:4"
+        ],
+        "count": 1,
+        "first": "html:4",
+        "last": "html:4",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "svg",
+      "text",
+      "foreign",
+      "html"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0"
+        ],
+        "count": 1,
+        "first": "svg:0",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2"
+        ],
+        "count": 2,
+        "first": "svg:0",
+        "last": "foreign:2",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:0",
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 3,
+        "first": "svg:0",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3"
+        ],
+        "count": 2,
+        "first": "foreign:2",
+        "last": "html:3",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 4,
+        "first": "svg:4",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "foreign:2",
+          "html:3",
+          "svg:0"
+        ],
+        "count": 3,
+        "first": "foreign:2",
+        "last": "svg:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "comment",
+      "prefixed",
+      "upper",
+      "comment"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1"
+        ],
+        "count": 1,
+        "first": "prefixed:1",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "prefixed:1",
+          "upper:2"
+        ],
+        "count": 2,
+        "first": "prefixed:1",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2"
+        ],
+        "count": 1,
+        "first": "upper:2",
+        "last": "upper:2",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 3,
+        "first": "svg:4",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "upper:2",
+          "prefixed:1"
+        ],
+        "count": 2,
+        "first": "upper:2",
+        "last": "prefixed:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  },
+  {
+    "parent": "shadow",
+    "pattern": [
+      "html",
+      "html",
+      "svg",
+      "foreign"
+    ],
+    "expected": [
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      },
+      {
+        "members": [
+          "html:0"
+        ],
+        "count": 1,
+        "first": "html:0",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1"
+        ],
+        "count": 2,
+        "first": "html:0",
+        "last": "html:1",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2"
+        ],
+        "count": 3,
+        "first": "html:0",
+        "last": "svg:2",
+        "same": true
+      },
+      {
+        "members": [
+          "html:0",
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 4,
+        "first": "html:0",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3"
+        ],
+        "count": 3,
+        "first": "html:1",
+        "last": "foreign:3",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "svg:4",
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 5,
+        "first": "svg:4",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:1",
+          "svg:2",
+          "foreign:3",
+          "html:0"
+        ],
+        "count": 4,
+        "first": "html:1",
+        "last": "html:0",
+        "same": true
+      },
+      {
+        "members": [
+          "html:5"
+        ],
+        "count": 1,
+        "first": "html:5",
+        "last": "html:5",
+        "same": true
+      },
+      {
+        "members": [],
+        "count": 0,
+        "first": null,
+        "last": null,
+        "same": true
+      }
+    ]
+  }
+]

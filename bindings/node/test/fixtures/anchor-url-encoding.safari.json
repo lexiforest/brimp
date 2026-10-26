@@ -1,0 +1,118 @@
+[
+  [
+    [
+      "attribute",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9"
+    ],
+    [
+      "href",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9"
+    ],
+    [
+      "search",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80"
+    ],
+    [
+      "adopted",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é"
+    ]
+  ],
+  [
+    [
+      "attribute",
+      "https://example.test/%C3%A9?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B#%C3%A9",
+      "?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "href",
+      "https://example.test/%C3%A9?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B#%C3%A9",
+      "?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%26%2312288%3B%26%239731%3B%26%2320013%3B%E9%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "search",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80"
+    ],
+    [
+      "adopted",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é"
+    ]
+  ],
+  [
+    [
+      "attribute",
+      "https://example.test/%C3%A9?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B#%C3%A9",
+      "?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "href",
+      "https://example.test/%C3%A9?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B#%C3%A9",
+      "?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%A1@%26%239731%3B%A4%A4%26%23233%3B%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "search",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80"
+    ],
+    [
+      "adopted",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é"
+    ]
+  ],
+  [
+    [
+      "attribute",
+      "https://example.test/%C3%A9?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B#%C3%A9",
+      "?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "href",
+      "https://example.test/%C3%A9?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B#%C3%A9",
+      "?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B",
+      "https://example.test/é?X　☃中é🦀#é",
+      "https://example.test/%C3%A9?X%1B$B!!%1B(B%26%239731%3B%1B$BCf%1B(B%26%23233%3B%26%23129408%3B#%C3%A9"
+    ],
+    [
+      "search",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80"
+    ],
+    [
+      "adopted",
+      "https://example.test/%C3%A9?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80#%C3%A9",
+      "?X%E3%80%80%E2%98%83%E4%B8%AD%C3%A9%F0%9F%A6%80",
+      "https://example.test/é?X　☃中é🦀#é"
+    ]
+  ]
+]

@@ -38,8 +38,21 @@ for (const [name, code] of Object.entries(DOMException.__codes)) {
 }
 
 const __trustedEvents = new WeakSet();
+const __pendingTrustedEvents = new WeakSet();
+const __uninitializedEvents = new WeakSet();
+const __eventData = new WeakMap();
+function __eventRecord(event) {
+    const record = __eventData.get(event);
+    if (!record) throw new TypeError('Illegal invocation');
+    return record;
+}
 function __markTrustedEvent(event) {
     __trustedEvents.add(event);
+    __pendingTrustedEvents.add(event);
+    if (__keyboardEventData.has(event)) {
+        const data = __keyboardEventData.get(event);
+        __uiEventData.get(event).which = event.type === 'keypress' ? data.charCode : data.keyCode;
+    }
     return event;
 }
 Object.defineProperty(globalThis, "__brimpMarkTrustedEvent", {
@@ -52,23 +65,35 @@ Object.defineProperty(globalThis, "__brimpMarkTrustedEvent", {
 class Event {
     constructor(type, options = {}) {
         if (arguments.length === 0) throw new TypeError("Event type is required");
-        this.type = String(type);
-        this.bubbles = Boolean(options.bubbles);
-        this.cancelable = Boolean(options.cancelable);
-        this.target = null;
-        this.srcElement = null;
-        this.currentTarget = null;
-        this.eventPhase = 0;
-        this.defaultPrevented = false;
-        this.composed = Boolean(options.composed);
-        this.timeStamp = Date.now();
+        type = `${type}`;
+        if (options == null) options = {};
+        if (typeof options !== 'object' && typeof options !== 'function') throw new TypeError('Expected an event dictionary');
+        __eventData.set(this, {
+            type, bubbles:Boolean(options.bubbles), cancelable:Boolean(options.cancelable), composed:Boolean(options.composed),
+            target:null, currentTarget:null, eventPhase:0, defaultPrevented:false, timeStamp:__nativeHost('clockNow'),
+        });
+        Object.defineProperty(this, 'isTrusted', {enumerable:true, get() {
+            __eventRecord(this);
+            return __trustedEvents.has(this);
+        }});
         this.__stopped = false;
         this.__immediateStopped = false;
         this.__dispatching = false;
         this.__inPassiveListener = false;
     }
+    get type() { return __eventRecord(this).type; }
+    get bubbles() { return __eventRecord(this).bubbles; }
+    get cancelable() { return __eventRecord(this).cancelable; }
+    get composed() { return __eventRecord(this).composed; }
+    get target() { return __eventRecord(this).target; }
+    get srcElement() { return __eventRecord(this).target; }
+    get currentTarget() { return __eventRecord(this).currentTarget; }
+    get eventPhase() { return __eventRecord(this).eventPhase; }
+    get defaultPrevented() { return __eventRecord(this).defaultPrevented; }
+    get timeStamp() { return __eventRecord(this).timeStamp; }
     preventDefault() {
-        if (this.cancelable && !this.__inPassiveListener) this.defaultPrevented = true;
+        const record = __eventRecord(this);
+        if (record.cancelable && !this.__inPassiveListener) record.defaultPrevented = true;
     }
     stopPropagation() { this.__stopped = true; }
     stopImmediatePropagation() {
@@ -78,11 +103,17 @@ class Event {
     composedPath() { return __visibleEventPath(this); }
     initEvent(type, bubbles = false, cancelable = false) {
         if (arguments.length === 0) throw new TypeError("Event type is required");
+        type = `${type}`;
         if (this.__dispatching) return;
-        this.type = String(type);
-        this.bubbles = Boolean(bubbles);
-        this.cancelable = Boolean(cancelable);
-        this.defaultPrevented = false;
+        const record = __eventRecord(this);
+        record.type = type;
+        record.bubbles = Boolean(bubbles);
+        record.cancelable = Boolean(cancelable);
+        record.target = null;
+        __uninitializedEvents.delete(this);
+        __trustedEvents.delete(this);
+        __pendingTrustedEvents.delete(this);
+        record.defaultPrevented = false;
         this.__stopped = false;
         this.__immediateStopped = false;
     }
@@ -90,104 +121,214 @@ class Event {
     set cancelBubble(value) { if (value) this.stopPropagation(); }
     get returnValue() { return !this.defaultPrevented; }
     set returnValue(value) { if (!value) this.preventDefault(); }
-    get isTrusted() {
-        if (!Event.prototype.isPrototypeOf(this)) throw new TypeError("Illegal invocation");
-        return __trustedEvents.has(this);
-    }
 }
-Event.NONE = 0;
-Event.CAPTURING_PHASE = 1;
-Event.AT_TARGET = 2;
-Event.BUBBLING_PHASE = 3;
-Object.defineProperty(Event.prototype, "isTrusted", {
-    ...Object.getOwnPropertyDescriptor(Event.prototype, "isTrusted"),
-    enumerable: true,
-    configurable: false,
-});
+for (const [name, value] of Object.entries({NONE:0, CAPTURING_PHASE:1, AT_TARGET:2, BUBBLING_PHASE:3})) {
+    Object.defineProperty(Event, name, {value, enumerable:true});
+    Object.defineProperty(Event.prototype, name, {value, enumerable:true});
+}
+const __preventEventDefault = Event.prototype.preventDefault;
+const __initializeEvent = Event.prototype.initEvent;
 
+const __customEventData = new WeakMap();
 class CustomEvent extends Event {
     constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError('Event type is required');
+        if (options == null) options = {};
         super(type, options);
-        this.detail = options.detail === undefined ? null : options.detail;
+        const detail = options.detail;
+        __customEventData.set(this, {detail:detail === undefined ? null : detail});
     }
+    get detail() { return __customEventData.get(this).detail; }
     initCustomEvent(type, bubbles = false, cancelable = false, detail = null) {
         if (arguments.length === 0) throw new TypeError("Event type is required");
+        type = `${type}`;
         if (this.__dispatching) return;
-        this.initEvent(type, bubbles, cancelable);
-        this.detail = detail;
+        __initializeEvent.call(this, type, bubbles, cancelable);
+        __customEventData.get(this).detail = detail;
     }
 }
 
+const __errorEventData = new WeakMap();
+class ErrorEvent extends Event {
+    constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError('ErrorEvent type is required');
+        type = `${type}`;
+        if (options == null) options = {};
+        if (typeof options !== 'object' && typeof options !== 'function') throw new TypeError('Expected an event dictionary');
+        // Inherited dictionary members precede the derived members, with each
+        // dictionary's own members read and converted in lexical order.
+        const bubbles = Boolean(options.bubbles), cancelable = Boolean(options.cancelable);
+        const composed = Boolean(options.composed);
+        const colno = options.colno, column = colno === undefined ? 0 : +colno >>> 0;
+        const error = options.error;
+        const filename = options.filename, file = filename === undefined ? '' : __toUSVString(`${filename}`);
+        const lineno = options.lineno, line = lineno === undefined ? 0 : +lineno >>> 0;
+        const message = options.message, text = message === undefined ? '' : `${message}`;
+        super(type, {bubbles, cancelable, composed});
+        __errorEventData.set(this, {message:text, filename:file, lineno:line, colno:column, error});
+    }
+    get message() { return __errorEventRecord(this).message; }
+    get filename() { return __errorEventRecord(this).filename; }
+    get lineno() { return __errorEventRecord(this).lineno; }
+    get colno() { return __errorEventRecord(this).colno; }
+    get error() { return __errorEventRecord(this).error; }
+}
+function __errorEventRecord(event) {
+    const record = __errorEventData.get(event);
+    if (!record) throw new TypeError('Illegal invocation');
+    return record;
+}
+
+const __beforeUnloadEventData = new WeakMap();
+class BeforeUnloadEvent extends Event {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get returnValue() {
+        if (!__beforeUnloadEventData.has(this)) throw new TypeError('Illegal invocation');
+        return __beforeUnloadEventData.get(this);
+    }
+    set returnValue(value) {
+        if (!__beforeUnloadEventData.has(this)) throw new TypeError('Illegal invocation');
+        __beforeUnloadEventData.set(this, `${value}`);
+    }
+}
+function __createBeforeUnloadEvent() {
+    const event = new Event('');
+    Object.setPrototypeOf(event, BeforeUnloadEvent.prototype);
+    __beforeUnloadEventData.set(event, '');
+    __uninitializedEvents.add(event);
+    return event;
+}
+
+const __uiEventData = new WeakMap();
+function __eventView(value) {
+    if (value == null) return null;
+    if (!__windowEventTargets.has(value)) throw new TypeError('Expected a Window');
+    return value;
+}
 class UIEvent extends Event {
     constructor(type, options = {}) {
+        if (arguments.length === 0) throw new TypeError('Event type is required');
+        if (options == null) options = {};
         super(type, options);
-        this.view = options.view === undefined ? null : options.view;
-        this.detail = Number(options.detail ?? 0);
-        this.sourceCapabilities = null;
-        this.which = 0;
+        const detail = +options.detail >> 0, view = __eventView(options.view);
+        __uiEventData.set(this, {view, detail, which:0});
     }
+    get view() { return __uiEventData.get(this).view; }
+    get detail() { return __uiEventData.get(this).detail; }
+    get which() { return __uiEventData.get(this).which; }
     initUIEvent(type, bubbles = false, cancelable = false, view = null, detail = 0) {
+        if (arguments.length === 0) throw new TypeError('Event type is required');
+        type = `${type}`;
+        view = __eventView(view);
+        detail = +detail >> 0;
         if (this.__dispatching) return;
-        this.initEvent(type, bubbles, cancelable);
-        this.view = view;
-        this.detail = Number(detail);
+        __initializeEvent.call(this, type, bubbles, cancelable);
+        Object.assign(__uiEventData.get(this), {view, detail});
     }
 }
 
+const __initializeUIEvent = UIEvent.prototype.initUIEvent;
+const __textEventData = new WeakMap();
+class TextEvent extends UIEvent {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get data() { return __textEventData.get(this); }
+    initTextEvent(type, bubbles = false, cancelable = false, view = null, data = undefined) {
+        if (arguments.length === 0) throw new TypeError('Event type is required');
+        type = `${type}`;
+        view = __eventView(view);
+        data = `${data}`;
+        if (this.__dispatching) return;
+        __initializeUIEvent.call(this, type, bubbles, cancelable, view, 0);
+        __textEventData.set(this, data);
+    }
+}
+function __createTextEvent() {
+    const event = new UIEvent('');
+    Object.setPrototypeOf(event, TextEvent.prototype);
+    __textEventData.set(event, '');
+    __uninitializedEvents.add(event);
+    return event;
+}
+
+const __eventModifiers = new WeakMap();
 function __initializeModifiers(event, options) {
-    event.ctrlKey = Boolean(options.ctrlKey);
-    event.shiftKey = Boolean(options.shiftKey);
-    event.altKey = Boolean(options.altKey);
-    event.metaKey = Boolean(options.metaKey);
-    event.__modifierAltGraph = Boolean(options.modifierAltGraph);
-    event.__modifierCapsLock = Boolean(options.modifierCapsLock);
+    const state = Object.create(null);
+    for (const [key, option] of Object.entries({Control:'ctrlKey', Shift:'shiftKey', Alt:'altKey', Meta:'metaKey',
+        AltGraph:'modifierAltGraph', CapsLock:'modifierCapsLock', Fn:'modifierFn', FnLock:'modifierFnLock',
+        Hyper:'modifierHyper', NumLock:'modifierNumLock', ScrollLock:'modifierScrollLock', Super:'modifierSuper', Symbol:'modifierSymbol', SymbolLock:'modifierSymbolLock'})) {
+        state[key] = Boolean(options[option]);
+    }
+    __eventModifiers.set(event, state);
 }
-
-function __getModifierState(event, key) {
-    return ({
-        Control: event.ctrlKey,
-        Shift: event.shiftKey,
-        Alt: event.altKey,
-        Meta: event.metaKey,
-        AltGraph: event.__modifierAltGraph,
-        CapsLock: event.__modifierCapsLock,
-    })[String(key)] ?? false;
+function __getModifierState(event, key, count) {
+    if (!count) throw new TypeError('Not enough arguments');
+    key = `${key}`;
+    return __eventModifiers.get(event)[key] ?? false;
 }
-
+function __eventDouble(value) {
+    return value === undefined ? 0 : +value;
+}
+function __eventRelatedTarget(value) {
+    if (value == null) return null;
+    if (!__eventTargets.has(value) && !__windowEventTargets.has(value) &&
+        !((typeof value === 'object' || typeof value === 'function') && __nativeHost('isNativeNode', value))) throw new TypeError('Expected an EventTarget');
+    return value;
+}
+const __mouseEventData = new WeakMap();
 class MouseEvent extends UIEvent {
     constructor(type, options = {}) {
+        if (!arguments.length) throw new TypeError('Event type is required');
+        if (options == null) options = {};
         super(type, options);
-        this.screenX = Number(options.screenX ?? 0);
-        this.screenY = Number(options.screenY ?? 0);
-        this.clientX = Number(options.clientX ?? 0);
-        this.clientY = Number(options.clientY ?? 0);
-        this.button = Number(options.button ?? 0);
-        this.buttons = Number(options.buttons ?? 0);
-        this.relatedTarget = options.relatedTarget === undefined ? null : options.relatedTarget;
-        this.movementX = Number(options.movementX ?? 0);
-        this.movementY = Number(options.movementY ?? 0);
+        const data = {
+            screenX:__eventDouble(options.screenX), screenY:__eventDouble(options.screenY),
+            clientX:__eventDouble(options.clientX), clientY:__eventDouble(options.clientY),
+            button:(+options.button << 16) >> 16, buttons:+options.buttons & 65535,
+            relatedTarget:__eventRelatedTarget(options.relatedTarget),
+            movementX:__eventDouble(options.movementX), movementY:__eventDouble(options.movementY),
+        };
+        __mouseEventData.set(this, data);
+        __uiEventData.get(this).which = data.button + 1;
         __initializeModifiers(this, options);
     }
+    get screenX() { return Math.floor(__mouseEventData.get(this).screenX); }
+    get screenY() { return Math.floor(__mouseEventData.get(this).screenY); }
+    get clientX() { return Math.floor(__mouseEventData.get(this).clientX); }
+    get clientY() { return Math.floor(__mouseEventData.get(this).clientY); }
+    get button() { return __mouseEventData.get(this).button; }
+    get buttons() { return __mouseEventData.get(this).buttons; }
+    get relatedTarget() { return __mouseEventData.get(this).relatedTarget; }
+    get movementX() { return __mouseEventData.get(this).movementX; }
+    get movementY() { return __mouseEventData.get(this).movementY; }
+    get ctrlKey() { return __eventModifiers.get(this).Control; }
+    get shiftKey() { return __eventModifiers.get(this).Shift; }
+    get altKey() { return __eventModifiers.get(this).Alt; }
+    get metaKey() { return __eventModifiers.get(this).Meta; }
+    get fromElement() { return ['mouseout','mouseleave'].includes(this.type) ? this.target : this.relatedTarget; }
+    get toElement() { return ['mouseout','mouseleave'].includes(this.type) ? this.relatedTarget : this.target; }
     get x() { return this.clientX; }
     get y() { return this.clientY; }
-    get pageX() { return this.clientX; }
-    get pageY() { return this.clientY; }
-    get offsetX() { return this.clientX; }
-    get offsetY() { return this.clientY; }
-    getModifierState(key) { return __getModifierState(this, key); }
+    // Explicit legacy placeholders: this runtime has no layout coordinate space.
+    get pageX() { return 0; }
+    get pageY() { return 0; }
+    get offsetX() { return 0; }
+    get offsetY() { return 0; }
+    get layerX() { return 0; }
+    get layerY() { return 0; }
+    getModifierState(key) { return __getModifierState(this, key, arguments.length); }
     initMouseEvent(type, bubbles = false, cancelable = false, view = null, detail = 0,
                    screenX = 0, screenY = 0, clientX = 0, clientY = 0,
                    ctrlKey = false, altKey = false, shiftKey = false, metaKey = false,
                    button = 0, relatedTarget = null) {
+        if (!arguments.length) throw new TypeError('Event type is required');
+        type = `${type}`; view = __eventView(view); detail = +detail >> 0;
+        const data = {screenX:+screenX >> 0, screenY:+screenY >> 0, clientX:+clientX >> 0, clientY:+clientY >> 0,
+            button:(+button << 16) >> 16, buttons:0, relatedTarget:__eventRelatedTarget(relatedTarget), movementX:0, movementY:0};
         if (this.__dispatching) return;
-        this.initUIEvent(type, bubbles, cancelable, view, detail);
-        Object.assign(this, {
-            screenX: Number(screenX), screenY: Number(screenY),
-            clientX: Number(clientX), clientY: Number(clientY),
-            ctrlKey: Boolean(ctrlKey), altKey: Boolean(altKey),
-            shiftKey: Boolean(shiftKey), metaKey: Boolean(metaKey),
-            button: Number(button), buttons: 0, relatedTarget,
-        });
+        __initializeUIEvent.call(this, type, bubbles, cancelable, view, detail);
+        __mouseEventData.set(this, data);
+        __uiEventData.get(this).which = data.button + 1;
+        __initializeModifiers(this, {ctrlKey, altKey, shiftKey, metaKey});
     }
 }
 
@@ -239,40 +380,91 @@ class SubmitEvent extends Event {
     }
 }
 
+const __keyboardEventData = new WeakMap();
 class KeyboardEvent extends UIEvent {
     constructor(type, options = {}) {
+        if (!arguments.length) throw new TypeError('Event type is required');
+        if (options == null) options = {};
         super(type, options);
-        this.key = String(options.key ?? "");
-        this.code = String(options.code ?? "");
-        this.location = Number(options.location ?? 0);
-        this.repeat = Boolean(options.repeat);
-        this.isComposing = Boolean(options.isComposing);
-        this.charCode = Number(options.charCode ?? 0);
-        this.keyCode = Number(options.keyCode ?? 0);
-        this.which = type === "keypress" ? this.charCode : this.keyCode;
+        const key = options.key, code = options.code;
+        __keyboardEventData.set(this, {key:key === undefined ? '' : `${key}`, code:code === undefined ? '' : `${code}`,
+            location:+options.location >>> 0, repeat:Boolean(options.repeat), isComposing:Boolean(options.isComposing),
+            charCode:+options.charCode >>> 0, keyCode:+options.keyCode >>> 0});
         __initializeModifiers(this, options);
     }
-    getModifierState(key) { return __getModifierState(this, key); }
+    get key() { return __keyboardEventData.get(this).key; }
+    get code() { return __keyboardEventData.get(this).code; }
+    get location() { return __keyboardEventData.get(this).location; }
+    get repeat() { return __keyboardEventData.get(this).repeat; }
+    get isComposing() { return __keyboardEventData.get(this).isComposing; }
+    get charCode() { return __keyboardEventData.get(this).charCode; }
+    get keyCode() { return __keyboardEventData.get(this).keyCode; }
+    get ctrlKey() { return __eventModifiers.get(this).Control; }
+    get shiftKey() { return __eventModifiers.get(this).Shift; }
+    get altKey() { return __eventModifiers.get(this).Alt; }
+    get metaKey() { return __eventModifiers.get(this).Meta; }
+    getModifierState(key) { return __getModifierState(this, key, arguments.length); }
+    initKeyboardEvent(type, bubbles = false, cancelable = false, view = null, keyIdentifier = '', location = 0,
+                      ctrlKey = false, altKey = false, shiftKey = false, metaKey = false) {
+        if (!arguments.length) throw new TypeError('Event type is required');
+        // Safari converts the legacy identifier but leaves key/code empty.
+        type = `${type}`; view = __eventView(view); keyIdentifier = `${keyIdentifier}`; location = +location >>> 0;
+        if (this.__dispatching) return;
+        __initializeUIEvent.call(this, type, bubbles, cancelable, view, 0);
+        __keyboardEventData.set(this, {key:'', code:'', location, repeat:false, isComposing:false, charCode:0, keyCode:0});
+        __uiEventData.get(this).which = 0;
+        __initializeModifiers(this, {ctrlKey, altKey, shiftKey, metaKey});
+    }
 }
-KeyboardEvent.DOM_KEY_LOCATION_STANDARD = 0;
-KeyboardEvent.DOM_KEY_LOCATION_LEFT = 1;
-KeyboardEvent.DOM_KEY_LOCATION_RIGHT = 2;
-KeyboardEvent.DOM_KEY_LOCATION_NUMPAD = 3;
+for (const [name, value] of Object.entries({DOM_KEY_LOCATION_STANDARD:0, DOM_KEY_LOCATION_LEFT:1, DOM_KEY_LOCATION_RIGHT:2, DOM_KEY_LOCATION_NUMPAD:3})) {
+    Object.defineProperty(KeyboardEvent, name, {value, enumerable:true});
+    Object.defineProperty(KeyboardEvent.prototype, name, {value, enumerable:true});
+}
 
+const __pointerEventData = new WeakMap();
+function __pointerNumber(value, fallback = 0) {
+    const number = value === undefined ? fallback : +value;
+    if (!Number.isFinite(number)) throw new TypeError('Expected a finite number');
+    return number;
+}
 class PointerEvent extends MouseEvent {
     constructor(type, options = {}) {
+        if (!arguments.length) throw new TypeError('Event type is required');
+        if (options == null) options = {};
         super(type, options);
-        this.pointerId = Number(options.pointerId ?? 0);
-        this.width = Number(options.width ?? 1);
-        this.height = Number(options.height ?? 1);
-        this.pressure = Number(options.pressure ?? 0);
-        this.tangentialPressure = Number(options.tangentialPressure ?? 0);
-        this.tiltX = Number(options.tiltX ?? 0);
-        this.tiltY = Number(options.tiltY ?? 0);
-        this.twist = Number(options.twist ?? 0);
-        this.pointerType = String(options.pointerType ?? "");
-        this.isPrimary = Boolean(options.isPrimary);
+        const pointerType = options.pointerType;
+        const data = {pointerId:+options.pointerId >> 0, width:__pointerNumber(options.width, 1), height:__pointerNumber(options.height, 1),
+            pressure:Math.fround(__pointerNumber(options.pressure)), tangentialPressure:Math.fround(__pointerNumber(options.tangentialPressure)),
+            tiltX:+options.tiltX >> 0, tiltY:+options.tiltY >> 0, twist:+options.twist >>> 0,
+            pointerType:pointerType === undefined ? '' : `${pointerType}`, isPrimary:Boolean(options.isPrimary)};
+        const radians = Math.PI / 180, x = Math.tan(data.tiltX * radians), y = Math.tan(data.tiltY * radians);
+        data.altitudeAngle = Math.atan2(1, Math.hypot(x, y));
+        data.azimuthAngle = (Math.atan2(y, x) + 2 * Math.PI) % (2 * Math.PI);
+        const altitude = options.altitudeAngle, azimuth = options.azimuthAngle;
+        if (altitude !== undefined || azimuth !== undefined) {
+            const a = __pointerNumber(altitude, Math.PI / 2), z = __pointerNumber(azimuth);
+            // Safari exposes angles from the initial tilt while explicit angle
+            // options determine the final tilt payload.
+            data.tiltX = Math.round(Math.atan2(Math.cos(z), Math.tan(a)) / radians);
+            data.tiltY = Math.round(Math.atan2(Math.sin(z), Math.tan(a)) / radians);
+        }
+        __pointerEventData.set(this, data);
     }
+    get pointerId() { return __pointerEventData.get(this).pointerId; }
+    get width() { return __pointerEventData.get(this).width; }
+    get height() { return __pointerEventData.get(this).height; }
+    get pressure() { return __pointerEventData.get(this).pressure; }
+    get tangentialPressure() { return __pointerEventData.get(this).tangentialPressure; }
+    get tiltX() { return __pointerEventData.get(this).tiltX; }
+    get tiltY() { return __pointerEventData.get(this).tiltY; }
+    get twist() { return __pointerEventData.get(this).twist; }
+    get pointerType() { return __pointerEventData.get(this).pointerType; }
+    get isPrimary() { return __pointerEventData.get(this).isPrimary; }
+    get altitudeAngle() { return __pointerEventData.get(this).altitudeAngle; }
+    get azimuthAngle() { return __pointerEventData.get(this).azimuthAngle; }
+    // Legacy placeholders: no hardware sample history or prediction engine.
+    getCoalescedEvents() {}
+    getPredictedEvents() {}
 }
 
 class Touch {
@@ -301,6 +493,10 @@ class TouchEvent extends UIEvent {
         this.changedTouches = Object.freeze(Array.from(options.changedTouches ?? []));
         __initializeModifiers(this, options);
     }
+    get ctrlKey() { return __eventModifiers.get(this).Control; }
+    get shiftKey() { return __eventModifiers.get(this).Shift; }
+    get altKey() { return __eventModifiers.get(this).Alt; }
+    get metaKey() { return __eventModifiers.get(this).Meta; }
 }
 
 class MessageEvent extends Event {
@@ -356,46 +552,135 @@ class HashChangeEvent extends Event {
 }
 
 function __listenerCapture(options) {
-    return typeof options === "boolean" ? options : Boolean(options && options.capture);
+    return options !== null && (typeof options === 'object' || typeof options === 'function')
+        ? Boolean(options.capture) : Boolean(options);
+}
+function __listenerArguments(type, callback, count) {
+    if (count < 2) throw new TypeError('Not enough arguments');
+    type = `${type}`;
+    if (callback != null && typeof callback !== 'object' && typeof callback !== 'function') throw new TypeError('Expected an event listener');
+    return type;
+}
+
+const __eventHandlerRecords = new WeakMap();
+const __windowEventTargets = new WeakSet([globalThis]);
+const __bodyWindowEventTypes = [
+    'afterprint', 'beforeprint', 'blur', 'focus', 'hashchange', 'languagechange',
+    'load', 'message', 'messageerror', 'offline', 'online', 'pagehide', 'pageshow',
+    'popstate', 'rejectionhandled', 'resize', 'scroll', 'storage', 'unhandledrejection', 'unload',
+    'error', 'beforeunload',
+];
+function __defaultPassiveListener(target, type) {
+    if (!['touchstart', 'touchmove', 'wheel', 'mousewheel'].includes(type)) return false;
+    if (target === globalThis || target instanceof Document) return true;
+    const owner = target instanceof Node ? target.ownerDocument : null;
+    return !!owner && (target === owner.body || target === owner.documentElement);
+}
+function __defineEventHandlers(prototype, types, windowReflecting = false) {
+    // Forwarding belongs to the body/frameset accessor. Explicitly calling an
+    // HTMLElement accessor on the same receiver still accesses its local handler.
+    const handlerTarget = receiver => windowReflecting
+        ? __documentWindow(__callHost('ownerDocument', receiver)) : receiver;
+    for (const type of types) {
+        const property = `on${type}`;
+        const eventType = ({webkitanimationend:'webkitAnimationEnd', webkitanimationiteration:'webkitAnimationIteration',
+            webkitanimationstart:'webkitAnimationStart', webkittransitionend:'webkitTransitionEnd'})[type] ?? type;
+        const descriptor = Object.getOwnPropertyDescriptor({
+            get [property]() { return __eventHandlerRecords.get(handlerTarget(this))?.get(eventType)?.value ?? null; },
+            set [property](value) {
+                const target = handlerTarget(this);
+                if (target === null) return;
+                if ((typeof value !== 'object' && typeof value !== 'function') || value === null) value = null;
+                let handlers = __eventHandlerRecords.get(target);
+                if (!handlers) __eventHandlerRecords.set(target, handlers = new Map());
+                let record = handlers.get(eventType);
+                if (!record) handlers.set(eventType, record = {value:null, listener:null});
+                record.value = value;
+                let listeners = __eventListeners.get(target);
+                if (!listeners) __eventListeners.set(target, listeners = []);
+                if (value === null && record.listener) {
+                    const index = listeners.indexOf(record.listener);
+                    if (index !== -1) listeners.splice(index, 1);
+                    record.listener = null;
+                } else if (value !== null && !record.listener) {
+                    record.listener = {
+                        type:eventType, capture:false, once:false, passive:__defaultPassiveListener(target, eventType),
+                        callback(event) {
+                            if (typeof record.value !== 'function') return;
+                            const error = eventType === 'error' && __windowEventTargets.has(this) && __errorEventData.get(event);
+                            const result = error
+                                ? record.value.call(undefined, error.message, error.filename, error.lineno, error.colno, error.error)
+                                : record.value.call(this, event);
+                            if (eventType === 'beforeunload') {
+                                if (!__beforeUnloadEventData.has(event)) return;
+                                const value = result == null ? null : `${result}`;
+                                if (value !== null) {
+                                    __preventEventDefault.call(event);
+                                    if (__beforeUnloadEventData.get(event) === '') __beforeUnloadEventData.set(event, value);
+                                }
+                            } else if (error ? result === true : result === false) __preventEventDefault.call(event);
+                        },
+                    };
+                    listeners.push(record.listener);
+                }
+            },
+        }, property);
+        if (['beforecopy', 'beforecut', 'beforepaste', 'webkitfullscreenchange', 'webkitfullscreenerror',
+            'webkitmouseforcechanged', 'webkitmouseforcedown', 'webkitmouseforceup', 'webkitmouseforcewillbegin'].includes(type)) descriptor.enumerable = false;
+        if (['mouseenter', 'mouseleave', 'readystatechange'].includes(type)) {
+            __lenientThisFunctions.add(descriptor.get);
+            __lenientThisFunctions.add(descriptor.set);
+        }
+        Object.defineProperty(prototype, property, descriptor);
+    }
 }
 
 function __invokeListeners(target, event, capture, phase) {
     const listeners = (__eventListeners.get(target) || []).slice();
-    event.target = __retarget(event.__originalTarget, target);
-    event.srcElement = event.target;
-    event.currentTarget = target;
-    event.eventPhase = phase;
+    const record = __eventRecord(event);
+    record.target = __retarget(event.__originalTarget, target);
+    record.currentTarget = target;
+    record.eventPhase = phase;
     event.__immediateStopped = false;
     for (const listener of listeners) {
         if (listener.type !== event.type || listener.capture !== capture) continue;
+        if (!(__eventListeners.get(target) || []).includes(listener)) continue;
         if (listener.once) target.removeEventListener(event.type, listener.callback, listener.capture);
         event.__inPassiveListener = listener.passive;
         try {
             if (typeof listener.callback === "function") listener.callback.call(target, event);
             else listener.callback.handleEvent(event);
+        } catch (error) {
+            setTimeout(() => { throw error; }, 0);
         } finally {
             event.__inPassiveListener = false;
         }
         if (event.__immediateStopped) break;
     }
-    if (!capture && !event.__immediateStopped) {
+    // Other EventTarget families (ports, abort signals and optional plugins)
+    // still own their on* dispatch hooks; registered DOM handlers run above.
+    if (!capture && !event.__immediateStopped && !(target instanceof Node) && !__eventHandlerRecords.get(target)?.has(event.type)) {
         const handler = target[`on${event.type}`];
         if (typeof handler === "function" && handler.call(target, event) === false) event.preventDefault();
     }
 }
 
+const __eventTargets = new WeakSet();
 class EventTarget {
+    constructor() { __eventTargets.add(this); }
     addEventListener(type, callback, options = false) {
-        if (callback == null) return;
+        type = __listenerArguments(type, callback, arguments.length);
         const capture = __listenerCapture(options);
-        const signal = options && typeof options === "object" ? options.signal : undefined;
+        const dictionary = options !== null && (typeof options === 'object' || typeof options === 'function') ? options : null;
+        const once = Boolean(dictionary?.once), passive = dictionary?.passive, signal = dictionary?.signal;
+        if (signal !== undefined && !(signal instanceof AbortSignal)) throw new TypeError('Expected an AbortSignal');
+        if (callback == null) return;
         if (signal && signal.aborted) return;
         const listeners = __eventListeners.get(this) || [];
-        if (!listeners.some(item => item.type === String(type) && item.callback === callback && item.capture === capture)) {
+        if (!listeners.some(item => item.type === type && item.callback === callback && item.capture === capture)) {
             const listener = {
-                type: String(type), callback, capture,
-                once: Boolean(options && typeof options === "object" && options.once),
-                passive: Boolean(options && typeof options === "object" && options.passive),
+                type, callback, capture, once,
+                passive: passive !== undefined ? Boolean(passive) : __defaultPassiveListener(this, type),
             };
             listeners.push(listener);
             __eventListeners.set(this, listeners);
@@ -407,22 +692,26 @@ class EventTarget {
         }
     }
     removeEventListener(type, callback, options = false) {
+        type = __listenerArguments(type, callback, arguments.length);
         const capture = __listenerCapture(options);
         const listeners = __eventListeners.get(this);
         if (!listeners) return;
-        const index = listeners.findIndex(item => item.type === String(type) && item.callback === callback && item.capture === capture);
+        const index = listeners.findIndex(item => item.type === type && item.callback === callback && item.capture === capture);
         if (index !== -1) listeners.splice(index, 1);
     }
     dispatchEvent(event) {
-        if (!(event instanceof Event)) throw new TypeError("argument must be an Event");
-        if (event.__dispatching) throw new Error("event is already being dispatched");
+        const record = __eventRecord(event);
+        if (__uninitializedEvents.has(event)) throw new DOMException('Event has not been initialized', 'InvalidStateError');
+        if (event.__dispatching) throw new DOMException('Event is already being dispatched', 'InvalidStateError');
+        if (!__pendingTrustedEvents.delete(event)) __trustedEvents.delete(event);
         event.__dispatching = true;
         event.__originalTarget = this;
-        event.target = this;
+        record.target = this;
         const path = [];
         let ancestor = this instanceof Node ? __eventParent(this, event) : null;
         while (ancestor) { path.push(ancestor); ancestor = __eventParent(ancestor, event); }
         event.__path = [this, ...path];
+        const completeActivation = __prepareInputActivation(event, event.__path);
         try {
             for (let i = path.length - 1; i >= 0 && !event.__stopped; i--) {
                 __invokeListeners(path[i], event, true, __retarget(this, path[i]) === path[i] ? Event.AT_TARGET : Event.CAPTURING_PHASE);
@@ -441,13 +730,17 @@ class EventTarget {
             }
             return !event.defaultPrevented;
         } finally {
-            event.currentTarget = null;
-            event.eventPhase = Event.NONE;
+            record.currentTarget = null;
+            record.eventPhase = Event.NONE;
             event.__dispatching = false;
+            event.__stopped = false;
+            event.__immediateStopped = false;
             event.__path = [];
+            if (completeActivation) completeActivation(!event.defaultPrevented);
         }
     }
 }
+const __dispatchEvent = EventTarget.prototype.dispatchEvent;
 
 function __prepareMessage(message, transferOrOptions) {
     const transfer = Array.isArray(transferOrOptions) ? transferOrOptions : transferOrOptions?.transfer ?? [];

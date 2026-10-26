@@ -164,6 +164,19 @@ impl JsRuntime {
         Ok(unsafe { JsValue::from_raw(self, result) })
     }
 
+    /// Service engine work (including asynchronous WASM compilation) on its owner
+    /// thread without waiting. The embedder must call this between host tasks.
+    pub fn pump_jobs(&self) {
+        // SAFETY: JsRuntime is thread-bound and this services only the current
+        // thread's loop. No JS value or VM is accessed from a foreign thread.
+        unsafe {
+            #[cfg(target_os = "macos")]
+            crate::ffi::CFRunLoopRunInMode(crate::ffi::kCFRunLoopDefaultMode, 0.0, 1);
+            #[cfg(not(target_os = "macos"))]
+            crate::ffi::run_loop_cycle(0);
+        }
+    }
+
     pub fn garbage_collect(&self) {
         // SAFETY: the context remains live for the duration of this call.
         unsafe { JSGarbageCollect(self.as_raw()) };

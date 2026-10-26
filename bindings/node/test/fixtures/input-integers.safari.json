@@ -1,0 +1,9463 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "undefined",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "null",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "false",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "true",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "NaN",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Infinity",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-Infinity",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-1.9",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "1e100",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-1e100",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Number.MAX_VALUE",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Number.MIN_VALUE",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Number.MAX_SAFE_INTEGER",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Number.MIN_SAFE_INTEGER",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "1n",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Object(1n)",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Symbol()",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "Object(Symbol())",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "[]",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "[2]",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "[1,2]",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "{}",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "new Number(3.8)",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "({valueOf(){return 9;}})",
+      "expected": {
+        "error": null,
+        "value": 9,
+        "attribute": "9",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(\"wrong hint\");return 11;}})",
+      "expected": {
+        "error": null,
+        "value": 11,
+        "attribute": "11",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "({valueOf(){return {};},toString(){return \"12\";}})",
+      "expected": {
+        "error": null,
+        "value": 12,
+        "attribute": "12",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "({valueOf(){throw new RangeError(\"conversion\");}})",
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-4294967297",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-4294967296",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-4294967295",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-2147483648",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-2147483647",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "-1",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "2147483648",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "2147483649",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "4294967294",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "4294967295",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "4294967296",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "4294967297",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "8589934591",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "8589934592",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "8589934593",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"\\u000b2\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"2.9\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"-2.9\"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"0x10\"",
+      "expected": {
+        "error": null,
+        "value": 16,
+        "attribute": "16",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"0b11\"",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"0o10\"",
+      "expected": {
+        "error": null,
+        "value": 8,
+        "attribute": "8",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"2e2\"",
+      "expected": {
+        "error": null,
+        "value": 200,
+        "attribute": "200",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"2junk\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "property",
+      "source": "\"Infinity\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " ",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " ",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\t\n\f\r ",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\t\n\f\r ",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "+0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "+0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "00",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "00",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "00000000001",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "00000000001",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "+1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "+1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-1",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-1",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-01",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-01",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1.9",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "-0.9",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "+0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "+0.9",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": ".9",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": ".9",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "1e2",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "1e999",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e999",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "0x10",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0x10",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "0b11",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0b11",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2junk",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2junk",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2 3",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2 3",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "++2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "++2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "--2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "--2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "+-2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "+-2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-+2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-+2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "+ 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "+ 2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "- 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "- 2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "NaN",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "NaN",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "Infinity",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "Infinity",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "٢",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "٢",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "２",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "２",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2147483648",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "2147483648",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "2147483649",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "2147483649",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "4294967295",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "4294967295",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "4294967296",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "4294967296",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-2147483648",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-2147483648",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-2147483649",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "9007199254740991",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "9007199254740991",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+      "expected": {
+        "error": null,
+        "value": 7,
+        "attribute": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\t2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\t2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\t-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\t-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\n2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\n2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\n-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\n-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\f2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\f2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\f-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\f-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\r2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\r2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\r-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\r-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": " 2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": " -0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\u000b2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u000b2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\u000b-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u000b-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " 2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " -0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " 2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " -0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "﻿2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "﻿2",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "﻿-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "﻿-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\u00002",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u00002",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\u0000-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u0000-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\ud8002",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\ud8002",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "maxLength",
+      "kind": "attribute",
+      "source": "\ud800-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\ud800-0",
+        "records": [
+          [
+            "maxlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "undefined",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "null",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "false",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "true",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "NaN",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Infinity",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-Infinity",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-1.9",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "1e100",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-1e100",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Number.MAX_VALUE",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Number.MIN_VALUE",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Number.MAX_SAFE_INTEGER",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Number.MIN_SAFE_INTEGER",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "1n",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Object(1n)",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Symbol()",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "Object(Symbol())",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "[]",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "[2]",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "[1,2]",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "{}",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "new Number(3.8)",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "({valueOf(){return 9;}})",
+      "expected": {
+        "error": null,
+        "value": 9,
+        "attribute": "9",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(\"wrong hint\");return 11;}})",
+      "expected": {
+        "error": null,
+        "value": 11,
+        "attribute": "11",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "({valueOf(){return {};},toString(){return \"12\";}})",
+      "expected": {
+        "error": null,
+        "value": 12,
+        "attribute": "12",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "({valueOf(){throw new RangeError(\"conversion\");}})",
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-4294967297",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-4294967296",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-4294967295",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-2147483648",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-2147483647",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "-1",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "2147483648",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "2147483649",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "4294967294",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "4294967295",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "4294967296",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "4294967297",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "8589934591",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "8589934592",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "8589934593",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"\\u000b2\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"2.9\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"-2.9\"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"0x10\"",
+      "expected": {
+        "error": null,
+        "value": 16,
+        "attribute": "16",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"0b11\"",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"0o10\"",
+      "expected": {
+        "error": null,
+        "value": 8,
+        "attribute": "8",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"2e2\"",
+      "expected": {
+        "error": null,
+        "value": 200,
+        "attribute": "200",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"2junk\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "property",
+      "source": "\"Infinity\"",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " ",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " ",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\t\n\f\r ",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\t\n\f\r ",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "+0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "+0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "00",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "00",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "00000000001",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "00000000001",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "+1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "+1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-1",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-1",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-01",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-01",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1.9",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "-0.9",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "+0.9",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "+0.9",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": ".9",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": ".9",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "1e2",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "1e999",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e999",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "0x10",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0x10",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "0b11",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "0b11",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2junk",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2junk",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2 3",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2 3",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "++2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "++2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "--2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "--2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "+-2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "+-2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-+2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-+2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "+ 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "+ 2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "- 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "- 2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "NaN",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "NaN",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "Infinity",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "Infinity",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "٢",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "٢",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "２",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "２",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2147483648",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "2147483648",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "2147483649",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "2147483649",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "4294967295",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "4294967295",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "4294967296",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "4294967296",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-2147483648",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-2147483648",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "-2147483649",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "9007199254740991",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "9007199254740991",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+      "expected": {
+        "error": null,
+        "value": 7,
+        "attribute": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\t2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\t2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\t-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\t-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\n2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\n2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\n-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\n-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\f2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\f2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\f-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\f-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\r2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\r2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\r-0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": "\r-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": " 2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": 0,
+        "attribute": " -0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\u000b2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u000b2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\u000b-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u000b-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " 2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " -0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " 2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": " -0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "﻿2",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "﻿2",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "﻿-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "﻿-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\u00002",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u00002",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\u0000-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\u0000-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\ud8002",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\ud8002",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "minLength",
+      "kind": "attribute",
+      "source": "\ud800-0",
+      "expected": {
+        "error": null,
+        "value": -1,
+        "attribute": "\ud800-0",
+        "records": [
+          [
+            "minlength",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "undefined",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "null",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "false",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "true",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "NaN",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Infinity",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-Infinity",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-0",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-0.9",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "0.9",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-1.9",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "1e100",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-1e100",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Number.MAX_VALUE",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Number.MIN_VALUE",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Number.MAX_SAFE_INTEGER",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Number.MIN_SAFE_INTEGER",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "1n",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Object(1n)",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Symbol()",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "Object(Symbol())",
+      "expected": {
+        "error": {
+          "name": "TypeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "[]",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "[2]",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "[1,2]",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "{}",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "new Number(3.8)",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "({valueOf(){return 9;}})",
+      "expected": {
+        "error": null,
+        "value": 9,
+        "attribute": "9",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(\"wrong hint\");return 11;}})",
+      "expected": {
+        "error": null,
+        "value": 11,
+        "attribute": "11",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "({valueOf(){return {};},toString(){return \"12\";}})",
+      "expected": {
+        "error": null,
+        "value": 12,
+        "attribute": "12",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "({valueOf(){throw new RangeError(\"conversion\");}})",
+      "expected": {
+        "error": {
+          "name": "RangeError",
+          "code": null
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-4294967297",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-4294967296",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-4294967295",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-2147483648",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-2147483647",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "-1",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "0",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "2147483648",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "2147483649",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "4294967294",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "4294967295",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "4294967296",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "4294967297",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "8589934591",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "8589934592",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "8589934593",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"\"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\" \"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"\\u000b2\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"2.9\"",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"-2.9\"",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "20",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"0x10\"",
+      "expected": {
+        "error": null,
+        "value": 16,
+        "attribute": "16",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"0b11\"",
+      "expected": {
+        "error": null,
+        "value": 3,
+        "attribute": "3",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"0o10\"",
+      "expected": {
+        "error": null,
+        "value": 8,
+        "attribute": "8",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"2e2\"",
+      "expected": {
+        "error": null,
+        "value": 200,
+        "attribute": "200",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"2junk\"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "property",
+      "source": "\"Infinity\"",
+      "expected": {
+        "error": {
+          "name": "IndexSizeError",
+          "code": 1
+        },
+        "value": 7,
+        "attribute": "7",
+        "records": []
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " ",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " ",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\t\n\f\r ",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\t\n\f\r ",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "+0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "+0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "00",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "00",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "00000000001",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "00000000001",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "+1",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "+1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-1",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-1",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-01",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-01",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "1.9",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1.9",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-0.9",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-0.9",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "+0.9",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "+0.9",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": ".9",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": ".9",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "1e2",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "1e999",
+      "expected": {
+        "error": null,
+        "value": 1,
+        "attribute": "1e999",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "0x10",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "0x10",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "0b11",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "0b11",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2junk",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2junk",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2 3",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "2 3",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "++2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "++2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "--2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "--2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "+-2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "+-2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-+2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-+2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "+ 2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "+ 2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "- 2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "- 2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "NaN",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "NaN",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "Infinity",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "Infinity",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "٢",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "٢",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "２",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "２",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2147483646",
+      "expected": {
+        "error": null,
+        "value": 2147483646,
+        "attribute": "2147483646",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2147483647",
+      "expected": {
+        "error": null,
+        "value": 2147483647,
+        "attribute": "2147483647",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2147483648",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "2147483648",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "2147483649",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "2147483649",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "4294967295",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "4294967295",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "4294967296",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "4294967296",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-2147483648",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-2147483648",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "-2147483649",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "-2147483649",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "9007199254740991",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "9007199254740991",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+      "expected": {
+        "error": null,
+        "value": 7,
+        "attribute": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\t2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\t2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\t-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\t-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\n2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\n2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\n-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\n-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\f2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\f2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\f-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\f-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\r2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": "\r2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\r-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\r-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": 2,
+        "attribute": " 2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " -0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\u000b2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\u000b2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\u000b-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\u000b-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " 2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " -0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " 2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " 2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": " -0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": " -0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "﻿2",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "﻿2",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "﻿-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "﻿-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\u00002",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\u00002",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\u0000-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\u0000-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\ud8002",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\ud8002",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    },
+    {
+      "property": "size",
+      "kind": "attribute",
+      "source": "\ud800-0",
+      "expected": {
+        "error": null,
+        "value": 20,
+        "attribute": "\ud800-0",
+        "records": [
+          [
+            "size",
+            null,
+            "7"
+          ]
+        ]
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "text",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "number",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "file",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "minLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "input",
+      "type": "hidden",
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "minLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": null,
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": null,
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": null,
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "0",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "0",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "0",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "10",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "10",
+      "value": 5,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "10",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "-1",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "-1",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "-1",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "bad",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "bad",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "bad",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 0,
+      "expected": {
+        "records": 1,
+        "value": 0,
+        "attribute": "0",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "2147483648",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 0,
+      "expected": {
+        "records": 0,
+        "value": -1,
+        "attribute": null,
+        "error": "IndexSizeError"
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 5,
+      "expected": {
+        "records": 1,
+        "value": 5,
+        "attribute": "5",
+        "error": null
+      }
+    },
+    {
+      "tag": "textarea",
+      "type": null,
+      "property": "maxLength",
+      "other": "5junk",
+      "value": 10,
+      "expected": {
+        "records": 1,
+        "value": 10,
+        "attribute": "10",
+        "error": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "property": [
+        55296
+      ],
+      "name": "accept",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "accept",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "align",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "align",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "alt",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "alt",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "dirName",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "dirName",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "name",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "name",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "pattern",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "pattern",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "placeholder",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "placeholder",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "useMap",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "useMap",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        55296
+      ],
+      "name": "formTarget",
+      "unit": 55296,
+      "attribute": [
+        55296
+      ]
+    },
+    {
+      "property": [
+        56320
+      ],
+      "name": "formTarget",
+      "unit": 56320,
+      "attribute": [
+        56320
+      ]
+    },
+    {
+      "property": [
+        115,
+        101,
+        99,
+        116,
+        105,
+        111,
+        110,
+        45,
+        55296,
+        32,
+        101,
+        109,
+        97,
+        105,
+        108
+      ],
+      "name": "autocomplete",
+      "unit": 55296,
+      "attribute": [
+        115,
+        101,
+        99,
+        116,
+        105,
+        111,
+        110,
+        45,
+        55296,
+        32,
+        101,
+        109,
+        97,
+        105,
+        108
+      ]
+    },
+    {
+      "property": [
+        115,
+        101,
+        99,
+        116,
+        105,
+        111,
+        110,
+        45,
+        56320,
+        32,
+        101,
+        109,
+        97,
+        105,
+        108
+      ],
+      "name": "autocomplete",
+      "unit": 56320,
+      "attribute": [
+        115,
+        101,
+        99,
+        116,
+        105,
+        111,
+        110,
+        45,
+        56320,
+        32,
+        101,
+        109,
+        97,
+        105,
+        108
+      ]
+    }
+  ]
+}

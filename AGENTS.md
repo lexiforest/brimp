@@ -24,9 +24,11 @@ works for now and is meant to be replaced later.
 
 Choose the simplest implementation that fully meets the current requirements.
 
-Use TODO.md to track the implementation progress and interact with the user.
+## Files
 
-DO NOT EDIT HUMAN.md, it's for the maintainer to edit manually.
+- Use TODO.md to track the implementation progress and interact with the user.
+- Follow but DO NOT EDIT HUMAN.md, it's for the maintainer to edit manually.
+- Read README.md and ./docs for the architecture fo this project
 
 ## Coding
 

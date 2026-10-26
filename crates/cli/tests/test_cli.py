@@ -112,6 +112,63 @@ def test_run_stdin_promise_console_and_blank_init(tmp_path):
     run('run', '-', input=b'throw Error("broken")', code=13)
 
 
+def test_trace_report_success_failure_loss_and_output_paths(tmp_path):
+    report = tmp_path / 'dependencies.json'
+    trace = tmp_path / 'trace.jsonl'
+    result = run('run', '-', '--trace-report', report, '--trace', trace,
+                 '--trace-include', 'Document.prototype.querySelector', '--trace-capacity', '2',
+                 input=b'for(let i=0;i<3;i++)document.querySelector("body"); 42')
+    assert json.loads(result.stdout) == 42
+    summary = json.loads(report.read_text())
+    assert summary['retained'] == 2 and summary['dropped'] == 1
+    assert summary['coverage']['enabled'] is True
+    assert summary['coverage']['include'] == ['Document.prototype.querySelector']
+    assert summary['dependencies'][0]['count'] == 2
+    assert len(trace.read_text().splitlines()) == 3
+    original = report.read_bytes()
+    run('run', '-', '--trace-report', report, input=b'42', code=2)
+    assert report.read_bytes() == original
+    output = write(tmp_path, 'result.json', 'keep existing result')
+    run('run', '-', '--trace-report', report, '--overwrite',
+        '--output', output,
+        '--trace-include', 'Document.prototype.querySelector',
+        input=b'document.querySelector("[")', code=13)
+    assert output.read_text() == 'keep existing result'
+    summary = json.loads(report.read_text())
+    assert summary['dependencies'][0]['throws'] == 1
+    assert summary['retained'] == 1
+    run('run', '-', '--trace-report', '-', input=b'42', code=2)
+
+
+def test_recursive_trace_mode(tmp_path):
+    report = tmp_path / 'recursive.json'
+    result = run('run', '-', '--trace-mode', 'recursive', '--trace-report', report,
+                 input=b'window.fixture={nested:{}};void window.fixture.nested.missing;window.fixture.nested.value=42;window.fixture.nested.value')
+    assert json.loads(result.stdout) == 42
+    summary = json.loads(report.read_text())
+    assert summary['coverage']['mode'] == 'recursive'
+    assert any(entry['layer'] == 'recursive' and entry['kind'] == 'get'
+               and entry['path'] == 'window.fixture.nested.missing' for entry in summary['dependencies'])
+    run('run', '-', '--trace-mode', 'recursive', input=b'42', code=2)
+    run('run', '-', '--trace-mode', 'unknown', input=b'42', code=2)
+    run('run', '-', '--trace-report', report, '--output', report, '--overwrite', input=b'42', code=2)
+    run('run', '-', '--trace-report', report, '--trace', report, '--overwrite', input=b'42', code=2)
+    run('run', '-', '--trace-include', 'Document', input=b'42', code=2)
+
+
+@pytest.mark.parametrize('mode', ['api', 'recursive'])
+def test_harness_example(tmp_path, mode):
+    example = ROOT / 'examples/harness'
+    report = tmp_path / 'dependencies.json'
+    result = run('run', example / 'page.js', '--clock', 'logical', '--epoch-ms', '1000',
+                 '--routes', example / 'routes.json', '--actions', example / 'actions.json',
+                 '--eval', 'compute("Ada")', '--trace-mode', mode, '--trace-report', report)
+    assert json.loads(result.stdout) == dict(text='Hello Ada', calls=1, clicks=1, now=1005)
+    summary = json.loads(report.read_text())
+    assert summary['coverage']['mode'] == mode
+    assert any(entry['path'] == 'Document.prototype.querySelector' for entry in summary['dependencies'])
+
+
 def test_fetch_outputs_and_waits(site, tmp_path):
     url, _ = site
     result = run('fetch', url, '--wait-selector', '#later')

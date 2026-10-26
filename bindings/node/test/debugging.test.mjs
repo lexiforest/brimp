@@ -35,3 +35,26 @@ test('graphics/audio host extensions remain asynchronous',async()=>{
     await assert.rejects(()=>page.evaluate('new AudioContext().decodeAudioData(new ArrayBuffer(1))'),/decoding unavailable/);
   }finally{await session.close();}
 });
+
+test('inspect and summarize a retained function without consuming its trace', async () => {
+  const session = await createSession({clock: {mode: 'logical', epochMs: 1000}, diagnostics: {include: ['Document.prototype.querySelector']}});
+  try {
+    const page = await session.newPage();
+    const fn = await page.evaluateHandle('(() => { let calls = 0; return async n => { await new Promise(r => setTimeout(r, 5)); document.querySelector("body"); return [n + ++calls, Date.now()]; }; })()');
+    try {
+      await page.takeDiagnostics();
+      for (const expected of [[41, 1005], [42, 1010]]) {
+        const result = await fn.call('(fn, n) => fn(n)', 40);
+        try { assert.deepEqual(await result.jsonValue(), expected); }
+        finally { await result.dispose(); }
+      }
+      const before = await page.peekDiagnostics();
+      const summary = await page.summarizeDiagnostics();
+      assert.equal(summary.coverage.enabled, true);
+      assert.equal(summary.writeError, null);
+      assert.deepEqual(summary.dependencies, [{layer: 'api', path: 'Document.prototype.querySelector', kind: 'call', target: null, property: null, count: 2, throws: 0}]);
+      assert.deepEqual(await page.takeDiagnostics(), before);
+      assert.equal((await page.summarizeDiagnostics()).retained, 0);
+    } finally { await fn.dispose(); }
+  } finally { await session.close(); }
+});

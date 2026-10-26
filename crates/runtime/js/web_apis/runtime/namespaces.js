@@ -30,11 +30,16 @@ function __attachAttribute(map, attr, namespaced) {
     if (attr.ownerElement && attr.ownerElement !== element) throw new DOMException('Attribute is in use', 'InUseAttributeError');
     const old = namespaced ? map.getNamedItemNS(attr.namespaceURI, attr.localName) : map.getNamedItem(attr.name);
     if (old === attr) return old;
-    if (old) element.removeAttributeNode(old);
+    if (old) {
+        if (old.namespaceURI === attr.namespaceURI && old.localName === attr.localName) {
+            __detachAttribute(element, old.namespaceURI, old.localName);
+        } else element.removeAttributeNode(old);
+    }
     // Attr attachment preserves case and namespaces, including a null namespace.
     __callHost('setAttributeNS', element, attr.namespaceURI ?? '', attr.name, attr.value);
     attr.__element = element; attr.__ownerDocument = element.ownerDocument;
     map.__cache.set(__attributeKey(attr.namespaceURI, attr.localName), attr);
+    __notifyAttributeChange(element, attr.localName, old?.value ?? null, attr.value, false, attr.namespaceURI);
     return old;
 }
 NamedNodeMap.prototype.setNamedItem = function(attr) { return __attachAttribute(this, attr, false); };
@@ -57,24 +62,33 @@ Element.prototype.getAttributeNS = function(namespace, name) { return this.getAt
 Element.prototype.hasAttributeNS = function(namespace, name) { return this.getAttributeNodeNS(namespace, name) !== null; };
 Element.prototype.setAttributeNS = function(namespace, name, value) {
     const record = __validateQualifiedName(namespace, name);
-    __callHost('setAttributeNS', this, record.namespaceURI ?? '', record.name, String(value));
+    value = `${value}`;
+    const oldValue = __attributeRecords(this).find(a => a.namespaceURI === record.namespaceURI && a.localName === record.localName)?.value ?? null;
+    __callHost('setAttributeNS', this, record.namespaceURI ?? '', record.name, value);
+    __notifyAttributeChange(this, record.localName, oldValue, value, false, record.namespaceURI);
 };
 Element.prototype.removeAttributeNS = function(namespace, localName) {
     namespace = namespace == null || namespace === '' ? null : String(namespace);
     localName = String(localName);
+    const oldValue = __attributeRecords(this).find(a => a.namespaceURI === namespace && a.localName === localName)?.value ?? null;
     __detachAttribute(this, namespace, localName);
     __callHost('removeAttributeNS', this, namespace ?? '', localName);
+    if (oldValue !== null) __notifyAttributeChange(this, localName, oldValue, null, false, namespace);
 };
 function __namespaceElements(namespace, localName) {
     namespace = namespace == null || namespace === '' ? null : String(namespace);
     localName = String(localName);
-    return new HTMLCollection(() => Array.from(this.querySelectorAll('*')).filter(e =>
+    return __createHTMLCollection(() => Array.from(this.querySelectorAll('*')).filter(e =>
         (namespace === '*' || e.namespaceURI === namespace) && (localName === '*' || e.localName === localName)));
 }
 Element.prototype.getElementsByTagNameNS = __namespaceElements;
 Document.prototype.getElementsByTagNameNS = __namespaceElements;
+function __namespaceArgument(value, count) {
+    if (!count) throw new TypeError('Not enough arguments');
+    return value == null ? null : `${value}` || null;
+}
 Node.prototype.lookupNamespaceURI = function(prefix) {
-    prefix = prefix == null || prefix === '' ? null : String(prefix);
+    prefix = __namespaceArgument(prefix, arguments.length);
     if (this instanceof Document) return this.documentElement?.lookupNamespaceURI(prefix) ?? null;
     if (this instanceof Attr) return this.ownerElement?.lookupNamespaceURI(prefix) ?? null;
     if (this instanceof Element) {
@@ -86,13 +100,16 @@ Node.prototype.lookupNamespaceURI = function(prefix) {
     return this.parentElement?.lookupNamespaceURI(prefix) ?? null;
 };
 Node.prototype.lookupPrefix = function(namespace) {
-    namespace = namespace == null || namespace === '' ? null : String(namespace);
+    namespace = __namespaceArgument(namespace, arguments.length);
     if (namespace === null) return null;
     const element = this instanceof Document ? this.documentElement : this instanceof Attr ? this.ownerElement : this instanceof Element ? this : this.parentElement;
     for (let e = element; e; e = e.parentElement) {
-        if (e.namespaceURI === namespace && e.prefix !== null && element.lookupNamespaceURI(e.prefix) === namespace) return e.prefix;
-        for (const a of e.attributes) if (a.namespaceURI === __xmlnsNamespace && a.prefix === 'xmlns' && a.value === namespace && element.lookupNamespaceURI(a.localName) === namespace) return a.localName;
+        if (e.namespaceURI === namespace && e.prefix !== null) return e.prefix;
+        for (const a of e.attributes) if (a.namespaceURI === __xmlnsNamespace && a.prefix === 'xmlns' && a.value === namespace) return a.localName;
     }
     return null;
 };
-Node.prototype.isDefaultNamespace = function(namespace) { return this.lookupNamespaceURI(null) === (namespace == null || namespace === '' ? null : String(namespace)); };
+Node.prototype.isDefaultNamespace = function(namespace) {
+    namespace = __namespaceArgument(namespace, arguments.length);
+    return this.lookupNamespaceURI(null) === namespace;
+};

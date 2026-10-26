@@ -14,5 +14,6 @@ Then pick the workflow you need:
 | [Extract, intercept and stream](/examples/fetch/) | Extract Markdown, provide API responses and stream downloads |
 | [Core APIs and plugins](/architecture/subsystems/) | Choose a bundled plugin and connect a custom host handler |
 | [CLI workflows](/examples/cli-workflows/) | Configure actions, routes, plugin files, diagnostics and logical time |
+| [Debug page scripts](/examples/debugging/) | Retain callable functions and inspect observed API dependencies |
 
 Looking up a signature or flag? Use the [generated API reference](/api/).

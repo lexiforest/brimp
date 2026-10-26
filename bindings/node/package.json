@@ -11,12 +11,13 @@
     "brimp.node",
     "README.md",
     "plugins.js",
+    "values.js",
     "bundled"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.19"
   }
 }

@@ -1,0 +1,137 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "type": "text",
+      "text": "ab",
+      "assign": "same",
+      "expected": "ab2"
+    },
+    {
+      "type": "text",
+      "text": "ab",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "text",
+      "text": " ab ",
+      "assign": "same",
+      "expected": " ab 2"
+    },
+    {
+      "type": "text",
+      "text": " ab ",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "url",
+      "text": "ab",
+      "assign": "same",
+      "expected": "ab2"
+    },
+    {
+      "type": "url",
+      "text": "ab",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "url",
+      "text": " ab ",
+      "assign": "same",
+      "expected": "ab2"
+    },
+    {
+      "type": "url",
+      "text": " ab ",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "email",
+      "text": "ab",
+      "assign": "same",
+      "expected": "ab2"
+    },
+    {
+      "type": "email",
+      "text": "ab",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "email",
+      "text": " ab ",
+      "assign": "same",
+      "expected": "2ab"
+    },
+    {
+      "type": "email",
+      "text": " ab ",
+      "assign": "new",
+      "expected": "xyz2"
+    },
+    {
+      "type": "number",
+      "text": "1",
+      "assign": "same",
+      "expected": "12"
+    },
+    {
+      "type": "number",
+      "text": "1",
+      "assign": "new",
+      "expected": "772"
+    },
+    {
+      "type": "number",
+      "text": "1.",
+      "assign": "same",
+      "expected": "21"
+    },
+    {
+      "type": "number",
+      "text": "1.",
+      "assign": "new",
+      "expected": "772"
+    },
+    {
+      "type": "number",
+      "text": "+1",
+      "assign": "same",
+      "expected": "21"
+    },
+    {
+      "type": "number",
+      "text": "+1",
+      "assign": "new",
+      "expected": "772"
+    },
+    {
+      "type": "number",
+      "text": "1e",
+      "assign": "same",
+      "expected": "2"
+    },
+    {
+      "type": "number",
+      "text": "1e",
+      "assign": "new",
+      "expected": "772"
+    },
+    {
+      "type": "number",
+      "text": "1e2",
+      "assign": "same",
+      "expected": "1e22"
+    },
+    {
+      "type": "number",
+      "text": "1e2",
+      "assign": "new",
+      "expected": "772"
+    }
+  ]
+}

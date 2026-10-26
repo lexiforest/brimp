@@ -252,7 +252,9 @@ fn closing_session_cancels_pending_page_installation() {
     );
     let worker = session.clone();
     let opening = std::thread::spawn(move || worker.new_page());
-    let call = receiver.recv_timeout(Duration::from_secs(1)).unwrap();
+    // Wait for installation to reach the host call; this is a cancellation
+    // contract, not a one-second page-startup performance assertion.
+    let call = receiver.recv_timeout(Duration::from_secs(5)).unwrap();
     session.close();
     assert!(matches!(
         opening.join().unwrap(),

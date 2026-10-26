@@ -1,0 +1,4825 @@
+[
+  {
+    "id": "HTML",
+    "path": "/html?x=1#fragment",
+    "contentType": "text/html",
+    "expected": {
+      "initial": [
+        "$ORIGIN/html?x=1#fragment",
+        "$ORIGIN/html?x=1#fragment",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/html?x=1#fragment",
+        "$ORIGIN/html?x=1#fragment",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/html?x=1#fragment",
+          "$ORIGIN/html?x=1#fragment",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html",
+            [
+              "$ORIGIN/html?x=1#fragment",
+              "$ORIGIN/html?x=1#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html",
+            [
+              "$ORIGIN/html?x=1#fragment",
+              "$ORIGIN/html?x=1#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html",
+            [
+              "$ORIGIN/html?x=1#fragment",
+              "$ORIGIN/html?x=1#fragment",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/html?x=1#fragment",
+            "$ORIGIN/html?x=1#fragment",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "HTML uppercase with parameters",
+    "path": "/upper#fragment",
+    "contentType": "TEXT/HTML; charset=UTF-8",
+    "expected": {
+      "initial": [
+        "$ORIGIN/upper#fragment",
+        "$ORIGIN/upper#fragment",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/upper#fragment",
+        "$ORIGIN/upper#fragment",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/upper#fragment",
+          "$ORIGIN/upper#fragment",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html",
+            [
+              "$ORIGIN/upper#fragment",
+              "$ORIGIN/upper#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html",
+            [
+              "$ORIGIN/upper#fragment",
+              "$ORIGIN/upper#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html",
+            [
+              "$ORIGIN/upper#fragment",
+              "$ORIGIN/upper#fragment",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/upper#fragment",
+            "$ORIGIN/upper#fragment",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "HTML quoted charset",
+    "path": "/quoted",
+    "contentType": "text/html; charset=\"utf-8\"",
+    "expected": {
+      "initial": [
+        "$ORIGIN/quoted",
+        "$ORIGIN/quoted",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/quoted",
+        "$ORIGIN/quoted",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/quoted",
+          "$ORIGIN/quoted",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html",
+            [
+              "$ORIGIN/quoted",
+              "$ORIGIN/quoted",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html",
+            [
+              "$ORIGIN/quoted",
+              "$ORIGIN/quoted",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html",
+            [
+              "$ORIGIN/quoted",
+              "$ORIGIN/quoted",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/quoted",
+            "$ORIGIN/quoted",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "missing Content-Type",
+    "path": "/missing#fragment",
+    "contentType": null,
+    "expected": {
+      "initial": [
+        "$ORIGIN/missing#fragment",
+        "$ORIGIN/missing#fragment",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/missing#fragment",
+        "$ORIGIN/missing#fragment",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/missing#fragment",
+          "$ORIGIN/missing#fragment",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html",
+            [
+              "$ORIGIN/missing#fragment",
+              "$ORIGIN/missing#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html",
+            [
+              "$ORIGIN/missing#fragment",
+              "$ORIGIN/missing#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html",
+            [
+              "$ORIGIN/missing#fragment",
+              "$ORIGIN/missing#fragment",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/missing#fragment",
+            "$ORIGIN/missing#fragment",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "plain document",
+    "path": "/plain#fragment",
+    "contentType": "text/plain; charset=utf-8",
+    "expected": {
+      "initial": [
+        "$ORIGIN/plain#fragment",
+        "$ORIGIN/plain#fragment",
+        "text/plain"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/plain"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/plain"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/plain#fragment",
+        "$ORIGIN/plain#fragment",
+        "text/plain"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/plain"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/plain"
+        ],
+        [
+          "$ORIGIN/plain#fragment",
+          "$ORIGIN/plain#fragment",
+          "text/plain"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/plain"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/plain",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/plain"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html",
+            [
+              "$ORIGIN/plain#fragment",
+              "$ORIGIN/plain#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "aliases": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain",
+            [
+              "$ORIGIN/plain#fragment",
+              "$ORIGIN/plain#fragment",
+              "text/plain"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "aliases": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain",
+            [
+              "$ORIGIN/plain#fragment",
+              "$ORIGIN/plain#fragment",
+              "text/plain"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "after": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "after": [
+            "$ORIGIN/plain#fragment",
+            "$ORIGIN/plain#fragment",
+            "text/plain"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/plain"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/plain"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "JSON document",
+    "path": "/json#fragment",
+    "contentType": "application/json",
+    "expected": {
+      "initial": [
+        "$ORIGIN/json#fragment",
+        "$ORIGIN/json#fragment",
+        "application/json"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "application/json"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "application/json"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/json#fragment",
+        "$ORIGIN/json#fragment",
+        "application/json"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "application/json"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "application/json"
+        ],
+        [
+          "$ORIGIN/json#fragment",
+          "$ORIGIN/json#fragment",
+          "application/json"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "application/json"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "application/json",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "application/json"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html",
+            [
+              "$ORIGIN/json#fragment",
+              "$ORIGIN/json#fragment",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "aliases": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json",
+            [
+              "$ORIGIN/json#fragment",
+              "$ORIGIN/json#fragment",
+              "application/json"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "aliases": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json",
+            [
+              "$ORIGIN/json#fragment",
+              "$ORIGIN/json#fragment",
+              "application/json"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "after": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "after": [
+            "$ORIGIN/json#fragment",
+            "$ORIGIN/json#fragment",
+            "application/json"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "application/json"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "application/json"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "redirect target fragment",
+    "path": "/redirect#initial",
+    "contentType": "text/html",
+    "redirect": "/landing?x=2#target",
+    "expected": {
+      "initial": [
+        "$ORIGIN/landing?x=2#target",
+        "$ORIGIN/landing?x=2#target",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/landing?x=2#target",
+        "$ORIGIN/landing?x=2#target",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#target",
+          "$ORIGIN/landing?x=2#target",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#target",
+              "$ORIGIN/landing?x=2#target",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#target",
+              "$ORIGIN/landing?x=2#target",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#target",
+              "$ORIGIN/landing?x=2#target",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#target",
+            "$ORIGIN/landing?x=2#target",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "redirect inherits fragment",
+    "path": "/redirect#initial",
+    "contentType": "text/html",
+    "redirect": "/landing?x=2",
+    "expected": {
+      "initial": [
+        "$ORIGIN/landing?x=2#initial",
+        "$ORIGIN/landing?x=2#initial",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/landing?x=2#initial",
+        "$ORIGIN/landing?x=2#initial",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#initial",
+          "$ORIGIN/landing?x=2#initial",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#initial",
+              "$ORIGIN/landing?x=2#initial",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#initial",
+              "$ORIGIN/landing?x=2#initial",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#initial",
+              "$ORIGIN/landing?x=2#initial",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#initial",
+            "$ORIGIN/landing?x=2#initial",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "redirect clears fragment",
+    "path": "/redirect#initial",
+    "contentType": "text/html",
+    "redirect": "/landing?x=2#",
+    "expected": {
+      "initial": [
+        "$ORIGIN/landing?x=2#",
+        "$ORIGIN/landing?x=2#",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/landing?x=2#",
+        "$ORIGIN/landing?x=2#",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing?x=2#",
+          "$ORIGIN/landing?x=2#",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#",
+              "$ORIGIN/landing?x=2#",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#",
+              "$ORIGIN/landing?x=2#",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html",
+            [
+              "$ORIGIN/landing?x=2#",
+              "$ORIGIN/landing?x=2#",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing?x=2#",
+            "$ORIGIN/landing?x=2#",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "redirect chain inherits replacement fragment",
+    "path": "/redirect#initial",
+    "contentType": "text/html",
+    "redirect": [
+      "/hop#middle",
+      "/landing"
+    ],
+    "expected": {
+      "initial": [
+        "$ORIGIN/landing#middle",
+        "$ORIGIN/landing#middle",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/landing#middle",
+        "$ORIGIN/landing#middle",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#middle",
+          "$ORIGIN/landing#middle",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html",
+            [
+              "$ORIGIN/landing#middle",
+              "$ORIGIN/landing#middle",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html",
+            [
+              "$ORIGIN/landing#middle",
+              "$ORIGIN/landing#middle",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html",
+            [
+              "$ORIGIN/landing#middle",
+              "$ORIGIN/landing#middle",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#middle",
+            "$ORIGIN/landing#middle",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "redirect chain preserves cleared fragment",
+    "path": "/redirect#initial",
+    "contentType": "text/html",
+    "redirect": [
+      "/hop#",
+      "/landing"
+    ],
+    "expected": {
+      "initial": [
+        "$ORIGIN/landing#",
+        "$ORIGIN/landing#",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/landing#",
+        "$ORIGIN/landing#",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/landing#",
+          "$ORIGIN/landing#",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html",
+            [
+              "$ORIGIN/landing#",
+              "$ORIGIN/landing#",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html",
+            [
+              "$ORIGIN/landing#",
+              "$ORIGIN/landing#",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html",
+            [
+              "$ORIGIN/landing#",
+              "$ORIGIN/landing#",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/landing#",
+            "$ORIGIN/landing#",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "escaped URL",
+    "path": "/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+    "contentType": "text/html",
+    "expected": {
+      "initial": [
+        "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+        "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+        "text/html"
+      ],
+      "created": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ]
+      ],
+      "clones": [
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ]
+        ],
+        [
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ]
+        ]
+      ],
+      "afterMetadata": [
+        "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+        "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+        "text/html"
+      ],
+      "history": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "retained": [
+        [
+          "about:blank",
+          "about:blank",
+          "application/xml"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "about:blank",
+          "about:blank",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+          "text/html"
+        ]
+      ],
+      "createdAfterHistory": [
+        "$ORIGIN/changed?x=3#history",
+        "$ORIGIN/changed?x=3#history",
+        "text/html"
+      ],
+      "canonical": [
+        {
+          "expected": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/changed?x=3#history",
+            "$ORIGIN/changed?x=3#history",
+            "text/html",
+            [
+              "$ORIGIN/changed?x=3#history",
+              "$ORIGIN/changed?x=3#history",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "application/xml",
+            [
+              "about:blank",
+              "about:blank",
+              "application/xml"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html",
+            [
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "aliases": [
+            "about:blank",
+            "about:blank",
+            "text/html",
+            [
+              "about:blank",
+              "about:blank",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html",
+            [
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "text/html"
+            ]
+          ]
+        },
+        {
+          "expected": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "aliases": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html",
+            [
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+              "text/html"
+            ]
+          ]
+        }
+      ],
+      "open": [
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "application/xml"
+          ],
+          "error": "InvalidStateError"
+        },
+        {
+          "before": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "after": [
+            "about:blank",
+            "about:blank",
+            "text/html"
+          ],
+          "error": "SecurityError"
+        },
+        {
+          "before": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "error": null
+        },
+        {
+          "before": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "after": [
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "$ORIGIN/path/%E9%9B%AA/%C3%A9?x=%E2%98%83#%C3%A9",
+            "text/html"
+          ],
+          "error": null
+        }
+      ],
+      "frame": [
+        "about:blank",
+        "about:blank",
+        "text/html"
+      ],
+      "frameWritten": [
+        [
+          "$ORIGIN/changed?x=3",
+          "$ORIGIN/changed?x=3",
+          "text/html"
+        ],
+        "$ORIGIN/changed?x=3"
+      ],
+      "removedFrame": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "removedFrameWritten": [
+        "$ORIGIN/changed?x=3",
+        "$ORIGIN/changed?x=3",
+        "text/html"
+      ],
+      "mainOpen": [
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ],
+        [
+          "$ORIGIN/after-frame#new",
+          "$ORIGIN/after-frame#new",
+          "text/html"
+        ]
+      ]
+    }
+  }
+]

@@ -249,6 +249,7 @@ fn check_paths(options: &Options) -> Result<()> {
         options.output.as_deref(),
         options.response_info.as_deref(),
         options.trace.as_deref(),
+        options.trace_report.as_deref(),
         options.events.as_deref(),
     ]
     .into_iter()
@@ -258,6 +259,7 @@ fn check_paths(options: &Options) -> Result<()> {
             if options.output.as_deref() != Some(path)
                 || options.response_info.as_deref() == Some(path)
                 || options.trace.as_deref() == Some(path)
+                || options.trace_report.as_deref() == Some(path)
                 || options.events.as_deref() == Some(path)
             {
                 return Err(invalid("only primary output may use stdout (-)"));
@@ -281,7 +283,7 @@ fn check_paths(options: &Options) -> Result<()> {
         };
         if !seen.insert(resolved) {
             return Err(invalid(
-                "output, metadata, trace and events need distinct paths",
+                "output, metadata, trace, trace report and events need distinct paths",
             ));
         }
         if path.exists() && !options.overwrite {
@@ -296,6 +298,14 @@ fn check_paths(options: &Options) -> Result<()> {
 fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Result<()> {
     let format = format(&options, script.is_some())?;
     let extraction = matches!(format, Some(Format::Markdown | Format::Json));
+    if matches!(options.trace_mode, args::TraceMode::Recursive)
+        && options.trace.is_none()
+        && options.trace_report.is_none()
+    {
+        return Err(invalid(
+            "--trace-mode recursive requires --trace or --trace-report",
+        ));
+    }
     let wait_seconds = match options.wait.as_str() {
         "load" | "domcontentloaded" | "networkidle" => None,
         value => Some(actions::seconds_duration(value.parse().map_err(invalid)?)?),
@@ -418,6 +428,11 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
         .as_deref()
         .map(|path| output::Output::new(Some(path), options.overwrite))
         .transpose()?;
+    let report = options
+        .trace_report
+        .as_deref()
+        .map(|path| output::Output::new(Some(path), options.overwrite))
+        .transpose()?;
     if let Some(path) = &options.trace {
         output::log_file(path, options.overwrite)?;
     }
@@ -456,213 +471,251 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
                 },
                 epoch_ms: options.epoch_ms,
             },
-            diagnostics: options.trace.as_ref().map(|path| DiagnosticsOptions {
-                path: Some(path.to_string_lossy().into_owned()),
-                include: options.trace_include.clone(),
-                capacity: options.trace_capacity,
-                stack: options.trace_stack,
+            diagnostics: (options.trace.is_some() || options.trace_report.is_some()).then(|| {
+                DiagnosticsOptions {
+                    mode: match options.trace_mode {
+                        args::TraceMode::Api => brimp_runtime::runtime::diagnostics::TraceMode::Api,
+                        args::TraceMode::Recursive => {
+                            brimp_runtime::runtime::diagnostics::TraceMode::Recursive
+                        }
+                    },
+                    path: options
+                        .trace
+                        .as_ref()
+                        .map(|path| path.to_string_lossy().into_owned()),
+                    include: options.trace_include.clone(),
+                    capacity: options.trace_capacity,
+                    stack: options.trace_stack,
+                }
             }),
         })?;
         let page = session.new_page()?;
         let errors = Arc::new(Mutex::new(None::<String>));
         let mut subscriptions = Vec::new();
-        for name in [
-            "console",
-            "error",
-            "lifecycle",
-            "mutation",
-            "request",
-            "response",
-            "request_finished",
-            "request_failed",
-            "websocket",
-            "eventsource",
-        ] {
-            let file = events.clone();
-            let errors = errors.clone();
-            subscriptions.push(page.on(
-                name,
-                Arc::new(move |event| {
-                    match &event {
-                        PageEvent::Console { level, message } => eprintln!("[{level}] {message}"),
-                        PageEvent::Error { message } => eprintln!("[page error] {message}"),
-                        _ => {}
-                    }
-                    if let Some(file) = &file {
-                        let result = (|| -> std::io::Result<()> {
-                            let mut file = file.lock().unwrap();
-                            serde_json::to_writer(&mut *file, &event)?;
-                            file.write_all(b"\n")
-                        })();
-                        if let Err(error) = result {
-                            *errors.lock().unwrap() = Some(error.to_string());
+        let mut registrations = Vec::new();
+        let execution = (|| {
+            for name in [
+                "console",
+                "error",
+                "lifecycle",
+                "mutation",
+                "request",
+                "response",
+                "request_finished",
+                "request_failed",
+                "websocket",
+                "eventsource",
+            ] {
+                let file = events.clone();
+                let errors = errors.clone();
+                subscriptions.push(page.on(
+                    name,
+                    Arc::new(move |event| {
+                        match &event {
+                            PageEvent::Console { level, message } => {
+                                eprintln!("[{level}] {message}")
+                            }
+                            PageEvent::Error { message } => eprintln!("[page error] {message}"),
+                            _ => {}
                         }
-                    }
-                }),
-            )?);
-        }
-        let mut registrations = routes.install(&page, errors.clone())?;
-        if let (Some((username, password)), Some(url)) = (auth, &url) {
-            let origin = url::Url::parse(url).map_err(invalid)?.origin();
-            registrations.push(page.route(
-                "*",
-                RouteStage::Auth,
-                Arc::new(move |route| {
-                    let allowed = url::Url::parse(&route.info().request.url)
-                        .is_ok_and(|url| url.origin() == origin)
-                        && route
-                            .info()
-                            .response
-                            .as_ref()
-                            .is_some_and(|response| response.status == 401);
-                    let result = if allowed {
-                        route.authenticate(username.clone(), password.clone())
-                    } else {
-                        route.continue_request(RouteOverrides::default())
-                    };
-                    if result.is_err() && route.is_pending() {
-                        let _ = route.fail("authentication failed");
-                    }
-                }),
-            )?);
-        }
-        page.configure_network(NetworkOptions {
-            offline: options.offline,
-            latency: options.latency.unwrap_or_default(),
-            bypass_cache: options.bypass_cache,
-            ..Default::default()
-        })?;
-        for source in &init_scripts {
-            if url.is_some() {
-                page.add_init_script(source)?;
-            } else {
-                evaluate(&page, source)?;
+                        if let Some(file) = &file {
+                            let result = (|| -> std::io::Result<()> {
+                                let mut file = file.lock().unwrap();
+                                serde_json::to_writer(&mut *file, &event)?;
+                                file.write_all(b"\n")
+                            })();
+                            if let Err(error) = result {
+                                *errors.lock().unwrap() = Some(error.to_string());
+                            }
+                        }
+                    }),
+                )?);
             }
-        }
-        if let Some(url) = &url {
-            for (name, value) in cookies {
-                session.cookies().set_cookie(url, &name, &value)?;
+            registrations.extend(routes.install(&page, errors.clone())?);
+            if let (Some((username, password)), Some(url)) = (auth, &url) {
+                let origin = url::Url::parse(url).map_err(invalid)?.origin();
+                registrations.push(page.route(
+                    "*",
+                    RouteStage::Auth,
+                    Arc::new(move |route| {
+                        let allowed = url::Url::parse(&route.info().request.url)
+                            .is_ok_and(|url| url.origin() == origin)
+                            && route
+                                .info()
+                                .response
+                                .as_ref()
+                                .is_some_and(|response| response.status == 401);
+                        let result = if allowed {
+                            route.authenticate(username.clone(), password.clone())
+                        } else {
+                            route.continue_request(RouteOverrides::default())
+                        };
+                        if result.is_err() && route.is_pending() {
+                            let _ = route.fail("authentication failed");
+                        }
+                    }),
+                )?);
             }
-        }
-        let request = RequestOptions {
-            body,
-            timeout: Some(budget.remaining()?),
-            allow_redirects: !options.no_redirects,
-            max_redirects: options.max_redirects,
-            cancellation: budget.cancellation.clone(),
-            ..Default::default()
-        };
-        if options.stream {
-            let response = page.stream(&options.method, url.as_deref().unwrap(), request)?;
-            if let Some(info) = &mut info {
-                info.write(&serde_json::to_vec_pretty(&response.metadata).map_err(internal)?)?;
-            }
-            if options.fail_on_http_error && response.metadata.status >= 400 {
-                if let Some(info) = info.take() {
-                    info.finish()?;
+            page.configure_network(NetworkOptions {
+                offline: options.offline,
+                latency: options.latency.unwrap_or_default(),
+                bypass_cache: options.bypass_cache,
+                ..Default::default()
+            })?;
+            for source in &init_scripts {
+                if url.is_some() {
+                    page.add_init_script(source)?;
+                } else {
+                    evaluate(&page, source)?;
                 }
-                return Err(AutomationError::HttpStatus(response.metadata.status));
             }
-            let mut size = 0usize;
-            while let Some(chunk) = response.body.next_chunk()? {
-                budget.remaining()?;
-                size = size
-                    .checked_add(chunk.len())
-                    .ok_or_else(|| internal("stream byte count overflow"))?;
-                if size > options.max_response_bytes {
-                    return Err(AutomationError::Transport(
-                        "response exceeds --max-response-bytes".into(),
-                    ));
+            if let Some(url) = &url {
+                for (name, value) in cookies {
+                    session.cookies().set_cookie(url, &name, &value)?;
                 }
-                output.write(&chunk)?;
             }
-        } else {
-            let response = url
-                .as_ref()
-                .map(|url| page.request(&options.method, url, request))
-                .transpose()?;
-            if let Some(response) = &response {
+            let request = RequestOptions {
+                body,
+                timeout: Some(budget.remaining()?),
+                allow_redirects: !options.no_redirects,
+                max_redirects: options.max_redirects,
+                cancellation: budget.cancellation.clone(),
+                ..Default::default()
+            };
+            if options.stream {
+                let response = page.stream(&options.method, url.as_deref().unwrap(), request)?;
                 if let Some(info) = &mut info {
-                    info.write(&serde_json::to_vec_pretty(response).map_err(internal)?)?;
+                    info.write(&serde_json::to_vec_pretty(&response.metadata).map_err(internal)?)?;
                 }
-                if options.fail_on_http_error && response.status_code >= 400 {
+                if options.fail_on_http_error && response.metadata.status >= 400 {
                     if let Some(info) = info.take() {
                         info.finish()?;
                     }
-                    return Err(AutomationError::HttpStatus(response.status_code));
+                    return Err(AutomationError::HttpStatus(response.metadata.status));
                 }
-            }
-            if options.wait == "networkidle" {
-                page.wait_for_network_idle(
-                    options.network_idle,
-                    budget.remaining()?,
-                    budget.cancellation.clone(),
-                )?;
-            }
-            if let Some(seconds) = wait_seconds {
-                budget.sleep(seconds)?;
-            }
-            if let Some(selector) = &options.wait_selector {
-                page.wait_for_selector(selector, budget.remaining()?, budget.cancellation.clone())?;
-            }
-            for source in scripts {
-                evaluate(&page, &source)?;
-            }
-            let mut value = if let Some(program) = program {
-                evaluate(&page, &program)?
-            } else {
-                Value::Null
-            };
-            actions.run(&page, &budget, options.max_tasks)?;
-            if let Some(duration) = options.advance_time {
-                page.advance_time(duration.as_secs_f64() * 1000., options.max_tasks)?;
-            }
-            let bytes = if let Some(expression) = expression {
-                value = evaluate(&page, &expression)?;
-                json_bytes(&value)?
-            } else {
-                match format {
-                    None => json_bytes(&value)?,
-                    Some(Format::Raw) => {
-                        response
-                            .ok_or_else(|| invalid("raw output requires URL"))?
-                            .content
+                let mut size = 0usize;
+                while let Some(chunk) = response.body.next_chunk()? {
+                    budget.remaining()?;
+                    size = size
+                        .checked_add(chunk.len())
+                        .ok_or_else(|| internal("stream byte count overflow"))?;
+                    if size > options.max_response_bytes {
+                        return Err(AutomationError::Transport(
+                            "response exceeds --max-response-bytes".into(),
+                        ));
                     }
-                    Some(Format::Html) => page.html()?.into_bytes(),
-                    Some(Format::Markdown | Format::Json) => {
-                        let document = page.extract(ExtractionOptions {
-                            content_selector: options.content.clone(),
-                            remove_images: options.remove_images,
-                            language: options.language.clone(),
-                            debug: options.extract_debug,
-                        })?;
-                        if format == Some(Format::Markdown) {
-                            document
-                                .content_markdown
-                                .ok_or_else(|| {
-                                    AutomationError::Extraction(
-                                        "Defuddle returned no Markdown".into(),
-                                    )
-                                })?
-                                .into_bytes()
-                        } else {
-                            serde_json::to_vec_pretty(&document).map_err(internal)?
+                    output.write(&chunk)?;
+                }
+            } else {
+                let response = url
+                    .as_ref()
+                    .map(|url| page.request(&options.method, url, request))
+                    .transpose()?;
+                if let Some(response) = &response {
+                    if let Some(info) = &mut info {
+                        info.write(&serde_json::to_vec_pretty(response).map_err(internal)?)?;
+                    }
+                    if options.fail_on_http_error && response.status_code >= 400 {
+                        if let Some(info) = info.take() {
+                            info.finish()?;
+                        }
+                        return Err(AutomationError::HttpStatus(response.status_code));
+                    }
+                }
+                if options.wait == "networkidle" {
+                    page.wait_for_network_idle(
+                        options.network_idle,
+                        budget.remaining()?,
+                        budget.cancellation.clone(),
+                    )?;
+                }
+                if let Some(seconds) = wait_seconds {
+                    budget.sleep(seconds)?;
+                }
+                if let Some(selector) = &options.wait_selector {
+                    page.wait_for_selector(
+                        selector,
+                        budget.remaining()?,
+                        budget.cancellation.clone(),
+                    )?;
+                }
+                for source in scripts {
+                    evaluate(&page, &source)?;
+                }
+                let mut value = if let Some(program) = program {
+                    evaluate(&page, &program)?
+                } else {
+                    Value::Null
+                };
+                actions.run(&page, &budget, options.max_tasks)?;
+                if let Some(duration) = options.advance_time {
+                    page.advance_time(duration.as_secs_f64() * 1000., options.max_tasks)?;
+                }
+                let bytes = if let Some(expression) = expression {
+                    value = evaluate(&page, &expression)?;
+                    json_bytes(&value)?
+                } else {
+                    match format {
+                        None => json_bytes(&value)?,
+                        Some(Format::Raw) => {
+                            response
+                                .ok_or_else(|| invalid("raw output requires URL"))?
+                                .content
+                        }
+                        Some(Format::Html) => page.html()?.into_bytes(),
+                        Some(Format::Markdown | Format::Json) => {
+                            let document = page.extract(ExtractionOptions {
+                                content_selector: options.content.clone(),
+                                remove_images: options.remove_images,
+                                language: options.language.clone(),
+                                debug: options.extract_debug,
+                            })?;
+                            if format == Some(Format::Markdown) {
+                                document
+                                    .content_markdown
+                                    .ok_or_else(|| {
+                                        AutomationError::Extraction(
+                                            "Defuddle returned no Markdown".into(),
+                                        )
+                                    })?
+                                    .into_bytes()
+                            } else {
+                                serde_json::to_vec_pretty(&document).map_err(internal)?
+                            }
                         }
                     }
-                }
-            };
-            budget.remaining()?;
-            output.write(&bytes)?;
-        }
-        if options.trace.is_some() {
-            let diagnostics = page.take_diagnostics()?;
-            if let Some(error) = diagnostics["writeError"].as_str() {
-                return Err(internal(error));
+                };
+                budget.remaining()?;
+                output.write(&bytes)?;
             }
-        }
+            Ok(())
+        })();
+        // Keep the realm alive long enough to report ordinary script failures.
+        // Cancellation/deadline expiry can also prevent diagnostic retrieval;
+        // preserve the original execution error if reporting fails as well.
+        let diagnostics = (|| {
+            if options.trace.is_some() || report.is_some() {
+                let summary = page.summarize_diagnostics()?;
+                if let Some(mut report) = report {
+                    report.write(&serde_json::to_vec_pretty(&summary).map_err(internal)?)?;
+                    report.finish()?;
+                }
+                if let Some(error) = summary["writeError"].as_str() {
+                    return Err(internal(error));
+                }
+            }
+            Ok(())
+        })();
         session.close();
         drop(registrations);
         drop(subscriptions);
+        if let Err(error) = execution {
+            if let Err(report_error) = diagnostics {
+                eprintln!("[diagnostics] {report_error}");
+            }
+            return Err(error);
+        }
+        diagnostics?;
         if let Some(error) = errors.lock().unwrap().take() {
             return Err(internal(error));
         }

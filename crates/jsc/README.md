@@ -17,3 +17,15 @@ cargo run -p brimp-jsc --example console
 ```
 
 No curl, Lexbor, Node or Python SDK is required.
+
+Embedders must call `JsRuntime::pump_jobs()` on the owner thread between host
+operations. This services asynchronous engine work, including WebAssembly
+compilation. It never waits for an event. Brimp's page scheduler calls it during
+Promise waits and idle processing with a maximum 10 ms wait between checks.
+
+On macOS this uses CoreFoundation's current-thread run loop. The pinned Linux
+and Windows SDKs export `WTF::RunLoop::cycle(unsigned)`, which provides a
+nonblocking iteration; that private scalar ABI is declared in `ffi.rs` alongside
+the existing pinned SDK APIs. The engine CI job verifies linking and asynchronous
+WASM execution on those targets. SDK upgrades must preserve or update this
+boundary; there is no silent fallback to synchronous WASM compilation.

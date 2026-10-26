@@ -1,0 +1,4467 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "select",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "textarea",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "output",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          true,
+          false
+        ],
+        [
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "object",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "ancestor",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "table-form",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "form-before-table",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "none",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "class",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "none",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "control-id",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "class",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "form-id",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "form-attribute",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          true,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "reinsert",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "tag": "fieldset",
+      "markup": "missing-explicit",
+      "operation": "remove-form",
+      "expected": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  ],
+  "radio_cases": [
+    {
+      "kind": "open-form",
+      "expected": [
+        [
+          false,
+          "f"
+        ],
+        [
+          true,
+          "f"
+        ]
+      ]
+    },
+    {
+      "kind": "closed-form",
+      "expected": [
+        [
+          true,
+          "f"
+        ],
+        [
+          true,
+          null
+        ]
+      ]
+    }
+  ],
+  "radio_mutations": [
+    {
+      "operation": "remove-form",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "move-form",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "move-a",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "move-cell",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "move-table",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "move-root",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "form-attribute",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "form-attribute-foreign",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "form-id",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "a-name",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "b-name",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "a-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "b-default",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "clone",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          false,
+          true,
+          false
+        ]
+      ]
+    },
+    {
+      "operation": "adopt",
+      "expected": [
+        [
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          false
+        ]
+      ]
+    }
+  ],
+  "script_boundary": [
+    [
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true,
+      true
+    ]
+  ]
+}

@@ -20,6 +20,16 @@ chunk is supplied. Comments, raw text, quoted delimiters, script escapes, and
 malformed markup are interpreted by Lexbor. A separate fragment parser allows
 script-time `innerHTML` mutations without disturbing the suspended parser.
 
+The shim uses each form control node's `user` slot for its parser-assigned form
+owner. The parser's existing insertion callback captures that pointer only for
+full-document parsing, outside template contents, and within the same tree.
+The arena retains both nodes. Separating a control from its owner clears the
+pointer; moving their common ancestor preserves it. Form-attribute changes and
+cloning clear parser state, while ordinary ancestor/ID association stays in the
+runtime. Fragment parsing does not create parser-owned associations. Parser
+callbacks are installed on the allocation-owning document, including when parsing
+a secondary logical document in the same arena.
+
 ## Local selector patch
 
 `source/lexbor/selectors/selectors.{c,h}` adds an explicit scoping-root pointer
@@ -48,3 +58,12 @@ The element's ID/class caches only track null-namespace attributes.
 `dom/interfaces/attr.c` interns prefixes in the prefix table rather than the
 namespace table. The shim exposes namespace-aware attribute mutation against
 this canonical state, with no parallel attribute store.
+
+## DocumentType clone patch
+
+`dom/interfaces/document_type.c` copies public/system identifiers only when
+their source storage exists. The parser may leave an omitted identifier with a
+null data pointer (for example the public identifier of a SYSTEM doctype).
+`lexbor_str_copy` rejects that representation, causing valid doctype and document
+clones to fail. Preserve absent identifiers as empty strings without allocating
+or reading nonexistent storage.

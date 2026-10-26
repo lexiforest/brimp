@@ -35,8 +35,14 @@ impl<'runtime> JsValue<'runtime> {
         }
     }
 
+    /// Convert to a Unicode scalar string, replacing unpaired UTF-16 surrogates.
     pub fn to_string(&self) -> Result<String, JsException> {
         value_to_string(self.runtime.as_raw(), self.raw)
+    }
+
+    /// Convert to a JavaScript string and preserve every UTF-16 code unit.
+    pub fn to_utf16(&self) -> Result<Vec<u16>, JsException> {
+        value_to_utf16(self.runtime.as_raw(), self.raw)
     }
 
     pub fn to_object(&self) -> Result<ProtectedJsObject, JsException> {
@@ -67,6 +73,17 @@ pub(crate) fn value_to_string(
     context: JSContextRef,
     value: JSValueRef,
 ) -> Result<String, JsException> {
+    Ok(value_to_js_string(context, value)?.to_rust_string())
+}
+
+pub(crate) fn value_to_utf16(
+    context: JSContextRef,
+    value: JSValueRef,
+) -> Result<Vec<u16>, JsException> {
+    Ok(value_to_js_string(context, value)?.code_units().to_vec())
+}
+
+fn value_to_js_string(context: JSContextRef, value: JSValueRef) -> Result<JsString, JsException> {
     let mut exception = ptr::null();
     // SAFETY: the caller supplies a live value from the supplied context.
     let string = unsafe { crate::ffi::JSValueToStringCopy(context, value, &mut exception) };
@@ -74,7 +91,6 @@ pub(crate) fn value_to_string(
         return Err(exception_from_raw(context, exception));
     }
     // SAFETY: a successful JSValueToStringCopy returns an owned string reference.
-    let string = unsafe { JsString::from_owned_raw(string) }
-        .ok_or_else(|| JsException::from_message("JavaScriptCore returned a null string"))?;
-    Ok(string.to_rust_string())
+    unsafe { JsString::from_owned_raw(string) }
+        .ok_or_else(|| JsException::from_message("JavaScriptCore returned a null string"))
 }

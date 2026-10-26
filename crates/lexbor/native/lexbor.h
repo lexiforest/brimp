@@ -13,6 +13,8 @@ typedef void (*br_attr_cb)(const unsigned char *, size_t, const unsigned char *,
     const unsigned char *, size_t, const unsigned char *, size_t,
     const unsigned char *, size_t, void *);
 typedef void (*br_decl_cb)(const unsigned char *, size_t, const unsigned char *, size_t, bool, void *);
+typedef bool (*br_charset_cb)(const unsigned char *, size_t, void *);
+int br_html_meta_charset(const unsigned char *, size_t, br_charset_cb, void *);
 
 br_document *br_document_new(void);
 void br_document_free(br_document *);
@@ -26,7 +28,12 @@ int br_parser_resume(br_parser *, const unsigned char *, size_t, size_t *, br_no
 br_node *br_fragment(br_document *, br_node *, const unsigned char *, size_t);
 
 unsigned br_node_type(br_node *);
+int br_document_quirks(br_node *);
+int br_document_set_no_quirks(br_node *);
+int br_document_copy_mode(br_node *, br_node *);
 br_node *br_node_parent(br_node *);
+/* Parser-assigned form owner; DOM mutations reset it when association breaks. */
+br_node *br_node_parser_form(br_node *);
 br_node *br_node_first(br_node *);
 br_node *br_node_next(br_node *);
 br_node *br_node_template_content(br_node *);

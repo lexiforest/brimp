@@ -1,0 +1,2777 @@
+{
+  "browser": "Installed Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "base": null,
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": null,
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": null,
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": null,
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": null,
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": null,
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": null,
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": null,
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": null,
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": null,
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": null,
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": null,
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": null,
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": null,
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": null,
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": null,
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": null,
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": null,
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": null,
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": null,
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": null,
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": null,
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": null,
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": null,
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": null,
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "https://other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/%E4%BD%A0%E5%A5%BD%F0%9F%A6%80",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "https://reference.test/a/",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/%E4%BD%A0%E5%A5%BD%F0%9F%A6%80",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/?q",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/?q",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/?q",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/?q",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/?q#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/?q#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "https://other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://reference.test/a/%E4%BD%A0%E5%A5%BD%F0%9F%A6%80",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "https://reference.test/a/?q#part",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "https://reference.test/a/%E4%BD%A0%E5%A5%BD%F0%9F%A6%80",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "../",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "../",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "../",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "../",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "../",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "../",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "../",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "../",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "../",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "../",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "../",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "../",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "../",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "../",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "../",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "../",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "../",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "../",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "../",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "../",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "../",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "../",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "../",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "../",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "../",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "http://[bad",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "javascript:void(0)",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": null,
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": null,
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": null
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "",
+      "kind": "attribute",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "",
+      "kind": "property",
+      "expected": {
+        "value": "",
+        "attribute": ""
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": " ",
+      "kind": "attribute",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": " ",
+      "kind": "property",
+      "expected": {
+        "value": " ",
+        "attribute": " "
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "\t\n",
+      "kind": "attribute",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "\t\n",
+      "kind": "property",
+      "expected": {
+        "value": "\t\n",
+        "attribute": "\t\n"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "./submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "./submit",
+      "kind": "property",
+      "expected": {
+        "value": "./submit",
+        "attribute": "./submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "../submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "../submit",
+      "kind": "property",
+      "expected": {
+        "value": "../submit",
+        "attribute": "../submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "/submit",
+      "kind": "attribute",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "/submit",
+      "kind": "property",
+      "expected": {
+        "value": "/submit",
+        "attribute": "/submit"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "?x=1",
+      "kind": "attribute",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "?x=1",
+      "kind": "property",
+      "expected": {
+        "value": "?x=1",
+        "attribute": "?x=1"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "#fragment",
+      "kind": "attribute",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "#fragment",
+      "kind": "property",
+      "expected": {
+        "value": "#fragment",
+        "attribute": "#fragment"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "//other.test/x",
+      "kind": "attribute",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "//other.test/x",
+      "kind": "property",
+      "expected": {
+        "value": "//other.test/x",
+        "attribute": "//other.test/x"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://EXAMPLE.test:443/a/../submit?x=1#part",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/submit?x=1#part",
+        "attribute": "https://EXAMPLE.test:443/a/../submit?x=1#part"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://[bad",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://[bad",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad",
+        "attribute": "http://[bad"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://",
+      "kind": "property",
+      "expected": {
+        "value": "http://",
+        "attribute": "http://"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://ex ample.test/",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://ex ample.test/",
+      "kind": "property",
+      "expected": {
+        "value": "http://ex ample.test/",
+        "attribute": "http://ex ample.test/"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "javascript:alert(1)",
+      "kind": "attribute",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "javascript:alert(1)",
+      "kind": "property",
+      "expected": {
+        "value": "javascript:alert(1)",
+        "attribute": "javascript:alert(1)"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "data:text/plain,x",
+      "kind": "attribute",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "data:text/plain,x",
+      "kind": "property",
+      "expected": {
+        "value": "data:text/plain,x",
+        "attribute": "data:text/plain,x"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "mailto:test@example.test",
+      "kind": "attribute",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "mailto:test@example.test",
+      "kind": "property",
+      "expected": {
+        "value": "mailto:test@example.test",
+        "attribute": "mailto:test@example.test"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/a\nb\tc",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/abc",
+        "attribute": "https://example.test/a\nb\tc"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/\u0000",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/\u0000",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/",
+        "attribute": "https://example.test/\u0000"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/\ud800",
+      "kind": "attribute",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/\ud800"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "https://example.test/\ud800",
+      "kind": "property",
+      "expected": {
+        "value": "https://example.test/%EF%BF%BD",
+        "attribute": "https://example.test/�"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://[bad/\udc00",
+      "kind": "attribute",
+      "expected": {
+        "value": "http://[bad/\udc00",
+        "attribute": "http://[bad/\udc00"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "http://[bad/\udc00",
+      "kind": "property",
+      "expected": {
+        "value": "http://[bad/�",
+        "attribute": "http://[bad/�"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "你好🦀",
+      "kind": "attribute",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    },
+    {
+      "base": "data:text/html,x",
+      "value": "你好🦀",
+      "kind": "property",
+      "expected": {
+        "value": "你好🦀",
+        "attribute": "你好🦀"
+      }
+    }
+  ]
+}

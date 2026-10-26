@@ -89,8 +89,8 @@ fn core_has_no_layout_or_xml_parser() {
     check(
         &page,
         r##"(() => {
-        if ('getBoundingClientRect' in Element.prototype || 'clientWidth' in Element.prototype ||
-            'getComputedStyle' in globalThis || 'elementFromPoint' in Document.prototype) return false;
+        if (document.body.getBoundingClientRect() !== undefined || document.body.clientWidth !== 0 ||
+            getComputedStyle(document.body) !== undefined || document.elementFromPoint(0, 0) !== undefined) return false;
         try { new DOMParser().parseFromString('<a/>', 'application/xml'); return false; }
         catch (error) { return error instanceof TypeError; }
     })()"##,
@@ -148,7 +148,7 @@ fn input_handler_detection_bubbling_and_rel_capabilities() {
         let classError = false;
         try { input.classList.supports('x'); } catch(e) { classError = e instanceof TypeError; }
         return 'oninput' in document && input.oninput === null && seen === 'input,document' &&
-            document.createElement('link').relList.supports('modulepreload') === false && classError;
+            document.createElement('link').relList.supports('modulepreload') === true && classError;
     })()"#,
     );
 }

@@ -14,6 +14,17 @@ SOURCE = '''async ({global, host}) => {
 }'''
 
 
+def test_rtc_installer_is_opt_in_and_creates_local_channels():
+    from brimp import plugins
+    with Session() as session, session.new_page() as page:
+        assert page.evaluate('typeof RTCPeerConnection') == 'undefined'
+    with Session(plugins=[plugins.rtc()]) as session, session.new_page() as page:
+        assert page.evaluate('''(() => {
+            const p = new RTCPeerConnection(), c = p.createDataChannel('python');
+            return [c.label, c.readyState, p.sctp, c.send('ignored') === undefined];
+        })()''') == ['python', 'connecting', None, True]
+
+
 def test_async_install_binary_notifications_exceptions_and_disposal():
     disposed = []
     def init(context, value):
@@ -38,9 +49,9 @@ def test_reentry_rejected_and_other_pages_remain_usable():
     refs = {}
     def callback(context):
         for action in (lambda: refs['page'].evaluate('1'), refs['page'].close,
-                       refs['session'].close, refs['session'].new_page,
-                       refs['handle'].json_value):
+                       refs['session'].close, refs['session'].new_page):
             with pytest.raises(Reentry): action()
+        assert refs['handle'].json_value() == {'a': 1}
         return refs['other'].evaluate('6 * 7')
     plugin = Plugin('reentry', '({global, host}) => { global.check = () => host.call("check"); }', {'check': callback})
     with Session(plugins=[plugin]) as session:

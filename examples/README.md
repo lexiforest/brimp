@@ -1,5 +1,10 @@
 # Examples
 
+The [script harness examples](harness/) run the same browser function repeatedly
+from Node, Python or the CLI, using controlled network responses and logical time.
+They inspect grouped API dependencies through the existing Session/Page API; see
+the [debugging tutorial](../docs/src/content/docs/examples/debugging.md).
+
 The [graphics/audio example](plugins/graphics-audio.js) demonstrates JavaScript
 state and explicit asynchronous host extensions. The [worker host example](plugins/node-host-worker.mjs)
 shows how to provide execution through the plugin bridge.

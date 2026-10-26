@@ -1,0 +1,3931 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "name": "charset",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "charset",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "charset",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "coords",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "coords",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "download",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "download",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "download",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hreflang",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "hreflang",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "name",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "name",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "name",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a�b�",
+        "a�b�",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "ping",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "ping",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rel",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rel",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "rev",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "rev",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "shape",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "shape",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "target",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "target",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "target",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "type",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "before",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "type",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "type",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "undefined",
+      "expected": [
+        null,
+        "undefined",
+        "before",
+        "undefined",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "null",
+      "expected": [
+        null,
+        "null",
+        "before",
+        "null",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "false",
+      "expected": [
+        null,
+        "false",
+        "before",
+        "false",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "true",
+      "expected": [
+        null,
+        "true",
+        "before",
+        "true",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "0",
+      "expected": [
+        null,
+        "0",
+        "before",
+        "0",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "1n",
+      "expected": [
+        null,
+        "1",
+        "before",
+        "1",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "beforetext",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "text",
+      "source": "({})",
+      "expected": [
+        null,
+        "[object Object]",
+        "before",
+        "[object Object]",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "converted",
+        "before",
+        "converted",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "beforetext",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "before",
+        "",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            0,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        " Plain VALUE ",
+        "before",
+        " Plain VALUE ",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "\u0000",
+        "before",
+        "\u0000",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "a\ud800b\udc00",
+        "before",
+        "a\ud800b\udc00",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "😀",
+        "before",
+        "😀",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "text",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "a\r\nb",
+        "before",
+        "a\r\nb",
+        [
+          [
+            "childList",
+            null,
+            null,
+            null,
+            1,
+            3
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "undefined",
+      "expected": [
+        null,
+        "",
+        "undefined",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "null",
+      "expected": [
+        null,
+        "",
+        "null",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "false",
+      "expected": [
+        null,
+        "",
+        "false",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "true",
+      "expected": [
+        null,
+        "",
+        "true",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "0",
+      "expected": [
+        null,
+        "",
+        "0",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "1n",
+      "expected": [
+        null,
+        "",
+        "1",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "Symbol()",
+      "expected": [
+        "TypeError",
+        "",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "({})",
+      "expected": [
+        null,
+        "",
+        "[object Object]",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"string\")throw Error(\"hint\");return \"converted\"}})",
+      "expected": [
+        null,
+        "",
+        "converted",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": [
+        "RangeError",
+        "",
+        "before",
+        "beforetext",
+        []
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\"\"",
+      "expected": [
+        null,
+        "",
+        "",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\" Plain VALUE \"",
+      "expected": [
+        null,
+        "",
+        " Plain VALUE ",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\"\\u0000\"",
+      "expected": [
+        null,
+        "",
+        "\u0000",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\"a\\ud800b\\udc00\"",
+      "expected": [
+        null,
+        "",
+        "a\ud800b\udc00",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\"😀\"",
+      "expected": [
+        null,
+        "",
+        "😀",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "referrerPolicy",
+      "source": "\"a\\r\\nb\"",
+      "expected": [
+        null,
+        "",
+        "a\r\nb",
+        "beforetext",
+        [
+          [
+            "attributes",
+            "referrerpolicy",
+            null,
+            "before",
+            0,
+            0
+          ]
+        ]
+      ]
+    }
+  ]
+}

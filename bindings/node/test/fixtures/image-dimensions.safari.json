@@ -1,0 +1,5017 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "decodeReturn": "Promise",
+  "dimensions": [
+    {
+      "name": "width",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "1",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "-1",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "2.9",
+      "raw": false,
+      "expected": [
+        null,
+        2,
+        "2",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "-2.9",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "-Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "2147483647",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "4294967295",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "4294967296",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "4294967297",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "9007199254740991",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "-1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "width",
+      "source": "Object(1n)",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "width",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "width",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "({valueOf(){return 31}})",
+      "raw": false,
+      "expected": [
+        null,
+        31,
+        "31",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})",
+      "raw": false,
+      "expected": [
+        null,
+        17,
+        "17",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "({valueOf(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"12\"",
+      "raw": false,
+      "expected": [
+        null,
+        12,
+        "12",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"12px\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"0xff\"",
+      "raw": false,
+      "expected": [
+        null,
+        255,
+        "255",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"1e2\"",
+      "raw": false,
+      "expected": [
+        null,
+        100,
+        "100",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\" 11\"",
+      "raw": false,
+      "expected": [
+        null,
+        11,
+        "11",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"\\ud800\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"-0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"+0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+0",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"-1\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-1",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"+1\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "+1",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\" \\t\\r\\n\\f12px\"",
+      "raw": true,
+      "expected": [
+        null,
+        12,
+        " \t\r\n\f12px",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"\\u000b12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "\u000b12",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\" 12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        " 12",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"1.5\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1.5",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"1e2\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1e2",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"0xff\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0xff",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"+ 2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+ 2",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"--2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "--2",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"01\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "01",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"2147483647\"",
+      "raw": true,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "2147483648",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"4294967295\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967295",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"4294967296\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967296",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"9007199254740991\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "9007199254740991",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"000000000000000000000000000001\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "000000000000000000000000000001",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"999999999999999999999999999\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "999999999999999999999999999",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"-0000000000000000000000000000\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0000000000000000000000000000",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"３\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "３",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "width",
+      "source": "\"١\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "١",
+        [
+          [
+            "width",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "1",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "-1",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "2.9",
+      "raw": false,
+      "expected": [
+        null,
+        2,
+        "2",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "-2.9",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "-Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "2147483647",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "4294967295",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "4294967296",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "4294967297",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "9007199254740991",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "-1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "height",
+      "source": "Object(1n)",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "height",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "height",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "({valueOf(){return 31}})",
+      "raw": false,
+      "expected": [
+        null,
+        31,
+        "31",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})",
+      "raw": false,
+      "expected": [
+        null,
+        17,
+        "17",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "({valueOf(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"12\"",
+      "raw": false,
+      "expected": [
+        null,
+        12,
+        "12",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"12px\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"0xff\"",
+      "raw": false,
+      "expected": [
+        null,
+        255,
+        "255",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"1e2\"",
+      "raw": false,
+      "expected": [
+        null,
+        100,
+        "100",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\" 11\"",
+      "raw": false,
+      "expected": [
+        null,
+        11,
+        "11",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"\\ud800\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"-0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"+0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+0",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"-1\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-1",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"+1\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "+1",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\" \\t\\r\\n\\f12px\"",
+      "raw": true,
+      "expected": [
+        null,
+        12,
+        " \t\r\n\f12px",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"\\u000b12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "\u000b12",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\" 12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        " 12",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"1.5\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1.5",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"1e2\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1e2",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"0xff\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0xff",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"+ 2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+ 2",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"--2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "--2",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"01\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "01",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"2147483647\"",
+      "raw": true,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "2147483648",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"4294967295\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967295",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"4294967296\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967296",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"9007199254740991\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "9007199254740991",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"000000000000000000000000000001\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "000000000000000000000000000001",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"999999999999999999999999999\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "999999999999999999999999999",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"-0000000000000000000000000000\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0000000000000000000000000000",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"３\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "３",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "height",
+      "source": "\"١\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "١",
+        [
+          [
+            "height",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "1",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "-1",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "2.9",
+      "raw": false,
+      "expected": [
+        null,
+        2,
+        "2",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "-2.9",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "-Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "2147483647",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "4294967295",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "4294967296",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "4294967297",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "9007199254740991",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "-1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "Object(1n)",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "({valueOf(){return 31}})",
+      "raw": false,
+      "expected": [
+        null,
+        31,
+        "31",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})",
+      "raw": false,
+      "expected": [
+        null,
+        17,
+        "17",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "({valueOf(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"12\"",
+      "raw": false,
+      "expected": [
+        null,
+        12,
+        "12",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"12px\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"0xff\"",
+      "raw": false,
+      "expected": [
+        null,
+        255,
+        "255",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"1e2\"",
+      "raw": false,
+      "expected": [
+        null,
+        100,
+        "100",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\" 11\"",
+      "raw": false,
+      "expected": [
+        null,
+        11,
+        "11",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"\\ud800\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"-0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"+0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+0",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"-1\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-1",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"+1\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "+1",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\" \\t\\r\\n\\f12px\"",
+      "raw": true,
+      "expected": [
+        null,
+        12,
+        " \t\r\n\f12px",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"\\u000b12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "\u000b12",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\" 12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        " 12",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"1.5\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1.5",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"1e2\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1e2",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"0xff\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0xff",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"+ 2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+ 2",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"--2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "--2",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"01\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "01",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"2147483647\"",
+      "raw": true,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "2147483648",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"4294967295\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967295",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"4294967296\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967296",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"9007199254740991\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "9007199254740991",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"000000000000000000000000000001\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "000000000000000000000000000001",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"999999999999999999999999999\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "999999999999999999999999999",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"-0000000000000000000000000000\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0000000000000000000000000000",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"３\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "３",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "hspace",
+      "source": "\"١\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "١",
+        [
+          [
+            "hspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "undefined",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "null",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "false",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "true",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "-0",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "1",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "-1",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "2.9",
+      "raw": false,
+      "expected": [
+        null,
+        2,
+        "2",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "-2.9",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "NaN",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "-Infinity",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "2147483647",
+      "raw": false,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "2147483648",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "4294967295",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "4294967296",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "4294967297",
+      "raw": false,
+      "expected": [
+        null,
+        1,
+        "1",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "9007199254740991",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "-1e100",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "1n",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "Object(1n)",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "Symbol()",
+      "raw": false,
+      "expected": [
+        "TypeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "({})",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "({valueOf(){return 31}})",
+      "raw": false,
+      "expected": [
+        null,
+        31,
+        "31",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})",
+      "raw": false,
+      "expected": [
+        null,
+        17,
+        "17",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "({valueOf(){throw new RangeError(\"conversion\")}})",
+      "raw": false,
+      "expected": [
+        "RangeError",
+        0,
+        "before",
+        []
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"12\"",
+      "raw": false,
+      "expected": [
+        null,
+        12,
+        "12",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"12px\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"0xff\"",
+      "raw": false,
+      "expected": [
+        null,
+        255,
+        "255",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"1e2\"",
+      "raw": false,
+      "expected": [
+        null,
+        100,
+        "100",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\" 11\"",
+      "raw": false,
+      "expected": [
+        null,
+        11,
+        "11",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"\\ud800\"",
+      "raw": false,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"-0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"+0\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+0",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"-1\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-1",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"+1\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "+1",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\" \\t\\r\\n\\f12px\"",
+      "raw": true,
+      "expected": [
+        null,
+        12,
+        " \t\r\n\f12px",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"\\u000b12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "\u000b12",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\" 12\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        " 12",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"1.5\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1.5",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"1e2\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "1e2",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"0xff\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "0xff",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"+ 2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "+ 2",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"--2\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "--2",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"01\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "01",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"2147483647\"",
+      "raw": true,
+      "expected": [
+        null,
+        2147483647,
+        "2147483647",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"2147483648\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "2147483648",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"4294967295\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967295",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"4294967296\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "4294967296",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"9007199254740991\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "9007199254740991",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"000000000000000000000000000001\"",
+      "raw": true,
+      "expected": [
+        null,
+        1,
+        "000000000000000000000000000001",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"999999999999999999999999999\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "999999999999999999999999999",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"-0000000000000000000000000000\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "-0000000000000000000000000000",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"３\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "３",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "vspace",
+      "source": "\"١\"",
+      "raw": true,
+      "expected": [
+        null,
+        0,
+        "١",
+        [
+          [
+            "vspace",
+            null,
+            "before"
+          ]
+        ]
+      ]
+    }
+  ],
+  "factory": [
+    {
+      "sources": [],
+      "expected": [
+        null,
+        0,
+        0,
+        null,
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "undefined"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        null,
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "null"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "false"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "true"
+      ],
+      "expected": [
+        null,
+        1,
+        0,
+        "1",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "0"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "-0"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "1"
+      ],
+      "expected": [
+        null,
+        1,
+        0,
+        "1",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "-1"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "2.9"
+      ],
+      "expected": [
+        null,
+        2,
+        0,
+        "2",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "-2.9"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "NaN"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "Infinity"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "-Infinity"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "2147483647"
+      ],
+      "expected": [
+        null,
+        2147483647,
+        0,
+        "2147483647",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "2147483648"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "4294967295"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "4294967296"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "4294967297"
+      ],
+      "expected": [
+        null,
+        1,
+        0,
+        "1",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "9007199254740991"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "1e100"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "-1e100"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "1n"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "Object(1n)"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "Symbol()"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "({})"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "({valueOf(){return 31}})"
+      ],
+      "expected": [
+        null,
+        31,
+        0,
+        "31",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})"
+      ],
+      "expected": [
+        null,
+        17,
+        0,
+        "17",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "({valueOf(){throw new RangeError(\"conversion\")}})"
+      ],
+      "expected": [
+        "RangeError"
+      ]
+    },
+    {
+      "sources": [
+        "\"\""
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\"12\""
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\"12px\""
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\"0xff\""
+      ],
+      "expected": [
+        null,
+        255,
+        0,
+        "255",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\"1e2\""
+      ],
+      "expected": [
+        null,
+        100,
+        0,
+        "100",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\" 11\""
+      ],
+      "expected": [
+        null,
+        11,
+        0,
+        "11",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "\"\\ud800\""
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        "0",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "undefined"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "null"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "false"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "true"
+      ],
+      "expected": [
+        null,
+        12,
+        1,
+        "12",
+        "1",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "0"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "-0"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "1"
+      ],
+      "expected": [
+        null,
+        12,
+        1,
+        "12",
+        "1",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "-1"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "2.9"
+      ],
+      "expected": [
+        null,
+        12,
+        2,
+        "12",
+        "2",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "-2.9"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "NaN"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "Infinity"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "-Infinity"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "2147483647"
+      ],
+      "expected": [
+        null,
+        12,
+        2147483647,
+        "12",
+        "2147483647",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "2147483648"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "4294967295"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "4294967296"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "4294967297"
+      ],
+      "expected": [
+        null,
+        12,
+        1,
+        "12",
+        "1",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "9007199254740991"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "1e100"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "-1e100"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "1n"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "Object(1n)"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "Symbol()"
+      ],
+      "expected": [
+        "TypeError"
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "({})"
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "({valueOf(){return 31}})"
+      ],
+      "expected": [
+        null,
+        12,
+        31,
+        "12",
+        "31",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "({[Symbol.toPrimitive](hint){if(hint!==\"number\")throw Error(hint);return 17.9}})"
+      ],
+      "expected": [
+        null,
+        12,
+        17,
+        "12",
+        "17",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "({valueOf(){throw new RangeError(\"conversion\")}})"
+      ],
+      "expected": [
+        "RangeError"
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"\""
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"12\""
+      ],
+      "expected": [
+        null,
+        12,
+        12,
+        "12",
+        "12",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"12px\""
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"0xff\""
+      ],
+      "expected": [
+        null,
+        12,
+        255,
+        "12",
+        "255",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"1e2\""
+      ],
+      "expected": [
+        null,
+        12,
+        100,
+        "12",
+        "100",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\" 11\""
+      ],
+      "expected": [
+        null,
+        12,
+        11,
+        "12",
+        "11",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "12",
+        "\"\\ud800\""
+      ],
+      "expected": [
+        null,
+        12,
+        0,
+        "12",
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "undefined",
+        "null"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        null,
+        "0",
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "undefined",
+        "undefined"
+      ],
+      "expected": [
+        null,
+        0,
+        0,
+        null,
+        null,
+        true,
+        true
+      ]
+    },
+    {
+      "sources": [
+        "1",
+        "2",
+        "Symbol()"
+      ],
+      "expected": [
+        null,
+        1,
+        2,
+        "1",
+        "2",
+        true,
+        true
+      ]
+    }
+  ]
+}

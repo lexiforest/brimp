@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 use std::sync::{Arc, Mutex, mpsc};
 
 enum Job {
-    Host(Arc<Py<PyAny>>, HostInvocation),
+    Host(Arc<Py<PyAny>>, Box<HostInvocation>),
     Event(Arc<Py<PyAny>>, u64, String),
     Route(Arc<Py<PyAny>>, brimp_runtime::runtime::routes::Route),
 }
@@ -60,7 +60,7 @@ impl Dispatcher {
                             }
                             continue;
                         }
-                        Job::Host(handler, call) => (handler, call),
+                        Job::Host(handler, call) => (handler, *call),
                     };
                     if call.context.is_cancelled() {
                         continue;
@@ -114,7 +114,7 @@ impl Dispatcher {
                                     dispatcher.0.lock().expect("Python dispatcher poisoned");
                                 if let Some(sender) = sender.as_ref() {
                                     if let Err(error) =
-                                        sender.send(Job::Host(handler.clone(), call))
+                                        sender.send(Job::Host(handler.clone(), Box::new(call)))
                                         && let Job::Host(_, call) = error.0
                                     {
                                         call.completion.reject("Python host dispatcher is closed");
@@ -197,6 +197,16 @@ impl PyHostContext {
     #[getter]
     fn cancelled(&self) -> bool {
         self.inner.is_cancelled()
+    }
+    fn bind_reference(&self, token: &str) -> PyResult<super::PyHandle> {
+        let token =
+            serde_json::from_str(token).map_err(|e| super::InvalidInput::new_err(e.to_string()))?;
+        Ok(super::PyHandle {
+            inner: brimp_runtime::runtime::native::JSHandle::from_reference(
+                self.inner.bridge.clone(),
+                token,
+            ),
+        })
     }
     fn emit(&self, channel: String, value: &str) -> PyResult<()> {
         let value =

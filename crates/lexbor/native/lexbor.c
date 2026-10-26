@@ -39,7 +39,30 @@ static lxb_status_t parser_mutation(br_node *node, br_node *parent, bool removed
     parser->mutations[parser->mutation_count++] = (br_mutation){parent,node,node->prev,node->next,removed};
     return LXB_STATUS_OK;
 }
-static lxb_status_t parser_inserted(br_node *node) { return parser_mutation(node,node->parent,false); }
+/* Node.user is reserved by this shim for a parser-assigned form owner. Both
+ * nodes belong to the same arena, which retains detached nodes until teardown. */
+static bool form_control(br_node *node) {
+    if (node->type != LXB_DOM_NODE_TYPE_ELEMENT || node->ns != LXB_NS_HTML) return false;
+    switch (node->local_name) {
+        case LXB_TAG_INPUT: case LXB_TAG_BUTTON: case LXB_TAG_SELECT:
+        case LXB_TAG_TEXTAREA: case LXB_TAG_OUTPUT: case LXB_TAG_OBJECT:
+        case LXB_TAG_FIELDSET: return true;
+        default: return false;
+    }
+}
+static br_node *tree_root(br_node *node) {
+    while (node->parent) node = node->parent;
+    return node;
+}
+static lxb_status_t parser_inserted(br_node *node) {
+    br_parser *parser = node->owner_document->user;
+    lxb_html_tree_t *tree = parser ? parser->html->tree : NULL;
+    if (tree && tree->form && !tree->fragment && !tree->template_insertion_modes->length && form_control(node)
+        && !lxb_dom_element_attr_by_name(lxb_dom_interface_element(node), (const unsigned char *)"form", 4)
+        && tree_root(node) == tree_root(lxb_dom_interface_node(tree->form)))
+        node->user = lxb_dom_interface_node(tree->form);
+    return parser_mutation(node,node->parent,false);
+}
 static lxb_status_t parser_removed(br_node *node, br_node *parent) { return parser_mutation(node,parent,true); }
 static lxb_status_t parser_character_data(br_node *node, const unsigned char *old_data, size_t length) {
     lxb_status_t status = parser_mutation(node,node,false);
@@ -110,6 +133,7 @@ br_parser *br_parser_new(br_node *root, bool scripting) {
     if (!parser->html || lxb_html_parser_init(parser->html) != LXB_STATUS_OK) goto failed;
     lxb_html_parser_scripting_set(parser->html, scripting);
     document->dom_document.scripting = scripting;
+    document->dom_document.compat_mode = LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS;
     if (lxb_html_parse_chunk_prepare(parser->html, document) != LXB_STATUS_OK) goto failed;
     parser->callback = parser->html->tkz->callback_token_done;
     parser->callback_ctx = parser->html->tkz->callback_token_ctx;
@@ -142,7 +166,7 @@ static int parser_resume(br_parser *parser, const unsigned char *data, size_t le
     return lxb_html_parse_chunk_end(parser->html) == LXB_STATUS_OK ? 0 : -1;
 }
 int br_parser_resume(br_parser *parser, const unsigned char *data, size_t len, size_t *offset, br_node **script) {
-    lxb_dom_document_t *doc = &parser->html->tree->document->dom_document;
+    lxb_dom_document_t *doc = lxb_dom_document_owner(&parser->html->tree->document->dom_document);
     const lxb_dom_document_mutation_cb_t *previous = doc->mutation;
     void *user = doc->user;
     doc->mutation = &parser_callbacks; doc->user = parser;
@@ -165,6 +189,20 @@ br_node *br_fragment(br_document *doc, br_node *context, const unsigned char *in
     return root;
 }
 unsigned br_node_type(br_node *node) { return node->type; }
+int br_document_quirks(br_node *node) {
+    if (node->type != LXB_DOM_NODE_TYPE_DOCUMENT) return -1;
+    return lxb_dom_interface_document(node)->compat_mode == LXB_DOM_DOCUMENT_CMODE_QUIRKS;
+}
+int br_document_set_no_quirks(br_node *node) {
+    if (node->type != LXB_DOM_NODE_TYPE_DOCUMENT) return -1;
+    lxb_dom_interface_document(node)->compat_mode = LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS;
+    return 0;
+}
+int br_document_copy_mode(br_node *source, br_node *target) {
+    if (source->type != LXB_DOM_NODE_TYPE_DOCUMENT || target->type != LXB_DOM_NODE_TYPE_DOCUMENT) return -1;
+    lxb_dom_interface_document(target)->compat_mode = lxb_dom_interface_document(source)->compat_mode;
+    return 0;
+}
 br_node *br_node_parent(br_node *node) { return node->parent; }
 br_node *br_node_first(br_node *node) { return node->first_child; }
 br_node *br_node_next(br_node *node) { return node->next; }
@@ -191,6 +229,12 @@ int br_node_name(br_node *node, unsigned part, br_bytes *out) {
         const unsigned char *colon = name ? memchr(name, ':', len) : NULL;
         len = colon ? (size_t)(colon - name) : 0;
     }
+    else if (part == 4 || part == 5) {
+        if (node->type != LXB_DOM_NODE_TYPE_DOCUMENT_TYPE) return -1;
+        lxb_dom_document_type_t *doctype = lxb_dom_interface_document_type(node);
+        name = part == 4 ? lxb_dom_document_type_public_id(doctype, &len)
+                         : lxb_dom_document_type_system_id(doctype, &len);
+    }
     return append_bytes(name, len, out) == LXB_STATUS_OK ? 0 : -1;
 }
 int br_node_text(br_node *node, br_bytes *out) {
@@ -199,7 +243,33 @@ int br_node_text(br_node *node, br_bytes *out) {
     if (text) lexbor_mraw_free(node->owner_document->text, text);
     return status;
 }
-void br_node_detach(br_node *node) { lxb_dom_node_remove(node); }
+br_node *br_node_parser_form(br_node *node) { return form_control(node) ? node->user : NULL; }
+static bool contains_node(br_node *parent, br_node *node) {
+    for (; node; node = node->parent) if (node == parent) return true;
+    return false;
+}
+static br_node *subtree_next(br_node *node, br_node *root) {
+    if (node->first_child) return node->first_child;
+    while (node != root && !node->next) node = node->parent;
+    return node == root ? NULL : node->next;
+}
+void br_node_detach(br_node *node) {
+    if (!node->parent) return;
+    bool relevant = false;
+    for (br_node *item = node; item; item = subtree_next(item, node)) {
+        if (br_node_parser_form(item) || (item->ns == LXB_NS_HTML && item->local_name == LXB_TAG_FORM)) {
+            relevant = true; break;
+        }
+    }
+    if (relevant) {
+        br_node *root = tree_root(node);
+        for (br_node *item = root; item; item = subtree_next(item, root)) {
+            br_node *owner = br_node_parser_form(item);
+            if (owner && contains_node(node, item) != contains_node(node, owner)) item->user = NULL;
+        }
+    }
+    lxb_dom_node_remove(node);
+}
 void br_node_clear(br_node *node) { while (node->first_child) br_node_detach(node->first_child); }
 int br_node_set_text(br_node *node, const unsigned char *text, size_t len) {
     if (node->type == LXB_DOM_NODE_TYPE_TEXT || node->type == LXB_DOM_NODE_TYPE_COMMENT) {
@@ -231,12 +301,19 @@ br_node *br_node_create(br_document *doc, unsigned kind, const unsigned char *na
         case LXB_DOM_NODE_TYPE_TEXT: return lxb_dom_interface_node(lxb_dom_document_create_text_node(owner, name, len));
         case LXB_DOM_NODE_TYPE_COMMENT: return lxb_dom_interface_node(lxb_dom_document_create_comment(owner, name, len));
         case LXB_DOM_NODE_TYPE_DOCUMENT_FRAGMENT: return lxb_dom_interface_node(lxb_dom_document_create_document_fragment(owner));
-        case LXB_DOM_NODE_TYPE_DOCUMENT: return lxb_dom_interface_node(lxb_html_document_interface_create(doc->html));
+        case LXB_DOM_NODE_TYPE_DOCUMENT: {
+            lxb_html_document_t *created = lxb_html_document_interface_create(doc->html);
+            if (!created) return NULL;
+            /* Memory ownership does not imply inheriting the owner's mode. */
+            created->dom_document.compat_mode = LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS;
+            return lxb_dom_interface_node(created);
+        }
         default: return NULL;
     }
 }
 br_node *br_node_clone(br_node *node, bool deep) {
     br_node *copy = lxb_dom_node_clone(node, deep);
+    if (copy) copy->user = NULL;
     if (!copy || !deep) return copy;
     /* Lexbor clones ordinary descendants. HTML template contents live outside
      * child links, so copy those explicitly, including nested templates. */
@@ -251,6 +328,7 @@ br_node *br_node_clone(br_node *node, bool deep) {
     *pair = (struct pair){node, copy};
     while (pending->length) {
         struct pair next = *(struct pair *)lexbor_array_obj_pop(pending);
+        next.copy->user = NULL;
         br_node *content = br_node_template_content(next.source);
         if (content) {
             br_node *target = br_node_template_content(next.copy);
@@ -302,13 +380,26 @@ int br_node_attribute(br_node *node, const unsigned char *name, size_t len, br_b
     const unsigned char *value = lxb_dom_attr_value(attr, &value_len);
     return append_bytes(value, value_len, out) == LXB_STATUS_OK ? 0 : -1;
 }
+static bool form_attribute(lxb_dom_attr_t *attr) {
+    if (!attr || attr->node.ns != LXB_NS__UNDEF) return false;
+    size_t len = 0;
+    const unsigned char *name = lxb_dom_attr_local_name(attr, &len);
+    return len == 4 && !memcmp(name, "form", 4);
+}
 int br_node_set_attribute(br_node *node, const unsigned char *name, size_t len, const unsigned char *value, size_t value_len) {
     if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
-    return lxb_dom_element_set_attribute(lxb_dom_interface_element(node), name, len, value, value_len) ? 0 : -1;
+    lxb_dom_attr_t *attr = lxb_dom_element_set_attribute(lxb_dom_interface_element(node), name, len, value, value_len);
+    if (!attr) return -1;
+    if (form_attribute(attr)) node->user = NULL;
+    return 0;
 }
 int br_node_remove_attribute(br_node *node, const unsigned char *name, size_t len) {
     if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
-    return lxb_dom_element_remove_attribute(lxb_dom_interface_element(node), name, len) == LXB_STATUS_OK ? 0 : -1;
+    lxb_dom_attr_t *attr = lxb_dom_element_attr_by_name(lxb_dom_interface_element(node), name, len);
+    bool reset_form = form_attribute(attr);
+    if (lxb_dom_element_remove_attribute(lxb_dom_interface_element(node), name, len) != LXB_STATUS_OK) return -1;
+    if (reset_form) node->user = NULL;
+    return 0;
 }
 
 extern lxb_status_t lxb_dom_attr_set_name_ns(lxb_dom_attr_t *, const lxb_char_t *, size_t, const lxb_char_t *, size_t, bool);
@@ -329,7 +420,11 @@ int br_node_set_attribute_ns(br_node *node, const unsigned char *ns, size_t ns_l
     const unsigned char *colon = memchr(name, ':', name_len), *local = colon ? colon + 1 : name;
     size_t local_len = name_len - (size_t)(local - name);
     lxb_dom_attr_t *attr = attribute_ns(node, ns, ns_len, local, local_len);
-    if (attr) return lxb_dom_attr_set_value(attr, value, value_len) == LXB_STATUS_OK ? 0 : -1;
+    if (attr) {
+        if (lxb_dom_attr_set_value(attr, value, value_len) != LXB_STATUS_OK) return -1;
+        if (!ns_len && local_len == 4 && !memcmp(local, "form", 4)) node->user = NULL;
+        return 0;
+    }
     attr = lxb_dom_attr_interface_create(node->owner_document);
     if (!attr) return -1;
     lxb_status_t status = ns_len
@@ -338,12 +433,14 @@ int br_node_set_attribute_ns(br_node *node, const unsigned char *ns, size_t ns_l
     if (status == LXB_STATUS_OK) status = lxb_dom_attr_set_value(attr, value, value_len);
     if (status == LXB_STATUS_OK) status = lxb_dom_element_attr_append(lxb_dom_interface_element(node), attr);
     if (status != LXB_STATUS_OK) { lxb_dom_attr_interface_destroy(attr); return -1; }
+    if (!ns_len && local_len == 4 && !memcmp(local, "form", 4)) node->user = NULL;
     return 0;
 }
 int br_node_remove_attribute_ns(br_node *node, const unsigned char *ns, size_t ns_len, const unsigned char *local, size_t local_len) {
     if (node->type != LXB_DOM_NODE_TYPE_ELEMENT) return -1;
     lxb_dom_attr_t *attr = attribute_ns(node, ns, ns_len, local, local_len);
     if (!attr) return 0;
+    if (!ns_len && local_len == 4 && !memcmp(local, "form", 4)) node->user = NULL;
     lxb_dom_element_attr_remove(lxb_dom_interface_element(node), attr);
     lxb_dom_attr_interface_destroy(attr);
     return 0;
@@ -493,7 +590,7 @@ br_parser *br_writer_new(br_node *root) {
     return br_parser_new(root,true);
 }
 int br_writer_feed(br_parser *parser, const unsigned char *data, size_t len, size_t *offset, br_node **script) {
-    lxb_dom_document_t *doc = &parser->html->tree->document->dom_document;
+    lxb_dom_document_t *doc = lxb_dom_document_owner(&parser->html->tree->document->dom_document);
     const lxb_dom_document_mutation_cb_t *previous = doc->mutation; void *user = doc->user;
     doc->mutation = &parser_callbacks; doc->user = parser;
     *script = NULL; parser->script = NULL; int result = 0;

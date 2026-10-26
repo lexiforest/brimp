@@ -1,0 +1,8444 @@
+{
+  "methods": [
+    {
+      "method": "item",
+      "source": "undefined",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "null",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "false",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "true",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "0",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "-0",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "1",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "-1",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "1.9",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "-1.9",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "NaN",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "Infinity",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "-Infinity",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "4294967296",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "4294967297",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "-4294967295",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "1n",
+      "expected": {
+        "result": null,
+        "error": "TypeError"
+      }
+    },
+    {
+      "method": "item",
+      "source": "Symbol()",
+      "expected": {
+        "result": null,
+        "error": "TypeError"
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"0\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"1\"",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"01\"",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"foo\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"name\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"missing\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"null\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"undefined\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"\\ud800\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "\"4294967296\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "({valueOf(){return 1}})",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "({toString(){return \"foo\"}})",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "({[Symbol.toPrimitive](hint){return hint===\"number\"?1:\"foo\"}})",
+      "expected": {
+        "result": "bar",
+        "error": null
+      }
+    },
+    {
+      "method": "item",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": {
+        "result": null,
+        "error": "RangeError"
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "undefined",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "null",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "false",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "true",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "0",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "-0",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "1",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "-1",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "1.9",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "-1.9",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "NaN",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "Infinity",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "-Infinity",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "4294967296",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "4294967297",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "-4294967295",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "1n",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "Symbol()",
+      "expected": {
+        "result": null,
+        "error": "TypeError"
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"0\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"1\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"01\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"foo\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"name\"",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"missing\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"null\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"undefined\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"\\ud800\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "\"4294967296\"",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "({valueOf(){return 1}})",
+      "expected": {
+        "result": null,
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "({toString(){return \"foo\"}})",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "({[Symbol.toPrimitive](hint){return hint===\"number\"?1:\"foo\"}})",
+      "expected": {
+        "result": "foo",
+        "error": null
+      }
+    },
+    {
+      "method": "namedItem",
+      "source": "({toString(){throw new RangeError(\"conversion\")}})",
+      "expected": {
+        "result": null,
+        "error": "RangeError"
+      }
+    }
+  ],
+  "properties": [
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          false,
+          false,
+          "element"
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          false,
+          false,
+          "element"
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          false,
+          false,
+          "element"
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          false,
+          false,
+          "element"
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "0",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          false,
+          false,
+          "element"
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "1"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "1",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "8"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "8",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "01"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "01",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "-1"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "-1",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "4294967294"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967294",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "4294967295"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "4294967295",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "foo"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "foo",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": 1,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": 1,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": 1,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": 1,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": 1,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "length"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "length",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": null,
+        "error": "TypeError",
+        "value": 1,
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "item"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:item",
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "item",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:item",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "toString"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:toString",
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "toString",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:toString",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          false,
+          "[object HTMLCollection]"
+        ],
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          false,
+          "[object HTMLCollection]"
+        ],
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          false,
+          "[object HTMLCollection]"
+        ],
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          false,
+          "[object HTMLCollection]"
+        ],
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__proto__"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "[object HTMLCollection]",
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__proto__",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          false,
+          "[object HTMLCollection]"
+        ],
+        "error": null,
+        "value": "[object HTMLCollection]",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "constructor"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "function:HTMLCollection",
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "constructor",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "function:HTMLCollection",
+        "has": true,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "read",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "set",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "define",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "delete",
+      "expected": {
+        "result": false,
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "inherit",
+      "expected": {
+        "result": "element",
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "element",
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": "element",
+          "writable": false,
+          "enumerable": false,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-id",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "foreign-name",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "read",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "set",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "define",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": 42,
+        "has": true,
+        "own": true,
+        "descriptor": {
+          "value": 42,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        },
+        "keys": [
+          "0",
+          "__items"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "delete",
+      "expected": {
+        "result": true,
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "inherit",
+      "expected": {
+        "result": "undefined",
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    },
+    {
+      "key": "__items",
+      "match": "none",
+      "operation": "inherit-set",
+      "expected": {
+        "result": [
+          true,
+          true,
+          42
+        ],
+        "error": null,
+        "value": "undefined",
+        "has": false,
+        "own": false,
+        "descriptor": null,
+        "keys": [
+          "0"
+        ]
+      }
+    }
+  ]
+}

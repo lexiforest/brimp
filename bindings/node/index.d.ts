@@ -2,8 +2,18 @@
 export type Headers = Record<string, string> | [string, string][];
 export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
 export interface IdentityOptions { userAgent?: string; languages?: string[]; platform?: string; }
-export interface DiagnosticsOptions { path?: string; include?: string[]; capacity?: number; stack?: boolean; }
-export interface TraceRecord { sequence: number; pageId: number; realmId: number; elapsedMs: number; kind: string; path: string; outcome: string; stack: string | null; details: {arguments?: JSONValue[]; argumentCount?: number; target?: string | null; property?: string | null} | null; }
+export interface DiagnosticsOptions { mode?: 'api' | 'recursive'; path?: string; include?: string[]; capacity?: number; stack?: boolean; }
+export interface TraceRecord { sequence: number; pageId: number; realmId: number; elapsedMs: number; kind: string; path: string; outcome: string; stack: string | null; details: {layer?: 'recursive'; note?: string; arguments?: JSONValue[]; argumentCount?: number; target?: string | null; property?: string | null} | null; }
+export interface DiagnosticCoverage { enabled: boolean; mode: 'api' | 'recursive'; include: string[]; limitations: string[]; }
+export interface DiagnosticBatch { records: TraceRecord[]; dropped: number; writeError: string | null; coverage: DiagnosticCoverage; }
+export interface DependencyUsage {
+  layer: 'api' | 'native' | 'reflection' | 'recursive'; path: string; kind: string;
+  target: string | null; property: string | null; count: number; throws: number;
+}
+export interface DiagnosticSummary {
+  dependencies: DependencyUsage[]; retained: number; dropped: number;
+  writeError: string | null; coverage: DiagnosticCoverage;
+}
 export interface SessionOptions {
   clock?: { mode?: 'system' | 'logical'; epochMs?: number };
   diagnostics?: DiagnosticsOptions;
@@ -69,7 +79,12 @@ export interface StreamingResponse { status: number; url: string; headers: [stri
 export class Page extends Requests {
   advanceTime(milliseconds: number, options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
   runPendingTasks(options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
-  takeDiagnostics(): Promise<{records: TraceRecord[]; dropped: number; writeError: string | null}>;
+  /** Consume retained records and the dropped count. JSONL output is unaffected. */
+  takeDiagnostics(): Promise<DiagnosticBatch>;
+  /** Inspect retained records without consuming them or the dropped count. */
+  peekDiagnostics(): Promise<DiagnosticBatch>;
+  /** Group retained observations. This does not imply complete dependency coverage. */
+  summarizeDiagnostics(): Promise<DiagnosticSummary>;
 
   stream(method: string, url: string, options?: RequestOptions): Promise<StreamingResponse>;
   private constructor();
@@ -80,8 +95,8 @@ export class Page extends Requests {
   readonly url: string;
   readonly headers: [string, string][];
   json(): JSONValue;
-  /** Evaluate browser JavaScript, await Promises, and copy a JSON-compatible result. */
-  evaluate(source: string): Promise<JSONValue>;
+  /** Evaluate browser JavaScript, await Promises, and copy rich values, including bigint and binary buffers. */
+  evaluate(source: string): Promise<CopiedValue>;
   evaluateHandle(source: string): Promise<JSHandle>;
   querySelector(selector: string): Promise<ElementHandle | null>;
   querySelectorAll(selector: string): Promise<ElementHandle[]>;
@@ -125,9 +140,16 @@ export class Response {
 /** Rooted JavaScript value. Dispose it when finished; navigation makes it stale. */
 export class JSHandle {
   protected constructor();
+  /** Copy the value using the shared bridge; non-copyable values require handles. */
+  value(): Promise<CopiedValue>;
+  /** Explicit JSON serialization, with JavaScript JSON.stringify semantics. */
   jsonValue(): Promise<JSONValue>;
   /** Calls function(value, ...args) and awaits its result in the page realm. */
-  call(functionSource: string, ...args: JSONValue[]): Promise<JSHandle>;
+  call(functionSource: string, ...args: HostValue[]): Promise<JSHandle>;
+  /** Invoke the held function with an optional receiver. */
+  invoke(args?: HostValue[], options?: {thisArg?: HostValue}): Promise<JSHandle>;
+  setProperty(name: string, value: HostValue): Promise<void>;
+  deleteProperty(name: string): Promise<boolean>;
   property(name: string): Promise<JSHandle>;
   propertyNames(): Promise<string[]>;
   dispose(): Promise<void>;
@@ -147,7 +169,10 @@ export class ElementHandle extends JSHandle {
   querySelectorAll(selector: string): Promise<ElementHandle[]>;
 }
 
-export type HostValue = null | boolean | number | string | Uint8Array | ArrayBuffer | HostValue[] | { [key: string]: HostValue };
+export type CopiedValue = undefined | null | boolean | number | bigint | string | ArrayBufferView | ArrayBuffer | CopiedValue[] | { [key: string]: CopiedValue };
+export type HostValue = undefined | null | boolean | number | bigint | string | ArrayBufferView | ArrayBuffer | JSHandle | HostFunction | HostValue[] | { [key: string]: HostValue };
+/** A registered plugin handler exposed to the page as a Promise-returning function. */
+export class HostFunction { private constructor(); readonly name: string; }
 export type HostHandler = (context: HostContext, ...args: HostValue[]) => HostValue | Promise<HostValue>;
 export interface PluginDescriptor { name: string; source: string; handlers?: Record<string, HostHandler>; }
 export interface PluginSessionScope { handlers?: Record<string, HostHandler>; dispose?: () => void | Promise<void>; }
@@ -166,6 +191,7 @@ export class HostContext {
   readonly pageId: string;
   readonly realmId: string;
   readonly cancelled: boolean;
+  function(name: string): HostFunction;
   emit(channel: string, value: HostValue): void;
 }
 
@@ -234,6 +260,7 @@ export function cssTypedOmPlugin(): Plugin;
 export function schedulingPlugin(): Plugin;
 export function graphicsPlugin(options?: {rgba?: number[]; renderer?: string; webgpu?: boolean}, handlers?: PluginDescriptor['handlers']): Plugin;
 export function audioPlugin(options?: {sampleRate?: number}, handlers?: PluginDescriptor['handlers']): Plugin;
+export function rtcPlugin(): Plugin;
 
 export interface PluginInfo {
   installers: {node: string; python: string};

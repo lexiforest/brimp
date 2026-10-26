@@ -1,32 +1,4 @@
 ({global}, options = {}) => {
-const __imageMetadata = () => ({complete: false,width:0,height:0});
-Object.defineProperties(HTMLImageElement.prototype, {
-    complete: {
-        get() { return (!this.hasAttribute("src") && !this.hasAttribute("srcset")) || __imageMetadata(this).complete; },
-        enumerable: true, configurable: true,
-    },
-    naturalWidth: {
-        get() { return __imageMetadata(this).width; },
-        enumerable: true, configurable: true,
-    },
-    naturalHeight: {
-        get() { return __imageMetadata(this).height; },
-        enumerable: true, configurable: true,
-    },
-    currentSrc: {
-        get() { return this.complete && this.naturalWidth > 0 ? this.src : ""; },
-        enumerable: true, configurable: true,
-    },
-    decode: {
-        value() {
-            return this.complete && this.naturalWidth > 0
-                ? Promise.resolve()
-                : Promise.reject(new DOMException("The image could not be decoded", "EncodingError"));
-        },
-        writable: true, configurable: true,
-    },
-});
-
 const rgba = options.rgba ?? [0, 0, 0, 0];
 if (!Array.isArray(rgba) || rgba.length !== 4 || !rgba.every(v => Number.isInteger(v) && v >= 0 && v <= 255)) throw new TypeError('rgba must contain four bytes');
 const advance = options.characterWidth ?? 0.5;
@@ -1108,6 +1080,8 @@ class CanvasRenderingContext2D {
         const [a, b, c, d, e, f] = this.__transform;
         return Object.freeze({ a, b, c, d, e, f, m11: a, m12: b, m21: c, m22: d, m41: e, m42: f, is2D: true });
     }
+    // Legacy callable placeholder: there is no focus-ring renderer.
+    drawFocusIfNeeded() {}
     fillRect(x, y, width, height) {
         const values = [x, y, width, height].map(Number);
         call("canvas2dFillRect", this.canvas, this.canvas.width, this.canvas.height, ...values, stylePayload(this.__fillStyle, this.__globalAlpha), ...this.__transform, effectsPayload(this), this.__globalCompositeOperation);
@@ -1558,5 +1532,12 @@ Object.defineProperties(globalThis, {
     Path2D: { value: Path2D, writable: true, configurable: true },
     TextMetrics: { value: TextMetrics, writable: true, configurable: true },
 });
+
+// Legacy callable placeholders; no capture or offscreen rendering ownership.
+for (const name of ['captureStream', 'transferControlToOffscreen']) {
+    Object.defineProperty(HTMLCanvasElement.prototype, name, {
+        value: {[name]() {}}[name], writable: true, configurable: true,
+    });
+}
 
 }

@@ -144,7 +144,8 @@ class Cache {
     put(request, response) {
         const key = new Request(request).url;
         if (!(response instanceof Response)) return Promise.reject(new TypeError("response must be a Response"));
-        return response.clone().text().then(body => {
+        return response.clone().arrayBuffer().then(buffer => {
+            const body = Array.from(new Uint8Array(buffer));
             const entries = this.__load();
             entries[key] = { body, status: response.status, statusText: response.statusText, headers: [...response.headers], url: response.url };
             save("cache", this.__name, entries);
@@ -164,7 +165,11 @@ class Cache {
 }
 
 class CacheStorage {
-    open(name) { return Promise.resolve(new Cache(String(name))); }
+    open(name) {
+        name = String(name);
+        if (call('get', 'cache', name) === null) save('cache', name, {});
+        return Promise.resolve(new Cache(name));
+    }
     has(name) { return Promise.resolve(call("get", "cache", String(name)) !== null); }
     delete(name) {
         name = String(name);
@@ -188,6 +193,8 @@ class StorageManager {
     estimate() { return Promise.resolve(JSON.parse(call("estimate"))); }
     persist() { return Promise.resolve(false); }
     persisted() { return Promise.resolve(false); }
+    // Legacy placeholder: no origin-private filesystem backend.
+    getDirectory() {}
 }
 
 globalThis.Cache = Cache;
@@ -195,6 +202,31 @@ globalThis.CacheStorage = CacheStorage;
 globalThis.caches = new CacheStorage();
 globalThis.StorageManager = StorageManager;
 Object.defineProperty(Navigator.prototype, "storage", { value: new StorageManager(), enumerable: true, configurable: true });
+
+// Legacy optional surfaces: cookie storage remains owned by document.cookie;
+// these calls do not modify it or start a database engine.
+class CookieStore extends EventTarget {
+    constructor(token) { super(); if (token !== __storageConstructorToken) throw new TypeError('Illegal constructor'); }
+    delete() {}
+    get() {}
+    getAll() {}
+    set() {}
+}
+const cookieHandlers = new WeakMap();
+Object.defineProperty(CookieStore.prototype, 'onchange', {
+    get() { return cookieHandlers.get(this) ?? null; },
+    set(value) { cookieHandlers.set(this, typeof value === 'function' ? value : null); },
+    enumerable: true, configurable: true,
+});
+class SQLTransaction {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    executeSql(sql, args, success) {
+        // Legacy synthetic result payload; no SQL parsing or execution.
+        if (typeof success === 'function') return success(this, {insertId:'', rows:{value:'0'}, rowsAffected:''});
+    }
+}
+Object.assign(global, {CookieStore, cookieStore: new CookieStore(__storageConstructorToken), SQLTransaction});
+Object.defineProperty(global, 'openDatabase', {value: undefined, configurable: true});
 
 
 return () => { localStorage.clear(); sessionStorage.clear(); namespaces.clear(); };

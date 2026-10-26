@@ -12,6 +12,11 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
 };
 
+mod dom_string;
+mod html_encoding;
+pub use dom_string::DomString;
+pub use html_encoding::html_meta_charset;
+
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Lexbor allocation or parser failure")]
@@ -46,6 +51,10 @@ struct Bytes {
     capacity: usize,
 }
 impl Bytes {
+    fn dom_string(&self) -> DomString {
+        // SAFETY: C initialized this buffer, and it remains owned until Drop.
+        DomString::from_bytes(unsafe { slice(self.data, self.len) })
+    }
     fn string(&self) -> String {
         // SAFETY: C initialized this buffer, and it remains owned until Drop.
         String::from_utf8_lossy(unsafe { slice(self.data, self.len) }).into_owned()
@@ -108,7 +117,11 @@ unsafe extern "C" {
         len: usize,
     ) -> *mut RawNode;
     fn br_node_type(node: *mut RawNode) -> u32;
+    fn br_document_quirks(node: *mut RawNode) -> i32;
+    fn br_document_set_no_quirks(node: *mut RawNode) -> i32;
+    fn br_document_copy_mode(source: *mut RawNode, target: *mut RawNode) -> i32;
     fn br_node_parent(node: *mut RawNode) -> *mut RawNode;
+    fn br_node_parser_form(node: *mut RawNode) -> *mut RawNode;
     fn br_node_first(node: *mut RawNode) -> *mut RawNode;
     fn br_node_next(node: *mut RawNode) -> *mut RawNode;
     fn br_node_template_content(node: *mut RawNode) -> *mut RawNode;
@@ -306,6 +319,16 @@ impl Document {
         // SAFETY: validated live arena membership.
         Ok(unsafe { br_node_type(node) })
     }
+    pub fn parser_form(&self, node: Node) -> Result<Option<Node>, Error> {
+        let node = self.raw(node)?;
+        // SAFETY: the shim retains the owner in the same live arena as node.
+        Ok(
+            NonNull::new(unsafe { br_node_parser_form(node) }).map(|raw| Node {
+                owner: self.0.identity,
+                raw,
+            }),
+        )
+    }
     pub fn parent(&self, node: Node) -> Result<Option<Node>, Error> {
         let node = self.raw(node)?;
         // SAFETY: validated live arena membership; a null parent is normal.
@@ -352,6 +375,33 @@ impl Document {
     pub fn prefix(&self, node: Node) -> Result<String, Error> {
         self.name_part(node, 3)
     }
+    pub fn doctype_public_id(&self, node: Node) -> Result<String, Error> {
+        self.name_part(node, 4)
+    }
+    pub fn doctype_system_id(&self, node: Node) -> Result<String, Error> {
+        self.name_part(node, 5)
+    }
+    pub fn document_quirks(&self, node: Node) -> Result<bool, Error> {
+        let node = self.raw(node)?;
+        // SAFETY: the node is live; the shim checks its type before casting.
+        let quirks = unsafe { br_document_quirks(node) };
+        match quirks {
+            0 => Ok(false),
+            1 => Ok(true),
+            _ => Err(Error::Native),
+        }
+    }
+    pub fn set_document_no_quirks(&self, node: Node) -> Result<(), Error> {
+        let node = self.raw(node)?;
+        // SAFETY: the node is live; the shim checks its type before casting.
+        status(unsafe { br_document_set_no_quirks(node) })
+    }
+    pub fn copy_document_mode(&self, source: Node, target: Node) -> Result<(), Error> {
+        let source = self.raw(source)?;
+        let target = self.raw(target)?;
+        // SAFETY: both nodes are live; the shim checks both types before casting.
+        status(unsafe { br_document_copy_mode(source, target) })
+    }
     fn name_part(&self, node: Node, part: u32) -> Result<String, Error> {
         let node = self.raw(node)?;
         let mut out = Bytes::default();
@@ -359,43 +409,51 @@ impl Document {
         status(unsafe { br_node_name(node, part, &mut out) })?;
         Ok(out.string())
     }
-    pub fn text(&self, node: Node) -> Result<String, Error> {
+    pub fn text(&self, node: Node) -> Result<DomString, Error> {
         let node = self.raw(node)?;
         let mut out = Bytes::default();
         // SAFETY: node is live and out is writable.
         status(unsafe { br_node_text(node, &mut out) })?;
-        Ok(out.string())
+        Ok(out.dom_string())
     }
-    pub fn set_text(&self, node: Node, text: &str) -> Result<(), Error> {
+    pub fn set_text(&self, node: Node, text: impl Into<DomString>) -> Result<(), Error> {
         let node = self.raw(node)?;
+        let text = text.into();
+        let bytes = text.as_bytes();
         // SAFETY: the input is borrowed only for this call. Existing children
         // are detached, never destroyed, so all other tokens remain valid.
-        status(unsafe { br_node_set_text(node, text.as_ptr(), text.len()) })
+        status(unsafe { br_node_set_text(node, bytes.as_ptr(), bytes.len()) })
     }
-    pub fn serialize(&self, node: Node, inner: bool) -> Result<String, Error> {
+    pub fn serialize(&self, node: Node, inner: bool) -> Result<DomString, Error> {
         let node = self.raw(node)?;
         let mut out = Bytes::default();
         // SAFETY: the serializer reads the arena synchronously and owns out's bytes.
         status(unsafe { br_node_serialize(node, inner, &mut out) })?;
-        Ok(out.string())
+        Ok(out.dom_string())
     }
     pub fn create_element(&self, name: &str, namespace: &str, prefix: &str) -> Result<Node, Error> {
-        self.create(1, name, namespace, prefix)
+        self.create(1, name.as_bytes(), namespace, prefix)
     }
-    pub fn create_text(&self, text: &str) -> Result<Node, Error> {
-        self.create(3, text, "", "")
+    pub fn create_text(&self, text: impl Into<DomString>) -> Result<Node, Error> {
+        self.create(3, text.into().as_bytes(), "", "")
     }
-    pub fn create_comment(&self, text: &str) -> Result<Node, Error> {
-        self.create(8, text, "", "")
+    pub fn create_comment(&self, text: impl Into<DomString>) -> Result<Node, Error> {
+        self.create(8, text.into().as_bytes(), "", "")
     }
     pub fn create_fragment(&self) -> Result<Node, Error> {
-        self.create(11, "", "", "")
+        self.create(11, b"", "", "")
     }
     /// A detached HTML document sharing this arena's lifetime.
     pub fn create_document(&self) -> Result<Node, Error> {
-        self.create(9, "", "", "")
+        self.create(9, b"", "", "")
     }
-    fn create(&self, kind: u32, input: &str, namespace: &str, prefix: &str) -> Result<Node, Error> {
+    fn create(
+        &self,
+        kind: u32,
+        input: &[u8],
+        namespace: &str,
+        prefix: &str,
+    ) -> Result<Node, Error> {
         // SAFETY: all strings are borrowed for the call and copied into this arena.
         self.token(unsafe {
             br_node_create(
@@ -442,18 +500,25 @@ impl Document {
             Err(Error::Hierarchy)
         }
     }
-    pub fn attribute(&self, node: Node, name: &str) -> Result<Option<String>, Error> {
+    pub fn attribute(&self, node: Node, name: &str) -> Result<Option<DomString>, Error> {
         let node = self.raw(node)?;
         let mut out = Bytes::default();
         // SAFETY: all pointers are live for this call; returned text is copied.
         match unsafe { br_node_attribute(node, name.as_ptr(), name.len(), &mut out) } {
-            0 => Ok(Some(out.string())),
+            0 => Ok(Some(out.dom_string())),
             1 => Ok(None),
             _ => Err(Error::Native),
         }
     }
-    pub fn set_attribute(&self, node: Node, name: &str, value: &str) -> Result<(), Error> {
+    pub fn set_attribute(
+        &self,
+        node: Node,
+        name: &str,
+        value: impl Into<DomString>,
+    ) -> Result<(), Error> {
         let node = self.raw(node)?;
+        let value = value.into();
+        let value = value.as_bytes();
         // SAFETY: the strings are copied into this validated node's arena.
         status(unsafe {
             br_node_set_attribute(node, name.as_ptr(), name.len(), value.as_ptr(), value.len())
@@ -469,9 +534,11 @@ impl Document {
         node: Node,
         ns: &str,
         name: &str,
-        value: &str,
+        value: impl Into<DomString>,
     ) -> Result<(), Error> {
         let node = self.raw(node)?;
+        let value = value.into();
+        let value = value.as_bytes();
         // SAFETY: validated arena node, borrowed strings are copied by the shim.
         status(unsafe {
             br_node_set_attribute_ns(
@@ -654,15 +721,13 @@ unsafe extern "C" fn node_callback(node: *mut RawNode, context: *mut c_void) {
     // SAFETY: query supplies this exact vector type and a live mutable pointer.
     unsafe { (&mut *context.cast::<Vec<*mut RawNode>>()).push(node) };
 }
-#[derive(Clone, Debug, serde::Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug)]
 pub struct Attribute {
     pub name: String,
     pub local_name: String,
-    #[serde(rename = "namespaceURI")]
     pub namespace: Option<String>,
     pub prefix: Option<String>,
-    pub value: String,
+    pub value: DomString,
 }
 unsafe extern "C" fn attr_callback(
     name: *const u8,
@@ -685,7 +750,7 @@ unsafe extern "C" fn attr_callback(
             local_name: string(local, local_len),
             namespace: (namespace_len != 0).then(|| string(namespace, namespace_len)),
             prefix: (prefix_len != 0).then(|| string(prefix, prefix_len)),
-            value: string(value, value_len),
+            value: DomString::from_bytes(slice(value, value_len)),
         });
     }
 }

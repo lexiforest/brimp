@@ -4,9 +4,14 @@
     "esbuild": "0.28.2",
     "fake-indexeddb": "6.2.6",
     "web-streams-polyfill": "4.3.0",
-    "xpath": "0.0.35"
+    "xpath": "0.0.35",
+    "@csstools/css-color-parser": "4.2.6",
+    "@csstools/css-parser-algorithms": "4.0.2",
+    "@csstools/css-tokenizer": "4.0.2",
+    "@csstools/color-helpers": "6.1.2"
   },
-  "lockSha256": "10bb74a0a4c2492fc8b35c346b38f7cd0b50bd6888f2c88a581d99e0e55abf2e",
+  "lockSha256": "f03a76aff9ed8384fd00cc69de14954e8921e33b83ee1fd3440cb5bf86e9ec94",
   "bundleSha256": "7aaf02740dc08c6e6bf6999820d1c8c4f17bf67702c5626a48e0bf74a3d6184f",
-  "storageSha256": "533b6847999dcc76cb2016e9bd62e55f1131465dcd45b49425f7763f2ee0f235"
+  "storageSha256": "feb46ef8db05c8215f812e255992bf9efdb0676d1e774ec4a37efd1b5530f0e8",
+  "inputColorSha256": "020bf651de602eacb51e1a272d6c041a5ee02979c6c8191efdd4f1cd4d73ac97"
 }

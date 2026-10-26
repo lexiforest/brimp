@@ -27,6 +27,7 @@ fn main() {
     println!("cargo:rerun-if-changed=vendor/lexbor");
     println!("cargo:rerun-if-changed=native/lexbor.c");
     println!("cargo:rerun-if-changed=native/lexbor.h");
+    println!("cargo:rerun-if-changed=native/html_encoding.c");
     cc::Build::new()
         .include(root)
         .define("LEXBOR_STATIC", None)
@@ -35,5 +36,6 @@ fn main() {
         .warnings(false)
         .files(files)
         .file("native/lexbor.c")
+        .file("native/html_encoding.c")
         .compile("brimp_lexbor");
 }

@@ -60,7 +60,10 @@ fn zero_delay_timers_run_on_the_page_owner_thread() {
     let document = page.document();
     let body = document.query_selector("body").unwrap().unwrap();
     assert_eq!(
-        document.attribute(body, "data-timer").as_deref(),
+        document
+            .attribute(body, "data-timer")
+            .as_ref()
+            .and_then(|value| value.as_str()),
         Some("done")
     );
 }

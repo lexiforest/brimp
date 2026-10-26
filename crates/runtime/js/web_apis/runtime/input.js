@@ -73,6 +73,7 @@ globalThis.__brimpInputController = (() => {
 
     function focus(target) {
         if (!target || target.disabled || document.activeElement === target) return;
+        if (target instanceof HTMLInputElement && __inputTemporalType(__inputType(target)) && __controlConnected(target)) __inputTemporalEditors.add(target);
         const previous = document.activeElement;
         if (previous) {
             dispatch(previous, new FocusEvent("blur", {relatedTarget: target}));
@@ -95,37 +96,6 @@ globalThis.__brimpInputController = (() => {
         return target?.closest?.("button,input,label,a[href]") ?? target;
     }
 
-    function prepareActivation(target) {
-        target = activationElement(target);
-        if (!(target instanceof HTMLInputElement) || target.disabled) return null;
-        if (target.type === "checkbox") {
-            const checked = Boolean(target.checked);
-            __inputCheckedStates.set(target, !checked);
-            return accepted => {
-                if (!accepted) __inputCheckedStates.set(target, checked);
-                else {
-                    inputEvent(target);
-                    inputEvent(target, "change");
-                }
-            };
-        }
-        if (target.type === "radio" && !target.checked) {
-            const radios = target.name
-                ? Array.from(document.querySelectorAll('input[type="radio"]')).filter(radio => radio.name === target.name)
-                : [target];
-            const checked = radios.map(radio => Boolean(radio.checked));
-            for (const radio of radios) __inputCheckedStates.set(radio, radio === target);
-            return accepted => {
-                if (!accepted) radios.forEach((radio, index) => { __inputCheckedStates.set(radio, checked[index]); });
-                else {
-                    inputEvent(target);
-                    inputEvent(target, "change");
-                }
-            };
-        }
-        return null;
-    }
-
     function activate(target) {
         target = activationElement(target);
         if (!target || target.disabled) return;
@@ -143,8 +113,8 @@ globalThis.__brimpInputController = (() => {
                 reset(__formOwner(target));
             }
         } else if (target instanceof HTMLButtonElement) {
-            if (target.type === "submit") submit(__formOwner(target));
-            else if (target.type === "reset") reset(__formOwner(target));
+            if (__buttonType(target) === "submit") submit(__formOwner(target));
+            else if (__buttonType(target) === "reset") reset(__formOwner(target));
         } else if (target instanceof HTMLAnchorElement && target.href) {
             location.href = target.href;
         }
@@ -158,10 +128,8 @@ globalThis.__brimpInputController = (() => {
         const activationTarget = activationElement(target);
         if (mouseDownTarget !== target || activationTarget?.disabled) return;
         if (command.button === 0) {
-            const prepared = prepareActivation(target);
             const accepted = pointer(target, "click", command);
-            prepared?.(accepted);
-            if (accepted && !prepared) activate(target);
+            if (accepted) activate(target);
             if (command.clickCount === 2) mouse(target, "dblclick", command);
         } else if (command.button === 1) {
             mouse(target, "auxclick", command);
@@ -241,12 +209,19 @@ globalThis.__brimpInputController = (() => {
 
     function editableTarget() {
         const target = document.activeElement;
-        if (!target || target.disabled || target.readOnly) return null;
+        if (!target) return null;
+        if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+            if (__isDisabledFormControl(target) || __getContentAttribute(target,'readonly') !== null) return null;
+        } else if (target.disabled || target.readOnly) return null;
         if (target instanceof HTMLTextAreaElement) return target;
-        if (target instanceof HTMLInputElement && ["text","search","url","tel","email","password","number"].includes(target.type)) return target;
+        if (target instanceof HTMLInputElement && ["text","search","url","tel","email","password","number"].includes(__inputType(target))) return target;
         return target.closest?.('[contenteditable="true"],[contenteditable=""]') || null;
     }
     function selection(target) {
+        if (target instanceof HTMLInputElement) {
+            const value = __inputEditorValue(target), {start,end} = __controlSelection(target);
+            return {value,start:Math.min(start,value.length),end:Math.min(end,value.length)};
+        }
         if ("value" in target) return {value:String(target.value),start:target.selectionStart,end:target.selectionEnd};
         const value = target.textContent;
         const range = document.getSelection()?.rangeCount ? document.getSelection().getRangeAt(0) : null;
@@ -254,7 +229,14 @@ globalThis.__brimpInputController = (() => {
         return {value,start:value.length,end:value.length};
     }
     function caret(target,start,end=start) {
-        if ("value" in target) target.setSelectionRange(start,end);
+        if (target instanceof HTMLInputElement) {
+            if (__supportsSelection(target)) __setControlSelection(target,start,end,'none');
+            else {
+                const length = __inputEditorValue(target).length;
+                end = Math.min(end,length); start = Math.min(start,end);
+                __controlSelections.set(target,{start,end,direction:'none'});
+            }
+        } else if ("value" in target) target.setSelectionRange(start,end);
         else if (target.firstChild) {
             const range = document.createRange(); range.setStart(target.firstChild,start); range.setEnd(target.firstChild,end);
             const selected = document.getSelection(); selected.removeAllRanges(); selected.addRange(range);
@@ -264,8 +246,24 @@ globalThis.__brimpInputController = (() => {
         const selected = selection(target);
         start ??= selected.start; end ??= selected.end;
         if (!dispatch(target,new InputEvent("beforeinput",{bubbles:true,cancelable:true,composed:true,data:text || null,inputType}))) return false;
+        if (target instanceof HTMLInputElement) {
+            const type = __inputType(target);
+            if (type === 'number') text = __filterInputNumberText(text,selected.value,start,end);
+            else {
+                text = text.replace(/[\r\n]/g,'');
+                const max = __parseNonnegativeInteger(__getContentAttribute(target,'maxlength') ?? '');
+                if (max !== null) {
+                    const available = Math.max(0,max-(selected.value.length-(end-start)));
+                    let limited = '';
+                    for (const character of text) { if (limited.length+character.length>available) break; limited += character; }
+                    text = limited;
+                }
+            }
+            if (text === '' && start === end) return false;
+        }
         const value = selected.value.slice(0,start) + text + selected.value.slice(end);
-        if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) __inputValues.set(target, value);
+        if (target instanceof HTMLInputElement) __setInputEditedValue(target,value);
+        else if (target instanceof HTMLTextAreaElement) __inputValues.set(target, value);
         else if ("value" in target) target.value = value; else target.textContent = value;
         caret(target,start+text.length);
         dispatch(target,new InputEvent("input",{bubbles:true,composed:true,data:text || null,inputType}));

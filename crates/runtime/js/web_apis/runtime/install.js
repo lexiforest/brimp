@@ -8,7 +8,10 @@ globalThis.MutationObserver = MutationObserver;
 globalThis.EventTarget = EventTarget;
 globalThis.Event = Event;
 globalThis.CustomEvent = CustomEvent;
+globalThis.ErrorEvent = ErrorEvent;
+globalThis.BeforeUnloadEvent = BeforeUnloadEvent;
 globalThis.UIEvent = UIEvent;
+globalThis.TextEvent = TextEvent;
 globalThis.MouseEvent = MouseEvent;
 globalThis.WheelEvent = WheelEvent;
 globalThis.FocusEvent = FocusEvent;
@@ -35,17 +38,44 @@ globalThis.NodeList = NodeList;
 globalThis.NamedNodeMap = NamedNodeMap;
 globalThis.Attr = Attr;
 globalThis.Node = Node;
-// GlobalEventHandlers are observable before the first assignment.
-for (const prototype of [HTMLElement.prototype, Document.prototype, Window.prototype]) {
-    for (const type of ["input", "beforeinput", "change", "click", "dblclick", "keydown", "keyup", "focus", "blur", "focusin", "focusout", "submit", "reset", "load", "error", "readystatechange"]) {
-        const values = new WeakMap();
-        Object.defineProperty(prototype, `on${type}`, {
-            configurable: true, enumerable: true,
-            get() { return values.get(this) ?? null; },
-            set(value) { values.set(this, typeof value === "function" ? value : null); },
-        });
-    }
+// Global event-handler surfaces measured in Safari 27.0. Event production is
+// independent of property registration (for example optional media engines).
+const __globalEventHandlerTypes = [
+    "abort", "animationcancel", "animationend", "animationiteration", "animationstart", "auxclick", "beforecopy", "beforecut",
+    "beforeinput", "beforematch", "beforepaste", "beforetoggle", "blur", "cancel", "canplay", "canplaythrough",
+    "change", "click", "close", "command", "contentvisibilityautostatechange", "contextmenu", "copy", "cuechange",
+    "cut", "dblclick", "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart",
+    "drop", "durationchange", "emptied", "ended", "error", "focus", "formdata", "gotpointercapture",
+    "input", "invalid", "keydown", "keypress", "keyup", "load", "loadeddata", "loadedmetadata",
+    "loadstart", "lostpointercapture", "mousedown", "mouseenter", "mouseleave", "mousemove", "mouseout", "mouseover",
+    "mouseup", "mousewheel", "paste", "pause", "play", "playing", "pointercancel", "pointerdown",
+    "pointerenter", "pointerleave", "pointermove", "pointerout", "pointerover", "pointerup", "progress", "ratechange",
+    "reset", "resize", "scroll", "scrollend", "securitypolicyviolation", "seeked", "seeking", "select",
+    "selectionchange", "selectstart", "slotchange", "stalled", "submit", "suspend", "timeupdate", "toggle",
+    "transitioncancel", "transitionend", "transitionrun", "transitionstart", "volumechange", "waiting", "webkitanimationend", "webkitanimationiteration",
+    "webkitanimationstart", "webkitmouseforcechanged", "webkitmouseforcedown", "webkitmouseforceup", "webkitmouseforcewillbegin", "webkittransitionend", "wheel",
+];
+for (const prototype of [HTMLElement.prototype, SVGElement.prototype, Document.prototype]) {
+    __defineEventHandlers(prototype, __globalEventHandlerTypes);
 }
+__defineEventHandlers(Document.prototype, ["fullscreenchange", "fullscreenerror", "pointerlockchange", "pointerlockerror", "readystatechange", "visibilitychange", "webkitfullscreenchange", "webkitfullscreenerror"]);
+__defineEventHandlers(Element.prototype, ['fullscreenchange', 'fullscreenerror', 'webkitfullscreenchange', 'webkitfullscreenerror']);
+__defineEventHandlers(HTMLMediaElement.prototype, ['encrypted', 'waitingforkey']);
+__defineEventHandlers(HTMLVideoElement.prototype, ['enterpictureinpicture', 'leavepictureinpicture']);
+__defineTokenListReflection(Element.prototype, 'part', 'part');
+__defineStringReflections(HTMLElement.prototype, [['nonce']]);
+__defineStringReflections(SVGElement.prototype, [['nonce']]);
+__defineBooleanReflections(SVGElement.prototype, [['autofocus']]);
+Object.defineProperty(SVGElement.prototype, 'tabIndex', Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'tabIndex'));
+__makeWebIdlMembersEnumerable(Element.prototype, ['querySelector', 'querySelectorAll', 'matches', 'webkitMatchesSelector', 'closest']);
+__makeWebIdlMembersEnumerable(Document.prototype, ['querySelector', 'querySelectorAll']);
+// Window callbacks share registration with ordinary DOM handlers; error and
+// beforeunload use their event-specific argument and cancellation algorithms.
+__defineEventHandlers(Window.prototype, __globalEventHandlerTypes);
+__defineEventHandlers(Window.prototype, ['devicemotion', 'deviceorientation', 'focus', 'blur', 'focusin', 'focusout', 'readystatechange']);
+__defineEventHandlers(Window.prototype, __bodyWindowEventTypes);
+__defineEventHandlers(HTMLBodyElement.prototype, __bodyWindowEventTypes, true);
+__defineEventHandlers(HTMLFrameSetElement.prototype, __bodyWindowEventTypes, true);
 globalThis.NodeFilter = NodeFilter;
 globalThis.TreeWalker = TreeWalker;
 globalThis.NodeIterator = NodeIterator;
@@ -54,8 +84,10 @@ globalThis.HTMLDocument = Document;
 globalThis.DOMParser = DOMParser;
 globalThis.Element = Element;
 globalThis.SVGElement = SVGElement;
+globalThis.SVGGraphicsElement = SVGGraphicsElement;
 globalThis.HTMLElement = HTMLElement;
 globalThis.HTMLAnchorElement = HTMLAnchorElement;
+globalThis.HTMLUnknownElement = HTMLUnknownElement;
 globalThis.HTMLBaseElement = HTMLBaseElement;
 globalThis.HTMLPictureElement = HTMLPictureElement;
 globalThis.HTMLImageElement = HTMLImageElement;
@@ -107,6 +139,7 @@ globalThis.HTMLUListElement = HTMLUListElement;
 globalThis.HTMLLIElement = HTMLLIElement;
 globalThis.HTMLDListElement = HTMLDListElement;
 globalThis.HTMLDivElement = HTMLDivElement;
+globalThis.HTMLSpanElement = HTMLSpanElement;
 globalThis.HTMLDataElement = HTMLDataElement;
 globalThis.HTMLTimeElement = HTMLTimeElement;
 globalThis.HTMLBRElement = HTMLBRElement;
@@ -114,6 +147,7 @@ globalThis.HTMLBodyElement = HTMLBodyElement;
 globalThis.HTMLHeadingElement = HTMLHeadingElement;
 globalThis.HTMLHtmlElement = HTMLHtmlElement;
 globalThis.HTMLScriptElement = HTMLScriptElement;
+__makeWebIdlMembersEnumerable(HTMLScriptElement.prototype, ['text']);
 globalThis.HTMLTemplateElement = HTMLTemplateElement;
 globalThis.HTMLSlotElement = HTMLSlotElement;
 globalThis.HTMLModElement = HTMLModElement;
@@ -128,6 +162,7 @@ globalThis.HTMLFontElement = HTMLFontElement;
 globalThis.CharacterData = CharacterData;
 globalThis.Text = Text;
 globalThis.Comment = Comment;
+globalThis.DocumentType = DocumentType;
 globalThis.CDATASection = CDATASection;
 globalThis.ProcessingInstruction = ProcessingInstruction;
 globalThis.DocumentFragment = DocumentFragment;
@@ -159,6 +194,61 @@ function __tagWebIdlPrototype(constructor, name) {
     });
 }
 
+for (const constructor of [Element, CharacterData, DocumentType]) {
+    __makeWebIdlMembersEnumerable(constructor.prototype, ['before', 'after', 'replaceWith', 'remove']);
+}
+__makeWebIdlMembersEnumerable(DOMTokenList.prototype, ['length', 'value', 'item', 'contains', 'add', 'remove', 'toggle', 'replace', 'supports', 'toString']);
+__makeWebIdlMembersEnumerable(HTMLCollection.prototype, ['length', 'item', 'namedItem']);
+__makeWebIdlMembersEnumerable(NodeList.prototype, ['length', 'item']);
+__makeWebIdlMembersEnumerable(Node.prototype, ['nodeType', 'nodeName', 'ownerDocument', 'parentNode', 'parentElement', 'firstChild', 'lastChild', 'previousSibling', 'nextSibling', 'childNodes', 'isConnected', 'hasChildNodes', 'getRootNode']);
+__makeWebIdlMembersEnumerable(Node.prototype, ['baseURI', 'contains', 'isSameNode', 'isEqualNode']);
+__makeWebIdlMembersEnumerable(Node.prototype, ['textContent', 'nodeValue', 'normalize', 'cloneNode']);
+__makeWebIdlMembersEnumerable(Node.prototype, ['appendChild', 'insertBefore', 'replaceChild', 'removeChild']);
+__makeWebIdlMembersEnumerable(Node.prototype, ['compareDocumentPosition']);
+for (const constructor of [Document, Element, DocumentFragment]) {
+    __makeWebIdlMembersEnumerable(constructor.prototype, ['children', 'childElementCount', 'firstElementChild', 'lastElementChild']);
+}
+for (const constructor of [Element, CharacterData]) {
+    __makeWebIdlMembersEnumerable(constructor.prototype, ['previousElementSibling', 'nextElementSibling']);
+}
+__makeWebIdlMembersEnumerable(CharacterData.prototype, ['data', 'length', 'substringData', 'appendData', 'insertData', 'deleteData', 'replaceData']);
+__makeWebIdlMembersEnumerable(Text.prototype, ['wholeText', 'splitText']);
+__makeWebIdlMembersEnumerable(Attr.prototype, ['name', 'localName', 'prefix', 'namespaceURI', 'specified', 'ownerElement', 'value']);
+__makeWebIdlMembersEnumerable(Document.prototype, ['doctype', 'compatMode', 'characterSet', 'charset', 'inputEncoding', 'URL', 'documentURI', 'contentType', 'title', 'dir', 'documentElement', 'head', 'body']);
+__makeWebIdlMembersEnumerable(Document.prototype, ['forms', 'images', 'embeds', 'plugins', 'links', 'scripts', 'anchors', 'applets']);
+__makeWebIdlMembersEnumerable(HTMLInputElement.prototype, ['files', 'list', 'webkitdirectory', 'webkitEntries', 'value', 'defaultValue', 'alpha', 'autocomplete', 'min', 'max', 'step', 'indeterminate', 'checked']);
+__makeWebIdlMembersEnumerable(HTMLTextAreaElement.prototype, ['value', 'defaultValue']);
+__makeWebIdlMembersEnumerable(HTMLAnchorElement.prototype, ['text', 'href', 'origin', 'protocol', 'username', 'password', 'host', 'hostname', 'port', 'pathname', 'search', 'hash', 'toString']);
+__makeWebIdlMembersEnumerable(HTMLTitleElement.prototype, ['text']);
+__makeWebIdlMembersEnumerable(HTMLImageElement.prototype, ['complete', 'currentSrc', 'naturalWidth', 'naturalHeight', 'x', 'y', 'decode']);
+__makeWebIdlMembersEnumerable(ErrorEvent.prototype, ['message', 'filename', 'lineno', 'colno', 'error']);
+__makeWebIdlMembersEnumerable(Event.prototype, ['type', 'bubbles', 'cancelable', 'composed', 'target', 'srcElement', 'currentTarget', 'eventPhase', 'defaultPrevented', 'timeStamp', 'preventDefault', 'stopPropagation', 'stopImmediatePropagation', 'composedPath', 'initEvent', 'cancelBubble', 'returnValue']);
+__makeWebIdlMembersEnumerable(EventTarget.prototype, ['addEventListener', 'removeEventListener', 'dispatchEvent']);
+__makeWebIdlMembersEnumerable(CustomEvent.prototype, ['detail', 'initCustomEvent']);
+__makeWebIdlMembersEnumerable(UIEvent.prototype, ['detail', 'view', 'which', 'initUIEvent']);
+__makeWebIdlMembersEnumerable(TextEvent.prototype, ['data', 'initTextEvent']);
+__makeWebIdlMembersEnumerable(MouseEvent.prototype, ['screenX', 'screenY', 'clientX', 'clientY', 'button', 'buttons', 'relatedTarget', 'movementX', 'movementY', 'ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'fromElement', 'toElement', 'x', 'y', 'pageX', 'pageY', 'offsetX', 'offsetY', 'layerX', 'layerY', 'getModifierState', 'initMouseEvent']);
+__makeWebIdlMembersEnumerable(KeyboardEvent.prototype, ['key', 'code', 'location', 'repeat', 'isComposing', 'charCode', 'keyCode', 'ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'getModifierState', 'initKeyboardEvent']);
+__makeWebIdlMembersEnumerable(PointerEvent.prototype, ['pointerId', 'width', 'height', 'pressure', 'tangentialPressure', 'tiltX', 'tiltY', 'twist', 'pointerType', 'isPrimary', 'altitudeAngle', 'azimuthAngle', 'getCoalescedEvents', 'getPredictedEvents']);
+__makeWebIdlMembersEnumerable(BeforeUnloadEvent.prototype, ['returnValue']);
+__makeWebIdlMembersEnumerable(HTMLElement.prototype, [
+    'offsetHeight', 'offsetLeft', 'offsetParent', 'offsetTop', 'offsetWidth',
+    'title', 'lang', 'accessKey', 'dir', 'autofocus', 'hidden',
+    'contentEditable', 'draggable', 'spellcheck', 'translate',
+]);
+for (const [constructor, names] of [
+    [Element, ['slot', 'before', 'after', 'replaceWith', 'remove', 'prepend', 'append', 'replaceChildren']],
+    [CharacterData, ['before', 'after', 'replaceWith', 'remove']],
+    [DocumentType, ['before', 'after', 'replaceWith', 'remove']],
+    [Document, ['prepend', 'append', 'replaceChildren']],
+    [DocumentFragment, ['prepend', 'append', 'replaceChildren']],
+]) {
+    Object.defineProperty(constructor.prototype, Symbol.unscopables, {
+        value: Object.assign(Object.create(null), Object.fromEntries(names.map(name => [name, true]))),
+        configurable: true,
+    });
+}
+
 function __exposeWebIdl(name, value) {
     Object.defineProperty(globalThis, name, {
         value,
@@ -171,6 +261,7 @@ function __exposeWebIdl(name, value) {
 for (const [constructor, name, members] of [
     [DOMStringMap, "DOMStringMap", []],
     [DOMImplementation, "DOMImplementation", ["hasFeature", "createHTMLDocument"]],
+    [DocumentType, "DocumentType", ["name", "publicId", "systemId", "before", "after", "replaceWith", "remove"]],
     [FormData, "FormData", ["append", "delete", "get", "getAll", "has", "set", "entries", "keys", "values", "forEach"]],
     [History, "History", ["length", "state", "scrollRestoration", "pushState", "replaceState", "go", "back", "forward"]],
     [PopStateEvent, "PopStateEvent", ["state", "hasUAVisualTransition"]],
@@ -318,10 +409,32 @@ class PerformanceTiming {
     }
 }
 const __performanceTiming = new PerformanceTiming();
+class PerformanceNavigation {
+    constructor(token) {
+        if (token !== __performanceEntryToken) throw new TypeError('Illegal constructor');
+    }
+    // Legacy initial-navigation placeholders; no redirect/history timing backend.
+    get redirectCount() { return 0; }
+    get type() { return 0; }
+    toJSON() { return {type: this.type, redirectCount: this.redirectCount}; }
+}
+for (const [name, value] of Object.entries({
+    TYPE_NAVIGATE: 0, TYPE_RELOAD: 1, TYPE_BACK_FORWARD: 2, TYPE_RESERVED: 255,
+})) {
+    Object.defineProperty(PerformanceNavigation, name, {value, enumerable: true});
+    Object.defineProperty(PerformanceNavigation.prototype, name, {value, enumerable: true});
+}
+const __performanceNavigation = new PerformanceNavigation(__performanceEntryToken);
+class PerformancePaintTiming extends PerformanceEntry {}
 class Performance extends EventTarget {
     now() { return __nativeHost("clockNow"); }
     get timeOrigin() { return __performanceTimeOrigin; }
     get timing() { return __performanceTiming; }
+    get navigation() { return __performanceNavigation; }
+    // Legacy placeholders: no event counting or resource timing production.
+    get eventCounts() { return ''; }
+    clearResourceTimings() {}
+    setResourceTimingBufferSize() {}
     getEntries() { return __performanceEntries.slice(); }
     getEntriesByType(type) {
         type = String(type);
@@ -391,6 +504,8 @@ class Performance extends EventTarget {
 }
 for (const [constructor, name, members] of [
     [PerformanceEntry, "PerformanceEntry", ["name", "entryType", "startTime", "duration", "toJSON"]],
+    [PerformancePaintTiming, "PerformancePaintTiming", []],
+    [PerformanceNavigation, "PerformanceNavigation", ["redirectCount", "type", "toJSON"]],
     [PerformanceMark, "PerformanceMark", ["detail", "toJSON"]],
     [PerformanceMeasure, "PerformanceMeasure", ["detail", "toJSON"]],
     [PerformanceObserverEntryList, "PerformanceObserverEntryList", [
@@ -405,7 +520,7 @@ for (const [constructor, name, members] of [
         "loadEventStart", "loadEventEnd", "toJSON",
     ]],
     [Performance, "Performance", [
-        "now", "timeOrigin", "timing", "getEntries", "getEntriesByType", "getEntriesByName",
+        "now", "timeOrigin", "timing", "navigation", "eventCounts", "clearResourceTimings", "setResourceTimingBufferSize", "getEntries", "getEntriesByType", "getEntriesByName",
         "mark", "clearMarks", "measure", "clearMeasures", "toJSON",
     ]],
 ]) {
@@ -413,6 +528,7 @@ for (const [constructor, name, members] of [
     __tagWebIdlPrototype(constructor, name);
     __exposeWebIdl(name, constructor);
 }
+__defineEventHandlers(Performance.prototype, ['resourcetimingbufferfull']);
 globalThis.performance = new Performance();
 
 globalThis.window = globalThis;
@@ -426,10 +542,15 @@ globalThis.dispatchEvent = EventTarget.prototype.dispatchEvent.bind(globalThis);
 Object.defineProperties(globalThis, {
 });
 window.fetch = globalThis.fetch;
-globalThis.location = Object.create(Location.prototype);
+const __windowLocation = Object.create(Location.prototype);
+Object.defineProperty(__windowLocation, Symbol.toPrimitive, {value: undefined});
+Object.defineProperty(globalThis, 'location', {
+    get() { return __windowLocation; },
+    set(value) { __windowLocation.href = value; },
+    enumerable: true, configurable: true,
+});
 globalThis.navigator = Object.create(Navigator.prototype);
 globalThis.history = new History(__historyConstructorToken);
-window.location = globalThis.location;
 window.navigator = globalThis.navigator;
 window.history = globalThis.history;
 
@@ -469,6 +590,8 @@ globalThis.requestAnimationFrame = callback => {
     return id;
 };
 globalThis.cancelAnimationFrame = id => { __animationFrameCallbacks.delete(Number(id)); };
+globalThis.webkitRequestAnimationFrame = globalThis.requestAnimationFrame;
+globalThis.webkitCancelAnimationFrame = globalThis.cancelAnimationFrame;
 window.setTimeout = globalThis.setTimeout;
 window.clearTimeout = globalThis.clearTimeout;
 window.setInterval = globalThis.setInterval;

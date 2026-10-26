@@ -1,28 +1,148 @@
+// Internal DOM operations must not dispatch through page-overridden methods.
+const __childAppend = Function.prototype.call.bind(Node.prototype.appendChild);
+const __childInsert = Function.prototype.call.bind(Node.prototype.insertBefore);
+const __childReplace = Function.prototype.call.bind(Node.prototype.replaceChild);
+const __childRemove = Function.prototype.call.bind(Node.prototype.removeChild);
+
 function __removeNode(node) {
-    if (node.parentNode) node.parentNode.removeChild(node);
+    const parent = __callHost('parentNode', node);
+    if (parent) __childRemove(parent, node);
+}
+
+function __childNodeArguments(values) {
+    // Web IDL conversion precedes the method steps, including the detached-node
+    // early return. Template conversion rejects Symbols and uses the string hint.
+    return values.map(value => value instanceof Node ? value : `${value}`);
+}
+
+function __childNodeReplacement(node, values) {
+    const owner = node.ownerDocument;
+    const nodes = values.map(value => typeof value === 'string' ? __callHost('createTextNode', owner, value) : value);
+    if (nodes.length === 1) return nodes[0];
+    const fragment = __callHost('createDocumentFragment', owner);
+    for (const child of nodes) __childAppend(fragment, child);
+    return fragment;
+}
+
+function __beforeNode(node, values) {
+    const nodes = __childNodeArguments(values);
+    const parent = node.parentNode;
+    if (!parent) return;
+    let previous = node.previousSibling;
+    while (nodes.includes(previous)) previous = previous.previousSibling;
+    const replacement = __childNodeReplacement(node, nodes);
+    __childInsert(parent, replacement, previous ? previous.nextSibling : parent.firstChild);
+}
+
+function __afterNode(node, values) {
+    const nodes = __childNodeArguments(values);
+    const parent = node.parentNode;
+    if (!parent) return;
+    let reference = node.nextSibling;
+    while (nodes.includes(reference)) reference = reference.nextSibling;
+    __childInsert(parent, __childNodeReplacement(node, nodes), reference);
 }
 
 function __replaceNode(node, values) {
+    const nodes = __childNodeArguments(values);
     const parent = node.parentNode;
     if (!parent) return;
-    const nodes = __nodesFromArguments(values);
     let reference = node.nextSibling;
     while (nodes.includes(reference)) reference = reference.nextSibling;
-    const replacement = nodes.length === 1 ? nodes[0] : node.ownerDocument.createDocumentFragment();
-    if (nodes.length !== 1) for (const n of nodes) replacement.appendChild(n);
-    if (node.parentNode === parent) parent.replaceChild(replacement, node);
-    else parent.insertBefore(replacement, reference);
+    const replacement = __childNodeReplacement(node, nodes);
+    if (node.parentNode === parent) __childReplace(parent, replacement, node);
+    else __childInsert(parent, replacement, reference);
+}
+
+class DocumentType extends Node {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get name() { return __callHost('nodeName', this); }
+    get publicId() { return __callHost('doctypePublicId', this); }
+    get systemId() { return __callHost('doctypeSystemId', this); }
+    before(...nodes) { __beforeNode(this, nodes); }
+    after(...nodes) { __afterNode(this, nodes); }
+    replaceWith(...nodes) { __replaceNode(this, nodes); }
+    remove() { __removeNode(this); }
+}
+
+const __documentWindows = new WeakMap();
+const __documentDesignModes = new WeakMap();
+function __documentWindow(owner) {
+    if (owner === document) return window;
+    const context = __documentWindows.get(owner);
+    if (!context) return null;
+    let root = context.frame, parent;
+    while ((parent = __callHost('parentNode', root) ?? __shadowData.get(root)?.host) != null) root = parent;
+    return root !== owner && __documentWindow(root) !== null ? context.window : null;
+}
+function __documentURL(owner) {
+    return __callHost('documentURL', owner);
+}
+function __documentHtmlRoot(owner) {
+    const root = __callHost('documentElement', owner);
+    return root && __callHost('namespaceURI', root) === 'http://www.w3.org/1999/xhtml'
+        && __callHost('localName', root) === 'html' ? root : null;
+}
+function __documentCollection(owner, name) {
+    return __cachedCollection(owner, name, () => __createHTMLCollection(() => __callHost('documentCollection', owner, name)));
 }
 
 class Document extends Node {
+    constructor() {
+        const created = __callHost('createDocument', null);
+        const prototype = new.target.prototype;
+        Object.setPrototypeOf(created, prototype !== null && (typeof prototype === 'object' || typeof prototype === 'function') ? prototype : Document.prototype);
+        return created;
+    }
     get readyState() { return this === document ? __documentReadyState : 'complete'; }
-    get title() { return __callHost("title", this); }
-    get URL() { return this.__URL ?? location.href; }
-    get documentURI() { return this.URL; }
-    get contentType() { return this.__contentType ?? "text/html"; }
-    get compatMode() { return this.__compatMode ?? "CSS1Compat"; }
+    get designMode() { return __documentDesignModes.get(this) ?? 'off'; }
+    set designMode(value) {
+        const mode = __asciiLowercase(`${value}`);
+        if (mode === 'on' || mode === 'off') __documentDesignModes.set(this, mode);
+    }
+    get rootElement() {
+        const root = this.documentElement;
+        return root?.namespaceURI === 'http://www.w3.org/2000/svg' && root.localName === 'svg' ? root : null;
+    }
+    get title() {
+        const title = __callHost('documentTitleElement', this);
+        if (!title) return '';
+        let text = '';
+        if (__callHost('namespaceURI', title) === 'http://www.w3.org/2000/svg') {
+            text = __callHost('textContent', title);
+        } else {
+            for (const child of __callHost('childNodes', title)) {
+                if (__callHost('nodeType', child) === 3) text += __callHost('textContent', child);
+            }
+        }
+        return text.replace(/[\t\n\f\r ]+/g, ' ').replace(/^ | $/g, '');
+    }
+    set title(value) {
+        value = `${value}`;
+        const root = __callHost('documentElement', this);
+        if (!root) return;
+        const namespace = __callHost('namespaceURI', root);
+        const svg = namespace === 'http://www.w3.org/2000/svg' && __callHost('localName', root) === 'svg';
+        if (!svg && namespace !== 'http://www.w3.org/1999/xhtml') return;
+        let title = __callHost('documentTitleElement', this);
+        if (!title) {
+            const parent = svg ? root : __callHost('childNodes', root).find(child =>
+                __callHost('nodeType', child) === 1 && __callHost('namespaceURI', child) === namespace
+                    && __callHost('localName', child) === 'head');
+            if (!parent) return;
+            title = __callHost('createElementNS', this, namespace, 'title');
+            __callHost('insertBefore', parent, title, svg ? __callHost('firstChild', parent) : null);
+        }
+        __callHost('setTextContent', title, value);
+    }
+    get URL() { return __documentURL(this) || 'about:blank'; }
+    get documentURI() { return __documentURL(this) || 'about:blank'; }
+    get contentType() { return __callHost('documentContentType', this); }
+    get compatMode() { return __callHost('compatMode', this); }
+    get doctype() { return __callHost('doctype', this); }
     get location() { return this === document ? globalThis.location : null; }
-    get defaultView() { return this === document ? window : null; }
+    set location(value) { if (this === document) globalThis.location.href = value; }
+    get defaultView() { return __documentWindow(this); }
     get currentScript() { return this === document ? __currentScript : null; }
     get domain() {
         if (this.__domain !== undefined) return this.__domain;
@@ -37,47 +157,73 @@ class Document extends Node {
         this.__domain = value;
     }
     get dir() {
-        const value = __asciiLowercase(this.documentElement?.getAttribute("dir") ?? "");
+        const root = __documentHtmlRoot(this);
+        const value = __asciiLowercase(root ? __getContentAttribute(root, 'dir') ?? '' : '');
         return value === "ltr" || value === "rtl" || value === "auto" ? value : "";
     }
-    set dir(value) { this.documentElement?.setAttribute("dir", String(value)); }
+    set dir(value) {
+        value = `${value}`;
+        const root = __documentHtmlRoot(this);
+        if (root) __setContentAttribute(root, 'dir', value);
+    }
     get hidden() { return false; }
     get visibilityState() { return "visible"; }
-    get characterSet() {
-        if (this.__characterSet === undefined) {
-            this.__characterSet = this.querySelector("meta[charset]")?.getAttribute("charset") || "UTF-8";
-        }
-        return this.__characterSet;
-    }
-    get charset() { return this.characterSet; }
-    get inputEncoding() { return this.characterSet; }
+    get characterSet() { return __callHost("documentEncoding", this); }
+    get charset() { return __callHost("documentEncoding", this); }
+    get inputEncoding() { return __callHost("documentEncoding", this); }
     get cookie() { return __callHost("cookie", this); }
     set cookie(value) { __callHost("setCookie", this, value); }
     get documentElement() { return __callHost("documentElement", this); }
     get head() { return __callHost("head", this); }
     get body() { return __callHost("body", this); }
-    get forms() { return __cachedCollection(this, "forms", () => new HTMLCollection(() => [...this.querySelectorAll("form")])); }
-    get images() { return __cachedCollection(this, "images", () => new HTMLCollection(() => [...this.querySelectorAll("img")])); }
-    get embeds() { return __cachedCollection(this, "embeds", () => new HTMLCollection(() => [...this.querySelectorAll("embed")])); }
-    get plugins() { return this.embeds; }
-    get links() { return __cachedCollection(this, "links", () => new HTMLCollection(() => [...this.querySelectorAll("a[href],area[href]")])); }
-    get scripts() { return __cachedCollection(this, "scripts", () => new HTMLCollection(() => [...this.querySelectorAll("script")])); }
-    get anchors() { return __cachedCollection(this, "anchors", () => new HTMLCollection(() => [...this.querySelectorAll("a[name]")])); }
-    get applets() { return __cachedCollection(this, "applets", () => new HTMLCollection(() => [])); }
-    get activeElement() { return __activeElement || this.body; }
-    get children() { return __cachedCollection(this, "children", () => new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element))); }
-    get childElementCount() { return this.children.length; }
-    get firstElementChild() { return this.children.item(0); }
-    get lastElementChild() { return this.children.item(this.children.length - 1); }
-    get implementation() { return __domImplementation; }
-    createElement(name, options = {}) {
-        name = String(name); __validateXmlName(name);
-        const element = __callHost('createElement', this, name);
-        if (options && typeof options === 'object' && options.is !== undefined) {
-            const is = String(options.is); __customElementNames.set(element, is);
-            element.setAttribute('is', is);
+    set body(value) {
+        if (value != null && (!['object', 'function'].includes(typeof value)
+            || !__callHost('isNativeNode', value) || __callHost('nodeType', value) !== 1
+            || __callHost('namespaceURI', value) !== 'http://www.w3.org/1999/xhtml')) {
+            throw new TypeError('Document body must be an HTMLElement');
         }
-        return __upgradeCustomElement(element);
+        if (value == null || !['body', 'frameset'].includes(__callHost('localName', value))) {
+            throw new DOMException('Document body must be a body or frameset element', 'HierarchyRequestError');
+        }
+        const previous = __callHost('body', this);
+        if (value === previous) return;
+        const root = __callHost('documentElement', this);
+        if (!root) throw new DOMException('Document has no root element', 'HierarchyRequestError');
+        for (let parent = root; parent; parent = __callHost('parentNode', parent) ?? __shadowData.get(parent)?.host) {
+            if (parent === value) throw new DOMException('Invalid tree insertion', 'HierarchyRequestError');
+        }
+        const owner = __callHost('ownerDocument', value);
+        if (previous) __callHost('replaceChild', root, value, previous);
+        else __callHost('appendChild', root, value);
+        __disconnectCustomElementTree(value);
+        if (owner !== this) for (const element of __customElementTree(value)) {
+            if (__upgradedCustomElements.has(element) && typeof element.adoptedCallback === 'function') {
+                element.adoptedCallback(owner, this);
+            }
+        }
+        if (previous) __disconnectCustomElementTree(previous);
+        __connectCustomElementTree(value);
+    }
+    get forms() { return __documentCollection(this, 'forms'); }
+    get images() { return __documentCollection(this, 'images'); }
+    get embeds() { return __documentCollection(this, 'embeds'); }
+    get plugins() { return __documentCollection(this, 'embeds'); }
+    get links() { return __documentCollection(this, 'links'); }
+    get scripts() { return __documentCollection(this, 'scripts'); }
+    get anchors() { return __documentCollection(this, 'anchors'); }
+    get applets() { return __documentCollection(this, 'applets'); }
+    get activeElement() {
+        return __activeElement?.ownerDocument === this && __activeElement.isConnected
+            ? __activeElement : this.body ?? this.documentElement;
+    }
+    get children() { return __elementChildren(this); }
+    get childElementCount() { return __callHost('childElementCount', this); }
+    get firstElementChild() { return __callHost('firstElementChild', this); }
+    get lastElementChild() { return __callHost('lastElementChild', this); }
+    get implementation() { return __domImplementation; }
+    createElement(name) {
+        name = String(name); __validateXmlName(name);
+        return __upgradeCustomElement(__callHost('createElement', this, name), true);
     }
     createElementNS(namespace, qualifiedName) {
         const name = __validateQualifiedName(namespace, qualifiedName);
@@ -85,11 +231,17 @@ class Document extends Node {
     }
     createTextNode(text) { return __callHost("createTextNode", this, text); }
     createComment(data) { return __callHost("createComment", this, data); }
+    createCDATASection(data) {
+        // HTML rejects CDATA; the runtime also has no XML CDATA node backend.
+        throw new DOMException('CDATA sections are not supported', 'NotSupportedError');
+    }
+    // Legacy callable placeholder until an XML node backend is in scope.
+    createProcessingInstruction(target, data) {}
     createDocumentFragment() { return __callHost("createDocumentFragment", this); }
     adoptNode(node) {
         if (!(node instanceof Node)) throw new TypeError('Expected a Node');
         if (node instanceof Document || node instanceof ShadowRoot) throw new DOMException('Cannot adopt this node', 'NotSupportedError');
-        const previous = node.ownerDocument;
+        const previous = node instanceof Attr ? node.ownerDocument : __callHost('ownerDocument', node);
         if (node instanceof Attr) {
             if (node.ownerElement) node.ownerElement.removeAttributeNode(node);
             node.__ownerDocument = this;
@@ -112,8 +264,9 @@ class Document extends Node {
     }
     importNode(node, deep = false) {
         if (!(node instanceof Node)) throw new TypeError("node must be a Node");
-        if (node.nodeType === Node.DOCUMENT_NODE) {
-            throw new DOMException("Documents cannot be imported", "NotSupportedError");
+        // Safari also rejects importing DocumentType, although adoption works.
+        if (node.nodeType === Node.DOCUMENT_NODE || node.nodeType === Node.DOCUMENT_TYPE_NODE) {
+            throw new DOMException("This node type cannot be imported", "NotSupportedError");
         }
         if (node instanceof Attr) return new Attr(__attrConstructionToken, null, {...node.__record, value:node.value}, this);
         return __callHost("importNode", this, node, Boolean(deep));
@@ -133,33 +286,40 @@ class Document extends Node {
     prepend(...nodes) { __prependNodes(this, nodes); }
     replaceChildren(...nodes) { __replaceChildren(this, nodes); }
     createEvent(interfaceName) {
+        const create = constructor => {
+            const event = new constructor('');
+            __uninitializedEvents.add(event);
+            return event;
+        };
         switch (String(interfaceName).toLowerCase()) {
             case "event":
             case "events":
             case "htmlevents":
-            case "svgevents": return new Event("");
-            case "customevent": return new CustomEvent("");
+            case "svgevents": return create(Event);
+            case "customevent": return create(CustomEvent);
+            case "beforeunloadevent": return __createBeforeUnloadEvent();
             case "uievent":
-            case "uievents": return new UIEvent("");
-            case "focusevent": return new FocusEvent("");
+            case "uievents": return create(UIEvent);
+            case "textevent": return __createTextEvent();
+            case "focusevent": return create(FocusEvent);
             case "mouseevent":
-            case "mouseevents": return new MouseEvent("");
-            case "keyboardevent": return new KeyboardEvent("");
+            case "mouseevents": return create(MouseEvent);
+            case "keyboardevent": return create(KeyboardEvent);
             default: throw new DOMException("The event interface is not supported", "NotSupportedError");
         }
     }
     getElementById(id) { return __callHost("getElementById", this, id); }
     getElementsByTagName(name) {
-        return new HTMLCollection(() => __callHost("getElementsByTagName", this, name));
+        return __createHTMLCollection(() => __callHost("getElementsByTagName", this, name));
     }
     getElementsByClassName(names) {
-        return new HTMLCollection(() => __callHost("getElementsByClassName", this, names));
+        return __createHTMLCollection(() => __callHost("getElementsByClassName", this, names));
     }
     getElementsByName(name) {
-        return new NodeList(() => __callHost("getElementsByName", this, name));
+        return __createNodeList(() => __callHost("getElementsByName", this, name));
     }
-    querySelector(selector) { return __callHost("querySelector", this, String(selector)); }
-    querySelectorAll(selector) { return new NodeList(__callHost("querySelectorAll", this, String(selector))); }
+    querySelector(selector) { return __selectorCall("querySelector", this, __selectorString(selector, arguments.length)); }
+    querySelectorAll(selector) { return __createNodeList(__selectorCall("querySelectorAll", this, __selectorString(selector, arguments.length))); }
 }
 
 
@@ -171,18 +331,7 @@ class DOMParser {
         if (type !== "text/html") {
             throw new TypeError("unsupported DOMParser type");
         }
-        const parsed = __callHost("domParserParse", this, input, type);
-        Object.defineProperties(parsed, {
-            __URL: { value: document.URL, configurable: true },
-            __contentType: { value: type, configurable: true },
-            __characterSet: { value: "UTF-8", configurable: true },
-            __compatMode: {
-                value: type === "text/html" && !/^\s*<!doctype\s+html(?:\s|>)/i.test(input)
-                    ? "BackCompat"
-                    : "CSS1Compat",
-                configurable: true,
-            },
-        });
+        const parsed = __callHost("domParserParse", this, input, type, __safariDOMParserStandardsMode(input));
         return parsed;
     }
 }
@@ -214,13 +363,13 @@ function __boundaryOrder(aNode, aOffset, bNode, bOffset) {
     let child = bNode;
     while (child.parentNode && child.parentNode !== aNode) child = child.parentNode;
     if (child.parentNode === aNode) {
-        return aOffset <= aNode.childNodes.indexOf(child) ? -1 : 1;
+        return aOffset <= Array.prototype.indexOf.call(aNode.childNodes, child) ? -1 : 1;
     }
 
     child = aNode;
     while (child.parentNode && child.parentNode !== bNode) child = child.parentNode;
     if (child.parentNode === bNode) {
-        return bOffset <= bNode.childNodes.indexOf(child) ? 1 : -1;
+        return bOffset <= Array.prototype.indexOf.call(bNode.childNodes, child) ? 1 : -1;
     }
 
     return aNode.compareDocumentPosition(bNode) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
@@ -248,9 +397,9 @@ function __rangeMutationBefore(operation, args) {
     }));
     if (operation === 'replaceChild') {
         const incoming = child.nodeType === 11 ? Array.from(child.childNodes) : [child];
-        let index = target.childNodes.indexOf(reference);
+        let index = Array.prototype.indexOf.call(target.childNodes, reference);
         for (const node of incoming) if (node.parentNode) {
-            const parent = node.parentNode, oldIndex = parent.childNodes.indexOf(node);
+            const parent = node.parentNode, oldIndex = Array.prototype.indexOf.call(parent.childNodes, node);
             remove(node,parent,child.nodeType === 11 ? 0 : oldIndex);
             if(parent === target && oldIndex < index) index--;
         }
@@ -258,15 +407,19 @@ function __rangeMutationBefore(operation, args) {
         updates.push(() => __rangeBoundaries((r,n,o) => { if(r[n]===target && r[o]>index)r[o]+=incoming.length; }));
     } else if (['appendChild','insertBefore','removeChild'].includes(operation)) {
         const children = child.nodeType === 11 ? Array.from(child.childNodes) : [child];
-        for (const node of children) if (node.parentNode) remove(node,node.parentNode,child.nodeType === 11 ? 0 : node.parentNode.childNodes.indexOf(node));
+        for (const node of children) {
+            const parent = __callHost('parentNode', node);
+            if (parent) remove(node,parent,child.nodeType === 11 ? 0 : Array.prototype.indexOf.call(parent.childNodes, node));
+        }
         if (operation !== 'removeChild') {
-            let index = operation === 'appendChild' || reference == null ? target.childNodes.length : target.childNodes.indexOf(reference);
-            if (child.parentNode === target && target.childNodes.indexOf(child) < index) index--;
+            let index = operation === 'appendChild' || reference == null ? target.childNodes.length : Array.prototype.indexOf.call(target.childNodes, reference);
+            if (child.parentNode === target && Array.prototype.indexOf.call(target.childNodes, child) < index) index--;
             // insertBefore(node, node) removes then reinserts at the following sibling.
             updates.push(() => __rangeBoundaries((r,n,o) => { if (r[n] === target && r[o] > index) r[o] += children.length; }));
         }
-    } else if (operation === 'setTextContent' && target instanceof CharacterData) {
-        const edit = __characterDataEdit ?? {offset:0,count:target.length,length:String(child ?? '').length};
+    } else if (operation === 'setTextContent' && [3,4,7,8].includes(__callHost('nodeType', target))) {
+        const edit = __characterDataEdit?.target === target ? __characterDataEdit
+            : {offset:0,count:__callHost('textContent', target).length,length:String(child ?? '').length};
         updates.push(() => __rangeBoundaries((r,n,o) => {
             if (r[n] !== target) return;
             if (r[o] > edit.offset && r[o] <= edit.offset+edit.count) r[o] = edit.offset;
@@ -288,7 +441,7 @@ function __rangeContents(range, mode) {
         let child = start;
         while (child.parentNode && !child.parentNode.contains(end)) child = child.parentNode;
         collapseNode = child.parentNode;
-        collapseOffset = collapseNode.childNodes.indexOf(child)+1;
+        collapseOffset = Array.prototype.indexOf.call(collapseNode.childNodes, child)+1;
     }
     const plan = node => {
         if (node instanceof CharacterData) {
@@ -297,7 +450,7 @@ function __rangeContents(range, mode) {
         }
         const children = [];
         for (const child of node.childNodes) {
-            const index = node.childNodes.indexOf(child);
+            const index = Array.prototype.indexOf.call(node.childNodes, child);
             if (__boundaryOrder(node,index+1,start,startOffset)<=0 || __boundaryOrder(node,index,end,endOffset)>=0) continue;
             if (child.nodeType === 10 && mode !== 'delete') throw new DOMException('DocumentType cannot be cloned into a fragment','HierarchyRequestError');
             const partial = child.contains(start) || child.contains(end);
@@ -373,10 +526,10 @@ class Range {
         this.__endContainer = node;
         this.__endOffset = offset;
     }
-    setStartBefore(node) { this.setStart(node.parentNode, node.parentNode.childNodes.indexOf(node)); }
-    setStartAfter(node) { this.setStart(node.parentNode, node.parentNode.childNodes.indexOf(node) + 1); }
-    setEndBefore(node) { this.setEnd(node.parentNode, node.parentNode.childNodes.indexOf(node)); }
-    setEndAfter(node) { this.setEnd(node.parentNode, node.parentNode.childNodes.indexOf(node) + 1); }
+    setStartBefore(node) { this.setStart(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node)); }
+    setStartAfter(node) { this.setStart(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node) + 1); }
+    setEndBefore(node) { this.setEnd(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node)); }
+    setEndAfter(node) { this.setEnd(node.parentNode, Array.prototype.indexOf.call(node.parentNode.childNodes, node) + 1); }
     collapse(toStart = false) {
         if (toStart) {
             this.__endContainer = this.__startContainer;
@@ -389,7 +542,7 @@ class Range {
     selectNode(node) {
         const parent = node.parentNode;
         if (!parent) throw new DOMException("The node has no parent", "InvalidNodeTypeError");
-        const index = parent.childNodes.indexOf(node);
+        const index = Array.prototype.indexOf.call(parent.childNodes, node);
         this.__startContainer = parent;
         this.__startOffset = index;
         this.__endContainer = parent;
@@ -439,7 +592,7 @@ class Range {
         if (start.nodeType === 3) reference = start.splitText(this.startOffset);
         if (reference === node) reference = reference.nextSibling;
         if (node.parentNode) node.parentNode.removeChild(node);
-        const offset = reference ? parent.childNodes.indexOf(reference) : parent.childNodes.length;
+        const offset = reference ? Array.prototype.indexOf.call(parent.childNodes, reference) : parent.childNodes.length;
         const count = node.nodeType === 11 ? node.childNodes.length : 1;
         parent.insertBefore(node, reference);
         if (collapsed) this.setEnd(parent, offset + count);
@@ -486,7 +639,7 @@ class Range {
         if (!(node instanceof Node)) throw new TypeError('Expected a Node');
         if (__nodeRoot(node) !== __nodeRoot(this.startContainer)) return false;
         if (!node.parentNode) return true;
-        const parent = node.parentNode, index = parent.childNodes.indexOf(node);
+        const parent = node.parentNode, index = Array.prototype.indexOf.call(parent.childNodes, node);
         return __boundaryOrder(parent,index+1,this.startContainer,this.startOffset)>0 && __boundaryOrder(parent,index,this.endContainer,this.endOffset)<0;
     }
     toString() {
@@ -588,7 +741,7 @@ class Selection {
     containsNode(node, allowPartialContainment = false) {
         if (!this.__range || !(node instanceof Node) || !node.parentNode) return false;
         const parent = node.parentNode;
-        const index = parent.childNodes.indexOf(node);
+        const index = Array.prototype.indexOf.call(parent.childNodes, node);
         const start = __boundaryOrder(this.__range.startContainer, this.__range.startOffset, parent, index);
         const end = __boundaryOrder(this.__range.endContainer, this.__range.endOffset, parent, index + 1);
         return allowPartialContainment ? start < 0 && end > 0 : start <= 0 && end >= 0;
@@ -598,111 +751,6 @@ class Selection {
 }
 const __selection = new Selection();
 
-const __classLists = new WeakMap();
-
-function __domTokenListTokens(element, attribute) {
-    const value = element.getAttribute(attribute) || "";
-    const tokens = value.split(/[\t\n\f\r ]+/).filter(Boolean);
-    return [...new Set(tokens)];
-}
-
-function __validateDomToken(token) {
-    token = String(token);
-    if (token === "") throw new DOMException("The token must not be empty", "SyntaxError");
-    if (/[\t\n\f\r ]/.test(token)) {
-        throw new DOMException("The token must not contain ASCII whitespace", "InvalidCharacterError");
-    }
-    return token;
-}
-
-class DOMTokenList {
-    constructor(element, attribute = "class") {
-        this.__element = element;
-        this.__attribute = attribute;
-        return new Proxy(this, {
-            get(target, property, receiver) {
-                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                    return target.item(Number(property)) ?? undefined;
-                }
-                return Reflect.get(target, property, receiver);
-            },
-            has(target, property) {
-                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                    return Number(property) < target.length;
-                }
-                return Reflect.has(target, property);
-            },
-        });
-    }
-    get length() { return __domTokenListTokens(this.__element, this.__attribute).length; }
-    get value() { return this.__element.getAttribute(this.__attribute) || ""; }
-    set value(value) { this.__element.setAttribute(this.__attribute, String(value)); }
-    item(index) { return __domTokenListTokens(this.__element, this.__attribute)[Number(index)] ?? null; }
-    contains(token) { return __domTokenListTokens(this.__element, this.__attribute).includes(String(token)); }
-    add(...tokens) {
-        tokens = tokens.map(__validateDomToken);
-        const values = __domTokenListTokens(this.__element, this.__attribute);
-        for (const token of tokens) if (!values.includes(token)) values.push(token);
-        this.__element.setAttribute(this.__attribute, values.join(" "));
-    }
-    remove(...tokens) {
-        tokens = tokens.map(__validateDomToken);
-        const remove = new Set(tokens);
-        const values = __domTokenListTokens(this.__element, this.__attribute);
-        if (this.__element.getAttribute(this.__attribute) !== null) {
-            this.__element.setAttribute(this.__attribute, values.filter(token => !remove.has(token)).join(" "));
-        }
-    }
-    toggle(token, force = undefined) {
-        token = __validateDomToken(token);
-        const present = this.contains(token);
-        if (arguments.length > 1) {
-            if (Boolean(force)) { if (!present) this.add(token); return true; }
-            if (present) this.remove(token);
-            return false;
-        }
-        if (present) { this.remove(token); return false; }
-        this.add(token);
-        return true;
-    }
-    replace(token, newToken) {
-        token = String(token);
-        newToken = String(newToken);
-        if (token === "" || newToken === "") {
-            throw new DOMException("The token must not be empty", "SyntaxError");
-        }
-        if (/[\t\n\f\r ]/.test(token) || /[\t\n\f\r ]/.test(newToken)) {
-            throw new DOMException("The token must not contain ASCII whitespace", "InvalidCharacterError");
-        }
-        const values = __domTokenListTokens(this.__element, this.__attribute);
-        const index = values.indexOf(token);
-        if (index === -1) return false;
-        values[index] = newToken;
-        this.__element.setAttribute(this.__attribute, [...new Set(values)].join(" "));
-        return true;
-    }
-    supports(token) {
-        if (this.__attribute !== "rel") throw new TypeError("This attribute has no supported tokens");
-        // Resource hints, stylesheets and module preloading are not implemented.
-        // Relationship metadata is represented, but is not a processing capability.
-        String(token);
-        return false;
-    }
-    entries() { return __domTokenListTokens(this.__element, this.__attribute).entries(); }
-    keys() { return __domTokenListTokens(this.__element, this.__attribute).keys(); }
-    values() { return __domTokenListTokens(this.__element, this.__attribute).values(); }
-    forEach(callback, thisArg = undefined) {
-        __domTokenListTokens(this.__element, this.__attribute).forEach((value, index) => callback.call(thisArg, value, index, this));
-    }
-    toString() { return this.value; }
-    get [Symbol.toStringTag]() { return "DOMTokenList"; }
-}
-DOMTokenList.prototype.entries = Array.prototype.entries;
-DOMTokenList.prototype.keys = Array.prototype.keys;
-DOMTokenList.prototype.values = Array.prototype.values;
-DOMTokenList.prototype.forEach = Array.prototype.forEach;
-DOMTokenList.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
-
 function __liveCollectionItems(read) {
     let version = -1, items;
     return () => {
@@ -710,120 +758,146 @@ function __liveCollectionItems(read) {
         return items;
     };
 }
-class HTMLCollection {
-    constructor(items) {
-        this.__items = __liveCollectionItems(items);
-        return new Proxy(this, {
-            get(target, property, receiver) {
-                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                    return target.item(Number(property)) ?? undefined;
-                }
-                if (Reflect.has(target, property)) return Reflect.get(target, property, receiver);
-                if (typeof property === "string") return target.namedItem(property) ?? undefined;
-                return undefined;
-            },
-            has(target, property) {
-                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                    return Number(property) < target.length;
-                }
-                if (Reflect.has(target, property)) return true;
-                return typeof property === "string" && target.namedItem(property) !== null;
-            },
-            getOwnPropertyDescriptor(target, property) {
-                if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                    const value = target.item(Number(property));
-                    return value === null ? undefined : {
-                        value, configurable: true, enumerable: true, writable: false,
-                    };
-                }
-                if (typeof property === 'string' && !Reflect.has(target, property)) {
-                    const value = target.namedItem(property);
-                    if (value !== null) return {value, configurable:true, enumerable:false, writable:false};
-                }
-                return Reflect.getOwnPropertyDescriptor(target, property);
-            },
-            ownKeys(target) {
-                const nodes = target.__items(), keys = nodes.map((_, i) => String(i));
-                for (const node of nodes) for (const name of [node.id, node.namespaceURI === 'http://www.w3.org/1999/xhtml' ? node.getAttribute('name') : null]) {
-                    if (name && !Reflect.has(target, name) && !keys.includes(name)) keys.push(name);
-                }
-                return keys;
-            },
-        });
-    }
-    get length() { return this.__items().length; }
-    item(index) { return this.__items()[Number(index)] ?? null; }
-    namedItem(name) {
-        name = String(name);
-        if (name === "") return null;
-        return this.__items().find(element => element.id === name || element.namespaceURI === "http://www.w3.org/1999/xhtml" && element.getAttribute("name") === name) ?? null;
-    }
-    get [Symbol.toStringTag]() { return "HTMLCollection"; }
-    [Symbol.iterator]() { return this.__items()[Symbol.iterator](); }
+const __htmlCollectionData = new WeakMap();
+function __htmlCollectionState(collection) {
+    const state = __htmlCollectionData.get(collection);
+    if (!state) throw new TypeError('Illegal invocation');
+    return state;
 }
+function __htmlCollectionNamedItem(state, name) {
+    if (name === '') return null;
+    const items = state.items();
+    return items.find(element => __getContentAttribute(element, 'id') === name)
+        ?? items.find(element => __callHost('namespaceURI', element) === 'http://www.w3.org/1999/xhtml' && __getContentAttribute(element, 'name') === name)
+        ?? null;
+}
+function __createHTMLCollection(read, prototype = HTMLCollection.prototype) {
+    const target = Object.create(prototype), state = {items: __liveCollectionItems(read)};
+    const indexed = key => typeof key === 'string' && /^(0|[1-9][0-9]*)$/.test(key) && Number(key) < 4294967295;
+    const named = key => typeof key === 'string' && !indexed(key) && !Reflect.has(target, key)
+        ? __htmlCollectionNamedItem(state, key) : null;
+    const protectedName = key => typeof key === 'string' && !indexed(key) && !Object.hasOwn(target, key)
+        && __htmlCollectionNamedItem(state, key) !== null;
+    const descriptor = key => {
+        const index = indexed(key), value = index ? state.items()[Number(key)] : named(key);
+        return value == null ? undefined : {value, writable:false, enumerable:index, configurable:true};
+    };
+    const collection = new Proxy(target, {
+        get(target, key, receiver) {
+            return descriptor(key)?.value ?? Reflect.get(target, key, receiver);
+        },
+        has(target, key) { return descriptor(key) !== undefined || Reflect.has(target, key); },
+        getOwnPropertyDescriptor(target, key) {
+            return descriptor(key) ?? Reflect.getOwnPropertyDescriptor(target, key);
+        },
+        ownKeys(target) {
+            const nodes = state.items(), keys = new Set(nodes.map((_, index) => String(index)));
+            for (const node of nodes) {
+                for (const name of [__getContentAttribute(node, 'id'), __callHost('namespaceURI', node) === 'http://www.w3.org/1999/xhtml' ? __getContentAttribute(node, 'name') : null]) {
+                    if (name) keys.add(name);
+                }
+            }
+            for (const key of Reflect.ownKeys(target)) keys.add(key);
+            return [...keys];
+        },
+        set(target, key, value, receiver) {
+            if (receiver === collection ? indexed(key) || named(key) !== null
+                : indexed(key) && Number(key) < state.items().length) return false;
+            return Reflect.set(target, key, value, receiver);
+        },
+        defineProperty(target, key, property) {
+            return !indexed(key) && !protectedName(key) && Reflect.defineProperty(target, key, property);
+        },
+        deleteProperty(target, key) {
+            return !(indexed(key) && Number(key) < state.items().length) && !protectedName(key) && Reflect.deleteProperty(target, key);
+        },
+        // Native Safari collections can gain indexed keys after preventExtensions.
+        // JS Proxy invariants cannot represent that, so reject it explicitly.
+        preventExtensions() { return false; },
+    });
+    __htmlCollectionData.set(collection, state);
+    return collection;
+}
+class HTMLCollection {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get length() { return __htmlCollectionState(this).items().length; }
+    item(index) {
+        const state = __htmlCollectionState(this);
+        if (arguments.length < 1) throw new TypeError('Not enough arguments');
+        index = +index >>> 0;
+        return state.items()[index] ?? null;
+    }
+    namedItem(name) {
+        const state = __htmlCollectionState(this);
+        if (arguments.length < 1) throw new TypeError('Not enough arguments');
+        return __htmlCollectionNamedItem(state, `${name}`);
+    }
+}
+Object.defineProperty(HTMLCollection.prototype, Symbol.iterator, {
+    value: Array.prototype.values, writable: true, configurable: true,
+});
+Object.defineProperty(HTMLCollection.prototype, Symbol.toStringTag, {
+    value: 'HTMLCollection', configurable: true,
+});
 
 class HTMLFormControlsCollection extends HTMLCollection {}
 
-class NodeList extends Array {
-    constructor(items = []) {
-        if (typeof items === "number") {
-            super(items);
-            this.__items = null;
-        } else if (typeof items === "function") {
-            super();
-            this.__items = __liveCollectionItems(items);
-        } else {
-            super(...items);
-            this.__items = null;
-        }
-        if (this.__items !== null) {
-            return new Proxy(this, {
-                get(target, property, receiver) {
-                    if (property === "length") return target.__items().length;
-                    if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                        return target.item(Number(property)) ?? undefined;
-                    }
-                    return Reflect.get(target, property, receiver);
-                },
-                has(target, property) {
-                    if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                        return Number(property) < target.__items().length;
-                    }
-                    return Reflect.has(target, property);
-                },
-                getOwnPropertyDescriptor(target, property) {
-                    if (typeof property === "string" && /^(0|[1-9][0-9]*)$/.test(property)) {
-                        const value = target.item(Number(property));
-                        return value === null ? undefined : {
-                            value, configurable: true, enumerable: true, writable: false,
-                        };
-                    }
-                    return Reflect.getOwnPropertyDescriptor(target, property);
-                },
-            });
-        }
-    }
-    item(index) {
-        return this.__items === null
-            ? this[Number(index)] ?? null
-            : this.__items()[Number(index)] ?? null;
-    }
-    entries() { return Array.prototype.entries.call(this); }
-    keys() { return Array.prototype.keys.call(this); }
-    values() { return Array.prototype.values.call(this); }
-    forEach(callback, thisArg = undefined) {
-        Array.prototype.forEach.call(this, callback, thisArg);
-    }
-    [Symbol.iterator]() { return this.values(); }
-    get [Symbol.toStringTag]() { return "NodeList"; }
+const __nodeListData = new WeakMap();
+function __nodeListItems(list) {
+    const read = __nodeListData.get(list);
+    if (!read) throw new TypeError('Illegal invocation');
+    return read();
 }
+function __createNodeList(items = []) {
+    const snapshot = typeof items === 'function' ? null : Array.from(items);
+    const read = snapshot ? () => snapshot : __liveCollectionItems(items);
+    const indexed = key => typeof key === 'string' && /^(0|[1-9][0-9]*)$/.test(key) && Number(key) < 4294967295;
+    const descriptor = key => indexed(key) && Number(key) < read().length
+        ? {value: read()[Number(key)], configurable:true, enumerable:true, writable:false} : undefined;
+    const list = new Proxy(Object.create(NodeList.prototype), {
+        get(target, key, receiver) { return descriptor(key)?.value ?? Reflect.get(target, key, receiver); },
+        has(target, key) { return descriptor(key) !== undefined || Reflect.has(target, key); },
+        getOwnPropertyDescriptor(target, key) { return descriptor(key) ?? Reflect.getOwnPropertyDescriptor(target, key); },
+        ownKeys(target) { return [...read().keys()].map(String).concat(Reflect.ownKeys(target)); },
+        set(target, key, value, receiver) {
+            if (indexed(key) && (receiver === list || Number(key) < read().length)) return false;
+            return Reflect.set(target, key, value, receiver);
+        },
+        defineProperty(target, key, property) { return !indexed(key) && Reflect.defineProperty(target, key, property); },
+        deleteProperty(target, key) { return descriptor(key) === undefined && Reflect.deleteProperty(target, key); },
+        // Like the other live DOM collections, these proxies cannot become
+        // non-extensible while continuing to expose new indexed properties.
+        preventExtensions() { return false; },
+    });
+    __nodeListData.set(list, read);
+    return list;
+}
+class NodeList {
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get length() { return __nodeListItems(this).length; }
+    item(index) {
+        if (!__nodeListData.has(this)) throw new TypeError('Illegal invocation');
+        if (arguments.length < 1) throw new TypeError('Not enough arguments');
+        index = +index >>> 0;
+        return __nodeListItems(this)[index] ?? null;
+    }
+}
+for (const name of ['entries', 'keys', 'values', 'forEach']) Object.defineProperty(NodeList.prototype, name, {
+    value: Array.prototype[name], writable: true, enumerable: true, configurable: true,
+});
+Object.defineProperty(NodeList.prototype, Symbol.iterator, {
+    value: Array.prototype.values, writable: true, configurable: true,
+});
+Object.defineProperty(NodeList.prototype, Symbol.toStringTag, {value: 'NodeList', configurable: true});
 
 const __attrConstructionToken = {};
+const __attributeNodes = new WeakSet();
 
 class Attr extends Node {
     constructor(token, element, record, owner = element?.ownerDocument ?? document) {
         if (token !== __attrConstructionToken) throw new TypeError("Illegal constructor");
-        super();
+        super(__nodeConstructionToken);
+        __attributeNodes.add(this);
         this.__element = element;
         this.__record = record;
         this.__ownerDocument = owner;
@@ -847,29 +921,25 @@ class Attr extends Node {
         return this.__record.value;
     }
     set value(value) {
-        value = String(value);
+        value = `${value}`;
+        const record = this.__currentRecord() ?? this.__record;
         if (this.__element !== null) {
-            if (this.namespaceURI === null) this.__element.setAttribute(this.name, value);
-            else this.__element.setAttributeNS(this.namespaceURI, this.name, value);
-        }
-        this.__record.value = value;
+            const element = this.__element;
+            __callHost('setAttributeNS', element, record.namespaceURI ?? '', record.name, value);
+            __notifyAttributeChange(element, record.localName, record.value, value, false, record.namespaceURI);
+        } else this.__record.value = value;
     }
     get ownerElement() {
         this.__currentRecord();
         return this.__element;
     }
-    cloneNode() { return new Attr(__attrConstructionToken, null, {...this.__record, value:this.value}, this.ownerDocument); }
     get specified() { return true; }
     get nodeType() { return Node.ATTRIBUTE_NODE; }
     get nodeName() { return this.name; }
-    get nodeValue() { return this.value; }
-    set nodeValue(value) { this.value = value == null ? "" : value; }
-    get textContent() { return this.value; }
-    set textContent(value) { this.value = value == null ? "" : value; }
     get ownerDocument() { return this.__element?.ownerDocument ?? this.__ownerDocument; }
     get parentNode() { return null; }
     get parentElement() { return null; }
-    get childNodes() { return __cachedCollection(this, "childNodes", () => new NodeList()); }
+    get childNodes() { return __cachedCollection(this, "childNodes", () => __createNodeList()); }
     get firstChild() { return null; }
     get lastChild() { return null; }
     get previousSibling() { return null; }
@@ -878,7 +948,8 @@ class Attr extends Node {
 }
 
 function __attributeRecords(element) {
-    return JSON.parse(__callHost("elementAttributes", element));
+    return __callHost("elementAttributes", element).map(([name, localName, namespaceURI, prefix, value]) =>
+        ({name, localName, namespaceURI, prefix, value}));
 }
 
 class NamedNodeMap {

@@ -73,7 +73,10 @@ fn direct_input_order_defaults_cancellation_and_no_geometry() {
         json!("edit")
     );
     assert_eq!(
-        page.evaluate("typeof document.elementFromPoint").unwrap(),
-        json!("undefined")
+        page.evaluate(
+            "[typeof document.elementFromPoint, document.elementFromPoint(0, 0) === undefined]"
+        )
+        .unwrap(),
+        json!(["function", true])
     );
 }

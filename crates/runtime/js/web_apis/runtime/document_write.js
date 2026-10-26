@@ -16,11 +16,13 @@ function __deliverWriteResult(doc, serialized) {
     }
 }
 Document.prototype.open=function() {
+    const error = __callHost('documentWriteError', this);
+    if (error) throw new DOMException('The document cannot be opened for writing', error);
     if (arguments.length>=3) throw new DOMException('Window-opening overload is unavailable','NotSupportedError');
     if (this===document && __currentScript) return this;
     for(const node of [this,...this.querySelectorAll('*')])__eventListeners.delete(node);
     while(this.firstChild)this.removeChild(this.firstChild);
-    __callHost('documentOpen',this);__writingDocuments.add(this);
+    __callHost('documentOpen',this,this!==document && __documentWindow(this)!==null);__writingDocuments.add(this);
     if(this===document)__documentReadyState='loading';
     return this;
 };

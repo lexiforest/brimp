@@ -67,7 +67,13 @@ pub enum Clock {
     System,
     Logical,
 }
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum TraceMode {
+    Api,
+    Recursive,
+}
 #[derive(Args)]
+#[command(group(clap::ArgGroup::new("diagnostics").args(["trace", "trace_report"]).multiple(true)))]
 pub struct Options {
     /// Raw response, live DOM, or Defuddle output. Fetch defaults to HTML.
     #[arg(long, value_enum, conflicts_with_all = ["eval", "eval_file"])]
@@ -189,11 +195,17 @@ pub struct Options {
     /// Write runtime API diagnostics as JSONL.
     #[arg(long)]
     pub trace: Option<PathBuf>,
+    /// Write a grouped dependency report from retained diagnostics, including coverage and loss.
+    #[arg(long)]
+    pub trace_report: Option<PathBuf>,
+    /// API descriptor tracing or recursive browser/environment object tracing.
+    #[arg(long, value_enum, default_value = "api")]
+    pub trace_mode: TraceMode,
     /// Only trace API paths matching this prefix; repeat for more prefixes.
-    #[arg(long, requires = "trace")]
+    #[arg(long, requires = "diagnostics")]
     pub trace_include: Vec<String>,
     /// Include JavaScript stacks in diagnostics.
-    #[arg(long, requires = "trace")]
+    #[arg(long, requires = "diagnostics")]
     pub trace_stack: bool,
     /// Retained diagnostic ring capacity, up to one million records.
     #[arg(long, default_value_t = 4096, value_parser = positive)]

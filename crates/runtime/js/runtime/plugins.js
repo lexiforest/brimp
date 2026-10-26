@@ -1,51 +1,35 @@
-(descriptors) => {
+(descriptors, codec) => {
     const native = globalThis.__brimpPluginHost;
     delete globalThis.__brimpPluginHost;
     const PublicError = DOMException;
     let ready = false, error = null, closed = false, disposed = false, disposing = false;
     const subscriptions = descriptors.map(() => new Map());
     const disposers = [];
-    function encode(value, seen = new Set()) {
-        if (value === null) return {type: 'null'};
-        if (typeof value === 'boolean') return {type: 'boolean', value};
-        if (typeof value === 'string') return {type: 'string', value};
-        if (typeof value === 'number' && Number.isFinite(value)) return {type: 'number', value};
-        if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) {
-            const bytes = value instanceof ArrayBuffer ? new Uint8Array(value) : new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
-            return {type: 'binary', value: Array.from(bytes)};
-        }
-        if (typeof value !== 'object' || value === null || seen.has(value)) throw new TypeError('host values must be acyclic JSON-like values or binary buffers');
-        if (!Array.isArray(value) && Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null) throw new TypeError('host values cannot contain DOM nodes or class instances');
-        seen.add(value);
-        const result = Array.isArray(value)
-            ? {type: 'array', value: value.map(item => encode(item, seen))}
-            : {type: 'object', value: Object.fromEntries(Object.entries(value).map(([key, item]) => [key, encode(item, seen)]))};
-        seen.delete(value);
-        return result;
-    }
-    function decode(wire) {
-        switch (wire.type) {
-            case 'null': return null;
-            case 'binary': return Uint8Array.from(wire.value);
-            case 'array': return wire.value.map(decode);
-            case 'object': return Object.fromEntries(Object.entries(wire.value).map(([key, value]) => [key, decode(value)]));
-            case 'string': case 'number': case 'boolean': return wire.value;
-            default: throw new TypeError('invalid host value');
-        }
-    }
+    const {encode, ref} = codec;
+    const functions = [];
+    const decode = (wire, index) => codec.decode(wire, functions[index]);
     (async () => {
         for (let index = 0; index < descriptors.length; index++) {
             const descriptor = descriptors[index];
             try {
                 if (closed) throw new Error('plugin realm was closed');
                 const allowed = new Set(descriptor.handlers);
+                functions[index] = name => {
+                    if (!allowed.has(name)) throw new TypeError(`unregistered host handler: ${name}`);
+                    return (...args) => host.call(name, ...args);
+                };
                 const host = Object.freeze({
+                    function: functions[index],
+                    ref,
                     call(name, ...args) {
+                        try { codec.checkCall(); } catch (error) { return Promise.reject(error); }
                         return Promise.resolve().then(() => {
                             if (closed && !disposing) throw new Error('plugin realm was closed');
                             if (!allowed.has(name)) throw new Error(`unregistered host handler: ${name}`);
-                            return native(index, name, JSON.stringify(args.map(value => encode(value))));
-                        }).then(wire => decode(JSON.parse(wire)), () => {
+                            const wire = encode(args);
+                            try { return native(index, name, JSON.stringify(wire.value)); }
+                            catch (error) { codec.release(wire); throw error; }
+                        }).then(wire => decode(JSON.parse(wire), index), () => {
                             // Native code records the full failure for the host.
                             // Never pass adapter exceptions or host stacks to pages.
                             throw new PublicError('The operation failed.', 'OperationError');
@@ -94,7 +78,7 @@
         } else if (command.op === 'notify' && !closed) {
             const {plugin, channel, value} = command.notification;
             for (const listener of subscriptions[plugin]?.get(channel) ?? []) {
-                try { listener(decode(value)); } catch (cause) { setTimeout(() => { throw cause; }, 0); }
+                try { listener(decode(value, plugin)); } catch (cause) { setTimeout(() => { throw cause; }, 0); }
             }
         }
         return JSON.stringify({ready, error, disposed});

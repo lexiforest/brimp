@@ -1,0 +1,3437 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "required",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "input",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "valid",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "custom",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "required",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "disabled",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "readonly",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        false,
+        [
+          [
+            "capture",
+            true
+          ],
+          [
+            "target",
+            true,
+            false,
+            true,
+            false
+          ],
+          [
+            "nested",
+            true
+          ]
+        ]
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "barred",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "detached",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "connected",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "none",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "cancel",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "clear",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "disable",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "remove",
+      "expected": [
+        true,
+        []
+      ]
+    },
+    {
+      "tag": "button",
+      "state": "datalist",
+      "root": "shadow",
+      "listener": "reenter",
+      "expected": [
+        true,
+        []
+      ]
+    }
+  ]
+}

@@ -119,6 +119,16 @@ impl NativeHostCall {
         Ok(())
     }
     #[napi]
+    pub fn bind_reference(&self, token: String) -> Result<super::NativeHandle> {
+        let token = serde_json::from_str(&token).map_err(|e| Error::from_reason(e.to_string()))?;
+        Ok(super::NativeHandle {
+            inner: brimp_runtime::runtime::native::JSHandle::from_reference(
+                self.context.bridge.clone(),
+                token,
+            ),
+        })
+    }
+    #[napi]
     pub fn emit(&self, channel: String, value: String) -> Result<()> {
         let value = serde_json::from_str(&value).map_err(|e| Error::from_reason(e.to_string()))?;
         self.context

@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "brimp"
 version = "0.1.1"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 description = "In-process DOM automation with JavaScriptCore"
 license = "MIT"
 

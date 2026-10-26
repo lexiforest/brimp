@@ -152,6 +152,16 @@ impl PyPage {
             .map(|v| v.to_string())
             .map_err(error)
     }
+    fn peek_diagnostics(&self, py: Python<'_>) -> PyResult<String> {
+        py.detach(|| self.inner.peek_diagnostics())
+            .map(|v| v.to_string())
+            .map_err(error)
+    }
+    fn summarize_diagnostics(&self, py: Python<'_>) -> PyResult<String> {
+        py.detach(|| self.inner.summarize_diagnostics())
+            .map(|v| v.to_string())
+            .map_err(error)
+    }
 
     fn set_identity(&self, py: Python<'_>, identity: &str) -> PyResult<()> {
         let identity =
@@ -274,8 +284,10 @@ impl PyPage {
             .map_err(error)
     }
     fn evaluate(&self, py: Python<'_>, source: &str) -> PyResult<String> {
-        py.detach(|| self.inner.evaluate(source))
-            .map(|v| v.to_string())
+        py.detach(|| self.inner.evaluate_handle(source)?.value())
+            .and_then(|v| {
+                serde_json::to_string(&v).map_err(|e| AutomationError::Internal(e.to_string()))
+            })
             .map_err(error)
     }
     fn evaluate_handle(&self, py: Python<'_>, source: &str) -> PyResult<PyHandle> {
@@ -366,25 +378,25 @@ impl PyHandle {
             .map_err(error)
     }
 
-    fn json_value(&self, py: Python<'_>) -> PyResult<String> {
-        py.detach(|| self.inner.json_value())
-            .map(|v| v.to_string())
+    fn command(&self, py: Python<'_>, command: &str) -> PyResult<String> {
+        let command =
+            serde_json::from_str(command).map_err(|e| InvalidInput::new_err(e.to_string()))?;
+        py.detach(|| self.inner.bridge_command(command))
+            .and_then(|value| {
+                serde_json::to_string(&value).map_err(|e| AutomationError::Internal(e.to_string()))
+            })
             .map_err(error)
     }
-    fn call(&self, py: Python<'_>, source: &str, arguments: &str) -> PyResult<PyHandle> {
-        let args =
-            serde_json::from_str(arguments).map_err(|e| InvalidInput::new_err(e.to_string()))?;
-        py.detach(|| self.inner.call(source, args))
-            .map(|inner| PyHandle { inner })
-            .map_err(error)
+    fn reference(&self) -> PyResult<String> {
+        serde_json::to_string(&self.inner.reference().map_err(error)?)
+            .map_err(|e| InvalidInput::new_err(e.to_string()))
     }
-    fn property(&self, py: Python<'_>, name: &str) -> PyResult<PyHandle> {
-        py.detach(|| self.inner.property(name))
-            .map(|inner| PyHandle { inner })
-            .map_err(error)
-    }
-    fn property_names(&self, py: Python<'_>) -> PyResult<Vec<String>> {
-        py.detach(|| self.inner.property_names()).map_err(error)
+    fn bind_reference(&self, token: &str) -> PyResult<PyHandle> {
+        let token =
+            serde_json::from_str(token).map_err(|e| InvalidInput::new_err(e.to_string()))?;
+        Ok(PyHandle {
+            inner: self.inner.peer_handle(token),
+        })
     }
     fn query_selector(&self, py: Python<'_>, selector: &str) -> PyResult<Option<PyHandle>> {
         py.detach(|| ElementHandle(self.inner.clone()).query_selector(selector))

@@ -11,6 +11,7 @@ from ._brimp import (
     StaleHandle, TransportError, Reentry,
 )
 
+from .values import encode as _encode, decode as _decode, undefined, BigInt
 from .plugins import Plugin, HostContext, _check_session, _callback
 
 
@@ -126,6 +127,18 @@ class Page(_Requests):
         """Consume bounded records; JSONL output is unaffected."""
         return _snake_record(json.loads(self._inner.take_diagnostics()))
 
+    def peek_diagnostics(self):
+        """Inspect retained records, coverage and loss without consuming them."""
+        return _snake_record(json.loads(self._inner.peek_diagnostics()))
+
+    def summarize_diagnostics(self):
+        """Group retained observations by layer/path/kind and reflection target.
+
+        Does not consume records. Counts cover the retained, filtered window;
+        missing records do not establish that an API was never accessed.
+        """
+        return _snake_record(json.loads(self._inner.summarize_diagnostics()))
+
     def __init__(self, inner, session):
         self._inner = inner
         self._session = session
@@ -215,8 +228,8 @@ class Page(_Requests):
     def headers(self): return self.response.headers
     def json(self): return self.response.json()
     def evaluate(self, source):
-        """Evaluate browser JavaScript, await Promises, and copy a JSON result."""
-        return json.loads(self._inner.evaluate(source))
+        """Evaluate browser JavaScript, await Promises, and copy rich bridge values."""
+        return _decode(json.loads(self._inner.evaluate(source)))
     def evaluate_handle(self, source): return JSHandle(self._inner.evaluate_handle(source))
     def query_selector(self, selector):
         inner = self._inner.query_selector(selector)
@@ -288,10 +301,20 @@ class JSHandle:
     Navigation invalidates handles from the previous realm.
     """
     def __init__(self, inner): self._inner = inner
-    def json_value(self): return json.loads(self._inner.json_value())
-    def call(self, function, *args): return JSHandle(self._inner.call(function, json.dumps(args, allow_nan=False)))
-    def property(self, name): return JSHandle(self._inner.property(name))
-    def property_names(self): return self._inner.property_names()
+    def _reference(self): return json.loads(self._inner.reference())
+    def _from_reference(self, token): return JSHandle(self._inner.bind_reference(json.dumps(token)))
+    def _command(self, **command):
+        return _decode(json.loads(self._inner.command(json.dumps(command, allow_nan=False))), self._from_reference)
+    def value(self): return self._command(op="value")
+    def json_value(self): return json.loads(self._command(op="json"))
+    def call(self, function, *args):
+        return self._command(op="call", source=function, args=[_encode(arg) for arg in args], handle=True)
+    def invoke(self, *args, this=undefined):
+        return self._command(op="invoke", args=[_encode(arg) for arg in args], receiver=_encode(this), handle=True)
+    def property(self, name): return self._command(op="property", name=name, handle=True)
+    def set_property(self, name, value): return self._command(op="set", name=name, args=[_encode(value)])
+    def delete_property(self, name): return self._command(op="delete", name=name)
+    def property_names(self): return self._command(op="names")
     def dispose(self): self._inner.dispose()
     def __enter__(self): return self
     def __exit__(self, *_): self.dispose()

@@ -1,0 +1,131 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "cases": [
+    {
+      "tag": "input",
+      "name": "HTMLInputElement",
+      "expected": {
+        "shape": [
+          "HTMLInputElement",
+          0,
+          true,
+          true,
+          true,
+          true,
+          [
+            true,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "HTMLInputElement",
+            false,
+            false,
+            true
+          ],
+          "[object HTMLInputElement]"
+        ],
+        "construction": [
+          "TypeError",
+          "TypeError",
+          "TypeError",
+          "TypeError"
+        ],
+        "registered": "ok",
+        "builtIn": "TypeError",
+        "autonomous": "TypeError"
+      }
+    },
+    {
+      "tag": "button",
+      "name": "HTMLButtonElement",
+      "expected": {
+        "shape": [
+          "HTMLButtonElement",
+          0,
+          true,
+          true,
+          true,
+          true,
+          [
+            true,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "HTMLButtonElement",
+            false,
+            false,
+            true
+          ],
+          "[object HTMLButtonElement]"
+        ],
+        "construction": [
+          "TypeError",
+          "TypeError",
+          "TypeError",
+          "TypeError"
+        ],
+        "registered": "ok",
+        "builtIn": "TypeError",
+        "autonomous": "TypeError"
+      }
+    },
+    {
+      "tag": "a",
+      "name": "HTMLAnchorElement",
+      "expected": {
+        "shape": [
+          "HTMLAnchorElement",
+          0,
+          true,
+          true,
+          true,
+          true,
+          [
+            true,
+            false,
+            false,
+            false
+          ],
+          [
+            true,
+            true,
+            false,
+            true
+          ],
+          [
+            "HTMLAnchorElement",
+            false,
+            false,
+            true
+          ],
+          "[object HTMLAnchorElement]"
+        ],
+        "construction": [
+          "TypeError",
+          "TypeError",
+          "TypeError",
+          "TypeError"
+        ],
+        "registered": "ok",
+        "builtIn": "TypeError",
+        "autonomous": "TypeError"
+      }
+    }
+  ]
+}

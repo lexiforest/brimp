@@ -75,6 +75,120 @@ fn strings_replace_unpaired_utf16_surrogates() {
 }
 
 #[test]
+fn native_strings_round_trip_every_utf16_code_unit() {
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_global_function("roundTripUtf16", |call| {
+            Ok(NativeValue::StringUtf16(
+                call.argument(0).unwrap().to_utf16()?,
+            ))
+        })
+        .unwrap();
+
+    // Separators keep every surrogate unpaired. Also exercise valid pairs,
+    // reversed pairs, adjacent high/low surrogates, NUL, and the empty string.
+    let result = runtime
+        .eval(
+            r#"(() => {
+                const cases = ['', '\0', '\ud83e\udd80', '\udc00\ud800',
+                    '\ud800\ud800\udc00\udc00'];
+                let all = '';
+                for (let unit = 0; unit <= 0xffff; ++unit)
+                    all += String.fromCharCode(unit) + 'x';
+                cases.push(all);
+                return cases.every(value => roundTripUtf16(value) === value);
+            })()"#,
+        )
+        .unwrap();
+    assert_eq!(result.to_string().unwrap(), "true");
+
+    let value = runtime
+        .eval(r"roundTripUtf16('\0\ud800\ud83e\udd80\udc00')")
+        .unwrap();
+    assert_eq!(
+        value.to_utf16().unwrap(),
+        [0, 0xd800, 0xd83e, 0xdd80, 0xdc00]
+    );
+    // Scalar-string consumers deliberately get replacement characters.
+    assert_eq!(value.to_string().unwrap(), "\0\u{fffd}🦀\u{fffd}");
+}
+
+#[test]
+fn utf16_conversion_uses_string_hint_once_and_propagates_errors() {
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_global_function("roundTripUtf16", |call| {
+            Ok(NativeValue::StringUtf16(
+                call.argument(0).unwrap().to_utf16()?,
+            ))
+        })
+        .unwrap();
+    assert_eq!(
+        runtime
+            .eval(
+                r#"(() => {
+                    let calls = 0;
+                    const value = { [Symbol.toPrimitive](hint) {
+                        if (hint !== 'string') throw new Error('wrong hint');
+                        ++calls;
+                        return '\ud800';
+                    }};
+                    return roundTripUtf16(value) === '\ud800' && calls === 1 &&
+                        roundTripUtf16(null) === 'null' &&
+                        roundTripUtf16(undefined) === 'undefined' &&
+                        roundTripUtf16(42n) === '42';
+                })()"#,
+            )
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true",
+    );
+    let throwing = runtime
+        .eval("({ toString() { throw new Error('conversion failed'); } })")
+        .unwrap();
+    assert!(
+        throwing
+            .to_utf16()
+            .unwrap_err()
+            .message()
+            .contains("conversion failed")
+    );
+    assert!(runtime.eval("roundTripUtf16(Symbol('x'))").is_err());
+    assert!(
+        runtime
+            .eval("roundTripUtf16({ toString() { throw new Error('conversion failed'); } })")
+            .err()
+            .unwrap()
+            .message()
+            .contains("conversion failed")
+    );
+}
+
+#[test]
+fn native_arrays_preserve_utf16_strings_across_allocations() {
+    let runtime = JsRuntime::new().unwrap();
+    runtime
+        .set_global_function("utf16Array", |call| {
+            let values = (0..2048)
+                .map(|index| NativeValue::StringUtf16(vec![0xd800, index, 0xdc00]))
+                .collect();
+            Ok(NativeValue::ProtectedObject(call.make_value_array(values)?))
+        })
+        .unwrap();
+    assert_eq!(
+        runtime
+            .eval(
+                "utf16Array().every((value, i) => value.length === 3 && value.charCodeAt(0) === 0xd800 && value.charCodeAt(1) === i && value.charCodeAt(2) === 0xdc00)",
+            )
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "true",
+    );
+}
+
+#[test]
 fn reports_javascript_exceptions() {
     let runtime = JsRuntime::new().unwrap();
     let error = runtime.eval("throw new Error('broken')").err().unwrap();
@@ -368,4 +482,22 @@ fn typed_bytes_support_float16_and_data_view_buffers() {
             .unwrap(),
         0.0
     );
+}
+
+#[test]
+fn asynchronous_wasm_jobs_complete_on_each_owner_thread() {
+    let workers: Vec<_> = (0..3).map(|_| std::thread::spawn(|| {
+        let runtime = JsRuntime::new().unwrap();
+        runtime.eval("globalThis.done = false; WebAssembly.compile(new Uint8Array([0,97,115,109,1,0,0,0])).then(module => WebAssembly.instantiate(module)).then(instance => { done = instance instanceof WebAssembly.Instance; });").unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        loop {
+            runtime.pump_jobs();
+            if runtime.eval("Number(done)").unwrap().to_number().unwrap() == 1.0 { break; }
+            assert!(std::time::Instant::now() < deadline, "WASM deferred work did not settle");
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+    })).collect();
+    for worker in workers {
+        worker.join().unwrap();
+    }
 }

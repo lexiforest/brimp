@@ -21,7 +21,7 @@ def main():
         if not args.no_sanitize:
             command += ['-fsanitize=address,undefined', '-fno-omit-frame-pointer']
         command += [str(p) for p in files]
-        command += [str(lexbor / 'native/lexbor.c'), str(lexbor / 'native/tests/lexbor.c'), '-lm', '-o', str(binary)]
+        command += [str(lexbor / 'native/lexbor.c'), str(lexbor / 'native/html_encoding.c'), str(lexbor / 'native/tests/lexbor.c'), '-lm', '-o', str(binary)]
         subprocess.run(command, check=True)
         subprocess.run([str(binary)], check=True)
 

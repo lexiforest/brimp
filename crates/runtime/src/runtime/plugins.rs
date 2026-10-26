@@ -1,4 +1,4 @@
-//! Realm-scoped JavaScript plugins and a copied-value, asynchronous host bridge.
+//! Realm-scoped JavaScript plugins using the shared value/reference host bridge.
 use brimp_jsc::{
     JsException, JsRuntime, NativeError, NativeValue, PromiseSettlement, ProtectedJsObject,
 };
@@ -17,27 +17,7 @@ use std::{
 const MAX_PENDING_CALLS: usize = 1024;
 const NOTIFICATION_CAPACITY: usize = 256;
 
-#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
-#[serde(tag = "type", content = "value", rename_all = "camelCase")]
-pub enum BridgeValue {
-    Null,
-    Boolean(bool),
-    Number(f64),
-    String(String),
-    Binary(Vec<u8>),
-    Array(Vec<BridgeValue>),
-    Object(BTreeMap<String, BridgeValue>),
-}
-impl BridgeValue {
-    fn valid(&self) -> bool {
-        match self {
-            Self::Number(value) => value.is_finite(),
-            Self::Array(values) => values.iter().all(Self::valid),
-            Self::Object(values) => values.values().all(Self::valid),
-            _ => true,
-        }
-    }
-}
+pub use super::bridge::BridgeValue;
 
 /// The adapter schedules the invocation on its managed dispatcher/event loop.
 /// It must return promptly; all values in the invocation are owned and Send.
@@ -84,6 +64,7 @@ pub struct HostContext {
     cancelled: Arc<AtomicBool>,
     notifications: mpsc::SyncSender<Notification>,
     wake: std::thread::Thread,
+    pub bridge: super::bridge::BridgeEndpoint,
 }
 impl HostContext {
     pub fn is_cancelled(&self) -> bool {
@@ -95,7 +76,7 @@ impl HostContext {
             return Err("plugin realm is closed".into());
         }
         if !value.valid() {
-            return Err("host values must contain finite numbers".into());
+            return Err("invalid bridge value".into());
         }
         self.notifications
             .try_send(Notification {
@@ -112,6 +93,9 @@ impl HostContext {
     }
 }
 thread_local! { static CALLBACK_PAGE: Cell<Option<u64>> = const { Cell::new(None) }; }
+pub(crate) fn is_any_callback() -> bool {
+    CALLBACK_PAGE.with(|active| active.get().is_some())
+}
 pub(crate) fn is_callback_page(page: u64) -> bool {
     CALLBACK_PAGE.with(|active| active.get() == Some(page))
 }
@@ -143,7 +127,7 @@ impl HostCompletion {
         let result = if value.valid() {
             Ok(value)
         } else {
-            Err("host values must contain finite numbers".into())
+            Err("invalid bridge value".into())
         };
         self.finish(result);
     }
@@ -192,6 +176,7 @@ pub(crate) struct PluginRuntime {
     last_host_error: RefCell<Option<String>>,
 }
 impl PluginRuntime {
+    #[allow(clippy::too_many_arguments)]
     pub fn install(
         js: &JsRuntime,
         plugins: &[Plugin],
@@ -200,6 +185,7 @@ impl PluginRuntime {
         session_id: u64,
         browsing_context: Arc<crate::web_apis::BrowsingContext>,
         events: super::events::EventHub,
+        bridge: &super::bridge::BridgeRuntime,
     ) -> Result<Self, JsException> {
         let mut names = std::collections::HashSet::new();
         for plugin in plugins {
@@ -218,6 +204,7 @@ impl PluginRuntime {
         let (notify, notifications) = mpsc::sync_channel(NOTIFICATION_CAPACITY);
         let callback_state = state.clone();
         let descriptors = plugins.to_vec();
+        let endpoint = bridge.endpoint();
         js.set_global_function("__brimpPluginHost", move |call| {
             let index = call
                 .argument(0)
@@ -283,6 +270,7 @@ impl PluginRuntime {
                     cancelled: callback_cancelled.clone(),
                     notifications: notify.clone(),
                     wake: std::thread::current(),
+                    bridge: endpoint.clone(),
                 },
                 arguments,
                 completion: HostCompletion {
@@ -298,11 +286,17 @@ impl PluginRuntime {
         })?;
         let config = plugins.iter().map(|plugin| serde_json::json!({"name":plugin.name,"source":plugin.source,"handlers":plugin.handlers.keys().collect::<Vec<_>>()})).collect::<Vec<_>>();
         let source = include_str!("../../js/runtime/plugins.js");
-        let controller = js
+        let installer = js
             .eval(&format!(
-                "({source})({})",
-                serde_json::to_string(&config).expect("plugin descriptors")
+                "(config, bridge) => ({source})(JSON.parse(config), bridge.codec)"
             ))?
+            .to_object()?;
+        let controller = js
+            .call_function_with_string_and_object(
+                &installer,
+                &serde_json::to_string(&config).expect("plugin descriptors"),
+                &bridge.controller,
+            )?
             .to_object()?;
         Ok(Self {
             state,
@@ -420,6 +414,9 @@ pub mod bundled {
     }
     pub fn scheduling() -> Plugin {
         Plugin::new("scheduling", include_str!("../../js/plugins/scheduling.js"))
+    }
+    pub fn rtc() -> Plugin {
+        Plugin::new("rtc", include_str!("../../js/plugins/rtc.js"))
     }
     pub fn graphics(options: serde_json::Value) -> Plugin {
         Plugin::new(

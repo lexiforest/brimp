@@ -24,11 +24,13 @@ class Headers {
     get(name) { return this.__values.get(__headerName(name)) ?? null; }
     has(name) { return this.__values.has(__headerName(name)); }
     delete(name) { this.__values.delete(__headerName(name)); }
-    entries() { return this.__values.entries(); }
-    keys() { return this.__values.keys(); }
-    values() { return this.__values.values(); }
+    *entries() {
+        for (const name of [...this.__values.keys()].sort()) yield [name, this.__values.get(name)];
+    }
+    *keys() { for (const [name] of this.entries()) yield name; }
+    *values() { for (const [, value] of this.entries()) yield value; }
     forEach(callback, thisArg = undefined) {
-        for (const [name, value] of this.__values) callback.call(thisArg, value, name, this);
+        for (const [name, value] of this.entries()) callback.call(thisArg, value, name, this);
     }
     [Symbol.iterator]() { return this.entries(); }
 }
@@ -155,7 +157,6 @@ class Request {
         if (sourceSignal.aborted) this.signal.__abort(sourceSignal.reason);
         else sourceSignal.__dependents.push(this.signal);
         this.isReloadNavigation = false;
-        this.isHistoryNavigation = false;
     }
     clone() {
         if (this.bodyUsed) throw new TypeError("request body has already been consumed");
@@ -177,6 +178,16 @@ class Request {
         this.bodyUsed = true;
         const type = this.headers.get("content-type") || "";
         return Promise.resolve(new Blob([this.__bodyBytes ?? new Uint8Array()], { type }));
+    }
+    formData() {
+        const type = (this.headers.get('content-type') ?? '').split(';', 1)[0].trim().toLowerCase();
+        // Legacy ignored-result placeholder for formats without a body parser.
+        if (type !== 'application/x-www-form-urlencoded') return undefined;
+        return this.text().then(text => {
+            const data = new FormData();
+            for (const [name, value] of new URLSearchParams(text)) data.append(name, value);
+            return data;
+        });
     }
 }
 

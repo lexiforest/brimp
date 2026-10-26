@@ -1,3 +1,4 @@
+const __dataTransferFiles = new WeakMap();
 class DataTransferItem {
     constructor(kind, type, value) { this.kind = kind; this.type = type; this.__value = value; }
     getAsFile() { return this.kind === "file" ? this.__value : null; }
@@ -10,6 +11,8 @@ class DataTransferItemList {
     __sync() {
         for (const key of Object.keys(this)) if (/^\d+$/.test(key)) delete this[key];
         this.__items.forEach((item, index) => Object.defineProperty(this, index, {value:item, configurable:true, enumerable:true}));
+        const files = __dataTransferFiles.get(this.__owner);
+        if (files) __replaceFileList(files,this.__items.filter(item=>item.kind==='file').map(item=>item.getAsFile()));
     }
     add(value, type) {
         if (this.__owner.__readOnly) return null;
@@ -25,7 +28,10 @@ class DataTransferItemList {
 class DataTransfer {
     constructor() { this.dropEffect = "none"; this.effectAllowed = "uninitialized"; this.__readOnly = false; this.items = new DataTransferItemList(this); }
     get types() { return [...new Set(Array.from(this.items, i => i.kind === "file" ? "Files" : i.type))]; }
-    get files() { return __fileList(Array.from(this.items).filter(i => i.kind === "file").map(i => i.getAsFile())); }
+    get files() {
+        if (!__dataTransferFiles.has(this)) __dataTransferFiles.set(this,__fileList(Array.from(this.items).filter(i=>i.kind==='file').map(i=>i.getAsFile())));
+        return __dataTransferFiles.get(this);
+    }
     __format(type) { type = String(type).toLowerCase(); return type === "text" ? "text/plain" : type === "url" ? "text/uri-list" : type; }
     getData(type) { return this.items.__items.find(i => i.kind === "string" && i.type === this.__format(type))?.__value ?? ""; }
     setData(type, value) {

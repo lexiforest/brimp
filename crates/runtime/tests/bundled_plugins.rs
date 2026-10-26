@@ -9,7 +9,7 @@ use serde_json::json;
 fn optional_surfaces_absent_by_default() {
     let session = Session::new(SessionOptions::default()).unwrap();
     let page = session.new_page().unwrap();
-    assert_eq!(page.evaluate("['localStorage','sessionStorage','indexedDB','caches','Worker','SharedWorker','Notification','screen','CanvasRenderingContext2D'].map(name => typeof globalThis[name])").unwrap(), json!(vec!["undefined";9]));
+    assert_eq!(page.evaluate("['localStorage','sessionStorage','indexedDB','caches','Worker','SharedWorker','Notification','cookieStore','CanvasRenderingContext2D'].map(name => typeof globalThis[name])").unwrap(), json!(vec!["undefined";9]));
     assert_eq!(page.evaluate("['locks','storage','serviceWorker','mediaDevices','bluetooth'].map(name => typeof navigator[name])").unwrap(), json!(vec!["undefined";5]));
     assert!(
         page.extract(ExtractionOptions::default())
@@ -33,7 +33,7 @@ fn storage_is_functional_in_memory_and_isolated() {
         json!(false)
     );
     assert_eq!(
-        page.evaluate("typeof navigator.storage.getDirectory")
+        page.evaluate("typeof navigator.storage.getDirectory()")
             .unwrap(),
         json!("undefined")
     );
@@ -64,7 +64,8 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
         json!({"width":2,"height":3,"length":24,"pixel":[1,2,3,4],"encoded":{"width":2,"height":3,"rgba":[1,2,3,4]},"fill":"#ff0000","transform":0,"textWidth":20,"hit":false})
     );
     assert_eq!(
-        page.evaluate("typeof getComputedStyle").unwrap(),
+        page.evaluate("typeof getComputedStyle(document.body)")
+            .unwrap(),
         json!("undefined")
     );
 }
@@ -115,7 +116,7 @@ fn extraction_plugin_uses_live_dom_without_layout() {
     assert_eq!(result.title, "Article");
     assert!(result.content_markdown.unwrap().contains("live DOM"));
     assert_eq!(
-        page.eval("typeof getComputedStyle + ':' + typeof Defuddle")
+        page.eval("typeof getComputedStyle(document.body) + ':' + typeof Defuddle")
             .unwrap()
             .to_string()
             .unwrap(),

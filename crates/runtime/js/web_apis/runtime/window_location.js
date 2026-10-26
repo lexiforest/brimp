@@ -1,47 +1,93 @@
+function __replaceCharacterData(node, offset, count, data) {
+    const current = __callHost('textContent', node);
+    if (offset > current.length) throw new DOMException('offset is outside the data', 'IndexSizeError');
+    count = Math.min(count, current.length - offset);
+    const previous = __characterDataEdit;
+    __characterDataEdit = {target: node, offset, count, length: data.length};
+    try { __callHost('setTextContent', node, current.slice(0, offset) + data + current.slice(offset + count)); }
+    finally { __characterDataEdit = previous; }
+}
+
 class CharacterData extends Node {
-    get data() { return this.textContent; }
-    set data(value) { this.textContent = String(value); }
-    get length() { return this.data.length; }
+    constructor() { throw new TypeError('Illegal constructor'); }
+    get previousElementSibling() { return __callHost('previousElementSibling', this); }
+    get nextElementSibling() { return __callHost('nextElementSibling', this); }
+    get data() { return __callHost('textContent', this); }
+    set data(value) {
+        value = value === null ? '' : `${value}`;
+        __replaceCharacterData(this, 0, Infinity, value);
+    }
+    get length() { return __callHost('textContent', this).length; }
     substringData(offset, count) {
-        offset = Number(offset) >>> 0;
-        count = Number(count) >>> 0;
-        if (offset > this.length) throw new DOMException("offset is outside the data", "IndexSizeError");
-        return this.data.substring(offset, Math.min(offset + count, this.length));
+        if (arguments.length < 2) throw new TypeError('Not enough arguments');
+        offset = +offset >>> 0;
+        count = +count >>> 0;
+        const data = __callHost('textContent', this);
+        if (offset > data.length) throw new DOMException('offset is outside the data', 'IndexSizeError');
+        return data.slice(offset, offset + count);
     }
-    appendData(data) { this.replaceData(this.length,0,data); }
-    insertData(offset, data) { this.replaceData(offset, 0, data); }
-    deleteData(offset, count) { this.replaceData(offset, count, ""); }
+    appendData(data) {
+        if (arguments.length < 1) throw new TypeError('Not enough arguments');
+        data = `${data}`;
+        __replaceCharacterData(this, __callHost('textContent', this).length, 0, data);
+    }
+    insertData(offset, data) {
+        if (arguments.length < 2) throw new TypeError('Not enough arguments');
+        offset = +offset >>> 0;
+        data = `${data}`;
+        __replaceCharacterData(this, offset, 0, data);
+    }
+    deleteData(offset, count) {
+        if (arguments.length < 2) throw new TypeError('Not enough arguments');
+        offset = +offset >>> 0;
+        count = +count >>> 0;
+        __replaceCharacterData(this, offset, count, '');
+    }
     replaceData(offset, count, data) {
-        offset = Number(offset) >>> 0;
-        count = Number(count) >>> 0;
-        if (offset > this.length) throw new DOMException("offset is outside the data", "IndexSizeError");
-        data = String(data); count = Math.min(count,this.length-offset);
-        __characterDataEdit = {offset,count,length:data.length};
-        try { this.data = this.data.slice(0, offset) + data + this.data.slice(offset + count); }
-        finally { __characterDataEdit = null; }
+        if (arguments.length < 3) throw new TypeError('Not enough arguments');
+        offset = +offset >>> 0;
+        count = +count >>> 0;
+        data = `${data}`;
+        __replaceCharacterData(this, offset, count, data);
     }
+    before(...nodes) { __beforeNode(this, nodes); }
+    after(...nodes) { __afterNode(this, nodes); }
     replaceWith(...nodes) { __replaceNode(this, nodes); }
     remove() { __removeNode(this); }
 }
 
 class Text extends CharacterData {
+    get wholeText() {
+        let first = this, previous;
+        while ((previous = __callHost('previousSibling', first)) && [3, 4].includes(__callHost('nodeType', previous))) first = previous;
+        let result = '';
+        for (let node = first; node && [3, 4].includes(__callHost('nodeType', node)); node = __callHost('nextSibling', node)) {
+            result += __callHost('textContent', node);
+        }
+        return result;
+    }
     splitText(offset) {
-        offset = Number(offset) >>> 0;
-        if (offset > this.length) throw new DOMException('Invalid offset','IndexSizeError');
-        const node = this.ownerDocument.createTextNode(this.data.slice(offset));
-        const parent = this.parentNode, index = parent ? parent.childNodes.indexOf(this) : -1;
+        if (arguments.length < 1) throw new TypeError('Not enough arguments');
+        offset = +offset >>> 0;
+        const data = __callHost('textContent', this);
+        if (offset > data.length) throw new DOMException('Invalid offset','IndexSizeError');
+        const node = __callHost('createTextNode', __callHost('ownerDocument', this), data.slice(offset));
+        const parent = __callHost('parentNode', this);
+        const index = parent ? __callHost('childNodes', parent).indexOf(this) : -1;
         const moved = [];
-        __rangeBoundaries((r,n,o) => {
-            if (r[n] === this && r[o] > offset) moved.push(() => {r[n]=node;r[o]-=offset;});
-            else if (parent && r[n] === parent && r[o] === index+1) moved.push(() => {r[o]++;});
+        if (parent) __rangeBoundaries((r,n,o) => {
+            if (r[n] === this && r[o] > offset) {
+                const nextOffset = r[o] - offset;
+                moved.push(() => {r[n]=node;r[o]=nextOffset;});
+            }
+            else if (r[n] === parent && r[o] === index+1) moved.push(() => {r[o]++;});
         });
-        if (parent) parent.insertBefore(node,this.nextSibling);
+        __replaceCharacterData(this, offset, data.length - offset, '');
+        if (parent) __callHost('insertBefore', parent, node, __callHost('nextSibling', this));
         for (const update of moved) update();
-        this.deleteData(offset,this.length-offset);
         return node;
     }
-    constructor(data = "") { return document.createTextNode(String(data)); }
-    remove() { __removeNode(this); }
+    constructor(data = '') { return __callHost('createTextNode', document, `${data}`); }
 }
 class Comment extends CharacterData {
     constructor(data = "") { return document.createComment(String(data)); }
@@ -55,17 +101,17 @@ class ProcessingInstruction extends CharacterData {
 }
 class DocumentFragment extends Node {
     constructor() { return document.createDocumentFragment(); }
-    get children() { return __cachedCollection(this, "children", () => new HTMLCollection(() => [...this.childNodes].filter(node => node instanceof Element))); }
-    get childElementCount() { return this.children.length; }
-    get firstElementChild() { return this.children.item(0); }
-    get lastElementChild() { return this.children.item(this.children.length - 1); }
+    get children() { return __elementChildren(this); }
+    get childElementCount() { return __callHost('childElementCount', this); }
+    get firstElementChild() { return __callHost('firstElementChild', this); }
+    get lastElementChild() { return __callHost('lastElementChild', this); }
     getElementById(id) {
         id = String(id);
         if (id === "") return null;
         return [...this.querySelectorAll("[id]")].find(element => element.id === id) ?? null;
     }
     querySelector(selector) { return __callHost("querySelector", this, String(selector)); }
-    querySelectorAll(selector) { return new NodeList(__callHost("querySelectorAll", this, String(selector))); }
+    querySelectorAll(selector) { return __createNodeList(__callHost("querySelectorAll", this, String(selector))); }
     append(...nodes) { __appendNodes(this, nodes); }
     prepend(...nodes) { __prependNodes(this, nodes); }
     replaceChildren(...nodes) { __replaceChildren(this, nodes); }
@@ -88,6 +134,10 @@ Object.defineProperty(Window.prototype, "constructor", {
     configurable: true,
 });
 Object.defineProperties(Window.prototype, {
+    clientInformation: { get() { return this.navigator; }, enumerable: true, configurable: true },
+    origin: { get() { return this.location.origin; }, enumerable: true, configurable: true },
+    frameElement: { get() { return null; }, enumerable: true, configurable: true },
+    closed: { get() { return false; }, enumerable: true, configurable: true },
     frames: { get() { return this; }, enumerable: true, configurable: true },
     length: {
         get() { return document.getElementsByTagName("iframe").length; },
@@ -95,19 +145,35 @@ Object.defineProperties(Window.prototype, {
         configurable: true,
     },
 });
+for (const name of ['name', 'status']) {
+    const values = new WeakMap();
+    Object.defineProperty(Window.prototype, name, {
+        get() { return values.get(this) ?? ''; },
+        set(value) { values.set(this, String(value)); },
+        enumerable: true, configurable: true,
+    });
+}
 
 class Location {
+    constructor() { throw new TypeError('Illegal constructor'); }
     get href() { return __callHost("location", this, "href"); }
     set href(value) { this.assign(value); }
     get protocol() { return __callHost("location", this, "protocol"); }
+    set protocol(value) { __setLocationComponent(this, 'protocol', value); }
     get host() { return __callHost("location", this, "host"); }
+    set host(value) { __setLocationComponent(this, 'host', value); }
     get hostname() { return __callHost("location", this, "hostname"); }
+    set hostname(value) { __setLocationComponent(this, 'hostname', value); }
     get port() { return __callHost("location", this, "port"); }
+    set port(value) { __setLocationComponent(this, 'port', value); }
     get pathname() { return __callHost("location", this, "pathname"); }
+    set pathname(value) { __setLocationComponent(this, 'pathname', value); }
     get search() { return __callHost("location", this, "search"); }
+    set search(value) { __setLocationComponent(this, 'search', value); }
     get hash() { return __callHost("location", this, "hash"); }
     set hash(value) { const url = new URL(this.href); url.hash = String(value); this.assign(url.href); }
     get origin() { return __callHost("location", this, "origin"); }
+    get ancestorOrigins() { return __emptyAncestorOrigins; }
     assign(url) {
         __navigateLocation(this, url, false);
     }
@@ -116,6 +182,20 @@ class Location {
     }
     reload() { __callHost("locationNavigate", this, this.href); }
     toString() { return this.href; }
+}
+
+// Top-level facade only; the lightweight frame model does not track origin lists.
+const __emptyAncestorOrigins = Object.freeze({
+    length: 0,
+    item() { return null; },
+    contains() { return false; },
+    *[Symbol.iterator]() {},
+    [Symbol.toStringTag]: 'DOMStringList',
+});
+function __setLocationComponent(receiver, component, value) {
+    const url = new URL(receiver.href);
+    url[component] = __toUSVString(value);
+    receiver.assign(url.href);
 }
 
 function __navigateLocation(receiver, value, replace) {
@@ -134,6 +214,13 @@ function __navigateLocation(receiver, value, replace) {
 
 class Navigator {
     constructor() { throw new TypeError("Illegal constructor"); }
+    get appCodeName() { return 'Mozilla'; }
+    get appName() { return 'Netscape'; }
+    get product() { return 'Gecko'; }
+    get vendorSub() { return ''; }
+    javaEnabled() { return false; }
+    // Legacy ignored-result placeholder: no beacon queue or network request.
+    sendBeacon() {}
     get userAgent() { return "Brimp/0.1"; }
     get platform() { return "MacIntel"; }
     get language() { return "en-US"; }

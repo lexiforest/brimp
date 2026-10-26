@@ -33,14 +33,15 @@ test('async installers, Promise handlers, binary, notifications, errors, disposa
   } finally { await session.close(); }
   assert.equal(disposed.length, 1);
 });
-test('async callback reentry rejected for page, handles and session', async () => {
+test('callback handle access works while lifecycle reentry is rejected', async () => {
   let page, other, handle, session;
   const plugin = new Plugin('reentry', '({global, host}) => {global.check = () => host.call("check");}', {
     async check() {
       await new Promise(resolve => setTimeout(resolve, 5));
-      for (const action of [() => page.evaluate('1'), () => page.close(), () => session.close(), () => session.newPage(), () => handle.jsonValue()]) {
+      for (const action of [() => page.evaluate('1'), () => page.close(), () => session.close(), () => session.newPage()]) {
         await assert.rejects(action, Reentry);
       }
+      assert.deepEqual(await handle.jsonValue(), {a: 1});
       return other.evaluate('6 * 7');
     },
   });

@@ -428,26 +428,21 @@ function __formDataEntry(name, value, filename = undefined) {
 }
 
 function __formOwner(control) {
-    const formId = control.getAttribute("form");
-    if (formId !== null) {
-        const root = control.getRootNode();
-        const owner = root instanceof Element
-            ? [root,...root.querySelectorAll('[id]')].find(e => e.id === formId)
-            : root.getElementById(formId);
+    const formId = __getContentAttribute(control, "form");
+    if (formId !== null && __nodeIsConnected(control)) {
+        if (formId === '') return null;
+        const root = __nodeTreeRoot(control);
+        const owner = root instanceof Element && __getContentAttribute(root, 'id') === formId ? root
+            : __callHost('getElementById', root, formId);
         return owner instanceof HTMLFormElement ? owner : null;
     }
-    return control.closest("form");
+    const parsedOwner = __callHost('parserForm', control);
+    if (parsedOwner !== null) return parsedOwner;
+    for (let node = __callHost('parentNode', control); node; node = __callHost('parentNode', node))
+        if (node instanceof HTMLFormElement) return node;
+    return null;
 }
 
-function __isDisabledFormControl(control) {
-    if (control.disabled) return true;
-    for (let p = control.parentElement; p; p = p.parentElement) {
-        if (!(p instanceof HTMLFieldSetElement) || !p.disabled) continue;
-        const legend = Array.from(p.children).find(e => e instanceof HTMLLegendElement);
-        if (!legend || !legend.contains(control)) return true;
-    }
-    return false;
-}
 
 function __appendFormControl(entries, control, submitter) {
     if (__isDisabledFormControl(control) || control.closest("datalist")) return;
@@ -455,7 +450,7 @@ function __appendFormControl(entries, control, submitter) {
     if (name === null || name === "") return;
 
     if (control instanceof HTMLButtonElement) {
-        if (control !== submitter || control.type !== "submit") return;
+        if (control !== submitter || __buttonType(control) !== "submit") return;
         entries.push(__formDataEntry(name, control.value));
         return;
     }
@@ -500,7 +495,7 @@ function __appendFormControl(entries, control, submitter) {
 function __populateFormData(formData, form, submitter) {
     if (!(form instanceof HTMLFormElement)) throw new TypeError("FormData form must be an HTMLFormElement");
     if (submitter !== null) {
-        const submitButton = (submitter instanceof HTMLButtonElement && submitter.type === "submit") ||
+        const submitButton = (submitter instanceof HTMLButtonElement && __buttonType(submitter) === "submit") ||
             (submitter instanceof HTMLInputElement && ["submit", "image"].includes(submitter.type));
         if (!submitButton) throw new TypeError("FormData submitter must be a submit button");
         if (__formOwner(submitter) !== form) {

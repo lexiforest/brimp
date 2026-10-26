@@ -1,0 +1,3707 @@
+{
+  "browser": "Safari 27.0 (22625.1.29.11.27)",
+  "types": [
+    "afterprint",
+    "beforeprint",
+    "blur",
+    "focus",
+    "hashchange",
+    "languagechange",
+    "load",
+    "message",
+    "messageerror",
+    "offline",
+    "online",
+    "pagehide",
+    "pageshow",
+    "popstate",
+    "rejectionhandled",
+    "resize",
+    "scroll",
+    "storage",
+    "unhandledrejection",
+    "unload"
+  ],
+  "cases": [
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "afterprint"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "afterprint",
+      "shape": [
+        true,
+        true,
+        "get onafterprint",
+        0,
+        "set onafterprint",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "beforeprint"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "beforeprint",
+      "shape": [
+        true,
+        true,
+        "get onbeforeprint",
+        0,
+        "set onbeforeprint",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "blur"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "blur",
+      "shape": [
+        true,
+        true,
+        "get onblur",
+        0,
+        "set onblur",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "focus"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "focus",
+      "shape": [
+        true,
+        true,
+        "get onfocus",
+        0,
+        "set onfocus",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "hashchange"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "hashchange",
+      "shape": [
+        true,
+        true,
+        "get onhashchange",
+        0,
+        "set onhashchange",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "languagechange"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "languagechange",
+      "shape": [
+        true,
+        true,
+        "get onlanguagechange",
+        0,
+        "set onlanguagechange",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "load"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "load",
+      "shape": [
+        true,
+        true,
+        "get onload",
+        0,
+        "set onload",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "message"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "message",
+      "shape": [
+        true,
+        true,
+        "get onmessage",
+        0,
+        "set onmessage",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "messageerror"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "messageerror",
+      "shape": [
+        true,
+        true,
+        "get onmessageerror",
+        0,
+        "set onmessageerror",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "offline"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "offline",
+      "shape": [
+        true,
+        true,
+        "get onoffline",
+        0,
+        "set onoffline",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "online"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "online",
+      "shape": [
+        true,
+        true,
+        "get ononline",
+        0,
+        "set ononline",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "pagehide"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "pagehide",
+      "shape": [
+        true,
+        true,
+        "get onpagehide",
+        0,
+        "set onpagehide",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "pageshow"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "pageshow",
+      "shape": [
+        true,
+        true,
+        "get onpageshow",
+        0,
+        "set onpageshow",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "popstate"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "popstate",
+      "shape": [
+        true,
+        true,
+        "get onpopstate",
+        0,
+        "set onpopstate",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "rejectionhandled"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "rejectionhandled",
+      "shape": [
+        true,
+        true,
+        "get onrejectionhandled",
+        0,
+        "set onrejectionhandled",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "resize"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "resize",
+      "shape": [
+        true,
+        true,
+        "get onresize",
+        0,
+        "set onresize",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "scroll"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "scroll",
+      "shape": [
+        true,
+        true,
+        "get onscroll",
+        0,
+        "set onscroll",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "storage"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "storage",
+      "shape": [
+        true,
+        true,
+        "get onstorage",
+        0,
+        "set onstorage",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "unhandledrejection"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "unhandledrejection",
+      "shape": [
+        true,
+        true,
+        "get onunhandledrejection",
+        0,
+        "set onunhandledrejection",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "unload"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "body",
+      "type": "unload",
+      "shape": [
+        true,
+        true,
+        "get onunload",
+        0,
+        "set onunload",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "afterprint"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "afterprint",
+      "shape": [
+        true,
+        true,
+        "get onafterprint",
+        0,
+        "set onafterprint",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "beforeprint"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "beforeprint",
+      "shape": [
+        true,
+        true,
+        "get onbeforeprint",
+        0,
+        "set onbeforeprint",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "blur"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "blur",
+      "shape": [
+        true,
+        true,
+        "get onblur",
+        0,
+        "set onblur",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "focus"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "focus",
+      "shape": [
+        true,
+        true,
+        "get onfocus",
+        0,
+        "set onfocus",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "hashchange"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "hashchange",
+      "shape": [
+        true,
+        true,
+        "get onhashchange",
+        0,
+        "set onhashchange",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "languagechange"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "languagechange",
+      "shape": [
+        true,
+        true,
+        "get onlanguagechange",
+        0,
+        "set onlanguagechange",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "load"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "load",
+      "shape": [
+        true,
+        true,
+        "get onload",
+        0,
+        "set onload",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "message"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "message",
+      "shape": [
+        true,
+        true,
+        "get onmessage",
+        0,
+        "set onmessage",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "messageerror"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "messageerror",
+      "shape": [
+        true,
+        true,
+        "get onmessageerror",
+        0,
+        "set onmessageerror",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "offline"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "offline",
+      "shape": [
+        true,
+        true,
+        "get onoffline",
+        0,
+        "set onoffline",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "online"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "online",
+      "shape": [
+        true,
+        true,
+        "get ononline",
+        0,
+        "set ononline",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "pagehide"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "pagehide",
+      "shape": [
+        true,
+        true,
+        "get onpagehide",
+        0,
+        "set onpagehide",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "pageshow"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "pageshow",
+      "shape": [
+        true,
+        true,
+        "get onpageshow",
+        0,
+        "set onpageshow",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "popstate"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "popstate",
+      "shape": [
+        true,
+        true,
+        "get onpopstate",
+        0,
+        "set onpopstate",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "rejectionhandled"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "rejectionhandled",
+      "shape": [
+        true,
+        true,
+        "get onrejectionhandled",
+        0,
+        "set onrejectionhandled",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "resize"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "resize",
+      "shape": [
+        true,
+        true,
+        "get onresize",
+        0,
+        "set onresize",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "scroll"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "scroll",
+      "shape": [
+        true,
+        true,
+        "get onscroll",
+        0,
+        "set onscroll",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "storage"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "storage",
+      "shape": [
+        true,
+        true,
+        "get onstorage",
+        0,
+        "set onstorage",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "unhandledrejection"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "unhandledrejection",
+      "shape": [
+        true,
+        true,
+        "get onunhandledrejection",
+        0,
+        "set onunhandledrejection",
+        1
+      ]
+    },
+    {
+      "calls": [
+        [
+          true,
+          true,
+          true,
+          "unload"
+        ]
+      ],
+      "result": false,
+      "prevented": true,
+      "defaults": [
+        null,
+        null,
+        null
+      ],
+      "assignments": [
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        [
+          true,
+          true,
+          true,
+          true,
+          false
+        ]
+      ],
+      "tag": "frameset",
+      "type": "unload",
+      "shape": [
+        true,
+        true,
+        "get onunload",
+        0,
+        "set onunload",
+        1
+      ]
+    }
+  ]
+}

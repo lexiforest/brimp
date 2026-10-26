@@ -1,3 +1,4 @@
+pub mod bridge;
 mod cancellation;
 pub mod clock;
 pub mod diagnostics;

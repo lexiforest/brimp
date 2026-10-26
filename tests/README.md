@@ -1,5 +1,9 @@
 # Browser regression tests
 
+The script-debugging regression also loads the pinned DOMPurify bundle directly,
+calls a retained function with multiple inputs, and checks non-consuming
+dependency reports against the resulting DOM operations.
+
 Run real browser libraries and applications against Brimp's Node binding. The
 suite covers eleven workloads: React and Vue TodoMVC, jQuery, htmx, Lit,
 DOMPurify, Readability, Axios, Defuddle, and two jose crypto cases.

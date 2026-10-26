@@ -5,7 +5,7 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc;
-use std::task::{Context, Poll, Wake, Waker};
+use std::task::{Context, Poll, Waker};
 use std::time::{Duration, Instant};
 
 use brimp_runtime::network::{
@@ -351,13 +351,8 @@ fn dropping_request_and_final_loader_cancels_and_joins_worker() {
             .fetch(ResourceRequest::get(format!("http://{address}/hang")))
             .await
     });
-    struct Noop;
-    impl Wake for Noop {
-        fn wake(self: Arc<Self>) {}
-    }
-    let waker = Waker::from(Arc::new(Noop));
     assert!(matches!(
-        Pin::new(&mut future).poll(&mut Context::from_waker(&waker)),
+        Pin::new(&mut future).poll(&mut Context::from_waker(Waker::noop())),
         Poll::Pending
     ));
     accepted_receiver

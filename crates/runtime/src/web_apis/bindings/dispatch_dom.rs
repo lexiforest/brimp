@@ -7,6 +7,18 @@ pub(super) fn dispatch(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "isNativeNode" => {
+            let object = call
+                .argument(1)
+                .map(|value| value.as_object())
+                .transpose()?
+                .flatten();
+            Ok(NativeValue::Boolean(
+                object
+                    .and_then(|object| state.wrappers.node_id(&object))
+                    .is_some(),
+            ))
+        }
         "cssParseSheet" => Ok(NativeValue::String(
             serde_json::to_string(
                 &brimp_lexbor::stylesheet(&required_string(call, 2, "CSS")?).map_err(err)?,
@@ -14,8 +26,21 @@ pub(super) fn dispatch(
             .map_err(err)?,
         )),
 
+        "documentWriteError" => {
+            let id = required_document_target(state, call)?;
+            Ok(state
+                .document
+                .borrow()
+                .document_write_error(id)
+                .map_or(NativeValue::Null, |error| NativeValue::String(error.into())))
+        }
         "documentOpen" => {
             let id = required_document_target(state, call)?;
+            if call.argument(2).is_some_and(|value| value.to_boolean()) {
+                let mut url = url::Url::parse(&document_url(state, 0)).map_err(err)?;
+                url.set_fragment(None);
+                state.document.borrow().set_document_url(id, url.into());
+            }
             let writer = state.document.borrow().writer(id).map_err(err)?;
             state.document_writers.borrow_mut().insert(id, writer);
             Ok(NativeValue::Undefined)
@@ -46,45 +71,212 @@ pub(super) fn dispatch(
                 serde_json::json!({"script":script,"records":records}).to_string(),
             ))
         }
-        "domParserParse" => {
-            let input = required_string(call, 2, "input")?;
-            if required_string(call, 3, "type")? != "text/html" {
+        "htmlDecodedTextLength" => {
+            let text = required_string(call, 2, "text")?;
+            // Reuse Lexbor's entity and newline handling in a temporary arena;
+            // this metadata check must not mutate the page DOM or emit events.
+            let arena = brimp_lexbor::Document::new().map_err(err)?;
+            let body = arena
+                .create_element("body", HTML_NAMESPACE, "")
+                .map_err(err)?;
+            let fragment = arena.fragment(body, &text).map_err(err)?;
+            Ok(NativeValue::Number(
+                arena.text(fragment).map_err(err)?.to_utf16().len() as f64,
+            ))
+        }
+        "createDocument" => {
+            let root = state.document.borrow().create_document().map_err(err)?;
+            state
+                .document
+                .borrow()
+                .set_content_type(root, "application/xml");
+            node_value(state, call, root)
+        }
+        "domParserParse" | "dataDocumentParse" => {
+            let mut input = required_string(call, 2, "input")?;
+            let mut encoding = encoding_rs::UTF_8;
+            let mut document_url_value = document_url(state, 0);
+            let mut content_type = "text/html".to_owned();
+            if operation == "dataDocumentParse" {
+                let data = data_url::DataUrl::process(&input).map_err(err)?;
+                content_type = data.mime_type().to_string();
+                document_url_value = input.clone();
+                let (bytes, _) = data.decode_to_vec().map_err(err)?;
+                let (decoded, selected) =
+                    crate::dom::decode_html(&bytes, Some(&data.mime_type().to_string()))
+                        .map_err(err)?;
+                input = decoded.into_owned();
+                encoding = selected;
+            } else if required_string(call, 3, "type")? != "text/html" {
                 return Err(NativeError::new("only text/html parsing is supported"));
             }
             let root = state.document.borrow().create_document().map_err(err)?;
+            state.document.borrow().set_encoding(root, encoding);
+            state
+                .document
+                .borrow()
+                .set_document_url(root, document_url_value);
+            state
+                .document
+                .borrow()
+                .set_content_type(root, &content_type);
             let mut parser =
                 HtmlParserSession::new_at_root(Rc::clone(&state.document), &input, root)
                     .map_err(err)?;
             while !matches!(parser.resume().map_err(err)?, ParseProgress::Done) {}
+            if call.argument(4).is_some_and(|value| value.to_boolean()) {
+                state.document.borrow().set_no_quirks(root).map_err(err)?;
+            }
             node_value(state, call, root)
         }
-        "documentElement" | "head" | "body" => {
+        "documentURL" => {
+            let id = required_document_target(state, call)?;
+            Ok(NativeValue::String(document_url(state, id)))
+        }
+        "nodeBaseURI" => {
+            let id = required_node_target(state, call)?;
+            let doc = state.document.borrow();
+            let owner = doc.node_document(id).ok_or_else(stale_wrapper)?;
+            let fallback = document_url(state, owner);
+            let base = resolve_document_base_url(&doc, owner, &fallback, url::Url::options());
+            Ok(NativeValue::String(
+                base.map(String::from).unwrap_or(fallback),
+            ))
+        }
+        "documentSetURL" => {
+            let id = required_document_target(state, call)?;
+            state
+                .document
+                .borrow()
+                .set_document_url(id, required_string(call, 2, "document URL")?);
+            Ok(NativeValue::Undefined)
+        }
+        "documentContentType" => {
+            let id = required_document_target(state, call)?;
+            Ok(NativeValue::String(
+                state.document.borrow().content_type(id),
+            ))
+        }
+        "documentEncoding" => {
+            let root = required_document_target(state, call)?;
+            Ok(NativeValue::String(
+                state.document.borrow().encoding(root).name().into(),
+            ))
+        }
+        "compatMode" => {
+            let root = required_document_target(state, call)?;
+            Ok(NativeValue::String(
+                state
+                    .document
+                    .borrow()
+                    .compat_mode(root)
+                    .map_err(err)?
+                    .into(),
+            ))
+        }
+        "documentElement" | "head" | "body" | "doctype" => {
             let root = required_document_target(state, call)?;
             let doc = state.document.borrow();
-            let id = if operation == "documentElement" {
-                doc.children(root)
+            let id = if operation == "documentElement" || operation == "doctype" {
+                doc.children(root).map_err(err)?.into_iter().find(|id| {
+                    doc.kind(*id).ok() == Some(if operation == "doctype" { 10 } else { 1 })
+                })
+            } else {
+                let element = doc
+                    .children(root)
                     .map_err(err)?
                     .into_iter()
-                    .find(|id| doc.is_element(*id))
-            } else {
-                doc.select(root, operation).map_err(err)?.into_iter().next()
+                    .find(|id| doc.kind(*id).ok() == Some(1));
+                let mut selected = None;
+                if let Some(element) = element {
+                    let eligible = operation == "head"
+                        || doc.namespace(element).map_err(err)? == HTML_NAMESPACE
+                            && doc.local_name(element).map_err(err)? == "html";
+                    if eligible {
+                        for child in doc.children(element).map_err(err)? {
+                            if doc.kind(child).map_err(err)? != 1
+                                || doc.namespace(child).map_err(err)? != HTML_NAMESPACE
+                            {
+                                continue;
+                            }
+                            let name = doc.local_name(child).map_err(err)?;
+                            if name == operation || operation == "body" && name == "frameset" {
+                                selected = Some(child);
+                                break;
+                            }
+                        }
+                    }
+                }
+                selected
             };
             drop(doc);
             optional_node(state, call, id)
         }
-        "title" => {
+        "documentCollection" => {
             let root = required_document_target(state, call)?;
+            let collection = required_string(call, 2, "document collection")?;
             let doc = state.document.borrow();
-            let text = doc
-                .select(root, "title")
+            let mut nodes = Vec::new();
+            if collection != "applets" {
+                for node in doc.descendants(root).map_err(err)? {
+                    if doc.kind(node).map_err(err)? != 1
+                        || doc.namespace(node).map_err(err)? != HTML_NAMESPACE
+                    {
+                        continue;
+                    }
+                    let name = doc.local_name(node).map_err(err)?;
+                    let matches = match collection.as_str() {
+                        "forms" => name == "form",
+                        "images" => name == "img",
+                        "embeds" => name == "embed",
+                        "scripts" => name == "script",
+                        "links" | "anchors" => {
+                            let (eligible, attribute) = if collection == "links" {
+                                (name == "a" || name == "area", "href")
+                            } else {
+                                (name == "a", "name")
+                            };
+                            eligible
+                                && doc.attributes(node).map_err(err)?.iter().any(|item| {
+                                    item.namespace.is_none() && item.local_name == attribute
+                                })
+                        }
+                        _ => false,
+                    };
+                    if matches {
+                        nodes.push(node);
+                    }
+                }
+            }
+            drop(doc);
+            node_array(state, call, &nodes)
+        }
+        "documentTitleElement" => {
+            let document = required_document_target(state, call)?;
+            let doc = state.document.borrow();
+            let root = doc
+                .children(document)
                 .map_err(err)?
                 .into_iter()
-                .next()
-                .map(|id| doc.text(id))
-                .transpose()
-                .map_err(err)?
-                .unwrap_or_default();
-            Ok(NativeValue::String(text))
+                .find(|id| doc.kind(*id).ok() == Some(1));
+            let svg_root = root.filter(|id| {
+                doc.namespace(*id).ok().as_deref() == Some("http://www.w3.org/2000/svg")
+                    && doc.local_name(*id).ok().as_deref() == Some("svg")
+            });
+            let (nodes, namespace) = if let Some(root) = svg_root {
+                (
+                    doc.children(root).map_err(err)?,
+                    "http://www.w3.org/2000/svg",
+                )
+            } else {
+                (doc.descendants(document).map_err(err)?, HTML_NAMESPACE)
+            };
+            let title = nodes.into_iter().find(|id| {
+                doc.local_name(*id).ok().as_deref() == Some("title")
+                    && doc.namespace(*id).ok().as_deref() == Some(namespace)
+            });
+            drop(doc);
+            optional_node(state, call, title)
         }
         "cookie" => {
             required_document_target(state, call)?;
@@ -137,8 +329,10 @@ pub(super) fn dispatch(
             let owner = required_document_target(state, call)?;
             let doc = state.document.borrow();
             let id = match operation {
-                "createTextNode" => doc.create_text(owner, &required_string(call, 2, "text")?),
-                "createComment" => doc.create_comment(owner, &required_string(call, 2, "comment")?),
+                "createTextNode" => doc.create_text(owner, required_dom_string(call, 2, "text")?),
+                "createComment" => {
+                    doc.create_comment(owner, required_dom_string(call, 2, "comment")?)
+                }
                 _ => doc.create_document_fragment(owner),
             }
             .map_err(err)?;
@@ -185,6 +379,9 @@ pub(super) fn dispatch(
                 doc.node_document(source).unwrap_or(0)
             };
             let clone = doc.clone_node(source, deep, owner).map_err(err)?;
+            if doc.is_document(source) {
+                doc.set_document_url(clone, document_url(state, source));
+            }
             drop(doc);
             node_value(state, call, clone)
         }
@@ -193,8 +390,14 @@ pub(super) fn dispatch(
         | "getElementsByClassName"
         | "getElementsByName" => {
             let root = required_parent_node_target(state, call)?;
-            let name = required_string(call, 2, "name")?;
-            let names: Vec<_> = name.split_ascii_whitespace().collect();
+            let dom_name = required_dom_string(call, 2, "name")?;
+            let name = dom_name.to_string_lossy();
+            let units = dom_name.to_utf16();
+            let whitespace = |unit: &u16| matches!(unit, 0x09 | 0x0a | 0x0c | 0x0d | 0x20);
+            let names: Vec<_> = units
+                .split(whitespace)
+                .filter(|name| !name.is_empty())
+                .collect();
             let doc = state.document.borrow();
             let nodes: Vec<_> = doc
                 .descendants(root)
@@ -202,10 +405,8 @@ pub(super) fn dispatch(
                 .into_iter()
                 .filter(|id| doc.is_element(*id))
                 .filter(|id| match operation {
-                    "getElementById" => doc.attribute(*id, "id").as_deref() == Some(name.as_str()),
-                    "getElementsByName" => {
-                        doc.attribute(*id, "name").as_deref() == Some(name.as_str())
-                    }
+                    "getElementById" => doc.attribute(*id, "id").as_ref() == Some(&dom_name),
+                    "getElementsByName" => doc.attribute(*id, "name").as_ref() == Some(&dom_name),
                     "getElementsByTagName" => {
                         name == "*"
                             || doc.local_name(*id).is_ok_and(|tag| {
@@ -219,9 +420,10 @@ pub(super) fn dispatch(
                     _ => {
                         !names.is_empty()
                             && doc.attribute(*id, "class").is_some_and(|classes| {
-                                names.iter().all(|name| {
-                                    classes.split_ascii_whitespace().any(|class| class == *name)
-                                })
+                                let units = classes.to_utf16();
+                                names
+                                    .iter()
+                                    .all(|name| units.split(whitespace).any(|class| class == *name))
                             })
                     }
                 })
@@ -257,7 +459,7 @@ pub(super) fn dispatch(
             ))
         }
         "ownerDocument" | "parentNode" | "firstChild" | "lastChild" | "previousSibling"
-        | "nextSibling" | "templateContent" => {
+        | "nextSibling" | "templateContent" | "parserForm" => {
             let id = required_node_target(state, call)?;
             let doc = state.document.borrow();
             let node = match operation {
@@ -269,6 +471,7 @@ pub(super) fn dispatch(
                     }
                 }
                 "parentNode" => doc.parent(id).map_err(err)?,
+                "parserForm" => doc.parser_form(id).map_err(err)?,
                 "firstChild" => doc.children(id).map_err(err)?.first().copied(),
                 "lastChild" => doc.children(id).map_err(err)?.last().copied(),
                 "templateContent" => doc.template_content(id).map_err(err)?,
@@ -286,6 +489,54 @@ pub(super) fn dispatch(
             drop(doc);
             optional_node(state, call, node)
         }
+        "previousElementSibling" | "nextElementSibling" => {
+            let id = required_node_target(state, call)?;
+            let doc = state.document.borrow();
+            let mut sibling = None;
+            if let Some(parent) = doc.parent(id).map_err(err)? {
+                let children = doc.children(parent).map_err(err)?;
+                if operation == "previousElementSibling" {
+                    for child in children {
+                        if child == id {
+                            break;
+                        }
+                        if doc.kind(child).map_err(err)? == 1 {
+                            sibling = Some(child);
+                        }
+                    }
+                } else {
+                    let mut found = false;
+                    for child in children {
+                        if found && doc.kind(child).map_err(err)? == 1 {
+                            sibling = Some(child);
+                            break;
+                        }
+                        if child == id {
+                            found = true;
+                        }
+                    }
+                }
+            }
+            drop(doc);
+            optional_node(state, call, sibling)
+        }
+        "elementChildren" | "childElementCount" | "firstElementChild" | "lastElementChild" => {
+            let id = required_parent_node_target(state, call)?;
+            let doc = state.document.borrow();
+            let mut nodes = Vec::new();
+            for child in doc.children(id).map_err(err)? {
+                if doc.kind(child).map_err(err)? == 1 {
+                    nodes.push(child);
+                }
+            }
+            drop(doc);
+            match operation {
+                "elementChildren" => node_array(state, call, &nodes),
+                "childElementCount" => Ok(NativeValue::Number(nodes.len() as f64)),
+                "firstElementChild" => optional_node(state, call, nodes.first().copied()),
+                _ => optional_node(state, call, nodes.last().copied()),
+            }
+        }
         "childNodes" => {
             let id = required_node_target(state, call)?;
             let nodes = state.document.borrow().children(id).map_err(err)?;
@@ -297,14 +548,25 @@ pub(super) fn dispatch(
                 state.document.borrow().kind(id).map_err(err)?,
             )))
         }
-        "nodeName" | "tagName" | "localName" | "namespaceURI" | "prefix" | "textContent" => {
+        "nodeName" | "tagName" | "localName" | "namespaceURI" | "prefix" | "textContent"
+        | "doctypePublicId" | "doctypeSystemId" => {
             let id = required_node_target(state, call)?;
             let doc = state.document.borrow();
+            if operation == "textContent" {
+                return if matches!(doc.kind(id).map_err(err)?, 9 | 10) {
+                    Ok(NativeValue::Null)
+                } else {
+                    Ok(NativeValue::StringUtf16(
+                        doc.text(id).map_err(err)?.to_utf16(),
+                    ))
+                };
+            }
             let value = match operation {
                 "localName" => doc.local_name(id),
                 "namespaceURI" => doc.namespace(id),
                 "prefix" => doc.prefix(id),
-                "textContent" => doc.text(id),
+                "doctypePublicId" => doc.doctype_public_id(id),
+                "doctypeSystemId" => doc.doctype_system_id(id),
                 _ => doc.name(id),
             }
             .map_err(err)?;
@@ -316,10 +578,13 @@ pub(super) fn dispatch(
         }
         "setTextContent" => {
             let id = required_node_target(state, call)?;
+            if matches!(state.document.borrow().kind(id).map_err(err)?, 9 | 10) {
+                return Ok(NativeValue::Undefined);
+            }
             state
                 .document
                 .borrow()
-                .set_text(id, &required_string(call, 2, "textContent")?)
+                .set_text(id, required_dom_string(call, 2, "textContent")?)
                 .map_err(err)?;
             Ok(NativeValue::Undefined)
         }
@@ -362,7 +627,7 @@ pub(super) fn dispatch(
             }
             match operation {
                 "setAttribute" => {
-                    doc.set_attribute(id, &name, &required_string(call, 3, "attribute value")?)
+                    doc.set_attribute(id, &name, required_dom_string(call, 3, "attribute value")?)
                         .map_err(err)?;
                     Ok(NativeValue::Undefined)
                 }
@@ -371,7 +636,7 @@ pub(super) fn dispatch(
                     Ok(NativeValue::Undefined)
                 }
                 _ => match doc.attribute(id, &name) {
-                    Some(value) => Ok(NativeValue::String(value)),
+                    Some(value) => Ok(NativeValue::StringUtf16(value.to_utf16())),
                     None if operation == "getAttributeOrEmpty" => {
                         Ok(NativeValue::String(String::new()))
                     }
@@ -385,7 +650,7 @@ pub(super) fn dispatch(
             let name = required_string(call, 3, "name")?;
             let doc = state.document.borrow();
             if operation == "setAttributeNS" {
-                doc.set_attribute_ns(id, &ns, &name, &required_string(call, 4, "value")?)
+                doc.set_attribute_ns(id, &ns, &name, required_dom_string(call, 4, "value")?)
                     .map_err(err)?;
             } else {
                 doc.remove_attribute_ns(id, &ns, &name).map_err(err)?;
@@ -395,29 +660,68 @@ pub(super) fn dispatch(
         "elementAttributes" => {
             let id = required_element_target(state, call)?;
             let attributes = state.document.borrow().attributes(id).map_err(err)?;
-            Ok(NativeValue::String(
-                serde_json::to_string(&attributes).map_err(err)?,
+            let records = attributes
+                .into_iter()
+                .map(|attribute| {
+                    call.make_value_array(vec![
+                        NativeValue::String(attribute.name),
+                        NativeValue::String(attribute.local_name),
+                        attribute
+                            .namespace
+                            .map_or(NativeValue::Null, NativeValue::String),
+                        attribute
+                            .prefix
+                            .map_or(NativeValue::Null, NativeValue::String),
+                        NativeValue::StringUtf16(attribute.value.to_utf16()),
+                    ])
+                    .map(NativeValue::ProtectedObject)
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(NativeValue::ProtectedObject(
+                call.make_value_array(records)?,
             ))
         }
         "elementUrl" => {
             let id = required_element_target(state, call)?;
             let property = required_string(call, 2, "URL property")?;
+            let document_url = required_string(call, 3, "document URL")?;
             let attribute = if property == "origin" {
                 "href"
             } else {
                 &property
             };
             let doc = state.document.borrow();
-            let value = resolve_element_attribute_url(&doc, &state.browsing_context, id, attribute)
-                .unwrap_or_else(|| doc.attribute(id, attribute).unwrap_or_default());
-            let value = if property == "origin" {
-                url::Url::parse(&value)
+            let encoding = call
+                .argument(4)
+                .map(|value| value.to_string())
+                .transpose()?;
+            let resolved = resolve_element_attribute_url(
+                &doc,
+                id,
+                attribute,
+                &document_url,
+                encoding.as_deref(),
+            );
+            if property == "origin" {
+                let value = resolved
+                    .and_then(|value| url::Url::parse(&value).ok())
                     .map(|url| url.origin().ascii_serialization())
-                    .unwrap_or_default()
+                    .unwrap_or_default();
+                Ok(NativeValue::String(value))
+            } else if let Some(value) = resolved {
+                Ok(NativeValue::String(value))
             } else {
-                value
-            };
-            Ok(NativeValue::String(value))
+                // Safari returns the original DOMString when parsing fails,
+                // including unpaired code units written through setAttribute.
+                let value = doc
+                    .attributes(id)
+                    .map_err(err)?
+                    .into_iter()
+                    .find(|item| item.namespace.is_none() && item.local_name == attribute)
+                    .map(|item| item.value)
+                    .unwrap_or_default();
+                Ok(NativeValue::StringUtf16(value.to_utf16()))
+            }
         }
         "innerHTML" | "outerHTML" | "serializeNode" => {
             let id = required_node_target(state, call)?;
@@ -427,9 +731,10 @@ pub(super) fn dispatch(
             } else {
                 id
             };
-            Ok(NativeValue::String(
+            Ok(NativeValue::StringUtf16(
                 doc.serialize(target, operation == "innerHTML")
-                    .map_err(err)?,
+                    .map_err(err)?
+                    .to_utf16(),
             ))
         }
         "setInnerHTML" => {

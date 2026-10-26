@@ -178,7 +178,10 @@ fn navigation_loads_css_and_classic_scripts_through_the_loader() {
     let document = page.document();
     let box_id = document.get_element_by_id("box").unwrap();
     assert_eq!(
-        document.attribute(box_id, "data-script").as_deref(),
+        document
+            .attribute(box_id, "data-script")
+            .as_ref()
+            .and_then(|value| value.as_str()),
         Some("done")
     );
     drop(document);
