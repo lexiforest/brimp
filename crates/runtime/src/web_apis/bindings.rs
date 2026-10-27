@@ -18,48 +18,59 @@ mod dispatch_dom;
 mod dispatch_platform;
 
 const CLASS_DEFINITIONS: &str = concat!(
-    include_str!("../../js/web_apis/runtime/bootstrap.js"),
+    "(() => {\n",
+    include_str!("../../js/web_apis/bootstrap.js"),
     include_str!("../../js/vendor/input-color.bundle.js"),
-    include_str!("../../js/web_apis/runtime/events_messaging.js"),
-    include_str!("../../js/web_apis/runtime/dom_core.js"),
-    include_str!("../../js/web_apis/runtime/document_mode.js"),
-    include_str!("../../js/web_apis/runtime/document_collections.js"),
-    include_str!("../../js/web_apis/runtime/token_list.js"),
-    include_str!("../../js/web_apis/runtime/traversal.js"),
-    include_str!("../../js/web_apis/runtime/elements.js"),
-    include_str!("../../js/web_apis/runtime/input_decimal.js"),
-    include_str!("../../js/web_apis/runtime/input_values.js"),
-    include_str!("../../js/web_apis/runtime/input_checked.js"),
-    include_str!("../../js/web_apis/runtime/input_attributes.js"),
-    include_str!("../../js/web_apis/runtime/html_elements.js"),
-    include_str!("../../js/web_apis/runtime/namespaces.js"),
-    include_str!("../../js/web_apis/runtime/window_location.js"),
-    include_str!("../../js/web_apis/runtime/shadow_dom.js"),
-    include_str!("../../js/web_apis/runtime/navigator_services.js"),
-    include_str!("../../js/web_apis/runtime/crypto.js"),
-    include_str!("../../js/web_apis/runtime/url_encoding_files.js"),
-    include_str!("../../js/web_apis/runtime/form_disabled.js"),
-    include_str!("../../js/web_apis/runtime/file_reader.js"),
-    include_str!("../../js/web_apis/runtime/storage_fetch.js"),
-    include_str!("../../js/web_apis/runtime/forms.js"),
-    include_str!("../../js/web_apis/runtime/input_value_conversions.js"),
-    include_str!("../../js/web_apis/runtime/input_stepping.js"),
-    include_str!("../../js/web_apis/runtime/input_editing.js"),
-    include_str!("../../js/web_apis/runtime/input_validity.js"),
-    include_str!("../../js/web_apis/runtime/input_validation.js"),
-    include_str!("../../js/web_apis/runtime/label_associations.js"),
-    include_str!("../../js/web_apis/runtime/control_selection.js"),
-    include_str!("../../js/web_apis/runtime/element_internals.js"),
-    include_str!("../../js/web_apis/runtime/css_property_names.js"),
-    include_str!("../../js/web_apis/runtime/css_style.js"),
-    include_str!("../../js/web_apis/runtime/stylesheets.js"),
-    include_str!("../../js/web_apis/runtime/observers.js"),
-    include_str!("../../js/web_apis/runtime/document_write.js"),
-    include_str!("../../js/web_apis/runtime/drag_drop.js"),
-    include_str!("../../js/web_apis/runtime/input.js"),
-    include_str!("../../js/web_apis/runtime/dom_placeholders.js"),
-    include_str!("../../js/web_apis/runtime/window_environment.js"),
-    include_str!("../../js/web_apis/runtime/install.js"),
+    include_str!("../../js/web_apis/events_messaging.js"),
+    include_str!("../../js/web_apis/dom_core.js"),
+    include_str!("../../js/web_apis/document_mode.js"),
+    include_str!("../../js/web_apis/document_collections.js"),
+    include_str!("../../js/web_apis/token_list.js"),
+    include_str!("../../js/web_apis/traversal.js"),
+    include_str!("../../js/web_apis/elements.js"),
+    include_str!("../../js/web_apis/input_decimal.js"),
+    include_str!("../../js/web_apis/input_values.js"),
+    include_str!("../../js/web_apis/input_checked.js"),
+    include_str!("../../js/web_apis/input_attributes.js"),
+    include_str!("../../js/web_apis/html_elements.js"),
+    include_str!("../../js/web_apis/namespaces.js"),
+    include_str!("../../js/web_apis/window_location.js"),
+    include_str!("../../js/web_apis/shadow_dom.js"),
+    include_str!("../../js/web_apis/navigator_services.js"),
+    include_str!("../../js/web_apis/crypto.js"),
+    include_str!("../../js/web_apis/url_encoding_files.js"),
+    include_str!("../../js/web_apis/form_disabled.js"),
+    include_str!("../../js/web_apis/file_reader.js"),
+    include_str!("../../js/web_apis/storage_fetch.js"),
+    include_str!("../../js/web_apis/forms.js"),
+    include_str!("../../js/web_apis/input_value_conversions.js"),
+    include_str!("../../js/web_apis/input_stepping.js"),
+    include_str!("../../js/web_apis/input_editing.js"),
+    include_str!("../../js/web_apis/input_validity.js"),
+    include_str!("../../js/web_apis/input_validation.js"),
+    include_str!("../../js/web_apis/label_associations.js"),
+    include_str!("../../js/web_apis/control_selection.js"),
+    include_str!("../../js/web_apis/element_internals.js"),
+    include_str!("../../js/web_apis/css_property_names.js"),
+    include_str!("../../js/web_apis/css_style.js"),
+    include_str!("../../js/web_apis/stylesheets.js"),
+    include_str!("../../js/web_apis/observers.js"),
+    include_str!("../../js/web_apis/document_write.js"),
+    include_str!("../../js/web_apis/drag_drop.js"),
+    include_str!("../../js/web_apis/input.js"),
+    include_str!("../../js/web_apis/dom_placeholders.js"),
+    include_str!("../../js/web_apis/intl_profile.js"),
+    include_str!("../../js/web_apis/media_query.js"),
+    include_str!("../../js/web_apis/fonts.js"),
+    include_str!("../../js/web_apis/window_environment.js"),
+    include_str!("../../js/web_apis/storage_host.js"),
+    include_str!("../../js/web_apis/scheduling.js"),
+    include_str!("../../js/web_apis/install.js"),
+    "\n})();\n",
+    include_str!("../../js/web_apis/geometry.js"),
+    include_str!("../../js/web_apis/css-typed-om.js"),
+    include_str!("../../js/web_apis/value_objects.js"),
+    include_str!("../../js/web_apis/canvas_contexts.js"),
 );
 
 pub struct TimerQueue {
@@ -151,6 +162,7 @@ struct Timer {
     id: u32,
     deadline: Duration,
     interval: Option<Duration>,
+    priority: u8,
     callback: ProtectedJsObject,
 }
 
@@ -194,6 +206,7 @@ impl TimerQueue {
             id,
             deadline: self.clock.now() + delay,
             interval: repeat.then_some(delay.max(Duration::from_millis(1))),
+            priority: 1,
             callback,
         });
         id
@@ -210,7 +223,7 @@ impl TimerQueue {
             .iter()
             .enumerate()
             .filter(|(_, timer)| timer.deadline <= now)
-            .min_by_key(|(_, timer)| timer.deadline)
+            .min_by_key(|(_, timer)| (timer.priority, timer.deadline, timer.id))
             .map(|(index, _)| index)?;
         if let Some(interval) = self.timers[index].interval {
             self.timers[index].deadline = now + interval;
@@ -409,6 +422,8 @@ pub struct BrowsingContext {
     pending_navigation: Mutex<Option<String>>,
     cookies: Arc<CookieJar>,
     request_headers: Mutex<Vec<(http::HeaderName, http::HeaderValue)>>,
+    pub(crate) storage: Arc<super::storage::Storage>,
+    pub(crate) session_storage: Mutex<super::storage::Partitions>,
 }
 
 impl Default for BrowsingContext {
@@ -424,6 +439,8 @@ impl BrowsingContext {
             pending_navigation: Mutex::new(None),
             cookies,
             request_headers: Mutex::new(Vec::new()),
+            storage: Arc::default(),
+            session_storage: Mutex::default(),
         }
     }
     pub fn set_request_headers(
@@ -545,6 +562,7 @@ impl BrowsingContext {
 
 struct BindingState {
     crypto: RefCell<crypto::CryptoState>,
+    storage_realm: super::storage::Realm,
     diagnostics: Option<crate::runtime::diagnostics::Diagnostics>,
     events: crate::runtime::events::EventHub,
     document: Rc<RefCell<BrowserDocument>>,
@@ -578,6 +596,9 @@ struct Prototypes {
 }
 
 impl BindingRuntime {
+    pub(crate) fn pump_storage(&self, js: &JsRuntime) -> Result<bool, JsException> {
+        self.state.storage_realm.pump(js)
+    }
     pub(crate) fn install(
         runtime: &JsRuntime,
         document: Rc<RefCell<BrowserDocument>>,
@@ -589,6 +610,7 @@ impl BindingRuntime {
     ) -> Result<Self, JsException> {
         let state = Rc::new(BindingState {
             crypto: RefCell::new(crypto::CryptoState::default()),
+            storage_realm: super::storage::Realm::new(browsing_context.storage.clone()),
             diagnostics,
             events,
             document,
@@ -607,6 +629,8 @@ impl BindingRuntime {
         runtime.set_global_function("__brimp", move |call| dispatch(&callback_state, &call))?;
         runtime.eval(CLASS_DEFINITIONS)?;
         runtime.eval(include_str!("../../js/vendor/core.bundle.js"))?;
+        runtime.eval(include_str!("../../js/web_apis/locks.js"))?;
+        runtime.eval(include_str!("../../js/vendor/storage.bundle.js"))?;
         let streaming_state = Rc::clone(&state);
         runtime.set_global_function("__brimpStreamingHost", move |call| {
             dispatch(&streaming_state, &call)
@@ -965,7 +989,8 @@ fn dispatch_operation(
 }
 
 fn is_platform_operation(operation: &str) -> bool {
-    operation.starts_with("webSocket")
+    operation.starts_with("storage")
+        || operation.starts_with("webSocket")
         || operation.starts_with("url")
         || operation.starts_with("encoding")
         || operation.starts_with("base64")
@@ -973,7 +998,9 @@ fn is_platform_operation(operation: &str) -> bool {
         || operation.starts_with("fetch")
         || matches!(
             operation,
-            "setTimeout"
+            "scheduleTask"
+                | "taskPriority"
+                | "setTimeout"
                 | "setInterval"
                 | "clearTimeout"
                 | "clearInterval"

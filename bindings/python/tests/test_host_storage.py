@@ -6,7 +6,7 @@ from brimp import Session, plugins, JavaScriptError
 
 def test_catalog_and_host_storage():
     catalog = plugins.catalog()
-    assert catalog["storage"]["lifetime"] == "realm"
+    assert not {"storage", "geometry", "css-typed-om", "scheduling"}.intersection(catalog)
     catalog["canvas"]["options"]["rgba"]["default"][0] = 255
     assert plugins.catalog()["canvas"]["options"]["rgba"]["default"][0] == 0
     plugin = plugins.host_storage()
@@ -43,3 +43,15 @@ def test_sqlite_backend_atomicity_isolation_and_reopen(tmp_path):
     reopened = module.SQLiteStorage(tmp_path / "store.db")
     try: assert reopened.transaction("https://a.test", [{"type": "get", "key": "x"}]) == [42]
     finally: reopened.close()
+
+
+def test_core_storage_path_option_survives_session_reopen(tmp_path):
+    for first in (True, False):
+        with Session(storage_path=tmp_path / "storage.json") as session:
+            page = session.new_page()
+            page.route("https://storage.test/**", lambda r: r.fulfill(body="<body></body>", headers={"content-type": "text/html"}))
+            page.get("https://storage.test/")
+            if first:
+                page.evaluate("localStorage.value='saved';null")
+            assert page.evaluate("localStorage.value") == "saved"
+            assert page.evaluate("navigator.storage.persisted()") is True

@@ -24,7 +24,8 @@ signature lists. For step-by-step examples, start with the [tutorials](/examples
 | Original HTTP bytes and metadata | Page's response snapshot |
 | Current serialized DOM | `page.html()`; await it in Node |
 | Rooted DOM/JavaScript objects | ElementHandle / JSHandle; dispose when finished |
-| Specialized APIs and host callbacks | Explicit plugins |
+| Browser subsystems | Default browser plugins or an explicit replacement set |
+| Extraction and custom host callbacks | Explicit plugins |
 
 Python timeouts are seconds; Node timeouts are milliseconds. A session owns its
 pages. Navigation invalidates the previous realm's handles.

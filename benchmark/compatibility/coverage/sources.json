@@ -1,0 +1,150 @@
+{
+  "jsdom": {
+    "commit": "89adb92b23d5b0dd9bf8263181783bfde74b2f6d",
+    "reviewedFiles": [
+      {
+        "path": "lib/jsdom/living/nodes/Document.webidl",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/Document.webidl",
+        "sha256": "b9700bee7f01849bc7c05f3981f0fabc78989ded335c9fb7a7eb4ed8f49c4503",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "lib/jsdom/living/nodes/Document-impl.js",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/Document-impl.js",
+        "sha256": "d6a839496106ce342b0d97c8cff9d1bc7ebc118d61e6a7140500d0908ab2d006",
+        "identicalPackagedFile": false
+      },
+      {
+        "path": "lib/jsdom/living/attributes/NamedNodeMap.webidl",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/attributes/NamedNodeMap.webidl",
+        "sha256": "878e9b2575e88b04111e303cdc43c1fa7b7851ab06ae0ac8ac5de4c60b2a5f5c",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "lib/jsdom/living/traversal/TreeWalker.webidl",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/traversal/TreeWalker.webidl",
+        "sha256": "e7175e68429e7bf95c928991d6fd51e1fbf7191d80a3ea6623528bac2fabe676",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "lib/jsdom/living/nodes/HTMLInputElement-impl.js",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/HTMLInputElement-impl.js",
+        "sha256": "d047b0d6b181e81be008a335b731c4de08ef0cec90a3dd5326ab156d816b157e",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "lib/jsdom/living/nodes/HTMLFormElement-impl.js",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/HTMLFormElement-impl.js",
+        "sha256": "0e3003ca1b675c303680375626847ef9ffd3ca4716aba9facbd52c3b92475ef7",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "lib/jsdom/living/nodes/HTMLElement-impl.js",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/HTMLElement-impl.js",
+        "sha256": "990dc7d09e06870d8d20f832baa6b21162b594270b079010639a18566ca49b77",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "lib/jsdom/living/nodes/Node-impl.js",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/nodes/Node-impl.js",
+        "sha256": "f0e2dc574ad8b5bdbe6382d7d88903041c5a933425ec827927eb58a701f311f8",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "lib/jsdom/living/css/CSSStyleSheet.webidl",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/lib/jsdom/living/css/CSSStyleSheet.webidl",
+        "sha256": "6be0e26364a169bae047e99ad197ba47895c8871e6ba7180eda6ca333f6e6a20",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "test/web-platform-tests/to-upstream/dom/ranges/Range-contents-boundaries.html",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/test/web-platform-tests/to-upstream/dom/ranges/Range-contents-boundaries.html",
+        "sha256": "e2745b0a30559920a84679a41024da7533e7ec879e24ad32ac9d37c61bdb8bff",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "test/web-platform-tests/to-upstream/dom/collections/HTMLCollection-namedItem-liveness.html",
+        "url": "https://github.com/jsdom/jsdom/blob/89adb92b23d5b0dd9bf8263181783bfde74b2f6d/test/web-platform-tests/to-upstream/dom/collections/HTMLCollection-namedItem-liveness.html",
+        "sha256": "62e6766140a5228c9152a7241c8ff8c79279364d366f7273b5f7979f7df83b99",
+        "identicalPackagedFile": null
+      }
+    ]
+  },
+  "happy-dom": {
+    "commit": "fd163520b74d9fa146be91f7b4e4f46d6cccbe13",
+    "reviewedFiles": [
+      {
+        "path": "packages/happy-dom/src/nodes/document/Document.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/document/Document.ts",
+        "sha256": "1e3f5408f81f68016fdb43457851fca5ddb02a4f20613b77b56dcb1d45f98b8e",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/src/nodes/element/NamedNodeMap.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/element/NamedNodeMap.ts",
+        "sha256": "7215fd31e201bf102e4708ed30183370601355a6a724e7c910470112fbf5242a",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/src/nodes/node/Node.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/node/Node.ts",
+        "sha256": "bb4bd8552c67ae0dc7e78ef0f78e5252e3595dd999a04a4f905f6e2a003f97bc",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/src/nodes/element/Element.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/element/Element.ts",
+        "sha256": "4f37b14ffd2429d4b4fc6341075278e8042dbc77bc8d2509e23d0136f58c19cc",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/src/nodes/html-input-element/HTMLInputElement.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/html-input-element/HTMLInputElement.ts",
+        "sha256": "a0adf2f282130df2e83c1b6eab2ffb80550f42f2e8ff4df382befac2b39af8ec",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/src/nodes/html-form-element/HTMLFormElement.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/src/nodes/html-form-element/HTMLFormElement.ts",
+        "sha256": "1840d186071c66f6aa64acf243a3426dc6ca4cc74f5f5d0d546688d71640a9ef",
+        "identicalPackagedFile": true
+      },
+      {
+        "path": "packages/happy-dom/test/form-data/FormData.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/form-data/FormData.test.ts",
+        "sha256": "e0dc9a84eca4f91431a5570dacd8302085a35b9bef9a0fe92696bcbb25148069",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "packages/happy-dom/test/range/Range.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/range/Range.test.ts",
+        "sha256": "3b13d702582da3c8fb9fd801bf47aa8e387c0db6b41a75eea47e17d242ee9cb0",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "packages/happy-dom/test/xml-serializer/XMLSerializer.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/xml-serializer/XMLSerializer.test.ts",
+        "sha256": "2bc5a8cd6de2171752c9c27b2b2fb35fd299484153a5aa741e57af231505e28f",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "packages/happy-dom/test/css/CSSStyleSheet.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/css/CSSStyleSheet.test.ts",
+        "sha256": "c0e97b51837a345dff1bf402752965e747e994eae4bd748a12d660337a23bbe0",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "packages/happy-dom/test/nodes/document/Document.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/nodes/document/Document.test.ts",
+        "sha256": "bfb558bf6e31487ce0ba83abdcdf3047a31b6666e69be1eb6ba1257c9af5b595",
+        "identicalPackagedFile": null
+      },
+      {
+        "path": "packages/happy-dom/test/nodes/html-input-element/HTMLInputElement.test.ts",
+        "url": "https://github.com/capricorn86/happy-dom/blob/fd163520b74d9fa146be91f7b4e4f46d6cccbe13/packages/happy-dom/test/nodes/html-input-element/HTMLInputElement.test.ts",
+        "sha256": "a5e070d23bc86fd2980858afbff67a523801406e303f3ea764a4a059d81e4c08",
+        "identicalPackagedFile": null
+      }
+    ]
+  }
+}

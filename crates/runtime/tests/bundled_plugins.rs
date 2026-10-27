@@ -6,41 +6,27 @@ use brimp_runtime::runtime::{
 use serde_json::json;
 
 #[test]
-fn optional_surfaces_absent_by_default() {
-    let session = Session::new(SessionOptions::default()).unwrap();
+fn core_only_selection_omits_subsystem_surfaces() {
+    let session = Session::new(SessionOptions {
+        plugins: vec![],
+        ..Default::default()
+    })
+    .unwrap();
     let page = session.new_page().unwrap();
-    assert_eq!(page.evaluate("['localStorage','sessionStorage','indexedDB','caches','Worker','SharedWorker','Notification','cookieStore','CanvasRenderingContext2D'].map(name => typeof globalThis[name])").unwrap(), json!(vec!["undefined";9]));
-    assert_eq!(page.evaluate("['locks','storage','serviceWorker','mediaDevices','bluetooth'].map(name => typeof navigator[name])").unwrap(), json!(vec!["undefined";5]));
+    assert_eq!(page.evaluate("['Worker','SharedWorker','Notification','CanvasRenderingContext2D'].map(name => typeof globalThis[name])").unwrap(), json!(vec!["undefined";4]));
+    assert_eq!(
+        page.evaluate(
+            "['serviceWorker','mediaDevices','bluetooth'].map(name => typeof navigator[name])"
+        )
+        .unwrap(),
+        json!(vec!["undefined"; 3])
+    );
     assert!(
         page.extract(ExtractionOptions::default())
             .unwrap_err()
             .to_string()
             .contains("requires the defuddle plugin")
     );
-}
-
-#[test]
-fn storage_is_functional_in_memory_and_isolated() {
-    let session = Session::new(SessionOptions {
-        plugins: vec![bundled::storage()],
-        ..Default::default()
-    })
-    .unwrap();
-    let page = session.new_page().unwrap();
-    assert_eq!(page.evaluate("localStorage.answer = 42; sessionStorage.setItem('a', 'b'); [localStorage.getItem('answer'), localStorage.length, Object.keys(localStorage), sessionStorage.a]").unwrap(), json!(["42",1,["answer"],"b"]));
-    assert_eq!(
-        page.evaluate("navigator.storage.persisted()").unwrap(),
-        json!(false)
-    );
-    assert_eq!(
-        page.evaluate("typeof navigator.storage.getDirectory()")
-            .unwrap(),
-        json!("undefined")
-    );
-    assert_eq!(page.evaluate("caches.open('test').then(c => c.put('https://example.test/', new Response('cached'))).then(() => caches.match('https://example.test/')).then(r => r.text())").unwrap(), json!("cached"));
-    assert_eq!(page.evaluate("new Promise((resolve,reject) => { const r=indexedDB.open('db',1); r.onupgradeneeded=()=>r.result.createObjectStore('values'); r.onerror=()=>reject(r.error); r.onsuccess=()=>{ const store=r.result.transaction('values','readwrite').objectStore('values'); store.put({ok:42},'key').onsuccess=()=>{store.get('key').onsuccess=e=>resolve(e.target.result);}; }; })").unwrap(), json!({"ok":42}));
-    let other = session.new_page().unwrap();
-    assert_eq!(other.evaluate("localStorage.length").unwrap(), json!(0));
 }
 
 #[test]
@@ -55,13 +41,16 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
         const canvas=document.createElement('canvas'); canvas.width=2; canvas.height=3;
         const c=canvas.getContext('2d'); c.fillStyle='#ff0000'; c.save(); c.translate(2,3); c.restore(); c.fillRect(0,0,2,3);
         const image=c.getImageData(0,0,2,3);
-        const encoded=JSON.parse(atob(canvas.toDataURL().split(',')[1]));
+        const dataUrl=canvas.toDataURL(),bytes=atob(dataUrl.split(',')[1]);
+        const encoded={prefix:dataUrl.slice(0,22),signature:[bytes.charCodeAt(1),bytes.charCodeAt(2),bytes.charCodeAt(3)],
+          width:(bytes.charCodeAt(16)<<24|bytes.charCodeAt(17)<<16|bytes.charCodeAt(18)<<8|bytes.charCodeAt(19))>>>0,
+          height:(bytes.charCodeAt(20)<<24|bytes.charCodeAt(21)<<16|bytes.charCodeAt(22)<<8|bytes.charCodeAt(23))>>>0};
         const metrics=c.measureText('abcd');
         return {width:image.width,height:image.height,length:image.data.length,pixel:Array.from(image.data.slice(0,4)),encoded,fill:c.fillStyle,transform:c.getTransform().e,textWidth:metrics.width,hit:c.isPointInPath(0,0)};
     })()"#).unwrap();
     assert_eq!(
         value,
-        json!({"width":2,"height":3,"length":24,"pixel":[1,2,3,4],"encoded":{"width":2,"height":3,"rgba":[1,2,3,4]},"fill":"#ff0000","transform":0,"textWidth":20,"hit":false})
+        json!({"width":2,"height":3,"length":24,"pixel":[255,0,0,255],"encoded":{"prefix":"data:image/png;base64,","signature":[80,78,71],"width":2,"height":3},"fill":"#ff0000","transform":0,"textWidth":20,"hit":false})
     );
     assert_eq!(
         page.evaluate("typeof getComputedStyle(document.body)")
@@ -71,23 +60,28 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
 }
 
 #[test]
-fn services_plugin_provides_locks_and_deterministic_device_mocks() {
+fn services_plugin_provides_deterministic_device_mocks() {
     let session = Session::new(SessionOptions {
-        plugins: vec![bundled::services(json!({}))],
+        plugins: vec![
+            bundled::environment(json!({})),
+            bundled::permissions(json!({})),
+            bundled::devices(json!({})),
+            bundled::media(json!({})),
+            bundled::workers(json!({})),
+            bundled::trusted_types(json!({})),
+        ],
         ..Default::default()
     })
     .unwrap();
     let page = session.new_page().unwrap();
     assert_eq!(
-        page.evaluate(
-            "navigator.locks.request('key', () => navigator.bluetooth.getAvailability())"
-        )
-        .unwrap(),
+        page.evaluate("navigator.bluetooth.getAvailability()")
+            .unwrap(),
         json!(false)
     );
     assert_eq!(
         page.evaluate("Notification.requestPermission()").unwrap(),
-        json!("denied")
+        json!("default")
     );
     assert_eq!(
         page.evaluate("navigator.mediaDevices.enumerateDevices()")
@@ -122,4 +116,11 @@ fn extraction_plugin_uses_live_dom_without_layout() {
             .unwrap(),
         "undefined:undefined"
     );
+}
+
+#[test]
+fn default_browser_subsystems_are_installed() {
+    let session = Session::new(Default::default()).unwrap();
+    let page = session.new_page().unwrap();
+    assert_eq!(page.evaluate("[typeof Worker,typeof AudioContext,typeof MediaEncryptedEvent,typeof SpeechSynthesisUtterance,typeof RTCPeerConnection,!!document.createElement('canvas').getContext('2d'),typeof hostStorage,typeof Defuddle]").unwrap(), json!(["function","function","function","function","function",true,"undefined","undefined"]));
 }

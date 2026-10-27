@@ -1,486 +1,932 @@
-({global,host}, options={}) => {
-    const rgba=Array.from(options.rgba??[0,0,0,0],Number);
-    if(rgba.length!==4||rgba.some(n=>!Number.isInteger(n)||n<0||n>255))throw new TypeError('rgba requires four bytes');
-    // Values and readonly descriptors verified against installed Safari 27.0.
-    const constants = {
-        ACTIVE_ATTRIBUTES: 35721,
-        ACTIVE_TEXTURE: 34016,
-        ACTIVE_UNIFORMS: 35718,
-        ALIASED_LINE_WIDTH_RANGE: 33902,
-        ALIASED_POINT_SIZE_RANGE: 33901,
-        ALPHA: 6406,
-        ALPHA_BITS: 3413,
-        ALWAYS: 519,
-        ARRAY_BUFFER: 34962,
-        ARRAY_BUFFER_BINDING: 34964,
-        ATTACHED_SHADERS: 35717,
-        BACK: 1029,
-        BLEND: 3042,
-        BLEND_COLOR: 32773,
-        BLEND_DST_ALPHA: 32970,
-        BLEND_DST_RGB: 32968,
-        BLEND_EQUATION: 32777,
-        BLEND_EQUATION_ALPHA: 34877,
-        BLEND_EQUATION_RGB: 32777,
-        BLEND_SRC_ALPHA: 32971,
-        BLEND_SRC_RGB: 32969,
-        BLUE_BITS: 3412,
-        BOOL: 35670,
-        BOOL_VEC2: 35671,
-        BOOL_VEC3: 35672,
-        BOOL_VEC4: 35673,
-        BROWSER_DEFAULT_WEBGL: 37444,
-        BUFFER_SIZE: 34660,
-        BUFFER_USAGE: 34661,
-        BYTE: 5120,
-        CCW: 2305,
-        CLAMP_TO_EDGE: 33071,
-        COLOR_ATTACHMENT0: 36064,
-        COLOR_BUFFER_BIT: 16384,
-        COLOR_CLEAR_VALUE: 3106,
-        COLOR_WRITEMASK: 3107,
-        COMPILE_STATUS: 35713,
-        COMPRESSED_TEXTURE_FORMATS: 34467,
-        CONSTANT_ALPHA: 32771,
-        CONSTANT_COLOR: 32769,
-        CONTEXT_LOST_WEBGL: 37442,
-        CULL_FACE: 2884,
-        CULL_FACE_MODE: 2885,
-        CURRENT_PROGRAM: 35725,
-        CURRENT_VERTEX_ATTRIB: 34342,
-        CW: 2304,
-        DECR: 7683,
-        DECR_WRAP: 34056,
-        DELETE_STATUS: 35712,
-        DEPTH_ATTACHMENT: 36096,
-        DEPTH_BITS: 3414,
-        DEPTH_BUFFER_BIT: 256,
-        DEPTH_CLEAR_VALUE: 2931,
-        DEPTH_COMPONENT: 6402,
-        DEPTH_COMPONENT16: 33189,
-        DEPTH_FUNC: 2932,
-        DEPTH_RANGE: 2928,
-        DEPTH_STENCIL: 34041,
-        DEPTH_STENCIL_ATTACHMENT: 33306,
-        DEPTH_TEST: 2929,
-        DEPTH_WRITEMASK: 2930,
-        DITHER: 3024,
-        DONT_CARE: 4352,
-        DST_ALPHA: 772,
-        DST_COLOR: 774,
-        DYNAMIC_DRAW: 35048,
-        ELEMENT_ARRAY_BUFFER: 34963,
-        ELEMENT_ARRAY_BUFFER_BINDING: 34965,
-        EQUAL: 514,
-        FASTEST: 4353,
-        FLOAT: 5126,
-        FLOAT_MAT2: 35674,
-        FLOAT_MAT3: 35675,
-        FLOAT_MAT4: 35676,
-        FLOAT_VEC2: 35664,
-        FLOAT_VEC3: 35665,
-        FLOAT_VEC4: 35666,
-        FRAGMENT_SHADER: 35632,
-        FRAMEBUFFER: 36160,
-        FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: 36049,
-        FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE: 36048,
-        FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: 36051,
-        FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL: 36050,
-        FRAMEBUFFER_BINDING: 36006,
-        FRAMEBUFFER_COMPLETE: 36053,
-        FRAMEBUFFER_INCOMPLETE_ATTACHMENT: 36054,
-        FRAMEBUFFER_INCOMPLETE_DIMENSIONS: 36057,
-        FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: 36055,
-        FRAMEBUFFER_UNSUPPORTED: 36061,
-        FRONT: 1028,
-        FRONT_AND_BACK: 1032,
-        FRONT_FACE: 2886,
-        FUNC_ADD: 32774,
-        FUNC_REVERSE_SUBTRACT: 32779,
-        FUNC_SUBTRACT: 32778,
-        GENERATE_MIPMAP_HINT: 33170,
-        GEQUAL: 518,
-        GREATER: 516,
-        GREEN_BITS: 3411,
-        HIGH_FLOAT: 36338,
-        HIGH_INT: 36341,
-        IMPLEMENTATION_COLOR_READ_FORMAT: 35739,
-        IMPLEMENTATION_COLOR_READ_TYPE: 35738,
-        INCR: 7682,
-        INCR_WRAP: 34055,
-        INT: 5124,
-        INT_VEC2: 35667,
-        INT_VEC3: 35668,
-        INT_VEC4: 35669,
-        INVALID_ENUM: 1280,
-        INVALID_FRAMEBUFFER_OPERATION: 1286,
-        INVALID_OPERATION: 1282,
-        INVALID_VALUE: 1281,
-        INVERT: 5386,
-        KEEP: 7680,
-        LEQUAL: 515,
-        LESS: 513,
-        LINE_LOOP: 2,
-        LINE_STRIP: 3,
-        LINE_WIDTH: 2849,
-        LINEAR: 9729,
-        LINEAR_MIPMAP_LINEAR: 9987,
-        LINEAR_MIPMAP_NEAREST: 9985,
-        LINES: 1,
-        LINK_STATUS: 35714,
-        LOW_FLOAT: 36336,
-        LOW_INT: 36339,
-        LUMINANCE: 6409,
-        LUMINANCE_ALPHA: 6410,
-        MAX_COMBINED_TEXTURE_IMAGE_UNITS: 35661,
-        MAX_CUBE_MAP_TEXTURE_SIZE: 34076,
-        MAX_FRAGMENT_UNIFORM_VECTORS: 36349,
-        MAX_RENDERBUFFER_SIZE: 34024,
-        MAX_TEXTURE_IMAGE_UNITS: 34930,
-        MAX_TEXTURE_SIZE: 3379,
-        MAX_VARYING_VECTORS: 36348,
-        MAX_VERTEX_ATTRIBS: 34921,
-        MAX_VERTEX_TEXTURE_IMAGE_UNITS: 35660,
-        MAX_VERTEX_UNIFORM_VECTORS: 36347,
-        MAX_VIEWPORT_DIMS: 3386,
-        MEDIUM_FLOAT: 36337,
-        MEDIUM_INT: 36340,
-        MIRRORED_REPEAT: 33648,
-        NEAREST: 9728,
-        NEAREST_MIPMAP_LINEAR: 9986,
-        NEAREST_MIPMAP_NEAREST: 9984,
-        NEVER: 512,
-        NICEST: 4354,
-        NO_ERROR: 0,
-        NONE: 0,
-        NOTEQUAL: 517,
-        ONE: 1,
-        ONE_MINUS_CONSTANT_ALPHA: 32772,
-        ONE_MINUS_CONSTANT_COLOR: 32770,
-        ONE_MINUS_DST_ALPHA: 773,
-        ONE_MINUS_DST_COLOR: 775,
-        ONE_MINUS_SRC_ALPHA: 771,
-        ONE_MINUS_SRC_COLOR: 769,
-        OUT_OF_MEMORY: 1285,
-        PACK_ALIGNMENT: 3333,
-        POINTS: 0,
-        POLYGON_OFFSET_FACTOR: 32824,
-        POLYGON_OFFSET_FILL: 32823,
-        POLYGON_OFFSET_UNITS: 10752,
-        RED_BITS: 3410,
-        RENDERBUFFER: 36161,
-        RENDERBUFFER_ALPHA_SIZE: 36179,
-        RENDERBUFFER_BINDING: 36007,
-        RENDERBUFFER_BLUE_SIZE: 36178,
-        RENDERBUFFER_DEPTH_SIZE: 36180,
-        RENDERBUFFER_GREEN_SIZE: 36177,
-        RENDERBUFFER_HEIGHT: 36163,
-        RENDERBUFFER_INTERNAL_FORMAT: 36164,
-        RENDERBUFFER_RED_SIZE: 36176,
-        RENDERBUFFER_STENCIL_SIZE: 36181,
-        RENDERBUFFER_WIDTH: 36162,
-        RENDERER: 7937,
-        REPEAT: 10497,
-        REPLACE: 7681,
-        RGB: 6407,
-        RGB5_A1: 32855,
-        RGB565: 36194,
-        RGBA: 6408,
-        RGBA4: 32854,
-        SAMPLE_ALPHA_TO_COVERAGE: 32926,
-        SAMPLE_BUFFERS: 32936,
-        SAMPLE_COVERAGE: 32928,
-        SAMPLE_COVERAGE_INVERT: 32939,
-        SAMPLE_COVERAGE_VALUE: 32938,
-        SAMPLER_2D: 35678,
-        SAMPLER_CUBE: 35680,
-        SAMPLES: 32937,
-        SCISSOR_BOX: 3088,
-        SCISSOR_TEST: 3089,
-        SHADER_TYPE: 35663,
-        SHADING_LANGUAGE_VERSION: 35724,
-        SHORT: 5122,
-        SRC_ALPHA: 770,
-        SRC_ALPHA_SATURATE: 776,
-        SRC_COLOR: 768,
-        STATIC_DRAW: 35044,
-        STENCIL_ATTACHMENT: 36128,
-        STENCIL_BACK_FAIL: 34817,
-        STENCIL_BACK_FUNC: 34816,
-        STENCIL_BACK_PASS_DEPTH_FAIL: 34818,
-        STENCIL_BACK_PASS_DEPTH_PASS: 34819,
-        STENCIL_BACK_REF: 36003,
-        STENCIL_BACK_VALUE_MASK: 36004,
-        STENCIL_BACK_WRITEMASK: 36005,
-        STENCIL_BITS: 3415,
-        STENCIL_BUFFER_BIT: 1024,
-        STENCIL_CLEAR_VALUE: 2961,
-        STENCIL_FAIL: 2964,
-        STENCIL_FUNC: 2962,
-        STENCIL_INDEX8: 36168,
-        STENCIL_PASS_DEPTH_FAIL: 2965,
-        STENCIL_PASS_DEPTH_PASS: 2966,
-        STENCIL_REF: 2967,
-        STENCIL_TEST: 2960,
-        STENCIL_VALUE_MASK: 2963,
-        STENCIL_WRITEMASK: 2968,
-        STREAM_DRAW: 35040,
-        SUBPIXEL_BITS: 3408,
-        TEXTURE: 5890,
-        TEXTURE_2D: 3553,
-        TEXTURE_BINDING_2D: 32873,
-        TEXTURE_BINDING_CUBE_MAP: 34068,
-        TEXTURE_CUBE_MAP: 34067,
-        TEXTURE_CUBE_MAP_NEGATIVE_X: 34070,
-        TEXTURE_CUBE_MAP_NEGATIVE_Y: 34072,
-        TEXTURE_CUBE_MAP_NEGATIVE_Z: 34074,
-        TEXTURE_CUBE_MAP_POSITIVE_X: 34069,
-        TEXTURE_CUBE_MAP_POSITIVE_Y: 34071,
-        TEXTURE_CUBE_MAP_POSITIVE_Z: 34073,
-        TEXTURE_MAG_FILTER: 10240,
-        TEXTURE_MIN_FILTER: 10241,
-        TEXTURE_WRAP_S: 10242,
-        TEXTURE_WRAP_T: 10243,
-        TEXTURE0: 33984,
-        TEXTURE1: 33985,
-        TEXTURE10: 33994,
-        TEXTURE11: 33995,
-        TEXTURE12: 33996,
-        TEXTURE13: 33997,
-        TEXTURE14: 33998,
-        TEXTURE15: 33999,
-        TEXTURE16: 34000,
-        TEXTURE17: 34001,
-        TEXTURE18: 34002,
-        TEXTURE19: 34003,
-        TEXTURE2: 33986,
-        TEXTURE20: 34004,
-        TEXTURE21: 34005,
-        TEXTURE22: 34006,
-        TEXTURE23: 34007,
-        TEXTURE24: 34008,
-        TEXTURE25: 34009,
-        TEXTURE26: 34010,
-        TEXTURE27: 34011,
-        TEXTURE28: 34012,
-        TEXTURE29: 34013,
-        TEXTURE3: 33987,
-        TEXTURE30: 34014,
-        TEXTURE31: 34015,
-        TEXTURE4: 33988,
-        TEXTURE5: 33989,
-        TEXTURE6: 33990,
-        TEXTURE7: 33991,
-        TEXTURE8: 33992,
-        TEXTURE9: 33993,
-        TRIANGLE_FAN: 6,
-        TRIANGLE_STRIP: 5,
-        TRIANGLES: 4,
-        UNPACK_ALIGNMENT: 3317,
-        UNPACK_COLORSPACE_CONVERSION_WEBGL: 37443,
-        UNPACK_FLIP_Y_WEBGL: 37440,
-        UNPACK_PREMULTIPLY_ALPHA_WEBGL: 37441,
-        UNSIGNED_BYTE: 5121,
-        UNSIGNED_INT: 5125,
-        UNSIGNED_SHORT: 5123,
-        UNSIGNED_SHORT_4_4_4_4: 32819,
-        UNSIGNED_SHORT_5_5_5_1: 32820,
-        UNSIGNED_SHORT_5_6_5: 33635,
-        VALIDATE_STATUS: 35715,
-        VENDOR: 7936,
-        VERSION: 7938,
-        VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: 34975,
-        VERTEX_ATTRIB_ARRAY_ENABLED: 34338,
-        VERTEX_ATTRIB_ARRAY_NORMALIZED: 34922,
-        VERTEX_ATTRIB_ARRAY_POINTER: 34373,
-        VERTEX_ATTRIB_ARRAY_SIZE: 34339,
-        VERTEX_ATTRIB_ARRAY_STRIDE: 34340,
-        VERTEX_ATTRIB_ARRAY_TYPE: 34341,
-        VERTEX_SHADER: 35633,
-        VIEWPORT: 2978,
-        ZERO: 0,
-    };
-    const contexts=new WeakMap(),state=new WeakMap(),key={};
-    function dimensions(canvas){return [Number(canvas.width),Number(canvas.height)];}
-    class WebGLRenderingContext {
-        constructor(token,canvas,attributes={}){if(token!==key)throw new TypeError('Illegal constructor');state.set(this,{canvas,attributes:{alpha:true,...attributes},error:0,clear:[0,0,0,0],viewport:[0,0,...dimensions(canvas)],buffers:new Map(),bound:null});}
-        get canvas(){return state.get(this).canvas;}get drawingBufferWidth(){return this.canvas.width;}get drawingBufferHeight(){return this.canvas.height;}
-        getContextAttributes(){return {...state.get(this).attributes};}isContextLost(){return false;}
-        getSupportedExtensions(){return ['WEBGL_debug_renderer_info'];}
-        getExtension(name){
-            if(String(name).toLowerCase()!=='webgl_debug_renderer_info')return null;
-            return state.get(this).debugRendererInfo??=Object.freeze({
-                UNMASKED_VENDOR_WEBGL:37445,UNMASKED_RENDERER_WEBGL:37446,
-                [Symbol.toStringTag]:'WebGLDebugRendererInfo',
-            });
+function installGraphics({ global, host, canvas, profile: settings }, options = {}) {
+  const webglProfile = settings.values(
+    'webgl',
+    {
+      vendor: 'Apple Inc.',
+      renderer: 'Apple GPU',
+      unmasked_vendor: 'Apple Inc.',
+      unmasked_renderer: 'ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)',
+      extensions: [
+        'ANGLE_instanced_arrays',
+        'EXT_blend_minmax',
+        'EXT_clip_control',
+        'EXT_color_buffer_float',
+        'EXT_color_buffer_half_float',
+        'EXT_conservative_depth',
+        'EXT_depth_clamp',
+        'EXT_disjoint_timer_query_webgl2',
+        'EXT_float_blend',
+        'EXT_frag_depth',
+        'EXT_polygon_offset_clamp',
+        'EXT_render_snorm',
+        'EXT_shader_texture_lod',
+        'EXT_sRGB',
+        'EXT_texture_compression_bptc',
+        'EXT_texture_compression_rgtc',
+        'EXT_texture_filter_anisotropic',
+        'EXT_texture_mirror_clamp_to_edge',
+        'EXT_texture_norm16',
+        'KHR_parallel_shader_compile',
+        'OES_draw_buffers_indexed',
+        'OES_element_index_uint',
+        'OES_fbo_render_mipmap',
+        'OES_sample_variables',
+        'OES_shader_multisample_interpolation',
+        'OES_standard_derivatives',
+        'OES_texture_float_linear',
+        'OES_vertex_array_object',
+        'WEBGL_blend_func_extended',
+        'WEBGL_clip_cull_distance',
+        'WEBGL_color_buffer_float',
+        'WEBGL_compressed_texture_astc',
+        'WEBGL_compressed_texture_etc',
+        'WEBGL_compressed_texture_etc1',
+        'WEBGL_compressed_texture_pvrtc',
+        'WEBGL_compressed_texture_s3tc',
+        'WEBGL_compressed_texture_s3tc_srgb',
+        'WEBGL_debug_renderer_info',
+        'WEBGL_debug_shaders',
+        'WEBGL_depth_texture',
+        'WEBGL_draw_buffers',
+        'WEBGL_lose_context',
+        'WEBGL_multi_draw',
+        'WEBGL_polygon_mode',
+      ],
+      parameters: {
+        MAX_TEXTURE_SIZE: 16384,
+        MAX_CUBE_MAP_TEXTURE_SIZE: 16384,
+        MAX_RENDERBUFFER_SIZE: 16384,
+        MAX_VIEWPORT_DIMS: [16384, 16384],
+        MAX_VERTEX_ATTRIBS: 16,
+        MAX_TEXTURE_IMAGE_UNITS: 16,
+        MAX_VERTEX_TEXTURE_IMAGE_UNITS: 16,
+        MAX_COMBINED_TEXTURE_IMAGE_UNITS: 32,
+        MAX_VARYING_VECTORS: 31,
+        MAX_VERTEX_UNIFORM_VECTORS: 1024,
+        MAX_FRAGMENT_UNIFORM_VECTORS: 1024,
+        ALIASED_LINE_WIDTH_RANGE: [1, 1],
+        ALIASED_POINT_SIZE_RANGE: [1, 511],
+        SUBPIXEL_BITS: 4,
+      },
+    },
+    {
+      version: 1,
+      fields: {
+        parameters: {
+          type: 'object',
+          additionalProperties: {
+            type: 'json',
+          },
+        },
+        extensions: {
+          items: {
+            type: 'string',
+          },
+        },
+      },
+      capture: ({ read, defaults }) => {
+        const canvas = document.createElement('canvas'),
+          gl = canvas.getContext('webgl');
+        if (!gl) throw new Error('WebGL context unavailable');
+        try {
+          const debug = gl.getExtension('WEBGL_debug_renderer_info');
+          return {
+            vendor: read(() => gl.getParameter(gl.VENDOR)),
+            renderer: read(() => gl.getParameter(gl.RENDERER)),
+            unmasked_vendor: read(() =>
+              debug ? gl.getParameter(debug.UNMASKED_VENDOR_WEBGL) : undefined,
+            ),
+            unmasked_renderer: read(() =>
+              debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : undefined,
+            ),
+            extensions: read(() => gl.getSupportedExtensions()),
+            parameters: read(() =>
+              Object.fromEntries(
+                Object.keys(defaults.parameters)
+                  .map((key) => {
+                    const enumValue = /^\d+$/.test(key) ? Number(key) : gl[key];
+                    if (enumValue === undefined) return [key, undefined];
+                    const value = gl.getParameter(enumValue);
+                    return [key, ArrayBuffer.isView(value) ? Array.from(value) : value];
+                  })
+                  .filter(([, value]) => value !== undefined),
+              ),
+            ),
+          };
+        } finally {
+          gl.getExtension('WEBGL_lose_context')?.loseContext?.();
         }
-        getError(){const s=state.get(this),error=s.error;s.error=0;return error;}
-        getParameter(name){const s=state.get(this);if(name===this.VERSION)return this instanceof WebGL2RenderingContext?'WebGL 2.0 (Brimp deterministic mock)':'WebGL 1.0 (Brimp deterministic mock)';if(name===this.VENDOR||name===37445)return 'Brimp';if(name===this.RENDERER||name===37446)return String(options.renderer??'Deterministic JavaScript mock');if(name===this.MAX_TEXTURE_SIZE)return 4096;if(name===this.VIEWPORT)return new Int32Array(s.viewport);if(name===this.COLOR_CLEAR_VALUE)return new Float32Array(s.clear);s.error=this.INVALID_ENUM;return null;}
-        clearColor(r,g,b,a){state.get(this).clear=[r,g,b,a].map(v=>Math.max(0,Math.min(1,Number(v))));}
-        clear(){}flush(){}finish(){}
-        viewport(x,y,width,height){if(width<0||height<0){state.get(this).error=this.INVALID_VALUE;return;}state.get(this).viewport=[x,y,width,height].map(Math.trunc);}
-        readPixels(x,y,width,height,format,type,pixels){const s=state.get(this);if(format!==this.RGBA||type!==this.UNSIGNED_BYTE){s.error=this.INVALID_ENUM;return;}if(![x,y,width,height].every(Number.isInteger)||width<0||height<0||width*height>16_000_000||!(pixels instanceof Uint8Array)||pixels.length<width*height*4){s.error=this.INVALID_VALUE;return;}for(let row=0;row<height;row++)for(let col=0;col<width;col++)for(let c=0;c<4;c++)pixels[(row*width+col)*4+c]=(x+col<0||y+row<0||x+col>=this.drawingBufferWidth||y+row>=this.drawingBufferHeight)?0:(!s.attributes.alpha&&c===3?255:rgba[c]);}
-        createBuffer(){const buffer={};state.get(this).buffers.set(buffer,new Uint8Array());return buffer;}
-        bindBuffer(target,buffer){const s=state.get(this);if(target!==this.ARRAY_BUFFER){s.error=this.INVALID_ENUM;return;}if(buffer!==null&&!s.buffers.has(buffer)){s.error=this.INVALID_OPERATION;return;}s.bound=buffer;}
-        bufferData(target,data){const s=state.get(this);if(target!==this.ARRAY_BUFFER||!s.bound){s.error=this.INVALID_OPERATION;return;}const length=typeof data==='number'?data:data?.byteLength;if(!Number.isInteger(length)||length<0||length>64*1024*1024){s.error=this.INVALID_VALUE;return;}s.buffers.set(s.bound,typeof data==='number'?new Uint8Array(length):new Uint8Array(data.buffer??data,data.byteOffset??0,length).slice());}
-        deleteBuffer(buffer){const s=state.get(this);s.buffers.delete(buffer);if(s.bound===buffer)s.bound=null;}
-        createShader(type){if(type!==this.VERTEX_SHADER&&type!==this.FRAGMENT_SHADER){state.get(this).error=this.INVALID_ENUM;return null;}return {type,source:''};}
-        shaderSource(shader,source){shader.source=String(source);}compileShader(){}getShaderParameter(_,name){return name===this.COMPILE_STATUS?false:null;}getShaderInfoLog(){return 'Shader compilation unavailable in the Brimp mock';}
-        createProgram(){return {};}attachShader(){}linkProgram(){}getProgramParameter(_,name){return name===this.LINK_STATUS?false:null;}getProgramInfoLog(){return 'Program linking unavailable in the Brimp mock';}
-        drawArrays(){state.get(this).error=this.INVALID_OPERATION;}
-        submitAsync(commands){return host.call('graphics.submit',{width:this.drawingBufferWidth,height:this.drawingBufferHeight,commands});}
+      },
+    },
+  );
+  const graphicsProfile = settings.values(
+    'graphics',
+    {
+      rgba: [0, 0, 0, 0],
+      webgpu: false,
+    },
+    {
+      version: 1,
+      notes:
+        'RGBA is the initial cleared buffer; WebGPU availability does not enable native GPU execution.',
+      capture: async ({ read }) => ({
+        rgba: read(() => {
+          const gl = document.createElement('canvas').getContext('webgl');
+          if (!gl) return undefined;
+          try {
+            const pixel = new Uint8Array(4);
+            gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+            return Array.from(pixel);
+          } finally {
+            gl.getExtension('WEBGL_lose_context')?.loseContext?.();
+          }
+        }),
+        webgpu: await read(async () =>
+          navigator.gpu ? Boolean(await navigator.gpu.requestAdapter()) : undefined,
+        ),
+      }),
+    },
+  );
+
+  const rgba = Array.from(options.rgba ?? graphicsProfile.rgba, Number);
+  if (rgba.length !== 4 || rgba.some((n) => !Number.isInteger(n) || n < 0 || n > 255))
+    throw new TypeError('rgba requires four bytes');
+  // Values and readonly descriptors verified against installed Safari 27.0.
+  const constants = {
+    ACTIVE_ATTRIBUTES: 35721,
+    ACTIVE_TEXTURE: 34016,
+    ACTIVE_UNIFORMS: 35718,
+    ALIASED_LINE_WIDTH_RANGE: 33902,
+    ALIASED_POINT_SIZE_RANGE: 33901,
+    ALPHA: 6406,
+    ALPHA_BITS: 3413,
+    ALWAYS: 519,
+    ARRAY_BUFFER: 34962,
+    ARRAY_BUFFER_BINDING: 34964,
+    ATTACHED_SHADERS: 35717,
+    BACK: 1029,
+    BLEND: 3042,
+    BLEND_COLOR: 32773,
+    BLEND_DST_ALPHA: 32970,
+    BLEND_DST_RGB: 32968,
+    BLEND_EQUATION: 32777,
+    BLEND_EQUATION_ALPHA: 34877,
+    BLEND_EQUATION_RGB: 32777,
+    BLEND_SRC_ALPHA: 32971,
+    BLEND_SRC_RGB: 32969,
+    BLUE_BITS: 3412,
+    BOOL: 35670,
+    BOOL_VEC2: 35671,
+    BOOL_VEC3: 35672,
+    BOOL_VEC4: 35673,
+    BROWSER_DEFAULT_WEBGL: 37444,
+    BUFFER_SIZE: 34660,
+    BUFFER_USAGE: 34661,
+    BYTE: 5120,
+    CCW: 2305,
+    CLAMP_TO_EDGE: 33071,
+    COLOR_ATTACHMENT0: 36064,
+    COLOR_BUFFER_BIT: 16384,
+    COLOR_CLEAR_VALUE: 3106,
+    COLOR_WRITEMASK: 3107,
+    COMPILE_STATUS: 35713,
+    COMPRESSED_TEXTURE_FORMATS: 34467,
+    CONSTANT_ALPHA: 32771,
+    CONSTANT_COLOR: 32769,
+    CONTEXT_LOST_WEBGL: 37442,
+    CULL_FACE: 2884,
+    CULL_FACE_MODE: 2885,
+    CURRENT_PROGRAM: 35725,
+    CURRENT_VERTEX_ATTRIB: 34342,
+    CW: 2304,
+    DECR: 7683,
+    DECR_WRAP: 34056,
+    DELETE_STATUS: 35712,
+    DEPTH_ATTACHMENT: 36096,
+    DEPTH_BITS: 3414,
+    DEPTH_BUFFER_BIT: 256,
+    DEPTH_CLEAR_VALUE: 2931,
+    DEPTH_COMPONENT: 6402,
+    DEPTH_COMPONENT16: 33189,
+    DEPTH_FUNC: 2932,
+    DEPTH_RANGE: 2928,
+    DEPTH_STENCIL: 34041,
+    DEPTH_STENCIL_ATTACHMENT: 33306,
+    DEPTH_TEST: 2929,
+    DEPTH_WRITEMASK: 2930,
+    DITHER: 3024,
+    DONT_CARE: 4352,
+    DST_ALPHA: 772,
+    DST_COLOR: 774,
+    DYNAMIC_DRAW: 35048,
+    ELEMENT_ARRAY_BUFFER: 34963,
+    ELEMENT_ARRAY_BUFFER_BINDING: 34965,
+    EQUAL: 514,
+    FASTEST: 4353,
+    FLOAT: 5126,
+    FLOAT_MAT2: 35674,
+    FLOAT_MAT3: 35675,
+    FLOAT_MAT4: 35676,
+    FLOAT_VEC2: 35664,
+    FLOAT_VEC3: 35665,
+    FLOAT_VEC4: 35666,
+    FRAGMENT_SHADER: 35632,
+    FRAMEBUFFER: 36160,
+    FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: 36049,
+    FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE: 36048,
+    FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: 36051,
+    FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL: 36050,
+    FRAMEBUFFER_BINDING: 36006,
+    FRAMEBUFFER_COMPLETE: 36053,
+    FRAMEBUFFER_INCOMPLETE_ATTACHMENT: 36054,
+    FRAMEBUFFER_INCOMPLETE_DIMENSIONS: 36057,
+    FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: 36055,
+    FRAMEBUFFER_UNSUPPORTED: 36061,
+    FRONT: 1028,
+    FRONT_AND_BACK: 1032,
+    FRONT_FACE: 2886,
+    FUNC_ADD: 32774,
+    FUNC_REVERSE_SUBTRACT: 32779,
+    FUNC_SUBTRACT: 32778,
+    GENERATE_MIPMAP_HINT: 33170,
+    GEQUAL: 518,
+    GREATER: 516,
+    GREEN_BITS: 3411,
+    HIGH_FLOAT: 36338,
+    HIGH_INT: 36341,
+    IMPLEMENTATION_COLOR_READ_FORMAT: 35739,
+    IMPLEMENTATION_COLOR_READ_TYPE: 35738,
+    INCR: 7682,
+    INCR_WRAP: 34055,
+    INT: 5124,
+    INT_VEC2: 35667,
+    INT_VEC3: 35668,
+    INT_VEC4: 35669,
+    INVALID_ENUM: 1280,
+    INVALID_FRAMEBUFFER_OPERATION: 1286,
+    INVALID_OPERATION: 1282,
+    INVALID_VALUE: 1281,
+    INVERT: 5386,
+    KEEP: 7680,
+    LEQUAL: 515,
+    LESS: 513,
+    LINE_LOOP: 2,
+    LINE_STRIP: 3,
+    LINE_WIDTH: 2849,
+    LINEAR: 9729,
+    LINEAR_MIPMAP_LINEAR: 9987,
+    LINEAR_MIPMAP_NEAREST: 9985,
+    LINES: 1,
+    LINK_STATUS: 35714,
+    LOW_FLOAT: 36336,
+    LOW_INT: 36339,
+    LUMINANCE: 6409,
+    LUMINANCE_ALPHA: 6410,
+    MAX_COMBINED_TEXTURE_IMAGE_UNITS: 35661,
+    MAX_CUBE_MAP_TEXTURE_SIZE: 34076,
+    MAX_FRAGMENT_UNIFORM_VECTORS: 36349,
+    MAX_RENDERBUFFER_SIZE: 34024,
+    MAX_TEXTURE_IMAGE_UNITS: 34930,
+    MAX_TEXTURE_SIZE: 3379,
+    MAX_VARYING_VECTORS: 36348,
+    MAX_VERTEX_ATTRIBS: 34921,
+    MAX_VERTEX_TEXTURE_IMAGE_UNITS: 35660,
+    MAX_VERTEX_UNIFORM_VECTORS: 36347,
+    MAX_VIEWPORT_DIMS: 3386,
+    MEDIUM_FLOAT: 36337,
+    MEDIUM_INT: 36340,
+    MIRRORED_REPEAT: 33648,
+    NEAREST: 9728,
+    NEAREST_MIPMAP_LINEAR: 9986,
+    NEAREST_MIPMAP_NEAREST: 9984,
+    NEVER: 512,
+    NICEST: 4354,
+    NO_ERROR: 0,
+    NONE: 0,
+    NOTEQUAL: 517,
+    ONE: 1,
+    ONE_MINUS_CONSTANT_ALPHA: 32772,
+    ONE_MINUS_CONSTANT_COLOR: 32770,
+    ONE_MINUS_DST_ALPHA: 773,
+    ONE_MINUS_DST_COLOR: 775,
+    ONE_MINUS_SRC_ALPHA: 771,
+    ONE_MINUS_SRC_COLOR: 769,
+    OUT_OF_MEMORY: 1285,
+    PACK_ALIGNMENT: 3333,
+    POINTS: 0,
+    POLYGON_OFFSET_FACTOR: 32824,
+    POLYGON_OFFSET_FILL: 32823,
+    POLYGON_OFFSET_UNITS: 10752,
+    RED_BITS: 3410,
+    RENDERBUFFER: 36161,
+    RENDERBUFFER_ALPHA_SIZE: 36179,
+    RENDERBUFFER_BINDING: 36007,
+    RENDERBUFFER_BLUE_SIZE: 36178,
+    RENDERBUFFER_DEPTH_SIZE: 36180,
+    RENDERBUFFER_GREEN_SIZE: 36177,
+    RENDERBUFFER_HEIGHT: 36163,
+    RENDERBUFFER_INTERNAL_FORMAT: 36164,
+    RENDERBUFFER_RED_SIZE: 36176,
+    RENDERBUFFER_STENCIL_SIZE: 36181,
+    RENDERBUFFER_WIDTH: 36162,
+    RENDERER: 7937,
+    REPEAT: 10497,
+    REPLACE: 7681,
+    RGB: 6407,
+    RGB5_A1: 32855,
+    RGB565: 36194,
+    RGBA: 6408,
+    RGBA4: 32854,
+    SAMPLE_ALPHA_TO_COVERAGE: 32926,
+    SAMPLE_BUFFERS: 32936,
+    SAMPLE_COVERAGE: 32928,
+    SAMPLE_COVERAGE_INVERT: 32939,
+    SAMPLE_COVERAGE_VALUE: 32938,
+    SAMPLER_2D: 35678,
+    SAMPLER_CUBE: 35680,
+    SAMPLES: 32937,
+    SCISSOR_BOX: 3088,
+    SCISSOR_TEST: 3089,
+    SHADER_TYPE: 35663,
+    SHADING_LANGUAGE_VERSION: 35724,
+    SHORT: 5122,
+    SRC_ALPHA: 770,
+    SRC_ALPHA_SATURATE: 776,
+    SRC_COLOR: 768,
+    STATIC_DRAW: 35044,
+    STENCIL_ATTACHMENT: 36128,
+    STENCIL_BACK_FAIL: 34817,
+    STENCIL_BACK_FUNC: 34816,
+    STENCIL_BACK_PASS_DEPTH_FAIL: 34818,
+    STENCIL_BACK_PASS_DEPTH_PASS: 34819,
+    STENCIL_BACK_REF: 36003,
+    STENCIL_BACK_VALUE_MASK: 36004,
+    STENCIL_BACK_WRITEMASK: 36005,
+    STENCIL_BITS: 3415,
+    STENCIL_BUFFER_BIT: 1024,
+    STENCIL_CLEAR_VALUE: 2961,
+    STENCIL_FAIL: 2964,
+    STENCIL_FUNC: 2962,
+    STENCIL_INDEX8: 36168,
+    STENCIL_PASS_DEPTH_FAIL: 2965,
+    STENCIL_PASS_DEPTH_PASS: 2966,
+    STENCIL_REF: 2967,
+    STENCIL_TEST: 2960,
+    STENCIL_VALUE_MASK: 2963,
+    STENCIL_WRITEMASK: 2968,
+    STREAM_DRAW: 35040,
+    SUBPIXEL_BITS: 3408,
+    TEXTURE: 5890,
+    TEXTURE_2D: 3553,
+    TEXTURE_BINDING_2D: 32873,
+    TEXTURE_BINDING_CUBE_MAP: 34068,
+    TEXTURE_CUBE_MAP: 34067,
+    TEXTURE_CUBE_MAP_NEGATIVE_X: 34070,
+    TEXTURE_CUBE_MAP_NEGATIVE_Y: 34072,
+    TEXTURE_CUBE_MAP_NEGATIVE_Z: 34074,
+    TEXTURE_CUBE_MAP_POSITIVE_X: 34069,
+    TEXTURE_CUBE_MAP_POSITIVE_Y: 34071,
+    TEXTURE_CUBE_MAP_POSITIVE_Z: 34073,
+    TEXTURE_MAG_FILTER: 10240,
+    TEXTURE_MIN_FILTER: 10241,
+    TEXTURE_WRAP_S: 10242,
+    TEXTURE_WRAP_T: 10243,
+    TEXTURE0: 33984,
+    TEXTURE1: 33985,
+    TEXTURE10: 33994,
+    TEXTURE11: 33995,
+    TEXTURE12: 33996,
+    TEXTURE13: 33997,
+    TEXTURE14: 33998,
+    TEXTURE15: 33999,
+    TEXTURE16: 34000,
+    TEXTURE17: 34001,
+    TEXTURE18: 34002,
+    TEXTURE19: 34003,
+    TEXTURE2: 33986,
+    TEXTURE20: 34004,
+    TEXTURE21: 34005,
+    TEXTURE22: 34006,
+    TEXTURE23: 34007,
+    TEXTURE24: 34008,
+    TEXTURE25: 34009,
+    TEXTURE26: 34010,
+    TEXTURE27: 34011,
+    TEXTURE28: 34012,
+    TEXTURE29: 34013,
+    TEXTURE3: 33987,
+    TEXTURE30: 34014,
+    TEXTURE31: 34015,
+    TEXTURE4: 33988,
+    TEXTURE5: 33989,
+    TEXTURE6: 33990,
+    TEXTURE7: 33991,
+    TEXTURE8: 33992,
+    TEXTURE9: 33993,
+    TRIANGLE_FAN: 6,
+    TRIANGLE_STRIP: 5,
+    TRIANGLES: 4,
+    UNPACK_ALIGNMENT: 3317,
+    UNPACK_COLORSPACE_CONVERSION_WEBGL: 37443,
+    UNPACK_FLIP_Y_WEBGL: 37440,
+    UNPACK_PREMULTIPLY_ALPHA_WEBGL: 37441,
+    UNSIGNED_BYTE: 5121,
+    UNSIGNED_INT: 5125,
+    UNSIGNED_SHORT: 5123,
+    UNSIGNED_SHORT_4_4_4_4: 32819,
+    UNSIGNED_SHORT_5_5_5_1: 32820,
+    UNSIGNED_SHORT_5_6_5: 33635,
+    VALIDATE_STATUS: 35715,
+    VENDOR: 7936,
+    VERSION: 7938,
+    VERTEX_ATTRIB_ARRAY_BUFFER_BINDING: 34975,
+    VERTEX_ATTRIB_ARRAY_ENABLED: 34338,
+    VERTEX_ATTRIB_ARRAY_NORMALIZED: 34922,
+    VERTEX_ATTRIB_ARRAY_POINTER: 34373,
+    VERTEX_ATTRIB_ARRAY_SIZE: 34339,
+    VERTEX_ATTRIB_ARRAY_STRIDE: 34340,
+    VERTEX_ATTRIB_ARRAY_TYPE: 34341,
+    VERTEX_SHADER: 35633,
+    VIEWPORT: 2978,
+    ZERO: 0,
+  };
+  const contexts = new WeakMap(),
+    state = new WeakMap(),
+    key = {};
+  function dimensions(canvas) {
+    return [Number(canvas.width), Number(canvas.height)];
+  }
+  class WebGLRenderingContext {
+    constructor(token, canvas, attributes = {}) {
+      if (token !== key) throw new TypeError('Illegal constructor');
+      state.set(this, {
+        canvas,
+        attributes: { alpha: true, ...attributes },
+        error: 0,
+        clear: [0, 0, 0, 0],
+        viewport: [0, 0, ...dimensions(canvas)],
+        buffers: new Map(),
+        bound: null,
+      });
     }
-    class WebGL2RenderingContext extends WebGLRenderingContext {}
-    // Legacy callable placeholders for GPU operations. These intentionally do
-    // not convert arguments, mutate GL state, render, or return resource/query
-    // objects. Keep existing stateful implementations above. Safari supplies
-    // the public names, arities and descriptors, not the placeholder behavior.
-    const placeholderMethods = {
-        activeTexture: 1,
-        bindAttribLocation: 3,
-        bindFramebuffer: 2,
-        bindRenderbuffer: 2,
-        bindTexture: 2,
-        blendColor: 4,
-        blendEquation: 1,
-        blendEquationSeparate: 2,
-        blendFunc: 2,
-        blendFuncSeparate: 4,
-        bufferSubData: 3,
-        checkFramebufferStatus: 1,
-        clearDepth: 1,
-        clearStencil: 1,
-        colorMask: 4,
-        compressedTexImage2D: 7,
-        compressedTexSubImage2D: 8,
-        copyTexImage2D: 8,
-        copyTexSubImage2D: 8,
-        createFramebuffer: 0,
-        createRenderbuffer: 0,
-        createTexture: 0,
-        cullFace: 1,
-        deleteFramebuffer: 1,
-        deleteProgram: 1,
-        deleteRenderbuffer: 1,
-        deleteShader: 1,
-        deleteTexture: 1,
-        depthFunc: 1,
-        depthMask: 1,
-        depthRange: 2,
-        detachShader: 2,
-        disable: 1,
-        disableVertexAttribArray: 1,
-        drawElements: 4,
-        enable: 1,
-        enableVertexAttribArray: 1,
-        framebufferRenderbuffer: 4,
-        framebufferTexture2D: 5,
-        frontFace: 1,
-        generateMipmap: 1,
-        getActiveAttrib: 2,
-        getActiveUniform: 2,
-        getAttachedShaders: 1,
-        getAttribLocation: 2,
-        getBufferParameter: 2,
-        getFramebufferAttachmentParameter: 3,
-        getRenderbufferParameter: 2,
-        getShaderPrecisionFormat: 2,
-        getShaderSource: 1,
-        getTexParameter: 2,
-        getUniform: 2,
-        getUniformLocation: 2,
-        getVertexAttrib: 2,
-        getVertexAttribOffset: 2,
-        hint: 2,
-        isBuffer: 1,
-        isEnabled: 1,
-        isFramebuffer: 1,
-        isProgram: 1,
-        isRenderbuffer: 1,
-        isShader: 1,
-        isTexture: 1,
-        lineWidth: 1,
-        pixelStorei: 2,
-        polygonOffset: 2,
-        renderbufferStorage: 4,
-        sampleCoverage: 2,
-        scissor: 4,
-        stencilFunc: 3,
-        stencilFuncSeparate: 4,
-        stencilMask: 1,
-        stencilMaskSeparate: 2,
-        stencilOp: 3,
-        stencilOpSeparate: 4,
-        texImage2D: 6,
-        texParameterf: 3,
-        texParameteri: 3,
-        texSubImage2D: 7,
-        uniform1f: 2,
-        uniform1fv: 2,
-        uniform1i: 2,
-        uniform1iv: 2,
-        uniform2f: 3,
-        uniform2fv: 2,
-        uniform2i: 3,
-        uniform2iv: 2,
-        uniform3f: 4,
-        uniform3fv: 2,
-        uniform3i: 4,
-        uniform3iv: 2,
-        uniform4f: 5,
-        uniform4fv: 2,
-        uniform4i: 5,
-        uniform4iv: 2,
-        uniformMatrix2fv: 3,
-        uniformMatrix3fv: 3,
-        uniformMatrix4fv: 3,
-        useProgram: 1,
-        validateProgram: 1,
-        vertexAttrib1f: 2,
-        vertexAttrib1fv: 2,
-        vertexAttrib2f: 3,
-        vertexAttrib2fv: 2,
-        vertexAttrib3f: 4,
-        vertexAttrib3fv: 2,
-        vertexAttrib4f: 5,
-        vertexAttrib4fv: 2,
-        vertexAttribPointer: 6,
-    };
-    for (const [name, length] of Object.entries(placeholderMethods)) {
-        const method = {[name]() {
-            if (!state.has(this)) throw new TypeError('Illegal invocation');
-            return undefined;
-        }}[name];
-        Object.defineProperty(method, 'length', {value: length, configurable: true});
-        Object.defineProperty(WebGLRenderingContext.prototype, name, {
-            value: method, enumerable: true, configurable: true, writable: true,
-        });
+    get canvas() {
+      return state.get(this).canvas;
     }
-    for (const [name, value] of Object.entries(constants)) {
-        for (const target of [WebGLRenderingContext, WebGLRenderingContext.prototype, WebGL2RenderingContext]) {
-            Object.defineProperty(target, name, {value, enumerable: true});
-        }
+    get drawingBufferWidth() {
+      return this.canvas.width;
     }
-    const original=global.HTMLCanvasElement.prototype.getContext;
-    Object.defineProperty(global.HTMLCanvasElement.prototype,'getContext',{configurable:true,writable:true,value:function(type,attributes){type=String(type);if(contexts.has(this)){const saved=contexts.get(this);return saved.type===type?saved.context:null;}if(type==='webgl'||type==='webgl2'){const context=new (type==='webgl2'?WebGL2RenderingContext:WebGLRenderingContext)(key,this,attributes);contexts.set(this,{type,context});return context;}const context=original?.call(this,type,attributes)??null;if(context)contexts.set(this,{type,context});return context;}});
-    const bufferState=new WeakMap();
-    class GPUBuffer {
-        constructor(token,descriptor){if(token!==key)throw new TypeError('Illegal constructor');const size=Number(descriptor.size);if(!Number.isSafeInteger(size)||size<0||size>64*1024*1024)throw new RangeError('GPU buffer size limit');this.size=size;this.usage=descriptor.usage??0;this.label=descriptor.label??'';bufferState.set(this,{bytes:new ArrayBuffer(size),mapped:!!descriptor.mappedAtCreation,destroyed:false});}
-        get mapState(){return bufferState.get(this).mapped?'mapped':'unmapped';}
-        async mapAsync(){const s=bufferState.get(this);if(s.destroyed||s.mapped)throw new DOMException('Invalid map state','OperationError');s.mapped=true;}
-        getMappedRange(offset=0,size=this.size-offset){const s=bufferState.get(this);if(!s.mapped||s.destroyed)throw new DOMException('Buffer not mapped','OperationError');if(offset!==0||size!==this.size)throw new DOMException('Only full buffer mappings supported','NotSupportedError');return s.bytes;}
-        unmap(){const s=bufferState.get(this);s.bytes=s.bytes.slice(0);s.mapped=false;}
-        destroy(){const s=bufferState.get(this);s.destroyed=true;s.mapped=false;s.bytes=new ArrayBuffer(0);}
+    get drawingBufferHeight() {
+      return this.canvas.height;
     }
-    class GPUDevice extends EventTarget {
-        constructor(){super();this.features=new Set();this.limits=Object.freeze({maxBufferSize:64*1024*1024});this.queue={submit:()=>{throw new DOMException('GPU execution unavailable','NotSupportedError');},onSubmittedWorkDone:()=>Promise.resolve(),writeBuffer:(buffer,offset,data)=>{const s=bufferState.get(buffer);if(!s||s.destroyed||s.mapped)throw new DOMException('Buffer unavailable','OperationError');const bytes=new Uint8Array(data.buffer??data,data.byteOffset??0,data.byteLength);if(!Number.isSafeInteger(offset)||offset<0||offset+bytes.length>buffer.size)throw new RangeError('Buffer range');new Uint8Array(s.bytes).set(bytes,offset);}};this.lost=new Promise(resolve=>{this._lose=resolve;});}
-        createBuffer(descriptor){if(this._destroyed)throw new DOMException('Device destroyed','InvalidStateError');return new GPUBuffer(key,descriptor);}
-        createShaderModule(){throw new DOMException('Shader compilation unavailable','NotSupportedError');}
-        destroy(){this._destroyed=true;this._lose({reason:'destroyed',message:'Mock device destroyed'});}
-        submitAsync(commands){return host.call('graphics.submit',commands);}
+    getContextAttributes() {
+      return { ...state.get(this).attributes };
     }
-    class GPUAdapter {constructor(){this.features=new Set();this.limits=Object.freeze({maxBufferSize:64*1024*1024});this.info=Object.freeze({vendor:'brimp',architecture:'mock',device:'mock',description:'Deterministic JavaScript mock'});}async requestDevice(){return new GPUDevice();}}
-    class GPU {async requestAdapter(){return options.webgpu===true?new GPUAdapter():null;}getPreferredCanvasFormat(){return 'bgra8unorm';}}
-    Object.defineProperty(global.navigator,'gpu',{value:new GPU(),configurable:true});
-    for(const [name,value] of Object.entries({WebGLRenderingContext,WebGL2RenderingContext,GPU,GPUAdapter,GPUDevice,GPUBuffer,GPUBufferUsage:{MAP_READ:1,MAP_WRITE:2,COPY_SRC:4,COPY_DST:8,INDEX:16,VERTEX:32,UNIFORM:64,STORAGE:128,INDIRECT:256,QUERY_RESOLVE:512},GPUMapMode:{READ:1,WRITE:2}}))Object.defineProperty(global,name,{value,writable:true,configurable:true});
+    isContextLost() {
+      return false;
+    }
+    getSupportedExtensions() {
+      return (
+        options.extensions ?? webglProfile?.extensions?.slice() ?? ['WEBGL_debug_renderer_info']
+      );
+    }
+    getExtension(name) {
+      name = String(name);
+      const supported = this.getSupportedExtensions().some(
+        (candidate) => candidate.toLowerCase() === name.toLowerCase(),
+      );
+      if (!supported) return null;
+      if (name.toLowerCase() !== 'webgl_debug_renderer_info')
+        return Object.freeze({ [Symbol.toStringTag]: name });
+      return (state.get(this).debugRendererInfo ??= Object.freeze({
+        UNMASKED_VENDOR_WEBGL: 37445,
+        UNMASKED_RENDERER_WEBGL: 37446,
+        [Symbol.toStringTag]: 'WebGLDebugRendererInfo',
+      }));
+    }
+    getError() {
+      const s = state.get(this),
+        error = s.error;
+      s.error = 0;
+      return error;
+    }
+    getParameter(name) {
+      const s = state.get(this);
+      if (name === this.VERSION)
+        return this instanceof WebGL2RenderingContext ? 'WebGL 2.0' : 'WebGL 1.0';
+      if (name === this.VENDOR)
+        return String(options.vendor ?? webglProfile?.vendor ?? 'Apple Inc.');
+      if (name === this.RENDERER)
+        return String(options.renderer ?? webglProfile?.renderer ?? 'Apple GPU');
+      if (name === 37445)
+        return String(options.unmaskedVendor ?? webglProfile?.unmasked_vendor ?? 'Apple Inc.');
+      if (name === 37446)
+        return String(options.unmaskedRenderer ?? webglProfile?.unmasked_renderer ?? 'Apple GPU');
+      if (name === this.VIEWPORT) return new Int32Array(s.viewport);
+      if (name === this.COLOR_CLEAR_VALUE) return new Float32Array(s.clear);
+      for (const [key, value] of Object.entries(webglProfile?.parameters ?? {})) {
+        if ((/^\d+$/.test(key) ? Number(key) : this[key]) === name)
+          return Array.isArray(value) ? new Float32Array(value) : value;
+      }
+      if (name === this.MAX_TEXTURE_SIZE) return 4096;
+      s.error = this.INVALID_ENUM;
+      return null;
+    }
+    clearColor(r, g, b, a) {
+      state.get(this).clear = [r, g, b, a].map((v) => Math.max(0, Math.min(1, Number(v))));
+    }
+    clear() {}
+    flush() {}
+    finish() {}
+    viewport(x, y, width, height) {
+      if (width < 0 || height < 0) {
+        state.get(this).error = this.INVALID_VALUE;
+        return;
+      }
+      state.get(this).viewport = [x, y, width, height].map(Math.trunc);
+    }
+    readPixels(x, y, width, height, format, type, pixels) {
+      const s = state.get(this);
+      if (format !== this.RGBA || type !== this.UNSIGNED_BYTE) {
+        s.error = this.INVALID_ENUM;
+        return;
+      }
+      if (
+        ![x, y, width, height].every(Number.isInteger) ||
+        width < 0 ||
+        height < 0 ||
+        width * height > 16_000_000 ||
+        !(pixels instanceof Uint8Array) ||
+        pixels.length < width * height * 4
+      ) {
+        s.error = this.INVALID_VALUE;
+        return;
+      }
+      for (let row = 0; row < height; row++)
+        for (let col = 0; col < width; col++)
+          for (let c = 0; c < 4; c++)
+            pixels[(row * width + col) * 4 + c] =
+              x + col < 0 ||
+              y + row < 0 ||
+              x + col >= this.drawingBufferWidth ||
+              y + row >= this.drawingBufferHeight
+                ? 0
+                : !s.attributes.alpha && c === 3
+                  ? 255
+                  : rgba[c];
+    }
+    createBuffer() {
+      const buffer = {};
+      state.get(this).buffers.set(buffer, new Uint8Array());
+      return buffer;
+    }
+    bindBuffer(target, buffer) {
+      const s = state.get(this);
+      if (target !== this.ARRAY_BUFFER) {
+        s.error = this.INVALID_ENUM;
+        return;
+      }
+      if (buffer !== null && !s.buffers.has(buffer)) {
+        s.error = this.INVALID_OPERATION;
+        return;
+      }
+      s.bound = buffer;
+    }
+    bufferData(target, data) {
+      const s = state.get(this);
+      if (target !== this.ARRAY_BUFFER || !s.bound) {
+        s.error = this.INVALID_OPERATION;
+        return;
+      }
+      const length = typeof data === 'number' ? data : data?.byteLength;
+      if (!Number.isInteger(length) || length < 0 || length > 64 * 1024 * 1024) {
+        s.error = this.INVALID_VALUE;
+        return;
+      }
+      s.buffers.set(
+        s.bound,
+        typeof data === 'number'
+          ? new Uint8Array(length)
+          : new Uint8Array(data.buffer ?? data, data.byteOffset ?? 0, length).slice(),
+      );
+    }
+    deleteBuffer(buffer) {
+      const s = state.get(this);
+      s.buffers.delete(buffer);
+      if (s.bound === buffer) s.bound = null;
+    }
+    createShader(type) {
+      if (type !== this.VERTEX_SHADER && type !== this.FRAGMENT_SHADER) {
+        state.get(this).error = this.INVALID_ENUM;
+        return null;
+      }
+      return { type, source: '' };
+    }
+    shaderSource(shader, source) {
+      shader.source = String(source);
+    }
+    compileShader() {}
+    getShaderParameter(_, name) {
+      return name === this.COMPILE_STATUS ? false : null;
+    }
+    getShaderInfoLog() {
+      return '';
+    }
+    createProgram() {
+      return {};
+    }
+    attachShader() {}
+    linkProgram() {}
+    getProgramParameter(_, name) {
+      return name === this.LINK_STATUS ? false : null;
+    }
+    getProgramInfoLog() {
+      return '';
+    }
+    drawArrays() {
+      state.get(this).error = this.INVALID_OPERATION;
+    }
+    submitAsync(commands) {
+      return host.call('graphics.submit', {
+        width: this.drawingBufferWidth,
+        height: this.drawingBufferHeight,
+        commands,
+      });
+    }
+  }
+  class WebGL2RenderingContext extends WebGLRenderingContext {}
+  // Legacy callable placeholders for GPU operations. These intentionally do
+  // not convert arguments, mutate GL state, render, or return resource/query
+  // objects. Keep existing stateful implementations above. Safari supplies
+  // the public names, arities and descriptors, not the placeholder behavior.
+  const placeholderMethods = {
+    activeTexture: 1,
+    bindAttribLocation: 3,
+    bindFramebuffer: 2,
+    bindRenderbuffer: 2,
+    bindTexture: 2,
+    blendColor: 4,
+    blendEquation: 1,
+    blendEquationSeparate: 2,
+    blendFunc: 2,
+    blendFuncSeparate: 4,
+    bufferSubData: 3,
+    checkFramebufferStatus: 1,
+    clearDepth: 1,
+    clearStencil: 1,
+    colorMask: 4,
+    compressedTexImage2D: 7,
+    compressedTexSubImage2D: 8,
+    copyTexImage2D: 8,
+    copyTexSubImage2D: 8,
+    createFramebuffer: 0,
+    createRenderbuffer: 0,
+    createTexture: 0,
+    cullFace: 1,
+    deleteFramebuffer: 1,
+    deleteProgram: 1,
+    deleteRenderbuffer: 1,
+    deleteShader: 1,
+    deleteTexture: 1,
+    depthFunc: 1,
+    depthMask: 1,
+    depthRange: 2,
+    detachShader: 2,
+    disable: 1,
+    disableVertexAttribArray: 1,
+    drawElements: 4,
+    enable: 1,
+    enableVertexAttribArray: 1,
+    framebufferRenderbuffer: 4,
+    framebufferTexture2D: 5,
+    frontFace: 1,
+    generateMipmap: 1,
+    getActiveAttrib: 2,
+    getActiveUniform: 2,
+    getAttachedShaders: 1,
+    getAttribLocation: 2,
+    getBufferParameter: 2,
+    getFramebufferAttachmentParameter: 3,
+    getRenderbufferParameter: 2,
+    getShaderPrecisionFormat: 2,
+    getShaderSource: 1,
+    getTexParameter: 2,
+    getUniform: 2,
+    getUniformLocation: 2,
+    getVertexAttrib: 2,
+    getVertexAttribOffset: 2,
+    hint: 2,
+    isBuffer: 1,
+    isEnabled: 1,
+    isFramebuffer: 1,
+    isProgram: 1,
+    isRenderbuffer: 1,
+    isShader: 1,
+    isTexture: 1,
+    lineWidth: 1,
+    pixelStorei: 2,
+    polygonOffset: 2,
+    renderbufferStorage: 4,
+    sampleCoverage: 2,
+    scissor: 4,
+    stencilFunc: 3,
+    stencilFuncSeparate: 4,
+    stencilMask: 1,
+    stencilMaskSeparate: 2,
+    stencilOp: 3,
+    stencilOpSeparate: 4,
+    texImage2D: 6,
+    texParameterf: 3,
+    texParameteri: 3,
+    texSubImage2D: 7,
+    uniform1f: 2,
+    uniform1fv: 2,
+    uniform1i: 2,
+    uniform1iv: 2,
+    uniform2f: 3,
+    uniform2fv: 2,
+    uniform2i: 3,
+    uniform2iv: 2,
+    uniform3f: 4,
+    uniform3fv: 2,
+    uniform3i: 4,
+    uniform3iv: 2,
+    uniform4f: 5,
+    uniform4fv: 2,
+    uniform4i: 5,
+    uniform4iv: 2,
+    uniformMatrix2fv: 3,
+    uniformMatrix3fv: 3,
+    uniformMatrix4fv: 3,
+    useProgram: 1,
+    validateProgram: 1,
+    vertexAttrib1f: 2,
+    vertexAttrib1fv: 2,
+    vertexAttrib2f: 3,
+    vertexAttrib2fv: 2,
+    vertexAttrib3f: 4,
+    vertexAttrib3fv: 2,
+    vertexAttrib4f: 5,
+    vertexAttrib4fv: 2,
+    vertexAttribPointer: 6,
+  };
+  for (const [name, length] of Object.entries(placeholderMethods)) {
+    const method = {
+      [name]() {
+        if (!state.has(this)) throw new TypeError('Illegal invocation');
+        return undefined;
+      },
+    }[name];
+    Object.defineProperty(method, 'length', { value: length, configurable: true });
+    Object.defineProperty(WebGLRenderingContext.prototype, name, {
+      value: method,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+  }
+  for (const [name, value] of Object.entries(constants)) {
+    for (const target of [
+      WebGLRenderingContext,
+      WebGLRenderingContext.prototype,
+      WebGL2RenderingContext,
+    ]) {
+      Object.defineProperty(target, name, { value, enumerable: true });
+    }
+  }
+  for (const type of ['webgl', 'webgl2'])
+    canvas.register(type, function (attributes) {
+      return new (type === 'webgl2' ? WebGL2RenderingContext : WebGLRenderingContext)(
+        key,
+        this,
+        attributes,
+      );
+    });
+  const bufferState = new WeakMap();
+  class GPUBuffer {
+    constructor(token, descriptor) {
+      if (token !== key) throw new TypeError('Illegal constructor');
+      const size = Number(descriptor.size);
+      if (!Number.isSafeInteger(size) || size < 0 || size > 64 * 1024 * 1024)
+        throw new RangeError('GPU buffer size limit');
+      this.size = size;
+      this.usage = descriptor.usage ?? 0;
+      this.label = descriptor.label ?? '';
+      bufferState.set(this, {
+        bytes: new ArrayBuffer(size),
+        mapped: !!descriptor.mappedAtCreation,
+        destroyed: false,
+      });
+    }
+    get mapState() {
+      return bufferState.get(this).mapped ? 'mapped' : 'unmapped';
+    }
+    async mapAsync() {
+      const s = bufferState.get(this);
+      if (s.destroyed || s.mapped) throw new DOMException('Invalid map state', 'OperationError');
+      s.mapped = true;
+    }
+    getMappedRange(offset = 0, size = this.size - offset) {
+      const s = bufferState.get(this);
+      if (!s.mapped || s.destroyed) throw new DOMException('Buffer not mapped', 'OperationError');
+      if (offset !== 0 || size !== this.size)
+        throw new DOMException('Only full buffer mappings supported', 'NotSupportedError');
+      return s.bytes;
+    }
+    unmap() {
+      const s = bufferState.get(this);
+      s.bytes = s.bytes.slice(0);
+      s.mapped = false;
+    }
+    destroy() {
+      const s = bufferState.get(this);
+      s.destroyed = true;
+      s.mapped = false;
+      s.bytes = new ArrayBuffer(0);
+    }
+  }
+  class GPUDevice extends EventTarget {
+    constructor() {
+      super();
+      this.features = new Set();
+      this.limits = Object.freeze({ maxBufferSize: 64 * 1024 * 1024 });
+      this.queue = {
+        submit: () => {
+          throw new DOMException('GPU execution unavailable', 'NotSupportedError');
+        },
+        onSubmittedWorkDone: () => Promise.resolve(),
+        writeBuffer: (buffer, offset, data) => {
+          const s = bufferState.get(buffer);
+          if (!s || s.destroyed || s.mapped)
+            throw new DOMException('Buffer unavailable', 'OperationError');
+          const bytes = new Uint8Array(data.buffer ?? data, data.byteOffset ?? 0, data.byteLength);
+          if (!Number.isSafeInteger(offset) || offset < 0 || offset + bytes.length > buffer.size)
+            throw new RangeError('Buffer range');
+          new Uint8Array(s.bytes).set(bytes, offset);
+        },
+      };
+      this.lost = new Promise((resolve) => {
+        this._lose = resolve;
+      });
+    }
+    createBuffer(descriptor) {
+      if (this._destroyed) throw new DOMException('Device destroyed', 'InvalidStateError');
+      return new GPUBuffer(key, descriptor);
+    }
+    createShaderModule() {
+      throw new DOMException('Shader compilation unavailable', 'NotSupportedError');
+    }
+    destroy() {
+      this._destroyed = true;
+      this._lose({ reason: 'destroyed', message: 'Mock device destroyed' });
+    }
+    submitAsync(commands) {
+      return host.call('graphics.submit', commands);
+    }
+  }
+  class GPUAdapter {
+    constructor() {
+      this.features = new Set();
+      this.limits = Object.freeze({ maxBufferSize: 64 * 1024 * 1024 });
+      this.info = Object.freeze({
+        vendor: String(webglProfile?.vendor ?? 'Apple Inc.'),
+        architecture: 'metal',
+        device: String(webglProfile?.renderer ?? 'Apple GPU'),
+        description: String(webglProfile?.unmasked_renderer ?? 'Apple GPU'),
+      });
+    }
+    async requestDevice() {
+      return new GPUDevice();
+    }
+  }
+  class GPU {
+    async requestAdapter() {
+      return (options.webgpu ?? graphicsProfile.webgpu) === true ? new GPUAdapter() : null;
+    }
+    getPreferredCanvasFormat() {
+      return 'bgra8unorm';
+    }
+  }
+  Object.defineProperty(global.navigator, 'gpu', { value: new GPU(), configurable: true });
+  for (const [name, value] of Object.entries({
+    WebGLRenderingContext,
+    WebGL2RenderingContext,
+    GPU,
+    GPUAdapter,
+    GPUDevice,
+    GPUBuffer,
+    GPUBufferUsage: {
+      MAP_READ: 1,
+      MAP_WRITE: 2,
+      COPY_SRC: 4,
+      COPY_DST: 8,
+      INDEX: 16,
+      VERTEX: 32,
+      UNIFORM: 64,
+      STORAGE: 128,
+      INDIRECT: 256,
+      QUERY_RESOLVE: 512,
+    },
+    GPUMapMode: { READ: 1, WRITE: 2 },
+  }))
+    Object.defineProperty(global, name, { value, writable: true, configurable: true });
 }

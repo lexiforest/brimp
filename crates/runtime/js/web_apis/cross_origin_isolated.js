@@ -1,4 +1,4 @@
-Object.defineProperty(globalThis, "crossOriginIsolated", {
-    value: true,
-    configurable: true,
+Object.defineProperty(globalThis, 'crossOriginIsolated', {
+  value: true,
+  configurable: true,
 });

@@ -1,0 +1,14 @@
+{
+  "name": "brimp-development",
+  "private": true,
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "format:runtime": "prettier --write \"crates/runtime/js/**/*.{js,mjs}\"",
+    "format:runtime:check": "prettier --check \"crates/runtime/js/**/*.{js,mjs}\""
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

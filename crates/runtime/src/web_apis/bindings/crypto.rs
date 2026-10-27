@@ -1,23 +1,12 @@
-//! Realm-owned WebCrypto keys. OpenSSL owns cryptographic primitives; this layer
+//! Realm-owned WebCrypto keys. Shared BoringSSL owns cryptographic primitives; this layer
 //! owns WebCrypto formats, algorithm binding, usages and extractability.
-use openssl::{
-    bn::BigNum,
-    derive::Deriver,
-    ec::{EcGroup, EcKey},
-    ecdsa::EcdsaSig,
-    hash::{MessageDigest, hash},
-    md::Md,
-    nid::Nid,
-    pkey::{Id, PKey, Private, Public},
-    pkey_ctx::PkeyCtx,
-    rsa::{Padding, Rsa},
-    sign::{RsaPssSaltlen, Signer, Verifier},
-};
+use native::NativeKey;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
 mod cipher;
 mod keys;
+mod native;
 
 #[derive(Debug)]
 struct Error {
@@ -25,11 +14,6 @@ struct Error {
     message: String,
 }
 type Result<T> = std::result::Result<T, Error>;
-impl From<openssl::error::ErrorStack> for Error {
-    fn from(_: openssl::error::ErrorStack) -> Self {
-        error("OperationError", "Cryptographic operation failed")
-    }
-}
 fn error(name: &'static str, message: impl Into<String>) -> Error {
     Error {
         name,
@@ -75,8 +59,8 @@ struct Request {
 }
 enum Material {
     Secret(Vec<u8>),
-    Public(PKey<Public>),
-    Private(PKey<Private>),
+    Public(NativeKey),
+    Private(NativeKey),
 }
 struct Key {
     material: Material,
@@ -101,16 +85,16 @@ impl Key {
             _ => Err(error("InvalidAccessError", "Expected a secret key")),
         }
     }
-    fn private(&self) -> Result<&PKey<Private>> {
+    fn private(&self) -> Result<&NativeKey> {
         match &self.material {
             Material::Private(p) => Ok(p),
             _ => Err(error("InvalidAccessError", "Expected a private key")),
         }
     }
-    fn public(&self) -> Result<PKey<Public>> {
+    fn public(&self) -> Result<&NativeKey> {
         match &self.material {
-            Material::Public(p) => Ok(p.clone()),
-            Material::Private(p) => Ok(PKey::public_key_from_der(&p.public_key_to_der()?)?),
+            Material::Public(p) => Ok(p),
+            Material::Private(p) => Ok(p),
             _ => Err(error("InvalidAccessError", "Expected a public key")),
         }
     }
@@ -123,9 +107,9 @@ impl Key {
             a["length"] = json!(self.length);
         }
         if self.algorithm.starts_with("RSA") {
-            let rsa = self.public()?.rsa()?;
-            a["modulusLength"] = json!(rsa.n().num_bits());
-            a["publicExponent"] = json!(rsa.e().to_vec());
+            let key = self.public()?;
+            a["modulusLength"] = json!(key.bits());
+            a["publicExponent"] = json!(key.export(11)?);
         }
         if !self.curve.is_empty() {
             a["namedCurve"] = json!(self.curve);
@@ -163,7 +147,7 @@ impl CryptoState {
     }
     fn run(&mut self, mut r: Request) -> Result<Value> {
         if r.operation == "digest" {
-            return Ok(json!(hash(digest(&r.algorithm)?, &r.data)?.to_vec()));
+            return Ok(json!(native::digest(&r.algorithm, &r.data)?));
         }
         if r.operation == "import" {
             return self.insert(keys::import(&r)?);
@@ -176,12 +160,11 @@ impl CryptoState {
                         "OperationError",
                         "Invalid RSA modulus length",
                     )?;
-                    let e = BigNum::from_slice(&r.exponent)?;
-                    PKey::from_rsa(Rsa::generate_with_e(r.modulus_length, &e)?)?
+                    NativeKey::generate_rsa(r.modulus_length, &r.exponent)?
                 } else {
-                    PKey::from_ec_key(EcKey::generate(&*group(&r.curve)?)?)?
+                    NativeKey::generate_ec(&r.curve)?
                 };
-                let public = PKey::public_key_from_der(&private.public_key_to_der()?)?;
+                let public = NativeKey::parse(false, &private.export(1)?)?;
                 let mut secret = keys::new_key(&r, Material::Private(private));
                 let mut visible = keys::new_key(&r, Material::Public(public));
                 visible.extractable = true;
@@ -283,10 +266,7 @@ impl CryptoState {
                 "InvalidAccessError",
                 "ECDH peer key mismatch",
             )?;
-            let public = peer.public()?;
-            let mut derive = Deriver::new(key.private()?)?;
-            derive.set_peer(&public)?;
-            let mut result = derive.derive_to_vec()?;
+            let mut result = key.private()?.ecdh(peer.public()?)?;
             require(
                 r.length <= result.len() * 8,
                 "OperationError",
@@ -313,129 +293,68 @@ impl CryptoState {
                     "OperationError",
                     "Invalid PBKDF2 iteration count",
                 )?;
-                openssl::pkcs5::pbkdf2_hmac(
+                native::derive(
+                    2,
+                    &r.hash,
                     key.secret()?,
                     &r.salt,
-                    r.iterations,
-                    digest(&r.hash)?,
+                    &[],
+                    r.iterations as u32,
                     &mut output,
                 )?;
             }
             "HKDF" => {
-                let mut ctx = PkeyCtx::new_id(Id::HKDF)?;
-                ctx.derive_init()?;
-                ctx.set_hkdf_md(md(&r.hash)?)?;
-                ctx.set_hkdf_key(key.secret()?)?;
-                ctx.set_hkdf_salt(&r.salt)?;
-                ctx.add_hkdf_info(&r.info)?;
-                ctx.derive(Some(&mut output))?;
+                native::derive(1, &r.hash, key.secret()?, &r.salt, &r.info, 0, &mut output)?;
             }
             _ => return Err(error("NotSupportedError", "Unsupported derivation")),
         }
         Ok(output)
     }
 }
-fn digest(name: &str) -> Result<MessageDigest> {
-    match name {
-        "SHA-1" => Ok(MessageDigest::sha1()),
-        "SHA-256" => Ok(MessageDigest::sha256()),
-        "SHA-384" => Ok(MessageDigest::sha384()),
-        "SHA-512" => Ok(MessageDigest::sha512()),
-        _ => Err(error("NotSupportedError", "Unsupported hash")),
-    }
-}
-fn md(name: &str) -> Result<&'static openssl::md::MdRef> {
-    match name {
-        "SHA-1" => Ok(Md::sha1()),
-        "SHA-256" => Ok(Md::sha256()),
-        "SHA-384" => Ok(Md::sha384()),
-        "SHA-512" => Ok(Md::sha512()),
-        _ => Err(error("NotSupportedError", "Unsupported hash")),
-    }
-}
-fn group(curve: &str) -> Result<EcGroup> {
-    Ok(EcGroup::from_curve_name(match curve {
-        "P-256" => Nid::X9_62_PRIME256V1,
-        "P-384" => Nid::SECP384R1,
-        "P-521" => Nid::SECP521R1,
-        _ => return Err(error("NotSupportedError", "Unsupported named curve")),
-    })?)
-}
 fn sign(key: &Key, r: &Request) -> Result<Value> {
     let signing = r.operation == "sign";
-    let hash_name = if key.algorithm == "ECDSA" {
+    let hash = if key.algorithm == "ECDSA" {
         &r.hash
     } else {
         &key.hash
     };
-    let hash = digest(hash_name)?;
+    native::hash_id(hash)?;
     if key.algorithm == "HMAC" {
-        let pkey = PKey::hmac(key.secret()?)?;
-        let mut signer = Signer::new(hash, &pkey)?;
-        let signature = signer.sign_oneshot_to_vec(&r.data)?;
+        let signature = native::hmac(hash, key.secret()?, &r.data)?;
         return Ok(if signing {
             json!(signature)
         } else {
-            json!(
-                signature.len() == r.signature.len()
-                    && openssl::memcmp::eq(&signature, &r.signature)
-            )
+            json!(native::equal(&signature, &r.signature))
         });
     }
-    require(
-        ["RSA-PSS", "RSASSA-PKCS1-v1_5", "ECDSA"].contains(&key.algorithm.as_str()),
-        "InvalidAccessError",
-        "Not a signing key",
-    )?;
-    if key.algorithm == "RSA-PSS" {
+    let scheme = match key.algorithm.as_str() {
+        "RSASSA-PKCS1-v1_5" => 1,
+        "RSA-PSS" => 2,
+        "ECDSA" => 3,
+        _ => return Err(error("InvalidAccessError", "Not a signing key")),
+    };
+    if scheme == 2 {
         require(r.salt_length >= 0, "OperationError", "Invalid salt length")?;
     }
     if signing {
-        let mut signer = Signer::new(hash, key.private()?)?;
-        if key.algorithm == "RSA-PSS" {
-            signer.set_rsa_padding(Padding::PKCS1_PSS)?;
-            signer.set_rsa_pss_saltlen(RsaPssSaltlen::custom(r.salt_length))?;
-            signer.set_rsa_mgf1_md(hash)?;
-        }
-        let signature = signer.sign_oneshot_to_vec(&r.data)?;
-        if key.algorithm == "ECDSA" {
-            let sig = EcdsaSig::from_der(&signature)?;
-            let size = group(&key.curve)?.degree().div_ceil(8) as i32;
-            let mut bytes = sig.r().to_vec_padded(size)?;
-            bytes.extend(sig.s().to_vec_padded(size)?);
-            return Ok(json!(bytes));
-        }
-        Ok(json!(signature))
+        Ok(json!(key.private()?.sign(
+            scheme,
+            hash,
+            r.salt_length,
+            &r.data
+        )?))
     } else {
         require(
             key.kind() == "public",
             "InvalidAccessError",
             "Expected a public verification key",
         )?;
-        let public = key.public()?;
-        let mut verifier = Verifier::new(hash, &public)?;
-        if key.algorithm == "RSA-PSS" {
-            verifier.set_rsa_padding(Padding::PKCS1_PSS)?;
-            verifier.set_rsa_pss_saltlen(RsaPssSaltlen::custom(r.salt_length))?;
-            verifier.set_rsa_mgf1_md(hash)?;
-        }
-        let signature = if key.algorithm == "ECDSA" {
-            let size = group(&key.curve)?.degree().div_ceil(8) as usize;
-            if r.signature.len() != 2 * size {
-                return Ok(json!(false));
-            }
-            EcdsaSig::from_private_components(
-                BigNum::from_slice(&r.signature[..size])?,
-                BigNum::from_slice(&r.signature[size..])?,
-            )?
-            .to_der()?
-        } else {
-            r.signature.clone()
-        };
-        Ok(json!(
-            verifier
-                .verify_oneshot(&signature, &r.data)
-                .unwrap_or(false)
-        ))
+        Ok(json!(key.public()?.verify(
+            scheme,
+            hash,
+            r.salt_length,
+            &r.data,
+            &r.signature
+        )?))
     }
 }

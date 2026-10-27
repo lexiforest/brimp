@@ -17,8 +17,9 @@ in independent JavaScript realms, with handles and typed events exposed to the h
 
 Plugins add capabilities for specific workloads. Install bundled plugins or
 provide your own JavaScript installer and host handlers. Storage lifetimes and
-mock behavior are explicit. Default binding sessions install no plugins; the CLI
-automatically installs extraction for Markdown/JSON output.
+mock behavior are explicit. Default sessions install browser subsystem plugins, including their synthetic
+compatibility behavior. An explicit plugin list replaces that set. The CLI also
+installs extraction for Markdown/JSON output.
 
 Start with the [quick start](/quick-start/), [API](/api/), and
 [plugin support](/architecture/subsystems/).
@@ -37,7 +38,7 @@ pages need:
 - inline styles and non-rendering stylesheet editing;
 - navigation, subresources, cookies, timers, events, and `fetch()`;
 - curl-impersonate transport profiles for HTTP/TLS behavior; and
-- coherent, configurable browser personas.
+- coherent, configurable browser profiles.
 
 ## One runtime, 3 interfaces
 

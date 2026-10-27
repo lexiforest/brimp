@@ -14,6 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  javascript-format:
+    name: Runtime JavaScript formatting
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run format:runtime:check
+
   lexbor:
     name: Standalone Lexbor
     runs-on: ubuntu-24.04
@@ -55,11 +67,25 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Download pinned native SDKs
+      - name: Check out curl-impersonate SDK source
+        uses: actions/checkout@v6
+        with:
+          repository: lexiforest/curl-impersonate
+          path: .native/curl-source
+
+      - name: Build curl SDK with shared BoringSSL WebCrypto
+        run: |
+          cmake -S .native/curl-source -B .native/curl-build -DCMAKE_INSTALL_PREFIX="$PWD/.native/curl-sdk"
+          cmake --build .native/curl-build --parallel 4
+          make -C .native/curl-source checkbuild BUILD_DIR="$PWD/.native/curl-build"
+          cmake --install .native/curl-build
+
+      - name: Prepare native SDKs
         run: >-
           python scripts/prepare_native.py
           --target aarch64-apple-darwin
           --output .native/aarch64-apple-darwin
+          --curl-sdk .native/curl-sdk
 
       - name: Build native bindings
         run: cargo build --locked -p brimp-cli -p brimp-python -p brimp-node
@@ -76,7 +102,8 @@ jobs:
           python3 bindings/prepare_local.py
           PYTHONPATH=bindings/python/python python3 -m pytest bindings/python/tests
           node --test bindings/node/test/*.test.mjs
-          PYTHONPATH=bindings/python/python python3 -m pytest docs/tests/test_examples.py
+          PYTHONPATH=bindings/python/python python3 -m pytest docs/tests/test_examples.py scripts/test_prepare_native.py
+          python3 -m pytest .native/curl-source/tests/test_webcrypto.py --install-dir .native/curl-sdk
 
       - name: Sanitize Lexbor boundary
         run: python3 scripts/test_lexbor_boundary.py
@@ -88,15 +115,21 @@ jobs:
           npm run build
           git diff --exit-code -- core.bundle.js manifest.json ../plugins/storage.js
 
+      - name: Install runtime and workload test dependencies
+        working-directory: tests
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Test runtime environment
+        working-directory: tests
+        run: npm run test:runtime
+
       - name: Prepare browser regression fixtures
         working-directory: tests
-        run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          npm run prepare:fixtures
+        run: npm run prepare:fixtures
 
       - name: Test browser regressions
         working-directory: tests
-        run: npm test
+        run: npm run test:workloads
 
       - name: Upload browser regression report
         if: always()
@@ -151,7 +184,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - name: Download pinned native SDKs
+      - name: Download pinned JSC SDK
         run: python scripts/prepare_native.py --target ${{ matrix.target }} --output .native/${{ matrix.target }}
       - name: Test engine ownership and asynchronous WASM
         run: cargo test --locked -p brimp-jsc --test runtime

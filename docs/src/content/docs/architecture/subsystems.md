@@ -3,9 +3,10 @@ title: Core APIs and plugins
 ---
 
 Brimp combines JavaScriptCore, a canonical Lexbor DOM, and curl-impersonate.
-Common web APIs are available in every page. Specialized capabilities use explicit
-plugins. Binding sessions start with no plugins; CLI Markdown/JSON extraction
-automatically selects Defuddle.
+DOM APIs and shared infrastructure live in core. Browser subsystem plugins are
+installed by default, including their placeholders and synthetic behavior. An
+explicit plugin list replaces the defaults; an empty list selects core only. CLI
+Markdown/JSON extraction also selects Defuddle.
 
 In this walkthrough, you will use core crypto, inspect plugin options and add a
 host-backed lookup function to page JavaScript.
@@ -35,20 +36,10 @@ from brimp import plugins
 print(plugins.catalog())
 ```
 
-Then opt into storage for one realm:
-
-```python
-from brimp import Session, plugins
-
-with Session(plugins=[plugins.storage()]) as session:
-    page = session.new_page()
-    print(page.evaluate("localStorage.setItem('theme', 'dark'); localStorage.getItem('theme')"))
-```
-
-Expect `dark`. This storage resets on navigation. Use `plugins.host_storage()`
-with a backend when state must outlive a realm; session memory is the default.
-The [host-storage contract](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
-includes an example SQLite backend for durable JSON storage.
+Browser storage is a core API. For optional application-specific storage, use
+`plugins.host_storage()` with a backend. Its [contract](/guides/plugins/) includes
+a SQLite example. Core localStorage, CacheStorage and IndexedDB share origin state
+within a session; `storage_path` optionally persists their committed contents.
 
 ## 3. Connect page code to a host handler
 
@@ -81,9 +72,16 @@ supplied by page code.
 
 ## 4. Check the boundary before adding a plugin
 
-Use the tables below to decide whether a missing behavior belongs in common web
-core or needs a specialized backend. Constructor presence is not evidence of a
-full graphics, audio or worker implementation.
+Core owns DOM APIs and shared runtime infrastructure. Browser subsystems such as
+audio, graphics, RTC and device services belong in plugins, including their
+placeholders and synthetic behavior. A real backend is not required for a plugin
+to provide useful compatibility. Which plugins the default environment installs
+is a separate decision from ownership.
+
+The tables below describe current coverage. Constructor presence is not evidence
+of a full graphics, audio or worker implementation, but those callable surfaces
+can still be required by browser scripts. See the [ownership policy](/guides/plugins/#core-runtime-and-plugins)
+before changing placement or exposure.
 
 ## Core coverage
 
@@ -103,7 +101,7 @@ DOM arena on one owner thread.
 
 ## Core WebCrypto
 
-The same vendored OpenSSL backend serves Python and Node. CryptoKey material and
+The BoringSSL instance embedded in curl-impersonate serves both Python and Node. CryptoKey material and
 usage/extractability policy live in native realm state; JavaScript wrappers hold
 opaque handles. SubtleCrypto operations return Promises and copy binary inputs.
 
@@ -123,25 +121,22 @@ RSA/EC keys support SPKI, PKCS8 and JWK; EC public keys also support raw points.
 Symmetric keys support raw and JWK formats; HKDF/PBKDF2 base keys use raw import.
 Ed25519/X25519 and CryptoKey structured cloning are unsupported. Expensive native
 operations occupy the page owner thread. The complete algorithm and parameter
-contract is in [core web coverage](https://github.com/lexiforest/brimp/blob/main/bindings/CORE_WEB.md).
+contract is in [core web coverage](/web-platform/).
 
 ## Bundled plugins
 
 | Plugin | Behavior and limits |
 | --- | --- |
-| Storage | Realm-local Storage, fake-indexeddb transactions and Cache subset; resets on navigation |
 | Host storage | Async hostStorage with atomic origin-partitioned batches; session memory by default, configurable backend for durability |
 | Defuddle | DOM/attribute/inline-style extraction required by page.extract() |
-| Canvas | State and fixed-color readback; no rasterization, fonts or image decoding |
-| Services | Realm-local locks and configurable navigator/device/permission mocks |
-| Geometry | Points, rectangles, quads and 2D matrices; no DOM measurement |
-| CSS Typed OM | Inline value objects and attributeStyleMap; no cascade or compound calc algebra |
-| Scheduling | Prioritized tasks, cancellation and zero-budget idle callbacks |
-| Graphics | WebGL state, Safari constants and legacy callable placeholders; optional WebGPU buffer mocks; no shader execution or GPU rendering |
+| Canvas | State, solid rectangle/putImageData painting and real PNG encoding; paths, images and text do not rasterize |
+| Environment / Permissions / Devices | Navigator configuration, synthetic permissions and device-service placeholders |
+| Media / Workers / Trusted Types | Media objects, worker shapes and policy placeholders; no media/worker execution or policy enforcement |
+| Graphics | WebGL state/constants with profile vendor, renderer and extensions; legacy callable placeholders; optional WebGPU buffers; no shader execution or GPU rendering |
 | Audio | AudioBuffer and graph/lifecycle state; no processing, decoding or output |
 
 See the [generated Python plugin API](/reference/python/plugins/) and
 [Node API](/reference/node/) for installer signatures. The
-[plugin contract](https://github.com/lexiforest/brimp/blob/main/bindings/PLUGINS.md)
+[plugin contract](/guides/plugins/)
 covers file loading, notification subscriptions, per-session setup/disposal,
 cancellation and storage backends.

@@ -1,28 +1,23 @@
 {
   "rtc": {
-    "installers": {"node": "rtcPlugin", "python": "rtc"},
-    "capabilities": ["Local peer/data-channel shapes", "Description and ICE payload storage", "RTC event payloads and handlers"],
-    "limitations": ["No ICE/SDP negotiation, networking or media transport", "Legacy offer promise never settles; most operations are no-ops", "Candidate parsing and SCTP are placeholders"],
-    "lifetime": "realm",
-    "options": {}
-  },
-  "storage": {
     "installers": {
-      "node": "storagePlugin",
-      "python": "storage"
+      "node": "rtcPlugin",
+      "python": "rtc"
     },
     "capabilities": [
-      "Storage",
-      "IndexedDB transactions",
-      "CookieStore and SQLTransaction legacy placeholders",
-      "Cache"
+      "Local peer/data-channel shapes",
+      "Profile ICE configuration",
+      "Description and ICE payload storage",
+      "RTC event payloads and handlers"
     ],
     "limitations": [
-      "Memory only; resets on navigation",
-      "No shared-origin IndexedDB, storage events or OPFS"
+      "No ICE/SDP negotiation, networking or media transport",
+      "Legacy offer promise never settles; most operations are no-ops",
+      "Candidate parsing and SCTP are placeholders"
     ],
     "lifetime": "realm",
-    "options": {}
+    "options": {},
+    "defaultEnabled": true
   },
   "canvas": {
     "installers": {
@@ -31,12 +26,14 @@
     },
     "capabilities": [
       "Canvas state",
-      "ImageData",
-      "Configured readback"
+      "Solid rectangle and putImageData painting",
+      "Real PNG encoding",
+      "Profile text metrics"
     ],
     "limitations": [
-      "No rasterization, fonts or image decoding",
-      "Mock data URL is not an image",
+      "Paths, gradients, images and text do not rasterize",
+      "Only image/png is encoded",
+      "No fonts or image decoding",
       "Capture/offscreen transfer are callable no-ops"
     ],
     "lifetime": "realm",
@@ -53,77 +50,8 @@
         "default": 0.5,
         "python": "character_width"
       }
-    }
-  },
-  "services": {
-    "installers": {
-      "node": "servicesPlugin",
-      "python": "services"
     },
-    "capabilities": [
-      "Realm-local locks",
-      "Configured navigator/device values",
-      "MediaEncryptedEvent payloads",
-      "MediaStream identity and legacy media/SourceBuffer placeholders",
-      "Worker and Trusted Types placeholders without execution or enforcement",
-      "Clipboard, credentials, geolocation, media and worker service placeholders"
-    ],
-    "limitations": [
-      "No real device or permission services",
-      "No encrypted-media playback or key-system backend",
-      "Locks do not coordinate different realms"
-    ],
-    "lifetime": "realm",
-    "options": {
-      "hardware_concurrency": {
-        "default": 4
-      },
-      "max_touch_points": {
-        "default": 0
-      },
-      "vendor": {
-        "default": ""
-      },
-      "product_sub": {
-        "default": "20030107"
-      },
-      "pdf_viewer_enabled": {
-        "default": false
-      },
-      "device_memory_gb": {
-        "default": 8
-      },
-      "connection_type": {
-        "default": "unknown"
-      },
-      "connection_rtt_ms": {
-        "default": 0
-      },
-      "connection_downlink_mbps": {
-        "default": 0
-      },
-      "connection_effective_type": {
-        "default": "4g"
-      },
-      "connection_save_data": {
-        "default": false
-      },
-      "notification_permission": {
-        "default": "denied"
-      },
-      "permissions_enabled": {
-        "default": true
-      },
-      "bluetooth_enabled": {
-        "default": true
-      },
-      "bluetooth_available": {
-        "default": false
-      },
-      "media_devices_enabled": {
-        "default": true
-      }
-    }
+    "defaultEnabled": true
   },
   "extraction": {
     "installers": {
@@ -137,53 +65,8 @@
       "DOM/inline styles only; no layout"
     ],
     "lifetime": "realm",
-    "options": {}
-  },
-  "geometry": {
-    "installers": {
-      "node": "geometryPlugin",
-      "python": "geometry"
-    },
-    "capabilities": [
-      "DOMPoint/Rect/Quad",
-      "2D DOMMatrix"
-    ],
-    "limitations": [
-      "No layout measurement, 3D matrices or transform-list parsing"
-    ],
-    "lifetime": "realm",
-    "options": {}
-  },
-  "css-typed-om": {
-    "installers": {
-      "node": "cssTypedOmPlugin",
-      "python": "css_typed_om"
-    },
-    "capabilities": [
-      "CSSUnitValue arithmetic",
-      "Inline attributeStyleMap"
-    ],
-    "limitations": [
-      "No cascade, compound calc algebra or computed style"
-    ],
-    "lifetime": "realm",
-    "options": {}
-  },
-  "scheduling": {
-    "installers": {
-      "node": "schedulingPlugin",
-      "python": "scheduling"
-    },
-    "capabilities": [
-      "Prioritized tasks",
-      "Abort and priority changes"
-    ],
-    "limitations": [
-      "Priorities apply within plugin tasks",
-      "Idle budget is zero"
-    ],
-    "lifetime": "realm",
-    "options": {}
+    "options": {},
+    "defaultEnabled": false
   },
   "graphics": {
     "installers": {
@@ -193,13 +76,13 @@
     "capabilities": [
       "WebGL state and buffers",
       "Safari WebGL constants and legacy callable placeholders",
-      "Debug renderer extension with configured mock identity",
+      "Debug renderer extension with profile identity",
+      "Profile extensions and named limits",
       "Optional WebGPU buffer mock"
     ],
     "limitations": [
       "Shaders fail; no GPU execution or rasterization",
-      "Additional WebGL methods return undefined without effects, including resource creation and queries",
-      "Install canvas first when combining"
+      "Additional WebGL methods return undefined without effects, including resource creation and queries"
     ],
     "lifetime": "realm",
     "options": {
@@ -212,12 +95,13 @@
         ]
       },
       "renderer": {
-        "default": "Deterministic JavaScript mock"
+        "default": null
       },
       "webgpu": {
         "default": false
       }
-    }
+    },
+    "defaultEnabled": true
   },
   "audio": {
     "installers": {
@@ -227,7 +111,7 @@
     "capabilities": [
       "AudioBuffer",
       "Graph/lifecycle and listener/compressor state",
-      "Local speech utterance payloads and manual events",
+      "Profile sample rate and output latency",
       "Legacy DSP/worklet call coverage and silent offline buffers"
     ],
     "limitations": [
@@ -238,10 +122,11 @@
     "lifetime": "realm",
     "options": {
       "sampleRate": {
-        "default": 48000,
+        "default": 44100,
         "python": "sample_rate"
       }
-    }
+    },
+    "defaultEnabled": true
   },
   "host-storage": {
     "installers": {
@@ -265,6 +150,159 @@
         "python": "backend_factory",
         "hostOnly": true
       }
-    }
+    },
+    "defaultEnabled": false
+  },
+  "environment": {
+    "installers": {
+      "node": "environmentPlugin",
+      "python": "environment"
+    },
+    "capabilities": [
+      "Explicit core navigator overrides",
+      "Configured connection values"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "hardware_concurrency": {
+        "default": 4
+      },
+      "max_touch_points": {
+        "default": 0
+      },
+      "vendor": {
+        "default": ""
+      },
+      "product_sub": {
+        "default": "20030107"
+      },
+      "pdf_viewer_enabled": {
+        "default": false
+      },
+      "device_memory_gb": {
+        "default": 8
+      },
+      "expose_global_privacy_control": {
+        "default": false
+      },
+      "global_privacy_control": {
+        "default": false
+      },
+      "connection_type": {
+        "default": "unknown"
+      },
+      "connection_rtt_ms": {
+        "default": 0
+      },
+      "connection_downlink_mbps": {
+        "default": 0
+      },
+      "connection_effective_type": {
+        "default": "4g"
+      },
+      "connection_save_data": {
+        "default": false
+      }
+    },
+    "defaultEnabled": true
+  },
+  "permissions": {
+    "installers": {
+      "node": "permissionsPlugin",
+      "python": "permissions"
+    },
+    "capabilities": [
+      "Notification and permission mocks",
+      "Credential placeholders"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "notification_permission": {
+        "default": "denied"
+      },
+      "permissions_enabled": {
+        "default": true
+      }
+    },
+    "defaultEnabled": true
+  },
+  "devices": {
+    "installers": {
+      "node": "devicesPlugin",
+      "python": "devices"
+    },
+    "capabilities": [
+      "Bluetooth availability",
+      "Clipboard, geolocation, wake lock and sharing placeholders"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "bluetooth_enabled": {
+        "default": true
+      },
+      "bluetooth_available": {
+        "default": false
+      }
+    },
+    "defaultEnabled": true
+  },
+  "media": {
+    "installers": {
+      "node": "mediaPlugin",
+      "python": "media"
+    },
+    "capabilities": [
+      "Media devices, streams and source-buffer placeholders",
+      "Media session state and encrypted-media event payloads"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {
+      "media_devices_enabled": {
+        "default": true
+      }
+    },
+    "defaultEnabled": true
+  },
+  "workers": {
+    "installers": {
+      "node": "workersPlugin",
+      "python": "workers"
+    },
+    "capabilities": [
+      "Worker and service-worker placeholders"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {},
+    "defaultEnabled": true
+  },
+  "trusted-types": {
+    "installers": {
+      "node": "trustedTypesPlugin",
+      "python": "trusted_types"
+    },
+    "capabilities": [
+      "Trusted Types placeholders"
+    ],
+    "limitations": [
+      "Synthetic compatibility behavior; no real device, service or execution backend"
+    ],
+    "lifetime": "realm",
+    "options": {},
+    "defaultEnabled": true
   }
 }

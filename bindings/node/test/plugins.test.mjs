@@ -20,8 +20,7 @@ test('async installers, Promise handlers, binary, notifications, errors, disposa
     },
     async notify(context) { for (let n = 0; n < 3; n++) context.emit('message', n); return null; },
     fail() { throw new Error('handler detail'); },
-    dispose(context) { disposed.push(context.realmId); return null; },
-  });
+    dispose(context) { disposed.push(context.realmId); return null; }});
   const session = await createSession({plugins: [plugin]});
   try {
     const page = await session.newPage();
@@ -43,8 +42,7 @@ test('callback handle access works while lifecycle reentry is rejected', async (
       }
       assert.deepEqual(await handle.jsonValue(), {a: 1});
       return other.evaluate('6 * 7');
-    },
-  });
+    }});
   session = await createSession({plugins:[plugin]});
   try {
     page = await session.newPage(); other = await session.newPage();
@@ -59,8 +57,7 @@ test('closure cancels callback and ignores late completion', async () => {
   const started = new Promise(resolve => { entered = resolve; });
   const blocked = new Promise(resolve => { finish = resolve; });
   const plugin = new Plugin('pending', '({global, host}) => {global.wait = () => host.call("wait");}', {
-    async wait(ctx) { context = ctx; entered(); await blocked; return Buffer.from('late'); },
-  });
+    async wait(ctx) { context = ctx; entered(); await blocked; return Buffer.from('late'); }});
   const session = await createSession({plugins:[plugin]});
   try {
     const page = await session.newPage();
@@ -84,8 +81,7 @@ test('navigation cancels host calls and discards results from the previous realm
   const blocked = new Promise(resolve => { finish = resolve; });
   const plugin = new Plugin('navigation',
     '({global,host}) => { global.wait = () => host.call("wait").then(v => global.late = v); }', {
-      async wait(ctx) { context = ctx; entered(); await blocked; return 'old'; },
-    });
+      async wait(ctx) { context = ctx; entered(); await blocked; return 'old'; }});
   const session = await createSession({plugins:[plugin]});
   try {
     const page = await session.newPage();
@@ -110,8 +106,7 @@ test('graphics and audio example uses state and explicit asynchronous host exten
     async processAudio(_context, command) {
       assert.equal(command.sampleRate, 48000);
       return command.samples;
-    },
-  });
+    }});
   const session = await createSession({plugins:[plugin]});
   try {
     const page = await session.newPage();
@@ -125,8 +120,8 @@ test('graphics and audio example uses state and explicit asynchronous host exten
 });
 
 test('bundled plugins, direct input and extraction', async () => {
-  const {storagePlugin, canvasPlugin, servicesPlugin, extractionPlugin} = await import('../index.js');
-  const session = await createSession({plugins:[storagePlugin(), canvasPlugin(), servicesPlugin(), extractionPlugin()]});
+  const { canvasPlugin, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin, workersPlugin, trustedTypesPlugin, extractionPlugin} = await import('../index.js');
+  const session = await createSession({plugins:[ canvasPlugin(), environmentPlugin(), permissionsPlugin(), devicesPlugin(), mediaPlugin(), workersPlugin(), trustedTypesPlugin(), extractionPlugin()]});
   try {
     const page = await session.newPage();
     await page.evaluate("document.body.innerHTML='<article><h1>Native article</h1><p>This article is read from a DOM without a layout engine.</p></article><input id=edit><input id=check type=checkbox>'; null");
@@ -136,7 +131,7 @@ test('bundled plugins, direct input and extraction', async () => {
     await checkbox.click(); await checkbox.dispose();
     assert.equal(await page.evaluate("document.querySelector('#check').checked"), true);
     assert.match((await page.extract({contentSelector:'article'})).contentMarkdown, /DOM/);
-    assert.equal(await page.evaluate("localStorage.x='yes';localStorage.getItem('x')"), 'yes');
+
     assert.deepEqual(await page.evaluate("Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)"), [0,0,0,0]);
   } finally { await session.close(); }
 });

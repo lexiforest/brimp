@@ -34,7 +34,7 @@ def main():
     names = sorted(packages[package]["name"] for package in visited)
     forbidden = ("brimp-protocol", "blitz", "stylo", "style", "skia",
                  "vello", "fontique", "parley", "html5ever", "xml5ever",
-                 "font-kit", "fontdb", "rustybuzz", "swash")
+                 "font-kit", "fontdb", "rustybuzz", "swash", "openssl")
     found = [name for name in names if any(
         name == prefix or name.startswith(prefix + "-") for prefix in forbidden
     ) or name == "brimp"]

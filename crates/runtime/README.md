@@ -22,9 +22,9 @@ records from the parser are delivered at script boundaries.
 
 Document lifecycle states, live Range content operations, FileReader, XPath,
 Shadow DOM and structured cloning are core. Web Streams use the pinned
-web-streams-polyfill implementation. WebCrypto uses vendored OpenSSL for SHA
+web-streams-polyfill implementation. WebCrypto shares curl-impersonate’s BoringSSL for SHA
 digests, HMAC, AES-GCM/CBC/CTR/KW, RSA signing/OAEP, ECDSA/ECDH, HKDF and PBKDF2.
-See [core coverage](../../bindings/CORE_WEB.md) for supported formats and limits.
+See [core coverage](../../docs/src/content/docs/web-platform/index.md) for supported formats and limits.
 
 Networking includes redirects, session cookies, proxies, authentication,
 Fetch/XHR, WebSocket, EventSource, URL/encoding/body primitives, typed events,
@@ -35,11 +35,13 @@ Response interception buffers at most 32 MiB. Streams use a 256 KiB consumer
 queue and replay paused chunks exactly once; retained response bodies have
 separate configurable limits. Buffered download delay is not bandwidth control.
 
-Plugins are explicit ordered JavaScript installers, with none enabled by default.
-See [plugin behavior and host callbacks](../../bindings/PLUGINS.md). Native
-rendering, fonts, image decoding, GPU/audio engines, durable storage, and worker
-execution are absent. Layout, computed style, screen/viewport geometry, XML
-parsing, and coordinate actions are outside the core contract.
+Browser subsystem plugins are enabled by default as ordered JavaScript installers.
+An explicit plugin list replaces that set; an empty list selects core only.
+See [plugin behavior and host callbacks](../../docs/src/content/docs/guides/plugins.md). Native
+rendering, fonts, image decoding, GPU/audio engines and worker
+execution are absent. Screen and viewport properties use configured profile
+values; geometry objects perform value arithmetic without measuring layout.
+Layout, computed style, XML parsing and coordinate actions are unsupported.
 
 ## Build and verify
 
@@ -49,7 +51,8 @@ or `libJavaScriptCore.so` on Linux. The local macOS default is the adjacent
 WebKit release directory. `BRIMP_CURL_LIB_DIR` selects curl-impersonate (default
 `/usr/local/lib`). Lexbor builds from the pinned source and license/provenance
 under [`brimp-lexbor/vendor/lexbor`](../lexbor/vendor/lexbor/UPSTREAM.md).
-OpenSSL builds from Cargo-pinned source and requires a C compiler, make and Perl.
+The curl SDK must export the BoringSSL WebCrypto interface declared in
+`curl-impersonate/webcrypto.h`; no separate crypto library is built by Cargo.
 
 On macOS, a locally built WebKit framework can retain the absolute system
 JavaScriptCore install name. Set `DYLD_FRAMEWORK_PATH="$BRIMP_JSC_LIB_DIR"` when
@@ -70,7 +73,7 @@ supported DOM, networking, and plugin contract.
 
 
 Diagnostics and logical clocks are explicit session options. See
-[`bindings/DEBUGGING.md`](../../bindings/DEBUGGING.md). Idle page owners and native
+[Diagnostics and time](../../docs/src/content/docs/guides/diagnostics.md). Idle page owners and native
 Promise waits use command/task/host wakeups and timer deadlines. Low-level
 selector/network-idle cancellation checks and WebSocket I/O retain bounded polls;
 these are not per-idle-page polling loops.

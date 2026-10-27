@@ -1,6 +1,6 @@
 ---
 title: CLI tutorial
-description: Check your build, evaluate page JavaScript, save HTML and use browser personas.
+description: Check your build, evaluate page JavaScript, save HTML and use browser profiles.
 ---
 
 **You'll build:** a shell workflow that fetches a page and writes its useful
@@ -51,16 +51,17 @@ The extensions select live HTML or extracted Markdown. Brimp refuses to replace
 an existing file unless you add `--overwrite`. Use `--format raw` for original
 response bytes; `--format json` means an extracted article object.
 
-## 4. Use a persona
+## 4. Use a profile
 
-From the repository root:
+Run `brimp profile capture --output browser-profile.json`, open the printed localhost
+URL in your browser, and click **Capture**. After it saves the profile:
 
 ```sh
-brimp fetch http://127.0.0.1:8765/   --persona crates/runtime/src/persona/example.json   --eval '({ua: navigator.userAgent, platform: navigator.platform})'
+brimp fetch http://127.0.0.1:8765/   --profile browser-profile.json   --eval '({ua: navigator.userAgent, platform: navigator.platform})'
 ```
 
-The result reflects the supplied persona. For individual overrides, use
-`--user-agent`, `--languages` or `--platform` without `--persona`.
+The result reflects the supplied profile. For individual overrides, use
+`--user-agent`, `--languages` or `--platform` without `--profile`.
 
 ## 5. Run browser JavaScript without navigating
 

@@ -5,7 +5,7 @@ Pinned, bundled runtime dependencies. Rebuild with `npm ci --ignore-scripts && n
 - `core-js-pure` supplies structured cloning of supported JavaScript data types, cycles, Maps/Sets, dates, buffers/views and ArrayBuffer transfer. It rejects unsupported platform types with DataCloneError; it does not pretend to clone DOM nodes or CryptoKeys.
 - `web-streams-polyfill` supplies WHATWG-based readable/writable/transform and byte streams, including backpressure, cancellation and reader/writer lifecycle. Fetch attaches its native source to these streams.
 - `xpath` supplies the XPath 1.0 expression engine over Brimp's live DOM wrappers, with an HTML namespace adapter. This is not a claim of full browser XPath conformance (in particular, iterator invalidation on later DOM mutation is not supplied by this library).
-- `fake-indexeddb` replaces the handwritten IndexedDB subset in the optional storage plugin. Transactions, indexes, rollback and structured-cloned records are provided by the library. The factory is instantiated in each realm. Navigation discards its data; it does not provide shared origin databases or durable storage.
+- `fake-indexeddb` provides core IndexedDB transactions, indexes, rollback and structured-cloned records. The adapter in `storage-idb.js` connects realm-local objects to session-owned origin records and native transaction locks. `build.mjs` injects the transaction hooks into the pinned library. Committed data survives navigation; an optional session storage file persists it across sessions. Cross-page schema change notifications remain unsupported.
 - `@csstools/css-color-parser`, its tokenizer/parser and color helpers supply CSS color parsing and conversion for core input values. `input-color.js` adapts sRGB byte rounding, Display-P3 and alpha serialization, currentColor and measured Safari light-appearance system defaults. It does not render or open a color picker. The separate bundle lives inside the DOM runtime closure and exposes no page global.
 
 The color build adapts the pinned library at a few verified boundaries:
@@ -22,7 +22,7 @@ Safari. WebKit's BSD notice is retained with the adapted math and distributed
 with the package licenses. See [WebKit's color transfer functions](https://github.com/WebKit/WebKit/blob/main/Source/WebCore/platform/graphics/ColorTransferFunctions.h)
 and [CSS Color Parser](https://github.com/csstools/postcss-plugins/tree/main/packages/css-color-parser).
 
-`core.js`, `input-color.js`, `safari-color-*.js` and `storage*.js` are the authored adapters. The core bundle installs no storage or graphics capabilities. Storage is still an explicitly selected plugin.
+`core.js`, `input-color.js`, `safari-color-*.js` and `storage*.js` are the authored adapters. `storage.bundle.js` installs core storage APIs after the primitive core bundle. Graphics backends remain optional plugins.
 
 The core build replaces core-js-pure's `internals/shared-store.js` with a
 bundle-local CommonJS store. All internal consumers still share that one store;

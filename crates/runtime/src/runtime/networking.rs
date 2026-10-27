@@ -74,7 +74,7 @@ struct Cached {
 struct Streams {
     generation: u64,
     closed: bool,
-    active: Vec<std::sync::Weak<super::streams::BodyState>>,
+    active: Vec<std::sync::Weak<super::native::streaming::BodyState>>,
 }
 struct State {
     next: u64,
@@ -132,7 +132,7 @@ impl NetworkRuntime {
     }
     pub fn register_stream(
         &self,
-        state: &Arc<super::streams::BodyState>,
+        state: &Arc<super::native::streaming::BodyState>,
         generation: u64,
     ) -> Result<(), AutomationError> {
         let mut streams = self.streams.lock().unwrap();
@@ -158,7 +158,7 @@ impl NetworkRuntime {
     }
     pub fn watch_cancellation(
         &self,
-        state: std::sync::Weak<super::streams::BodyState>,
+        state: std::sync::Weak<super::native::streaming::BodyState>,
         token: super::CancellationToken,
     ) {
         self.executor.spawn(async move {

@@ -21,7 +21,7 @@ EXPECTED = {
     'examples/node.md': ['Brimp tutorial', 'Edited by Node', 'Brimp tutorial', 'Request cancelled', 'experiment=rendered'],
     'examples/fetch.md': ['Edited article', 'Hello from JavaScript', 'route', '53248', ''],
     'architecture/javascript-runtime.md': ['Hello from JavaScript', 'Hello from JavaScript', 'The previous realm is gone', '42'],
-    'architecture/subsystems.md': ['32', 'storage', 'dark', '42'],
+    'architecture/subsystems.md': ['32', 'host-storage', '42'],
 }
 
 
@@ -78,10 +78,11 @@ def test_tutorial(language, code, expected, server, tmp_path):
 def test_cli_tutorial(server, tmp_path):
     executable = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug/brimp')).resolve()
     assert executable.is_file(), 'Build brimp-cli before testing tutorials'
+    # Live browser capture is verified separately; provide its partial document here.
+    (tmp_path / 'browser-profile.json').write_text('{"format":"brimp-profile","version":1,"values":{}}')
     # Run the shell blocks exactly as printed; use a temporary output directory.
     for source in re.findall(r'```sh\n(.*?)\n```', (DOCS / 'examples/cli.md').read_text(), re.S):
         source = source.replace('http://127.0.0.1:8765', server)
-        source = source.replace('crates/runtime/src/persona/example.json', str(ROOT / 'crates/runtime/src/persona/example.json'))
         source = re.sub(r'\bbrimp(?= (doctor|fetch|run))', shlex.quote(str(executable)), source)
         result = subprocess.run(['sh', '-eu', '-c', source], cwd=tmp_path, text=True, capture_output=True, timeout=30)
         assert result.returncode == 0, result.stderr

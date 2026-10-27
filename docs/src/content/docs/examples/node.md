@@ -73,7 +73,8 @@ try {
 ```
 
 The result contains `title: 'Brimp tutorial'` and `links: 1`. Evaluation returns
-JSON-compatible values and awaits Promises. File access runs in Node; page
+copied values, including BigInt and binary buffers, and awaits Promises. See
+[Values and handles](/guides/values/) for the full conversion contract. File access runs in Node; page
 JavaScript has no Node `process`, `require` or filesystem API.
 
 ## 4. Cancel a slow request
@@ -119,8 +120,10 @@ try {
 ```
 
 Expect a cookie header containing `experiment=rendered` and `['en-US', 'en']`.
-`identity` accepts `userAgent`, `languages` and `platform`; full persona-file
-loading is available through the [CLI](/examples/cli/#4-use-a-persona).
+`identity` accepts `userAgent`, `languages` and `platform`. Pass a [captured or partial profile](/guides/profiles/) as `profile`,
+for example `createSession({profile})` with the parsed profile object. A supplied
+profile drives navigator identity, screen/viewport values, locale and timezone;
+`identity` still overrides individual identity fields.
 
 Next: [extract and stream content](/examples/fetch/), or browse the
 [generated Node API](/reference/node/).

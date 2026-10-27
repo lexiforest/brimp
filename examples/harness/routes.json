@@ -1,0 +1,4 @@
+[
+  {"pattern":"*","decision":{"action":"block","message":"No fixture for this request"}},
+  {"pattern":"https://fixture.invalid/config","decision":{"action":"fulfill","headers":[["content-type","application/json"],["access-control-allow-origin","*"]],"body":"{\"prefix\":\"Hello \"}"}}
+]

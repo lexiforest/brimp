@@ -46,7 +46,7 @@ struct PySession {
 impl PySession {
     #[new]
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (headers, timeout=30.0, proxy=None, plugins=Vec::new(), identity="{}", clock="{}", diagnostics="null"))]
+    #[pyo3(signature = (headers, timeout=30.0, proxy=None, plugins=Vec::new(), identity="{}", profile="null", clock="{}", diagnostics="null", storage_path=None))]
     fn new(
         py: Python<'_>,
         headers: Vec<(String, String)>,
@@ -54,16 +54,22 @@ impl PySession {
         proxy: Option<String>,
         plugins: Vec<plugins::Descriptor>,
         identity: &str,
+        profile: &str,
         clock: &str,
         diagnostics: &str,
+        storage_path: Option<String>,
     ) -> PyResult<Self> {
         let dispatcher = plugins::Dispatcher::new()?;
+        let parsed_profile: Option<brimp_runtime::profile::BrowserProfile> =
+            serde_json::from_str(profile).map_err(|e| InvalidInput::new_err(e.to_string()))?;
         let mut options = SessionOptions {
+            storage_path: storage_path.map(Into::into),
             clock: serde_json::from_str(clock).map_err(|e| InvalidInput::new_err(e.to_string()))?,
             diagnostics: serde_json::from_str(diagnostics)
                 .map_err(|e| InvalidInput::new_err(e.to_string()))?,
             identity: serde_json::from_str(identity)
                 .map_err(|e| InvalidInput::new_err(e.to_string()))?,
+            profile: parsed_profile,
             plugins: dispatcher.plugins(plugins),
             headers,
             timeout: duration(timeout)?,
@@ -144,6 +150,16 @@ impl PyPage {
     }
     fn run_pending_tasks(&self, py: Python<'_>, max_tasks: usize) -> PyResult<String> {
         py.detach(|| self.inner.run_pending_tasks(max_tasks))
+            .map(|v| v.to_string())
+            .map_err(error)
+    }
+    fn profile_contract(&self, py: Python<'_>) -> PyResult<String> {
+        py.detach(|| self.inner.profile_contract())
+            .map(|v| v.to_string())
+            .map_err(error)
+    }
+    fn profile_report(&self, py: Python<'_>) -> PyResult<String> {
+        py.detach(|| self.inner.profile_report())
             .map(|v| v.to_string())
             .map_err(error)
     }
@@ -415,7 +431,7 @@ impl PyHandle {
 
 #[pyclass(name = "_Stream")]
 struct PyStream {
-    inner: Arc<brimp_runtime::runtime::streams::StreamingResponse>,
+    inner: Arc<brimp_runtime::runtime::native::streaming::StreamingResponse>,
 }
 #[pymethods]
 impl PyStream {

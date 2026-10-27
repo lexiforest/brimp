@@ -317,8 +317,8 @@ fn proxy_fixture(
 fn concurrent_pages_pin_distinct_proxies_and_share_context_cookies() {
     let (proxy_a, observed_a, worker_a) = proxy_fixture("Proxy A");
     let (proxy_b, observed_b, worker_b) = proxy_fixture("Proxy B");
-    let browser = Session::with_persona_and_network_config(
-        brimp_runtime::persona::PersonaConfig::default(),
+    let browser = Session::with_profile_and_network_config(
+        brimp_runtime::profile::BrowserProfile::default(),
         brimp_runtime::network::CurlConfig::default(),
     )
     .unwrap();
@@ -371,7 +371,7 @@ fn navigator_locks_queue_query_abort_and_release_real_operations() {
     let page = browser
         .new_page_with_options(
             PageOptions::builder()
-                .plugins(vec![brimp_runtime::runtime::plugins::bundled::services(
+                .plugins(vec![brimp_runtime::runtime::plugins::bundled::environment(
                     serde_json::json!({}),
                 )])
                 .build(),
@@ -438,10 +438,11 @@ fn navigator_locks_queue_query_abort_and_release_real_operations() {
                 releaseShared("shared-result");
                 await Promise.all([sharedA, sharedB]);
 
-                let releaseBlocker;
+                let releaseBlocker, blockerStarted;
+                const started = new Promise(resolve => { blockerStarted = resolve; });
                 const blocker = navigator.locks.request("abortable", () =>
-                    new Promise(resolve => { releaseBlocker = resolve; }));
-                await Promise.resolve();
+                    new Promise(resolve => { releaseBlocker = resolve; blockerStarted(); }));
+                await started;
                 const controller = new AbortController();
                 const aborted = navigator.locks.request(
                     "abortable",

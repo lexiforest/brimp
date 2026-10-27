@@ -18,6 +18,7 @@ http = "1"
 url = "2"
 glob = "0.3"
 tempfile = "3"
+tiny_http = "0.12"
 
 [target.'cfg(unix)'.dependencies]
 signal-hook-registry = "1.4"

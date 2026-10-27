@@ -9611,11 +9611,19 @@
   // core.js
   var import_structured_clone = __toESM(require_structured_clone2(), 1);
   var import_xpath = __toESM(require_xpath(), 1);
-  for (const [name2, value] of Object.entries(ponyfill_exports)) Object.defineProperty(globalThis, name2, { value, writable: true, configurable: true });
-  Object.defineProperty(globalThis, "structuredClone", { value: import_structured_clone.default, writable: true, configurable: true });
+  for (const [name2, value] of Object.entries(ponyfill_exports))
+    Object.defineProperty(globalThis, name2, { value, writable: true, configurable: true });
+  Object.defineProperty(globalThis, "structuredClone", {
+    value: import_structured_clone.default,
+    writable: true,
+    configurable: true
+  });
   var XPathEvaluator = class {
     createExpression(expression, resolver = null) {
-      const compiled = import_xpath.default.createExpression(String(expression), typeof resolver === "function" ? { lookupNamespaceURI: resolver } : resolver);
+      const compiled = import_xpath.default.createExpression(
+        String(expression),
+        typeof resolver === "function" ? { lookupNamespaceURI: resolver } : resolver
+      );
       const evaluate = compiled.evaluate;
       compiled.evaluate = function(node, type = 0, result = null) {
         const doc = node.nodeType === 9 ? node : node.ownerDocument;
@@ -9631,9 +9639,17 @@
       return this.createExpression(expression, resolver).evaluate(node, type, result);
     }
   };
-  Object.assign(globalThis, { XPathEvaluator, XPathResult: import_xpath.default.XPathResult, XPathExpression: import_xpath.default.XPathExpression });
+  Object.assign(globalThis, {
+    XPathEvaluator,
+    XPathResult: import_xpath.default.XPathResult,
+    XPathExpression: import_xpath.default.XPathExpression
+  });
   for (const name2 of ["createExpression", "createNSResolver", "evaluate"]) {
-    Object.defineProperty(Document.prototype, name2, { value: XPathEvaluator.prototype[name2], writable: true, configurable: true });
+    Object.defineProperty(Document.prototype, name2, {
+      value: XPathEvaluator.prototype[name2],
+      writable: true,
+      configurable: true
+    });
   }
 })();
 /*! Bundled license information:

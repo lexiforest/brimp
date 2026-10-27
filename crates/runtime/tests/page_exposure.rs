@@ -5,7 +5,7 @@ use brimp_runtime::{
     runtime::{
         events::PageEvent,
         native::{RequestOptions, Session, SessionOptions},
-        plugins::{Plugin, bundled},
+        plugins::Plugin,
     },
 };
 use serde_json::json;
@@ -56,7 +56,7 @@ impl ResourceLoader for Fixtures {
 
 #[test]
 fn internal_controls_and_dependency_store_stay_private_across_navigation() {
-    for plugins in [vec![], vec![bundled::storage()]] {
+    for plugins in [vec![]] {
         let session = Session::with_resource_loader(
             SessionOptions {
                 plugins,
@@ -120,7 +120,7 @@ fn plugin_apis_share_source_boundary_without_invoking_getters_or_freezing_pages(
     "#,
     );
     let session = Session::new(SessionOptions {
-        plugins: vec![bundled::storage(), plugin],
+        plugins: vec![plugin],
         ..Default::default()
     })
     .unwrap();

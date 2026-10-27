@@ -73,14 +73,15 @@ function bundled(name, options) {
   if (options !== undefined) source = `context => (${source})(context, ${JSON.stringify(options)})`;
   return new Plugin(name === 'extraction' ? 'defuddle' : name, source);
 }
-export const storagePlugin = () => bundled('storage');
 export const canvasPlugin = (options = {}) => bundled('canvas', options);
-export const servicesPlugin = (options = {}) => bundled('services', options);
+export const environmentPlugin = (options = {}) => bundled('environment', options);
+export const permissionsPlugin = (options = {}) => bundled('permissions', options);
+export const devicesPlugin = (options = {}) => bundled('devices', options);
+export const mediaPlugin = (options = {}) => bundled('media', options);
+export const workersPlugin = (options = {}) => bundled('workers', options);
+export const trustedTypesPlugin = (options = {}) => bundled('trusted-types', options);
 export const extractionPlugin = () => bundled('extraction');
 
-export const geometryPlugin = () => bundled('geometry');
-export const cssTypedOmPlugin = () => bundled('css-typed-om');
-export const schedulingPlugin = () => bundled('scheduling');
 export const rtcPlugin = () => bundled('rtc');
 export const graphicsPlugin = (options = {}, handlers = {}) => new Plugin('graphics', bundled('graphics', options).source, handlers);
 export const audioPlugin = (options = {}, handlers = {}) => new Plugin('audio', bundled('audio', options).source, handlers);
@@ -140,4 +141,10 @@ export function hostStoragePlugin({backendFactory = memoryStorageBackend} = {}) 
       async dispose() { await Promise.allSettled(queues.values()); await backend.close?.(); },
     };
   });
+}
+
+/** Default browser subsystems. Each call returns fresh descriptors. */
+export function browserPlugins() {
+  return ['environment', 'permissions', 'devices', 'media', 'workers', 'trusted-types',
+    'canvas', 'graphics', 'audio', 'rtc'].map(name => bundled(name, {}));
 }

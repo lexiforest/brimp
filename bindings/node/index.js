@@ -1,8 +1,8 @@
 import { encode, decode, referenceValue } from './values.js';
 export { HostFunction } from './values.js';
 import { Readable } from 'node:stream';
-import { callbackContext, configurePlugins } from './plugins.js';
-export { Plugin, HostContext, pluginCatalog, hostStoragePlugin, storagePlugin, canvasPlugin, servicesPlugin, extractionPlugin, geometryPlugin, cssTypedOmPlugin, schedulingPlugin, graphicsPlugin, audioPlugin, rtcPlugin } from './plugins.js';
+import { callbackContext, configurePlugins, browserPlugins } from './plugins.js';
+export { Plugin, HostContext, browserPlugins, pluginCatalog, hostStoragePlugin, canvasPlugin, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin, workersPlugin, trustedTypesPlugin, extractionPlugin, graphicsPlugin, audioPlugin, rtcPlugin } from './plugins.js';
 import { createRequire } from 'node:module';
 const native = createRequire(import.meta.url)('./brimp.node');
 const eventNames = {requestFinished:'request_finished',requestFailed:'request_failed',webSocket:'websocket',eventSource:'eventsource'};
@@ -50,11 +50,11 @@ class Requests {
   head(url, options) { return this.request('HEAD', url, options); }
   options(url, options) { return this.request('OPTIONS', url, options); }
 }
-export async function createSession({ headers, timeout = 30000, proxy, auth, plugins = [], identity = {}, clock = {}, diagnostics = null } = {}) {
+export async function createSession({ headers, timeout = 30000, proxy, auth, plugins = browserPlugins(), identity = {}, profile = null, clock = {}, diagnostics = null, storagePath = null } = {}) {
   const token = {};
   const { descriptors, dispatch, dispose } = await configurePlugins(plugins, token);
   try {
-    return new Session(await invoke(() => native.createNativeSession(authHeaders(headers, auth), timeout, proxy, descriptors, dispatch, identity, clock, diagnostics)), token, dispose);
+    return new Session(await invoke(() => native.createNativeSession(authHeaders(headers, auth), timeout, proxy, descriptors, dispatch, identity, profile, clock, diagnostics, storagePath)), token, dispose);
   } catch (error) { await dispose(); throw error; }
 }
 export class Session extends Requests {
@@ -74,6 +74,8 @@ export class Session extends Requests {
 export class Page extends Requests {
   advanceTime(milliseconds, {maxTasks = 10000} = {}) { return invoke(() => this._inner.advanceTime(milliseconds, maxTasks), this._pageId); }
   runPendingTasks({maxTasks = 10000} = {}) { return invoke(() => this._inner.runPendingTasks(maxTasks), this._pageId); }
+  profileContract() { return invoke(() => this._inner.profileContract(), this._pageId); }
+  profileReport() { return invoke(() => this._inner.profileReport(), this._pageId); }
   takeDiagnostics() { return invoke(() => this._inner.takeDiagnostics(), this._pageId); }
   peekDiagnostics() { return invoke(() => this._inner.peekDiagnostics(), this._pageId); }
   summarizeDiagnostics() { return invoke(() => this._inner.summarizeDiagnostics(), this._pageId); }

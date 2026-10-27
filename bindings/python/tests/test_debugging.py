@@ -43,7 +43,7 @@ def test_clock_diagnostics_and_plugins(tmp_path):
     path = tmp_path / 'trace.jsonl'
     with Session(time_mode='logical', time_origin=1000,
                  diagnostics={'path': str(path), 'include': ['Document.prototype', 'Reflect'], 'capacity': 8},
-                 plugins=[plugins.geometry(), plugins.css_typed_om(), plugins.scheduling(), plugins.audio()]) as session:
+                 plugins=[plugins.audio()]) as session:
         page = session.new_page()
         page.evaluate("globalThis.seen=[];setTimeout(()=>seen.push([Date.now(),performance.now()]),20);null")
         assert page.advance_time(20)['now'] == 20
@@ -60,14 +60,13 @@ def test_clock_diagnostics_and_plugins(tmp_path):
     assert len([json.loads(line) for line in path.read_text().splitlines()]) >= 2
 
 
-def test_graphics_audio_host_extensions_and_absent_defaults():
-    with Session() as session:
+def test_graphics_audio_host_extensions_and_core_only_selection():
+    with Session(plugins=[]) as session:
         page = session.new_page()
-        assert page.evaluate("[typeof DOMPoint,typeof CSSUnitValue,typeof scheduler,typeof AudioContext,typeof WebGLRenderingContext]") == ['undefined'] * 5
+        assert page.evaluate("[typeof DOMPoint,typeof CSSUnitValue,typeof scheduler,typeof AudioContext,typeof WebGLRenderingContext]") == ['function', 'function', 'object', 'undefined', 'undefined']
     with Session(time_mode='logical', plugins=[
         plugins.graphics(rgba=(9,8,7,6), handlers={'graphics.submit': lambda context, value: value['width']}),
-        plugins.audio(handlers={'audio.process': lambda context, value: value['samples']}),
-    ]) as session:
+        plugins.audio(handlers={'audio.process': lambda context, value: value['samples']})]) as session:
         page = session.new_page()
         assert page.evaluate("document.createElement('canvas').getContext('webgl').submitAsync([])") == 300
         assert page.evaluate("new AudioContext().processAsync(new Uint8Array([1,2])).then(v=>Array.from(v))") == [1,2]

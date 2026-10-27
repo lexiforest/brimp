@@ -1,6 +1,11 @@
 # Node
 
-See [native binding setup and current scope](../README.md).
+See the [Node.js tutorial](https://docs.brimp.ai/examples/node/)
+and [development setup](https://docs.brimp.ai/development/).
+
+Browser subsystem plugins are enabled by default. An explicit `plugins` list
+replaces them; `createSession({plugins: []})` selects core only. Use
+`browserPlugins()` to extend or customize the default set.
 
 ```javascript
 import { createSession } from '@brimp/brimp';

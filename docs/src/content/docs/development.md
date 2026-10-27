@@ -5,6 +5,19 @@ description: Build one layer, run local checks and regenerate the documentation.
 
 Use this workflow to make a change and verify the layer it affects.
 
+Runtime JavaScript uses pinned Prettier tooling installed from the repository root:
+
+```sh
+npm ci --ignore-scripts
+npm run format:runtime
+npm run format:runtime:check
+```
+
+The configuration lives in `crates/runtime/js/.prettierrc.json`. Generated bundles
+and the generated CSS property table are excluded. After editing vendor adapters,
+regenerate their bundles with `npm run build --prefix crates/runtime/js/vendor`.
+CI checks formatting independently of the native SDK builds.
+
 ## 1. Find the owning crate
 
 ![Three host interfaces share brimp-runtime; JavaScriptCore, Lexbor and curl-impersonate live behind independent lower crates.](/diagrams/runtime-layers.png)
@@ -38,9 +51,21 @@ cargo test -p brimp-net
 ## Native prerequisites
 
 Set `BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` as shown in
-[installation](/install/#2-point-to-your-native-sdks). The repository also includes
-`scripts/prepare_native.py` for pinned SDK downloads; inspect its target and
-output options before selecting your platform:
+[installation](/install/#2-point-to-your-native-sdks). The repository helper
+`scripts/prepare_native.py` downloads the pinned JSC SDK. Pass `--curl-sdk`
+the installation prefix of a source-built curl-impersonate SDK for runtime
+builds; omit it for standalone JSC tests:
+
+```sh
+cmake -S ../curl-impersonate -B ../curl-impersonate/build -DCMAKE_INSTALL_PREFIX="$PWD/.native/curl-sdk"
+cmake --build ../curl-impersonate/build --parallel
+cmake --install ../curl-impersonate/build
+python3 scripts/prepare_native.py --target aarch64-apple-darwin --output .native/jsc --curl-sdk .native/curl-sdk
+```
+
+Select the appropriate target for your platform. Outside GitHub Actions, export
+the environment variables printed by the script before building or testing.
+Inspect the available targets with:
 
 ```sh
 python3 scripts/prepare_native.py --help
@@ -53,9 +78,10 @@ and `/usr/local/lib` for curl. When using that WebKit build, run:
 export DYLD_FRAMEWORK_PATH="$PWD/../WebKit/WebKitBuild/Release"
 ```
 
-Lexbor 3.0.0 is vendored with provenance and documented patches. OpenSSL builds
-from pinned Cargo source and needs a C compiler, make and Perl; no OpenSSL shared
-library is required. Rendering, fonts, GPU/audio engines and browser Worker
+Lexbor 3.0.0 is vendored with provenance and documented patches. WebCrypto
+shares the BoringSSL instance in curl-impersonate. Build the curl SDK with its
+WebCrypto interface (`curl-impersonate/webcrypto.h`); older curl SDKs without
+these exports cannot link the runtime. Rendering, fonts, GPU/audio engines and browser Worker
 execution are outside the runtime.
 
 ## 3. Build and test the host interfaces
@@ -73,7 +99,7 @@ Install `pytest` in your Python environment first. Tests use local HTTP fixtures
 Re-run `prepare_local.py` after rebuilding bindings so Python and Node load the
 new extensions.
 
-Run the browser workload regressions against those bindings:
+Run the runtime environment and browser workload regressions against those bindings:
 
 ```sh
 npm ci --prefix tests --ignore-scripts --no-audit --no-fund
@@ -81,8 +107,11 @@ npm run prepare:fixtures --prefix tests
 npm test --prefix tests
 ```
 
-The standalone `tests/` suite runs eleven functional workloads against reviewed
-Chromium expectations. CI runs this suite without the optional full comparison
+The `tests/runtime/` suite checks browser APIs through the Node driver, separately
+from the host binding contracts. Run it alone with
+`npm run test:runtime --prefix tests`. The workload suite runs eleven functional
+workloads against reviewed Chromium expectations; run it alone with
+`npm run test:workloads --prefix tests`. CI runs both without the optional full comparison
 directory or a browser installation. See the
 [regression guide](https://github.com/lexiforest/brimp/blob/main/tests/README.md)
 for fixtures, reports, and updating expectations.
@@ -95,7 +124,7 @@ cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 ```
 
-Use [the coverage audit](https://github.com/lexiforest/brimp/blob/main/compatibility/coverage/README.md)
+Use [the coverage audit](https://github.com/lexiforest/brimp/blob/main/benchmark/compatibility/coverage/README.md)
 for browser behavior probes. For performance work, use the reproducible
 [native](https://github.com/lexiforest/brimp/blob/main/benchmark/native/README.md)
 and [network](https://github.com/lexiforest/brimp/blob/main/benchmark/network/README.md)

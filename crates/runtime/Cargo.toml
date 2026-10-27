@@ -21,6 +21,7 @@ encoding_rs = { version = "0.8.35" }
 getrandom = { version = "0.4" }
 glob = "0.3.4"
 http = { version = "1" }
+indexmap = { version = "2", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
 swc_common = { version = "26" }
@@ -33,7 +34,6 @@ swc_ecma_visit = { version = "29" }
 thiserror = { version = "2" }
 tokio = { version = "1", features = ["io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"] }
 url = { version = "2" }
-openssl = { version = "0.10.81", features = ["vendored"] }
 
 [dev-dependencies]
 tungstenite = { version = "0.30" }
@@ -43,8 +43,8 @@ name = "runtime_page"
 path = "tests/runtime/page.rs"
 
 [[test]]
-name = "runtime_persona"
-path = "tests/runtime/persona.rs"
+name = "runtime_profile"
+path = "tests/runtime/profile.rs"
 
 [[test]]
 name = "runtime_events"

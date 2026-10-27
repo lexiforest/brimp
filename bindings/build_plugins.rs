@@ -5,6 +5,14 @@ pub fn package_plugins(destination: &str) {
     let source = root.join("crates/runtime/js/plugins");
     let destination = Path::new(env!("CARGO_MANIFEST_DIR")).join(destination);
     fs::create_dir_all(&destination).expect("create plugin asset directory");
+    for entry in fs::read_dir(&destination).expect("read packaged plugins") {
+        let path = entry.expect("packaged plugin").path();
+        if path.extension().is_some_and(|extension| extension == "js")
+            && !source.join(path.file_name().unwrap()).exists()
+        {
+            fs::remove_file(path).expect("remove obsolete packaged plugin");
+        }
+    }
     for entry in fs::read_dir(&source).expect("read plugin sources") {
         let path = entry.expect("plugin source").path();
         if path.extension().is_some_and(|extension| extension == "js") {
@@ -50,18 +58,6 @@ pub fn package_plugins(destination: &str) {
     }
     for (source, name) in [
         ("LICENSE", "brimp-LICENSE"),
-        (
-            "crates/runtime/licenses/OpenSSL-LICENSE.txt",
-            "OpenSSL-LICENSE.txt",
-        ),
-        (
-            "crates/runtime/licenses/rust-openssl-LICENSE.txt",
-            "rust-openssl-LICENSE.txt",
-        ),
-        (
-            "crates/runtime/licenses/rust-openssl-NOTICE.txt",
-            "rust-openssl-NOTICE.txt",
-        ),
         ("crates/lexbor/vendor/lexbor/LICENSE", "lexbor-LICENSE"),
         ("crates/lexbor/vendor/lexbor/NOTICE", "lexbor-NOTICE"),
         ("assets/defuddle/0.19.3/NOTICE.md", "defuddle-NOTICE.md"),

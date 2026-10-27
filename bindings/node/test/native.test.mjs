@@ -117,14 +117,14 @@ test('network routes, ordered events, callback reentry, response overrides and c
 
 
 test('stream backpressure, identity, redirects, and AbortSignal', async () => {
-  const session = await createSession({identity: {userAgent: 'Test/1', languages: ['fr', 'en']}});
+  const session = await createSession({identity: {userAgent: 'Mozilla/5.0 (Test) Test/1 Safari/605.1.15', languages: ['fr', 'en']}});
   try {
     const page = await session.newPage();
-    assert.deepEqual(await page.evaluate('[navigator.userAgent,navigator.language]'), ['Test/1','fr']);
-    await page.setIdentity({userAgent:'Test/2'});
+    assert.deepEqual(await page.evaluate('[navigator.userAgent,navigator.language]'), ['Mozilla/5.0 (Test) Test/1 Safari/605.1.15','fr']);
+    await page.setIdentity({userAgent:'Mozilla/5.0 (Test) Test/2 Safari/605.1.15'});
     const headers = await page.stream('GET', url + '/headers');
     let chunks = []; for await (const chunk of headers.body) chunks.push(chunk);
-    assert.equal(JSON.parse(Buffer.concat(chunks))['user-agent'], 'Test/2');
+    assert.equal(JSON.parse(Buffer.concat(chunks))['user-agent'], 'Mozilla/5.0 (Test) Test/2 Safari/605.1.15');
     const response = await page.stream('GET', url + '/large');
     await new Promise(resolve => setTimeout(resolve, 50));
     assert.equal(await page.evaluate('6*7'),42);

@@ -1,10 +1,5 @@
 use super::*;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use openssl::{
-    bn::{BigNumContext, BigNumRef},
-    ec::{EcPoint, PointConversionForm},
-};
-
 pub(super) fn allowed(algorithm: &str, kind: &str) -> Vec<&'static str> {
     match (algorithm, kind) {
         ("HMAC", "secret") => vec!["sign", "verify"],
@@ -33,7 +28,7 @@ pub(super) fn validate_usages(key: &Key) -> Result<()> {
         "Invalid key usages",
     )?;
     if key.algorithm.starts_with("RSA") || key.algorithm == "HMAC" {
-        digest(&key.hash)?;
+        native::hash_id(&key.hash)?;
     }
     Ok(())
 }
@@ -60,14 +55,6 @@ fn decode(jwk: &Value, name: &str) -> Result<Vec<u8>> {
     URL_SAFE_NO_PAD
         .decode(text)
         .map_err(|_| error("DataError", "Invalid JWK base64url"))
-}
-fn number(jwk: &Value, name: &str) -> Result<BigNum> {
-    let bytes = decode(jwk, name)?;
-    require(!bytes.is_empty(), "DataError", "Empty JWK integer")?;
-    Ok(BigNum::from_slice(&bytes)?)
-}
-fn encode(n: &BigNumRef) -> String {
-    URL_SAFE_NO_PAD.encode(n.to_vec())
 }
 fn jwk_algorithm(key: &Key) -> Option<String> {
     let hash = key.hash.strip_prefix("SHA-").unwrap_or("");
@@ -137,18 +124,14 @@ pub(super) fn import(r: &Request) -> Result<Key> {
     } else {
         let public = key.public()?;
         if r.algorithm.starts_with("RSA") {
-            require(public.id() == Id::RSA, "DataError", "Expected RSA key")?;
+            require(public.kind() == 1, "DataError", "Expected RSA key")?;
         } else {
-            require(public.id() == Id::EC, "DataError", "Expected EC key")?;
+            require(public.kind() == 2, "DataError", "Expected EC key")?;
             require(
-                public.ec_key()?.group().curve_name() == group(&r.curve)?.curve_name(),
+                public.curve() == native::curve_id(&r.curve)?,
                 "DataError",
                 "Named curve mismatch",
             )?;
-            public.ec_key()?.check_key()?;
-            if let Material::Private(p) = &key.material {
-                p.ec_key()?.check_key()?;
-            }
         }
     }
     validate_usages(&key)?;
@@ -223,77 +206,63 @@ fn import_material(r: &Request) -> Result<Material> {
         "Unsupported key algorithm",
     )?;
     match r.format.as_str() {
-        "spki" => Ok(Material::Public(PKey::public_key_from_der(&r.key)?)),
-        "pkcs8" => Ok(Material::Private(PKey::private_key_from_pkcs8(&r.key)?)),
+        "spki" => Ok(Material::Public(NativeKey::parse(false, &r.key)?)),
+        "pkcs8" => Ok(Material::Private(NativeKey::parse(true, &r.key)?)),
         "raw" if r.algorithm.starts_with("EC") => {
-            let g = group(&r.curve)?;
+            let size = (native::curve_id(&r.curve)? as usize).div_ceil(8);
             require(
-                r.key.first() == Some(&4) && r.key.len() == 1 + 2 * g.degree().div_ceil(8) as usize,
+                r.key.first() == Some(&4) && r.key.len() == 1 + 2 * size,
                 "DataError",
                 "Expected an uncompressed EC point",
             )?;
-            let point = EcPoint::from_bytes(&g, &r.key, &mut *BigNumContext::new()?)?;
-            Ok(Material::Public(PKey::from_ec_key(
-                EcKey::from_public_key(&g, &point)?,
+            Ok(Material::Public(NativeKey::ec(
+                &r.curve,
+                &r.key[1..1 + size],
+                &r.key[1 + size..],
+                &[],
             )?))
         }
         "jwk" => {
             let j = &r.jwk;
-            if r.algorithm.starts_with("RSA") {
+            let private = j.get("d").is_some();
+            let material = if r.algorithm.starts_with("RSA") {
                 require(
                     j["kty"] == "RSA" && j.get("oth").is_none(),
                     "DataError",
                     "Expected two-prime RSA JWK",
                 )?;
-                if j.get("d").is_some() {
-                    let rsa = Rsa::from_private_components(
-                        number(j, "n")?,
-                        number(j, "e")?,
-                        number(j, "d")?,
-                        number(j, "p")?,
-                        number(j, "q")?,
-                        number(j, "dp")?,
-                        number(j, "dq")?,
-                        number(j, "qi")?,
-                    )?;
-                    require(rsa.check_key()?, "DataError", "Invalid RSA private key")?;
-                    Ok(Material::Private(PKey::from_rsa(rsa)?))
-                } else {
-                    Ok(Material::Public(PKey::from_rsa(
-                        Rsa::from_public_components(number(j, "n")?, number(j, "e")?)?,
-                    )?))
+                let mut parts: [Vec<u8>; 8] = Default::default();
+                for (i, name) in ["n", "e", "d", "p", "q", "dp", "dq", "qi"]
+                    .iter()
+                    .enumerate()
+                    .take(if private { 8 } else { 2 })
+                {
+                    parts[i] = decode(j, name)?;
+                    require(!parts[i].is_empty(), "DataError", "Empty JWK integer")?;
                 }
+                NativeKey::rsa(&parts)?
             } else {
                 require(
                     j["kty"] == "EC" && j["crv"] == r.curve,
                     "DataError",
                     "EC curve mismatch",
                 )?;
-                let g = group(&r.curve)?;
-                let size = g.degree().div_ceil(8) as usize;
+                let size = (native::curve_id(&r.curve)? as usize).div_ceil(8);
+                let x = decode(j, "x")?;
+                let y = decode(j, "y")?;
+                let d = if private { decode(j, "d")? } else { Vec::new() };
                 require(
-                    decode(j, "x")?.len() == size && decode(j, "y")?.len() == size,
+                    x.len() == size && y.len() == size && (!private || d.len() == size),
                     "DataError",
-                    "Invalid EC coordinate length",
+                    "Invalid EC component length",
                 )?;
-                let public = EcKey::from_public_key_affine_coordinates(
-                    &g,
-                    &*number(j, "x")?,
-                    &*number(j, "y")?,
-                )?;
-                if j.get("d").is_some() {
-                    require(
-                        decode(j, "d")?.len() == size,
-                        "DataError",
-                        "Invalid EC private length",
-                    )?;
-                    Ok(Material::Private(PKey::from_ec_key(
-                        EcKey::from_private_components(&g, &*number(j, "d")?, public.public_key())?,
-                    )?))
-                } else {
-                    Ok(Material::Public(PKey::from_ec_key(public)?))
-                }
-            }
+                NativeKey::ec(&r.curve, &x, &y, &d)?
+            };
+            Ok(if private {
+                Material::Private(material)
+            } else {
+                Material::Public(material)
+            })
         }
         _ => Err(error("NotSupportedError", "Unsupported key format")),
     }
@@ -302,24 +271,17 @@ pub(super) fn export(key: &Key, format: &str) -> Result<Value> {
     match format {
         "raw" => match &key.material {
             Material::Secret(bytes) => Ok(json!(bytes)),
-            Material::Public(p) if key.algorithm.starts_with("EC") => {
-                let ec = p.ec_key()?;
-                Ok(json!(ec.public_key().to_bytes(
-                    ec.group(),
-                    PointConversionForm::UNCOMPRESSED,
-                    &mut *BigNumContext::new()?
-                )?))
-            }
+            Material::Public(p) if key.algorithm.starts_with("EC") => Ok(json!(p.export(3)?)),
             _ => Err(error("InvalidAccessError", "Cannot export this key as raw")),
         },
-        "pkcs8" => Ok(json!(key.private()?.private_key_to_pkcs8()?)),
+        "pkcs8" => Ok(json!(key.private()?.export(2)?)),
         "spki" => {
             require(
                 key.kind() == "public",
                 "InvalidAccessError",
                 "SPKI requires a public key",
             )?;
-            Ok(json!(key.public()?.public_key_to_der()?))
+            Ok(json!(key.public()?.export(1)?))
         }
         "jwk" => {
             let mut j = json!({"key_ops":key.usages,"ext":key.extractable});
@@ -332,45 +294,26 @@ pub(super) fn export(key: &Key, format: &str) -> Result<Value> {
                     j["k"] = json!(URL_SAFE_NO_PAD.encode(bytes));
                 }
                 _ if key.algorithm.starts_with("RSA") => {
-                    let public = key.public()?.rsa()?;
                     j["kty"] = json!("RSA");
-                    j["n"] = json!(encode(public.n()));
-                    j["e"] = json!(encode(public.e()));
-                    if let Material::Private(p) = &key.material {
-                        let rsa = p.rsa()?;
-                        j["d"] = json!(encode(rsa.d()));
-                        for (name, bn) in [
-                            ("p", rsa.p()),
-                            ("q", rsa.q()),
-                            ("dp", rsa.dmp1()),
-                            ("dq", rsa.dmq1()),
-                            ("qi", rsa.iqmp()),
-                        ] {
-                            j[name] = json!(encode(bn.ok_or_else(|| error(
-                                "OperationError",
-                                "Missing RSA CRT parameter"
-                            ))?));
-                        }
+                    for (i, name) in ["n", "e", "d", "p", "q", "dp", "dq", "qi"]
+                        .iter()
+                        .enumerate()
+                        .take(if key.kind() == "private" { 8 } else { 2 })
+                    {
+                        j[name] =
+                            json!(URL_SAFE_NO_PAD.encode(key.public()?.export(10 + i as i32)?));
                     }
                 }
                 _ => {
-                    let public = key.public()?.ec_key()?;
-                    let size = public.group().degree().div_ceil(8) as i32;
-                    let (mut x, mut y) = (BigNum::new()?, BigNum::new()?);
-                    public.public_key().affine_coordinates_gfp(
-                        public.group(),
-                        &mut x,
-                        &mut y,
-                        &mut *BigNumContext::new()?,
-                    )?;
                     j["kty"] = json!("EC");
                     j["crv"] = json!(key.curve);
-                    j["x"] = json!(URL_SAFE_NO_PAD.encode(x.to_vec_padded(size)?));
-                    j["y"] = json!(URL_SAFE_NO_PAD.encode(y.to_vec_padded(size)?));
-                    if let Material::Private(p) = &key.material {
-                        j["d"] = json!(
-                            URL_SAFE_NO_PAD.encode(p.ec_key()?.private_key().to_vec_padded(size)?)
-                        );
+                    for (i, name) in ["x", "y", "d"]
+                        .iter()
+                        .enumerate()
+                        .take(if key.kind() == "private" { 3 } else { 2 })
+                    {
+                        j[name] =
+                            json!(URL_SAFE_NO_PAD.encode(key.public()?.export(20 + i as i32)?));
                     }
                 }
             }

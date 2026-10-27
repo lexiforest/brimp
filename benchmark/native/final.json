@@ -1,0 +1,25 @@
+{
+  "dom": {
+    "elapsed_ms": 223.732125,
+    "elements_per_document": 3000,
+    "iterations": 20,
+    "max_rss_bytes": 17874944
+  },
+  "python": {
+    "iterations": 20,
+    "elapsed_ms": 1858.45150006935,
+    "max_rss_platform_units": 80543744
+  },
+  "node": {
+    "iterations": 20,
+    "elapsed_ms": 1844.968708,
+    "max_rss_kib": 117536
+  },
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "architecture": "arm64",
+  "profile": "debug",
+  "backend": "JavaScriptCore + Lexbor 3.0.0 + curl-impersonate",
+  "iterations": 20,
+  "note": "Sequential debug runs on the baseline host; one sample per workload, 20 iterations. Process peak RSS includes startup. Python ru_maxrss is bytes on macOS; Node maxRSS is KiB. These measurements include all runtime changes, not just the DOM backend.",
+  "jsc_runtime_selection": "Default macOS dynamic-loader environment; the local SDK retains the system framework install name. Rebuilt SDK correctness checks use DYLD_FRAMEWORK_PATH separately."
+}

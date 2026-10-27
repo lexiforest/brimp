@@ -93,19 +93,43 @@ def _bundled(name, options=None):
     return Plugin("defuddle" if name == "extraction" else name, source)
 
 
-def storage():
-    """Functional realm-local in-memory storage; no filesystem durability or OPFS."""
-    return _bundled("storage")
+def canvas(*, rgba=None, character_width=None):
+    """Painted Canvas state with profile font metrics and a real PNG encoder."""
+    options = {}
+    if rgba is not None: options["rgba"] = list(rgba)
+    if character_width is not None: options["characterWidth"] = character_width
+    return _bundled("canvas", options)
 
 
-def canvas(*, rgba=(0, 0, 0, 0), character_width=0.5):
-    """Stateful Canvas mock. Drawing has no effect on the configured readback color."""
-    return _bundled("canvas", {"rgba": list(rgba), "characterWidth": character_width})
+def environment(**options):
+    """Explicit core navigator overrides; Configured connection values."""
+    return _bundled("environment", options)
 
 
-def services(**options):
-    """Realm-local locks and deterministic notification/device-service mocks."""
-    return _bundled("services", options)
+def permissions(**options):
+    """Notification and permission mocks; Credential placeholders."""
+    return _bundled("permissions", options)
+
+
+def devices(**options):
+    """Bluetooth availability; Clipboard, geolocation, wake lock and sharing placeholders."""
+    return _bundled("devices", options)
+
+
+def media(**options):
+    """Media devices, streams and source-buffer placeholders; Media session state and encrypted-media event payloads."""
+    return _bundled("media", options)
+
+
+def workers(**options):
+    """Worker and service-worker placeholders."""
+    return _bundled("workers", options)
+
+
+def trusted_types(**options):
+    """Trusted Types placeholders."""
+    return _bundled("trusted-types", options)
+
 
 
 def rtc():
@@ -133,26 +157,18 @@ def _callback(session, handler):
     return invoke
 
 
-def geometry():
-    """Functional points, rectangles, quads and 2D matrices; no DOM layout."""
-    return _bundled("geometry")
-
-def css_typed_om():
-    """Unit arithmetic and inline property maps; no cascade or computed style."""
-    return _bundled("css-typed-om")
-
-def scheduling():
-    """Prioritized tasks, cancellation and deterministic zero-budget idle callbacks."""
-    return _bundled("scheduling")
-
-def graphics(*, rgba=(0, 0, 0, 0), renderer="Deterministic JavaScript mock", webgpu=False, handlers=None):
-    """WebGL state/readback and opt-in WebGPU buffer mocks; no shader execution."""
-    plugin = _bundled("graphics", dict(rgba=list(rgba), renderer=renderer, webgpu=webgpu))
+def graphics(*, rgba=None, renderer=None, webgpu=False, handlers=None):
+    """WebGL state/readback with profile identity and opt-in WebGPU buffer mocks."""
+    options = {"webgpu": webgpu}
+    if rgba is not None: options["rgba"] = list(rgba)
+    if renderer is not None: options["renderer"] = renderer
+    plugin = _bundled("graphics", options)
     return Plugin(plugin.name, plugin.source, handlers or {})
 
-def audio(*, sample_rate=48000, handlers=None):
-    """Audio graph/buffer state and silent analysis; no sound generation or decoding."""
-    plugin = _bundled("audio", dict(sampleRate=sample_rate))
+def audio(*, sample_rate=None, handlers=None):
+    """Audio graph/buffer state with profile rate; silent analysis, no decoding."""
+    options = {} if sample_rate is None else {"sampleRate": sample_rate}
+    plugin = _bundled("audio", options)
     return Plugin(plugin.name, plugin.source, handlers or {})
 
 
@@ -224,3 +240,10 @@ def host_storage(*, backend_factory=_MemoryStorageBackend):
         return {"handlers": {"transaction": transaction}, "dispose": dispose}
 
     return Plugin("host-storage", _bundled("host-storage").source, setup=setup)
+
+
+def browser():
+    """Fresh default browser subsystem descriptors; excludes host storage and extraction."""
+    return [_bundled(name, {}) for name in (
+        "environment", "permissions", "devices", "media", "workers", "trusted-types",
+        "canvas", "graphics", "audio", "rtc")]

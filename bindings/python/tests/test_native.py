@@ -2,8 +2,10 @@ from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import threading
 import json
+from pathlib import Path
 import pytest
 from brimp import Session, JavaScriptError, StaleHandle, Closed
+
 
 HTML = b'''<!doctype html><main><b>old</b></main><script>
 globalThis.beforeLater = document.querySelector('#later') === null;
@@ -165,12 +167,12 @@ def test_network_routes_events_reentry_and_controls(server):
 def test_stream_backpressure_identity_and_cancellation(server):
     import time
     from brimp import RuntimeError
-    with Session(user_agent="Test/1", languages=["fr", "en"]) as session:
+    with Session(user_agent="Mozilla/5.0 (Test) Test/1 Safari/605.1.15", languages=["fr", "en"]) as session:
         page = session.new_page()
-        assert page.evaluate("[navigator.userAgent, navigator.language]") == ["Test/1", "fr"]
-        page.set_identity(user_agent="Test/2")
+        assert page.evaluate("[navigator.userAgent, navigator.language]") == ["Mozilla/5.0 (Test) Test/1 Safari/605.1.15", "fr"]
+        page.set_identity(user_agent="Mozilla/5.0 (Test) Test/2 Safari/605.1.15")
         with page.stream("GET", server + "/headers") as response:
-            assert {k.lower(): v for k,v in json.loads(b"".join(response)).items()}["user-agent"] == "Test/2"
+            assert {k.lower(): v for k,v in json.loads(b"".join(response)).items()}["user-agent"] == "Mozilla/5.0 (Test) Test/2 Safari/605.1.15"
         with page.stream("GET", server + "/large") as response:
             time.sleep(.05)
             assert page.evaluate("6*7") == 42
@@ -211,3 +213,17 @@ def test_authentication_callback_retries_requests_and_streams(server):
             assert b''.join(response) == HTML
         assert len(challenges) == 2
         assert all('local-test' in challenge for challenge in challenges)
+
+
+def test_profile_option_drives_environment_values():
+    profile = {'values': {'identity': {}, 'screen': {}}}
+    profile['values']['identity']['languages'] = ['fr-CA', 'fr']
+    profile['values']['identity']['locale'] = 'fr-CA'
+    profile['values']['identity']['timezone'] = 'America/New_York'
+    profile['values']['screen']['width'] = 1920
+    profile['values']['screen']['avail_width'] = 1920
+    with Session(profile=profile) as session:
+        page = session.new_page()
+        assert page.evaluate("[navigator.language, navigator.languages, screen.width, new Intl.DateTimeFormat().resolvedOptions().timeZone]") == [
+            'fr-CA', ['fr-CA', 'fr'], 1920, 'America/New_York']
+        assert page.evaluate("new Date('2026-01-15T12:00:00Z').getTimezoneOffset()") == 300

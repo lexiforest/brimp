@@ -1,4 +1,5 @@
 mod bindings;
+pub(crate) mod storage;
 mod wrapper_cache;
 
 pub use bindings::{

@@ -11,9 +11,6 @@ fn session() -> Session {
             epoch_ms: None,
         },
         plugins: vec![
-            bundled::geometry(),
-            bundled::css_typed_om(),
-            bundled::scheduling(),
             bundled::canvas(json!({})),
             bundled::graphics(json!({"rgba":[1,2,3,4],"webgpu":true})),
             bundled::audio(json!({})),

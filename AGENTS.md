@@ -34,8 +34,18 @@ Choose the simplest implementation that fully meets the current requirements.
 
 - Use pytest for python testing
 - Prefer playwright over puppeteer in examples and docs
+- Do NOT update the README.md without asking for permission
 
-## Implementation
+## Arch & Implementation
+
+This is a runtime for browser JavaScript, which may be badly written, intentionally or not.
+Our goal is NOT to make the browser/web API correct. Rather, most of these API calls
+are actually unnecessary, you should not assume that a remote external browser script is
+perfect, sometimes they have legacy code that relies on the existense of the API, but
+don't need the result actually. So you should not assume that the placeholder functions
+are optional.
+
+The private `__brimp*` properties must be hidden from external JavaScript files.
 
 - For Python binding, we target Python 3.11 and above.
 - For Nodejs binding, we target Node.js 22.19 and above.

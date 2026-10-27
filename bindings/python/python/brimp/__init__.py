@@ -12,7 +12,7 @@ from ._brimp import (
 )
 
 from .values import encode as _encode, decode as _decode, undefined, BigInt
-from .plugins import Plugin, HostContext, _check_session, _callback
+from .plugins import Plugin, HostContext, _check_session, _callback, browser as _browser_plugins
 
 
 def _snake_record(value):
@@ -44,12 +44,15 @@ class _Requests:
 
 
 class Session(_Requests):
-    """Own pages, shared cookies, request defaults and explicit plugins.
+    """Own pages, shared cookies, request defaults and browser subsystem plugins.
+
+    Omit plugins for the browser defaults; an explicit list replaces that set.
+    Pass plugins=[] for core-only execution.
 
     Use as a context manager to close all owned pages. Timeouts are seconds.
     Each request method creates a new Page; use Page.request to reuse a page.
     """
-    def __init__(self, *, headers=None, timeout=30.0, proxy=None, auth=None, plugins=(), user_agent=None, languages=None, platform=None, time_mode="system", time_origin=None, diagnostics=None):
+    def __init__(self, *, headers=None, timeout=30.0, proxy=None, auth=None, plugins=None, user_agent=None, languages=None, platform=None, profile=None, time_mode="system", time_origin=None, diagnostics=None, storage_path=None):
         pairs = _headers(headers)
         if auth is not None:
             pairs.append(("Authorization", "Basic " + base64.b64encode(
@@ -58,14 +61,16 @@ class Session(_Requests):
         self._plugin_disposers = []
         bound = []
         try:
-            for plugin in plugins:
+            for plugin in (_browser_plugins() if plugins is None else plugins):
                 plugin, dispose = plugin._bind()
                 bound.append(plugin)
                 if dispose: self._plugin_disposers.append(dispose)
             self._inner = _Session(pairs, timeout, proxy, [plugin._descriptor(self._plugin_token) for plugin in bound],
                                    json.dumps(dict(userAgent=user_agent, languages=languages, platform=platform)),
+                                   json.dumps(profile, allow_nan=False),
                                    json.dumps(dict(mode=time_mode, epochMs=time_origin), allow_nan=False),
-                                   json.dumps(diagnostics, allow_nan=False))
+                                   json.dumps(diagnostics, allow_nan=False),
+                                   None if storage_path is None else str(storage_path))
         except BaseException:
             self._dispose_plugins()
             raise
@@ -122,6 +127,14 @@ class Page(_Requests):
     def run_pending_tasks(self, *, max_tasks=10000):
         """Drain currently due tasks without advancing logical time."""
         return json.loads(self._inner.run_pending_tasks(max_tasks))
+
+    def profile_contract(self):
+        """Describe installed profile interfaces, preserving their original field names."""
+        return json.loads(self._inner.profile_contract())
+
+    def profile_report(self):
+        """Return defaulted paths and capture metadata without renaming profile keys."""
+        return json.loads(self._inner.profile_report())
 
     def take_diagnostics(self):
         """Consume bounded records; JSONL output is unaffected."""

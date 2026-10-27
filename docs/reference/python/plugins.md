@@ -9,13 +9,16 @@ to install a bundled plugin or connect page JavaScript to a host callback.
         - Plugin
         - HostContext
         - catalog
-        - storage
+        - browser
         - host_storage
         - extraction
         - canvas
-        - services
-        - geometry
-        - css_typed_om
-        - scheduling
+        - environment
+        - permissions
+        - devices
+        - media
+        - workers
+        - trusted_types
+        - rtc
         - graphics
         - audio

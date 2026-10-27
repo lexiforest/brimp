@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture a Brimp browser profile</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { max-width: 960px; margin: 48px auto; padding: 0 24px; line-height: 1.6; }
+  h1 { line-height: 1.2; }
+  button, a { font: inherit; }
+  button { padding: 10px 20px; cursor: pointer; }
+  #download { margin-left: 20px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px; border-bottom: 1px solid #8886; vertical-align: top; }
+  th:first-child { width: 35%; }
+  td { overflow-wrap: anywhere; }
+  #status { font-weight: 600; }
+  .captured { color: light-dark(#176735, #85e2a6); }
+</style>
+<h1>Capture this browser’s profile</h1>
+<p>Measure values for the core interfaces and plugins selected in Brimp. Measurements
+  run in this browser after you click Capture. Missing or blocked values remain
+  unspecified; Brimp will report the defaults it uses. Capturing does not change
+  which compatibility APIs Brimp exposes.</p>
+<p>Keep this window at the size you want to capture. Fonts are measured from a
+  candidate list; the profile does not reproduce a complete rendering engine or
+  detect the browser’s TLS configuration.</p>
+<button id="capture" type="button">Capture</button>
+<a id="download" hidden download="browser-profile.json">Download profile</a>
+<p id="status" role="status" aria-live="polite">Ready.</p>
+<table>
+  <thead><tr><th>Value</th><th>Result</th><th>Details</th></tr></thead>
+  <tbody id="results"></tbody>
+</table>
+<script src="capture.js"></script>
+</html>

@@ -106,7 +106,8 @@ brimp doctor
 brimp fetch https://example.com --output example.md
 brimp fetch https://example.com --eval 'document.title'
 brimp fetch https://example.com --output example.html
-brimp fetch https://example.com --persona crates/runtime/src/persona/example.json --eval 'navigator.userAgent'
+brimp profile capture --output browser-profile.json
+brimp fetch https://example.com --profile browser-profile.json --eval 'navigator.userAgent'
 ```
 
 ### Python

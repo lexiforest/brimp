@@ -1,3 +1,5 @@
+pub(super) mod streaming;
+
 use crate::network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
 use crate::web_apis::BrowsingContext;
 use std::sync::Arc;

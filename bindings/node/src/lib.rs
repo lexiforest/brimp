@@ -71,15 +71,23 @@ pub fn create_native_session(
     plugins: Vec<plugins::PluginDescriptor>,
     callback: napi::JsFunction,
     identity: Value,
+    profile: Value,
     clock: Value,
     diagnostics: Value,
+    storage_path: Option<String>,
 ) -> Result<AsyncTask<plugins::CreateSession>> {
     let mut options = SessionOptions {
+        storage_path: storage_path.map(Into::into),
         clock: serde_json::from_value(clock).map_err(|e| Error::from_reason(e.to_string()))?,
         diagnostics: serde_json::from_value(diagnostics)
             .map_err(|e| Error::from_reason(e.to_string()))?,
         identity: serde_json::from_value(identity)
             .map_err(|e| Error::from_reason(e.to_string()))?,
+        profile: if profile.is_null() {
+            None
+        } else {
+            Some(serde_json::from_value(profile).map_err(|e| Error::from_reason(e.to_string()))?)
+        },
         plugins: plugins::configure(env, plugins, callback)?,
         headers: pairs(headers)?,
         timeout: duration(timeout)?,
@@ -145,6 +153,16 @@ impl NativePageBinding {
     pub async fn run_pending_tasks(&self, max_tasks: u32) -> Result<Value> {
         let page = self.inner.clone();
         blocking(move || page.run_pending_tasks(max_tasks as usize)).await
+    }
+    #[napi]
+    pub async fn profile_contract(&self) -> Result<Value> {
+        let page = self.inner.clone();
+        blocking(move || page.profile_contract()).await
+    }
+    #[napi]
+    pub async fn profile_report(&self) -> Result<Value> {
+        let page = self.inner.clone();
+        blocking(move || page.profile_report()).await
     }
     #[napi]
     pub async fn take_diagnostics(&self) -> Result<Value> {
@@ -484,7 +502,7 @@ impl NativeHandle {
 
 #[napi]
 pub struct NativeStream {
-    inner: Arc<brimp_runtime::runtime::streams::StreamingResponse>,
+    inner: Arc<brimp_runtime::runtime::native::streaming::StreamingResponse>,
 }
 #[napi]
 impl NativeStream {

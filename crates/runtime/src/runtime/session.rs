@@ -58,7 +58,7 @@ impl SessionCookies {
 impl Session {
     pub(super) fn create(
         mut options: SessionOptions,
-        persona: Option<crate::persona::PersonaConfig>,
+        profile: Option<crate::profile::BrowserProfile>,
         loader: Option<Arc<dyn ResourceLoader>>,
     ) -> Result<Self, AutomationError> {
         let network_executor = super::networking::NetworkExecutor::new()?;
@@ -70,8 +70,8 @@ impl Session {
         let loader = match loader {
             Some(loader) => loader,
             None => {
-                if let Some(persona) = &persona {
-                    options.network.impersonation_profile = persona.network_profile.clone();
+                if let Some(profile) = &profile {
+                    options.network.impersonation_profile = profile.network_profile().to_owned();
                 }
                 crate::network::CurlResourceLoader::check_profile(&options.network)
                     .map_err(|e| AutomationError::Transport(e.to_string()))?;
@@ -89,24 +89,28 @@ impl Session {
         Ok(Self {
             id: NEXT_SESSION.fetch_add(1, Ordering::Relaxed),
             loader,
-            persona,
+            profile,
             closed: AtomicBool::new(false),
             state: Mutex::new(SessionState::default()),
             cookie_store: SessionCookies::default(),
+            storage: Arc::new(
+                crate::web_apis::storage::Storage::open(options.storage_path.clone())
+                    .map_err(AutomationError::InvalidInput)?,
+            ),
             network_config,
             options,
             network_executor,
         })
     }
-    pub fn with_persona(persona: crate::persona::PersonaConfig) -> Result<Self, AutomationError> {
-        Self::with_persona_and_network_config(persona, Default::default())
+    pub fn with_profile(profile: crate::profile::BrowserProfile) -> Result<Self, AutomationError> {
+        Self::with_profile_and_network_config(profile, Default::default())
     }
-    pub fn with_persona_and_network_config(
-        persona: crate::persona::PersonaConfig,
+    pub fn with_profile_and_network_config(
+        profile: crate::profile::BrowserProfile,
         network: crate::network::CurlConfig,
     ) -> Result<Self, AutomationError> {
         Self::new(SessionOptions {
-            persona: Some(persona),
+            profile: Some(profile),
             network,
             ..Default::default()
         })
@@ -225,12 +229,13 @@ impl Session {
         if self.is_closed() {
             return Err(AutomationError::Closed);
         }
-        let options = match &self.persona {
-            Some(persona) => options.with_persona(persona.clone()),
+        let options = match &self.profile {
+            Some(profile) => options.with_profile(profile.clone()),
             None => options,
         };
         let mut options = options;
         options.session_id = self.id;
+        options.storage = self.storage.clone();
         let options_sockets: Arc<dyn crate::network::WebSocketConnector> = options
             .network_runtime()
             .map(|network| network as Arc<dyn crate::network::WebSocketConnector>)
@@ -260,6 +265,7 @@ impl Session {
         for page in pages.into_iter().filter_map(|page| page.upgrade()) {
             page.close();
         }
+        self.storage.close();
     }
     pub fn is_closed(&self) -> bool {
         self.closed.load(Ordering::Acquire)

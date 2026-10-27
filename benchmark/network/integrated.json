@@ -1,0 +1,115 @@
+{
+  "arch": "aarch64",
+  "debug_assertions": true,
+  "measurement": "batch completion including body collection and byte validation; excludes client startup and warmup",
+  "os": "macos",
+  "profile": "chrome136",
+  "protocol": "loopback HTTP/1.1 keep-alive",
+  "results": [
+    {
+      "brimp_net_median_ms": 0.135625,
+      "brimp_net_samples_ms": [
+        0.148792,
+        0.135625,
+        0.133709,
+        0.13549999999999998,
+        0.141958,
+        0.14195899999999997,
+        0.134
+      ],
+      "concurrency": 1,
+      "response_bytes": 1024,
+      "server_delay_ms": 0,
+      "worker_median_ms": 0.15308300000000002,
+      "worker_samples_ms": [
+        0.16404200000000002,
+        0.15308300000000002,
+        0.135959,
+        0.169208,
+        0.166333,
+        0.140125,
+        0.137291
+      ],
+      "workload": "small_serial"
+    },
+    {
+      "brimp_net_median_ms": 2.068083,
+      "brimp_net_samples_ms": [
+        2.1219170000000003,
+        2.005334,
+        2.053708,
+        2.068083,
+        2.030583,
+        2.1449160000000003,
+        2.112375
+      ],
+      "concurrency": 16,
+      "response_bytes": 1024,
+      "server_delay_ms": 0,
+      "worker_median_ms": 2.078458,
+      "worker_samples_ms": [
+        2.155208,
+        2.054042,
+        2.073292,
+        2.078458,
+        2.2015,
+        2.1648330000000002,
+        2.0432089999999996
+      ],
+      "workload": "small_concurrent"
+    },
+    {
+      "brimp_net_median_ms": 36.850625,
+      "brimp_net_samples_ms": [
+        36.804625,
+        36.850625,
+        36.552041,
+        37.142208000000004,
+        37.330833,
+        36.540000000000006,
+        37.395709
+      ],
+      "concurrency": 16,
+      "response_bytes": 1024,
+      "server_delay_ms": 30,
+      "worker_median_ms": 36.299625,
+      "worker_samples_ms": [
+        36.299625,
+        36.142333,
+        36.136,
+        37.300458,
+        37.424042,
+        36.281167,
+        36.575291
+      ],
+      "workload": "delayed_concurrent"
+    },
+    {
+      "brimp_net_median_ms": 36.238458,
+      "brimp_net_samples_ms": [
+        35.406,
+        36.238458,
+        36.156166000000006,
+        36.029709,
+        36.628292,
+        36.561208,
+        36.965542
+      ],
+      "concurrency": 8,
+      "response_bytes": 2097152,
+      "server_delay_ms": 0,
+      "worker_median_ms": 35.936791,
+      "worker_samples_ms": [
+        36.08825,
+        36.042417,
+        35.401166999999994,
+        35.936791,
+        35.542416,
+        35.709125,
+        35.991417
+      ],
+      "workload": "bulk_concurrent"
+    }
+  ],
+  "samples_per_transport": 7
+}

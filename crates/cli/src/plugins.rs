@@ -16,13 +16,15 @@ fn source(name: &str) -> Option<&'static str> {
         _ => None,
     } }; }
     sources!(
-        "storage",
         "canvas",
-        "services",
+        "environment",
+        "permissions",
+        "devices",
+        "media",
+        "workers",
+        "trusted-types",
+        "rtc",
         "extraction",
-        "geometry",
-        "css-typed-om",
-        "scheduling",
         "graphics",
         "audio",
         "host-storage"

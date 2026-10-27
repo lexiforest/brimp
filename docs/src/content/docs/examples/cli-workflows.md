@@ -89,20 +89,20 @@ Discover capabilities:
 
 ```sh
 brimp plugins list
-brimp plugins show storage
+brimp plugins show canvas
 ```
 
-Opt into realm-local browser storage:
+Browser storage is core. Supply a URL to use origin-partitioned storage:
 
 ```sh
-brimp run - --plugin storage <<'JS'
+brimp run - --url http://127.0.0.1:8765 <<'JS'
 localStorage.setItem('theme', 'dark'); localStorage.getItem('theme')
 JS
 ```
 
-Expect `"dark"`. The plugin's state resets on navigation. CLI `host-storage`
-instead supplies session-memory, origin-partitioned atomic batches; it has no
-disk persistence and does not make browser localStorage durable.
+Expect `"dark"`. Origin-partitioned browser storage survives navigation within the
+session. Without an origin, storage is isolated to the current realm. CLI
+`host-storage` is a separate extension for origin-partitioned atomic batches.
 
 For a custom installer, save `custom.js`:
 
@@ -122,10 +122,14 @@ JS
 Expect `42`. File plugin names come from the file stem. Repeat `--plugin` to
 install in argument order; duplicate names reject. Installers run before page
 scripts, may return Promises, and may provide cleanup. They receive
-`{global, host, options}`; custom Python/Node host handlers require the bindings.
+`{global, host, options, profile, canvas}`; `profile` registers configurable values
+and capture recipes, and `canvas` registers context backends. Custom Python/Node
+host handlers require the bindings.
 
-Canvas, graphics and audio plugins retain their documented mock limits.
-Install Canvas before graphics when combining them. Crypto is core.
+Browser subsystem plugins, including canvas, graphics and audio, are enabled by
+default. Supplying `--plugin` replaces that set; `--no-plugins` selects core only.
+Canvas and graphics can be installed in either order and retain their documented
+limits. Crypto is core.
 
 ## 4. Stream bytes to a file
 

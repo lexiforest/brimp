@@ -35,6 +35,29 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Guides',
+          items: [
+            { label: 'Sessions, pages and requests', slug: 'guides/automation' },
+            { label: 'Values and handles', slug: 'guides/values' },
+            { label: 'Plugins', slug: 'guides/plugins' },
+            { label: 'Browser profiles', slug: 'guides/profiles' },
+            { label: 'Diagnostics and time', slug: 'guides/diagnostics' },
+          ],
+        },
+        {
+          label: 'Browser support',
+          items: [
+            { label: 'Overview', slug: 'web-platform' },
+            { label: 'DOM and documents', slug: 'web-platform/dom' },
+            { label: 'Forms and input', slug: 'web-platform/forms' },
+            { label: 'Events', slug: 'web-platform/events' },
+            { label: 'Window and environment', slug: 'web-platform/environment' },
+            { label: 'CSS, SVG and geometry', slug: 'web-platform/css-svg' },
+            { label: 'Network, files and streams', slug: 'web-platform/network-files' },
+            { label: 'Cryptography', slug: 'web-platform/crypto' },
+          ],
+        },
+        {
           label: 'API',
           items: [
             { label: 'Overview', slug: 'api' },
@@ -50,7 +73,14 @@ export default defineConfig({
             { label: 'Core APIs and plugins', slug: 'architecture/subsystems' },
           ],
         },
-        { label: 'Development', slug: 'development' },
+        {
+          label: 'Development',
+          items: [
+            { label: 'Build and test', slug: 'development' },
+            { label: 'Package native bindings', slug: 'development/packaging' },
+            { label: 'Network transport', slug: 'development/network' },
+          ],
+        },
       ],
     }),
   ],

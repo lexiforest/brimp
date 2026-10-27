@@ -6,6 +6,157 @@ pub(super) fn dispatch(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "storageOperation" => {
+            let request: serde_json::Value =
+                serde_json::from_str(&required_string(call, 2, "storage request")?).map_err(err)?;
+            let context = &state.browsing_context;
+            if request["op"] == "subscribe" {
+                let callback = call
+                    .argument(3)
+                    .ok_or_else(|| NativeError::new("missing storage listener"))?
+                    .to_function()?;
+                state.storage_realm.subscribe(context, callback);
+                return Ok(NativeValue::String("null".into()));
+            }
+            let url = context
+                .current_url()
+                .and_then(|url| url::Url::parse(&url).ok());
+            let tuple_origin = url
+                .as_ref()
+                .map(|url| url.origin().ascii_serialization())
+                .filter(|origin| origin != "null");
+            let opaque = tuple_origin.is_none();
+            let origin = tuple_origin.unwrap_or_else(|| state.storage_realm.opaque_origin());
+            let operation = request["op"].as_str().unwrap_or_default();
+            let result = match operation {
+                "lockRequest" => {
+                    let callback = call
+                        .argument(3)
+                        .ok_or_else(|| NativeError::new("missing lock callback"))?
+                        .to_function()?;
+                    serde_json::json!(state.storage_realm.request(origin, &request, callback))
+                }
+                "lockRelease" => {
+                    state
+                        .storage_realm
+                        .release(request["id"].as_u64().unwrap_or(0));
+                    serde_json::Value::Null
+                }
+                "lockQuery" => state.storage_realm.query(&origin),
+                "persistent" => serde_json::json!(!opaque && context.storage.persistent()),
+                "cookieGet" if opaque => serde_json::json!([]),
+                "cookieSet" if opaque => serde_json::Value::Null,
+                "cookieGet" => serde_json::to_value(
+                    context
+                        .cookies
+                        .matching(url.as_ref().unwrap().as_str())
+                        .into_iter()
+                        .filter(|cookie| !cookie.http_only)
+                        .collect::<Vec<_>>(),
+                )
+                .map_err(err)?,
+                "cookieSet" => {
+                    context
+                        .cookies
+                        .store_document(
+                            url.as_ref().unwrap().as_str(),
+                            request["header"].as_str().unwrap_or_default(),
+                        )
+                        .map_err(err)?;
+                    serde_json::Value::Null
+                }
+                _ => {
+                    let mut data = if opaque {
+                        state.storage_realm.ephemeral.lock().unwrap()
+                    } else if request["namespace"] == "session" {
+                        context.session_storage.lock().unwrap()
+                    } else {
+                        context.storage.data.lock().unwrap()
+                    };
+                    let mutation = matches!(
+                        operation,
+                        "set" | "delete" | "clear" | "cachePut" | "cacheDelete"
+                    );
+                    let previous = (!opaque
+                        && context.storage.persistent()
+                        && request["namespace"] != "session"
+                        && mutation)
+                        .then(|| data.clone());
+                    let namespaces = data.entry(origin.clone()).or_default();
+                    let namespace = request["namespace"].as_str().unwrap_or_default();
+                    let map = namespaces.entry(namespace.to_owned()).or_default();
+                    let key = request["key"].as_str().unwrap_or_default();
+                    let old_value = map.get(key).cloned();
+                    let changed = match operation {
+                        "set" => old_value.as_deref() != request["value"].as_str(),
+                        "delete" => old_value.is_some(),
+                        "clear" => !map.is_empty(),
+                        _ => false,
+                    };
+                    let result = match operation {
+                        "cachePut" | "cacheDelete" => {
+                            let mut entries: serde_json::Map<String, serde_json::Value> =
+                                serde_json::from_str(
+                                    map.get(key).map(String::as_str).unwrap_or("{}"),
+                                )
+                                .map_err(err)?;
+                            let url = request["url"].as_str().unwrap_or_default();
+                            let existed = if operation == "cachePut" {
+                                entries
+                                    .insert(
+                                        url.to_owned(),
+                                        serde_json::from_str(
+                                            request["value"].as_str().unwrap_or("null"),
+                                        )
+                                        .map_err(err)?,
+                                    )
+                                    .is_some()
+                            } else {
+                                entries.remove(url).is_some()
+                            };
+                            map.insert(
+                                key.to_owned(),
+                                serde_json::to_string(&entries).map_err(err)?,
+                            );
+                            serde_json::json!(existed)
+                        }
+                        "get" => serde_json::to_value(map.get(key)).map_err(err)?,
+                        "set" => {
+                            map.insert(
+                                key.to_owned(),
+                                request["value"].as_str().unwrap_or_default().to_owned(),
+                            );
+                            serde_json::Value::Null
+                        }
+                        "delete" => serde_json::json!(map.shift_remove(key).is_some()),
+                        "clear" => {
+                            map.clear();
+                            serde_json::Value::Null
+                        }
+                        "list" => serde_json::json!(map.keys().collect::<Vec<_>>()),
+                        "estimate" => {
+                            serde_json::json!({"usage":namespaces.values().flat_map(|map| map.iter()).map(|(k,v)| 2*(k.len()+v.len())).sum::<usize>(),"quota":null})
+                        }
+                        _ => return Err(NativeError::new("Unknown storage operation")),
+                    };
+                    if !opaque
+                        && request["namespace"] != "session"
+                        && mutation
+                        && let Err(error) = context.storage.persist(&data)
+                    {
+                        if let Some(previous) = previous {
+                            *data = previous;
+                        }
+                        return Err(NativeError::new(error));
+                    }
+                    if request["namespace"] == "local" && changed {
+                        state.storage_realm.broadcast(&origin, serde_json::json!({"key":if operation == "clear" {serde_json::Value::Null} else {request["key"].clone()},"oldValue":if operation == "clear" {None} else {old_value},"newValue":if operation == "set" {request["value"].clone()} else {serde_json::Value::Null},"url":context.current_url()}));
+                    }
+                    result
+                }
+            };
+            Ok(NativeValue::String(result.to_string()))
+        }
         "cryptoOperation" => {
             let request = required_string(call, 2, "crypto request")?;
             state
@@ -96,7 +247,21 @@ pub(super) fn dispatch(
                 .push_back(PendingWebSocketOperation::CancelFetch { id });
             Ok(NativeValue::Undefined)
         }
-        "setTimeout" | "setInterval" => {
+        "taskPriority" => {
+            let id = call.argument(2).unwrap().to_number()? as u32;
+            let priority = call.argument(3).unwrap().to_number()? as u8;
+            if let Some(timer) = state
+                .timers
+                .borrow_mut()
+                .timers
+                .iter_mut()
+                .find(|t| t.id == id)
+            {
+                timer.priority = priority.min(3);
+            }
+            Ok(NativeValue::Undefined)
+        }
+        "setTimeout" | "setInterval" | "scheduleTask" => {
             let callback = call
                 .argument(2)
                 .ok_or_else(|| NativeError::new("missing timer callback"))?
@@ -111,6 +276,22 @@ pub(super) fn dispatch(
                     .timers
                     .borrow_mut()
                     .schedule(delay, operation == "setInterval", callback);
+            if operation == "scheduleTask" {
+                let priority = call
+                    .argument(4)
+                    .map(|v| v.to_number())
+                    .transpose()?
+                    .unwrap_or(1.0) as u8;
+                if let Some(timer) = state
+                    .timers
+                    .borrow_mut()
+                    .timers
+                    .iter_mut()
+                    .find(|t| t.id == id)
+                {
+                    timer.priority = priority.min(3);
+                }
+            }
             Ok(NativeValue::Number(f64::from(id)))
         }
         "clearTimeout" | "clearInterval" => {

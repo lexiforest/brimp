@@ -96,7 +96,7 @@ def test_help_doctor_catalog():
         run('help', command)
     assert json.loads(run('doctor').stdout)['crypto'] == 'ok'
     catalog = json.loads(run('plugins', 'list').stdout)
-    assert 'storage' in catalog and 'host-storage' in catalog
+    assert 'storage' not in catalog and 'host-storage' in catalog
     assert json.loads(run('plugins', 'show', 'canvas').stdout)['limitations']
     run('plugins', 'show', 'unknown', code=2)
     run('crawl', 'https://unused.test', code=2)
@@ -223,13 +223,14 @@ def test_streaming(site, tmp_path):
 
 
 def test_plugins_and_logical_time(tmp_path, site):
+    url, _ = site
     plugin = write(tmp_path, 'custom.js', '({global,options})=>{global.answer=options.answer; return ()=>{}}')
     result = run('run', '-', '--plugin', plugin, '--plugin-options', 'custom={"answer":42}', input=b'answer')
     assert json.loads(result.stdout) == 42
     program = write(tmp_path, 'timers.js', 'globalThis.result=[]; setTimeout(()=>result.push(Date.now()),50); null')
     result = run('run', program, '--clock', 'logical', '--epoch-ms', '1000', '--advance-time', '50ms', '--eval', 'result')
     assert json.loads(result.stdout) == [1050]
-    result = run('run', '-', '--plugin', 'storage', input=b'localStorage.setItem("key","value"); localStorage.getItem("key")')
+    result = run('run', '-', '--url', url, input=b'localStorage.setItem("key","value"); localStorage.getItem("key")')
     assert json.loads(result.stdout) == 'value'
     url, _ = site
     result = run('run', '-', '--url', url, '--plugin', 'host-storage', input=b'(async()=>{await hostStorage.set("x",42);return await hostStorage.get("x")})()')
@@ -305,25 +306,27 @@ def test_sigint_during_javascript(source):
 @pytest.mark.parametrize('args', [
     ['--timeout', 'nanms'], ['--timeout', '0s'], ['--header', 'not-a-header'],
     ['--header', 'User-Agent: invalid'], ['--max-response-bytes', '0'],
-    ['--epoch-ms', '1000'], ['--persona', 'missing.json'],
+    ['--epoch-ms', '1000'], ['--profile', 'missing.json'],
     ['--eval', '1', '--format', 'html'], ['--timeout', '1s', '--timeout', '2s'],
 ])
 def test_validation_before_network(args):
     run('fetch', 'https://unused.invalid', *args, code=2)
 
 
-def test_persona_composes_with_plugins_trace_and_clock(site, tmp_path):
+def test_profile_composes_with_plugins_trace_and_clock(site, tmp_path):
     url, _ = site
-    persona = json.loads((ROOT / 'crates/runtime/src/persona/example.json').read_text())
-    persona['base_headers']['user_agent'] = 'Brimp CLI test'
-    path = write(tmp_path, 'persona.json', persona)
+    profile = {'values': {'identity': {}}}
+    user_agent = 'Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0 Safari/605.1.15'
+    profile['values']['identity']['user_agent'] = user_agent
+    profile['values']['identity']['app_version'] = user_agent[len('Mozilla/'):]
+    path = write(tmp_path, 'profile.json', profile)
     trace = tmp_path / 'trace.jsonl'
-    value = json.loads(run('fetch', url, '--persona', path, '--plugin', 'geometry',
+    value = json.loads(run('fetch', url, '--profile', path, '--plugin', 'environment',
                           '--trace', trace, '--clock', 'logical', '--epoch-ms', '1234',
                           '--eval', '[navigator.userAgent,typeof DOMPoint,Date.now()]').stdout)
-    assert value == ['Brimp CLI test', 'function', 1234]
+    assert value == [user_agent, 'function', 1234]
     assert trace.exists()
-    run('fetch', url, '--persona', path, '--user-agent', 'conflict', code=2)
+    run('fetch', url, '--profile', path, '--user-agent', 'conflict', code=2)
 
 
 def test_shared_deadline_and_plugin_installation(tmp_path):
@@ -375,3 +378,25 @@ def test_sigterm_during_navigation(site):
         if process.poll() is None:
             process.kill()
             process.wait()
+
+
+def test_subsystem_plugins_and_options():
+    result = run('run', '-', '--plugin', 'environment', '--plugin', 'permissions',
+                 '--plugin', 'devices', '--plugin', 'media', '--plugin', 'workers',
+                 '--plugin', 'trusted-types',
+                 '--plugin-options', 'environment={"connection_rtt_ms":7}',
+                 '--plugin-options', 'permissions={"notification_permission":"denied"}',
+                 '--plugin-options', 'devices={"bluetooth_available":true}',
+                 '--plugin-options', 'media={"media_devices_enabled":false}',
+                 input=b'''Promise.all([navigator.connection.rtt, Notification.requestPermission(),
+                    navigator.bluetooth.getAvailability(), typeof MediaEncryptedEvent,
+                    typeof navigator.mediaDevices, new Worker('ignored').terminate() === undefined,
+                    trustedTypes.createPolicy() === undefined])''')
+    assert json.loads(result.stdout) == [7, 'denied', True, 'function', 'undefined', True, True]
+
+
+def test_default_browser_plugins_and_core_only_selection():
+    source = b'[typeof Worker,typeof AudioContext,typeof RTCPeerConnection,typeof hostStorage]'
+    assert json.loads(run('run', '-', input=source).stdout) == ['function'] * 3 + ['undefined']
+    assert json.loads(run('run', '-', '--no-plugins', input=source).stdout) == ['undefined'] * 4
+    assert json.loads(run('run', '-', '--plugin', 'workers', input=source).stdout) == ['function'] + ['undefined'] * 3

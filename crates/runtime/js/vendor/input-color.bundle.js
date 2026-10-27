@@ -34,11 +34,15 @@ var __inputColor = (() => {
   }
   function lin_sRGB_channel(value) {
     const f2 = Math.fround, x2 = Math.abs(f2(value));
-    return f2(Math.sign(value) * (x2 <= f2(0.04045) ? f2(x2 / f2(12.92)) : f2(Math.pow(f2(f2(x2 + f2(0.055)) / f2(1.055)), f2(2.4)))));
+    return f2(
+      Math.sign(value) * (x2 <= f2(0.04045) ? f2(x2 / f2(12.92)) : f2(Math.pow(f2(f2(x2 + f2(0.055)) / f2(1.055)), f2(2.4))))
+    );
   }
   function gam_sRGB_channel(value) {
     const f2 = Math.fround, x2 = Math.abs(f2(value));
-    return f2(Math.sign(value) * (x2 < f2(31308e-7) ? f2(x2 * f2(12.92)) : f2(1.055) * f2(Math.pow(x2, f2(1 / f2(2.4)))) - f2(0.055)));
+    return f2(
+      Math.sign(value) * (x2 < f2(31308e-7) ? f2(x2 * f2(12.92)) : f2(1.055) * f2(Math.pow(x2, f2(1 / f2(2.4)))) - f2(0.055))
+    );
   }
   function lin_2020_channel(value) {
     const f2 = Math.fround, alpha2 = f2(1.09929682680944), beta = f2(0.018053968510807), gamma = f2(0.45);
@@ -3526,7 +3530,9 @@ var __inputColor = (() => {
       const replacement = Object.hasOwn(systemColors, name) && systemColors[name];
       return replacement ? tokenize({ css: replacement }).slice(0, -1) : [token];
     });
-    const nodes = parseListOfComponentValues(tokens).filter((node2) => !isWhiteSpaceOrCommentNode(node2));
+    const nodes = parseListOfComponentValues(tokens).filter(
+      (node2) => !isWhiteSpaceOrCommentNode(node2)
+    );
     const node = nodes.length === 1 && nodes[0];
     const parsed = node && color(node);
     let rgba = [0, 0, 0, 255];
@@ -3546,11 +3552,16 @@ var __inputColor = (() => {
           p3 = XYZ_D65_to_P3(sRGB_to_XYZ_D65(rgba.slice(0, 3).map((value2) => value2 / 255)));
           opacity = rgba[3] / 255;
         } else if (parsed.colorNotation === "display-p3") p3 = channels;
-        else p3 = XYZ_D65_to_P3(["hsl", "hwb"].includes(parsed.colorNotation) ? sRGB_to_XYZ_D65(rgb2) : convert ? convert(channels) : sRGB_to_XYZ_D65(channels));
+        else
+          p3 = XYZ_D65_to_P3(
+            ["hsl", "hwb"].includes(parsed.colorNotation) ? sRGB_to_XYZ_D65(rgb2) : convert ? convert(channels) : sRGB_to_XYZ_D65(channels)
+          );
       }
     }
-    if (displayP3) return "color(display-p3 " + p3.map(component).join(" ") + (!alpha2 || opacity === 1 ? "" : " / " + component(opacity)) + ")";
-    if (!alpha2) return "#" + rgba.slice(0, 3).map((value2) => value2.toString(16).padStart(2, "0")).join("");
+    if (displayP3)
+      return "color(display-p3 " + p3.map(component).join(" ") + (!alpha2 || opacity === 1 ? "" : " / " + component(opacity)) + ")";
+    if (!alpha2)
+      return "#" + rgba.slice(0, 3).map((value2) => value2.toString(16).padStart(2, "0")).join("");
     return "color(srgb " + rgba.slice(0, 3).map(decimal).join(" ") + (rgba[3] === 255 ? "" : " / " + decimal(rgba[3])) + ")";
   }
   return __toCommonJS(input_color_exports);

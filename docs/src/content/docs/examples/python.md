@@ -109,9 +109,8 @@ with Session(languages=["en-US", "en"], timeout=10.0) as session:
 ```
 
 Expect `['en-US', 'en']`. Identity options are `user_agent`, `languages` and
-`platform`; arbitrary request headers cannot override persona-owned identity
-headers. Full persona JSON files are a [CLI option](/examples/cli/#4-use-a-persona),
-not a Python constructor option.
+`platform`; arbitrary request headers cannot override profile-owned identity
+headers. Pass a [captured or partial profile](/guides/profiles/) with `Session(profile=...)`.
 
 Next: [extract and stream content](/examples/fetch/), or browse the
 [generated Python API](/reference/python/).

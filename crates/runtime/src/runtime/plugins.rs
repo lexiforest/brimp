@@ -285,7 +285,7 @@ impl PluginRuntime {
             Ok(NativeValue::ProtectedObject(promise))
         })?;
         let config = plugins.iter().map(|plugin| serde_json::json!({"name":plugin.name,"source":plugin.source,"handlers":plugin.handlers.keys().collect::<Vec<_>>()})).collect::<Vec<_>>();
-        let source = include_str!("../../js/runtime/plugins.js");
+        let source = include_str!("../../js/internal/plugins.js");
         let installer = js
             .eval(&format!(
                 "(config, bridge) => ({source})(JSON.parse(config), bridge.codec)"
@@ -403,17 +403,20 @@ impl Drop for PluginRuntime {
 /// Explicit bundled installers. Calling these functions does not enable a plugin globally.
 pub mod bundled {
     use super::Plugin;
-    pub fn geometry() -> Plugin {
-        Plugin::new("geometry", include_str!("../../js/plugins/geometry.js"))
-    }
-    pub fn css_typed_om() -> Plugin {
-        Plugin::new(
-            "css-typed-om",
-            include_str!("../../js/plugins/css-typed-om.js"),
-        )
-    }
-    pub fn scheduling() -> Plugin {
-        Plugin::new("scheduling", include_str!("../../js/plugins/scheduling.js"))
+    /// Default browser subsystems; extraction and host integrations stay explicit.
+    pub fn browser() -> Vec<Plugin> {
+        vec![
+            environment(serde_json::json!({})),
+            permissions(serde_json::json!({})),
+            devices(serde_json::json!({})),
+            media(serde_json::json!({})),
+            workers(serde_json::json!({})),
+            trusted_types(serde_json::json!({})),
+            canvas(serde_json::json!({})),
+            graphics(serde_json::json!({})),
+            audio(serde_json::json!({})),
+            rtc(),
+        ]
     }
     pub fn rtc() -> Plugin {
         Plugin::new("rtc", include_str!("../../js/plugins/rtc.js"))
@@ -438,9 +441,6 @@ pub mod bundled {
             ),
         )
     }
-    pub fn storage() -> Plugin {
-        Plugin::new("storage", include_str!("../../js/plugins/storage.js"))
-    }
     pub fn canvas(options: serde_json::Value) -> Plugin {
         Plugin::new(
             "canvas",
@@ -451,12 +451,62 @@ pub mod bundled {
             ),
         )
     }
-    pub fn services(options: serde_json::Value) -> Plugin {
+    pub fn environment(options: serde_json::Value) -> Plugin {
         Plugin::new(
-            "services",
+            "environment",
             format!(
                 "context => ({}) (context, {})",
-                include_str!("../../js/plugins/services.js"),
+                include_str!("../../js/plugins/environment.js"),
+                options
+            ),
+        )
+    }
+    pub fn permissions(options: serde_json::Value) -> Plugin {
+        Plugin::new(
+            "permissions",
+            format!(
+                "context => ({}) (context, {})",
+                include_str!("../../js/plugins/permissions.js"),
+                options
+            ),
+        )
+    }
+    pub fn devices(options: serde_json::Value) -> Plugin {
+        Plugin::new(
+            "devices",
+            format!(
+                "context => ({}) (context, {})",
+                include_str!("../../js/plugins/devices.js"),
+                options
+            ),
+        )
+    }
+    pub fn media(options: serde_json::Value) -> Plugin {
+        Plugin::new(
+            "media",
+            format!(
+                "context => ({}) (context, {})",
+                include_str!("../../js/plugins/media.js"),
+                options
+            ),
+        )
+    }
+    pub fn workers(options: serde_json::Value) -> Plugin {
+        Plugin::new(
+            "workers",
+            format!(
+                "context => ({}) (context, {})",
+                include_str!("../../js/plugins/workers.js"),
+                options
+            ),
+        )
+    }
+    pub fn trusted_types(options: serde_json::Value) -> Plugin {
+        Plugin::new(
+            "trusted-types",
+            format!(
+                "context => ({}) (context, {})",
+                include_str!("../../js/plugins/trusted-types.js"),
                 options
             ),
         )

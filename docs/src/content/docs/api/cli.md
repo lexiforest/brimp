@@ -15,6 +15,7 @@ A JavaScript runtime for JavaScript from the browser
 Usage: brimp <COMMAND>
 
 Commands:
+  profile  Capture a profile from a live browser on localhost
   doctor   Verify native initialization and basic DOM/JavaScript/crypto functionality
   fetch    Fetch a URL, execute page scripts, and output its live DOM or an evaluated result
   run      Execute a classic/bundled JavaScript file (or - for stdin) in a browser realm
@@ -29,6 +30,60 @@ Options:
 
 ```
 
+## `brimp profile`
+
+```text
+Capture a profile from a live browser on localhost
+
+Usage: brimp profile <COMMAND>
+
+Commands:
+  capture
+
+Options:
+  -h, --help
+          Print help
+
+```
+
+## `brimp profile capture`
+
+```text
+Usage: brimp profile capture [OPTIONS] --output <OUTPUT>
+
+Options:
+      --output <OUTPUT>
+
+
+      --directory <DIRECTORY>
+          Export index.html and capture.js for independent hosting
+
+      --no-serve
+          Export the kit without starting the localhost server
+
+      --port <PORT>
+          [default: 0]
+
+      --timeout <TIMEOUT>
+          [default: 10m]
+
+      --overwrite
+
+
+      --plugin <PLUGINS>
+          Select the complete plugin set (bundled names or JavaScript files)
+
+      --plugin-options <PLUGIN_OPTIONS>
+
+
+      --no-plugins
+
+
+  -h, --help
+          Print help
+
+```
+
 ## `brimp doctor`
 
 ```text
@@ -37,8 +92,8 @@ Verify native initialization and basic DOM/JavaScript/crypto functionality
 Usage: brimp doctor [OPTIONS]
 
 Options:
-      --persona <PERSONA>
-          Load a validated browser persona JSON file
+      --profile <PROFILE>
+          Load a validated browser profile JSON file
 
       --proxy <PROXY>
           HTTP/SOCKS proxy URL
@@ -131,17 +186,17 @@ Options:
       --ca-bundle <CA_BUNDLE>
           PEM certificate authority bundle
 
-      --persona <PERSONA>
-          Load a validated browser persona JSON file
+      --profile <PROFILE>
+          Load a validated browser profile JSON file
 
       --user-agent <USER_AGENT>
-          Override the browser user agent; cannot accompany a persona file
+          Override the browser user agent; cannot accompany a profile file
 
       --languages <LANGUAGES>
-          Comma-separated navigator languages; cannot accompany a persona file
+          Comma-separated navigator languages; cannot accompany a profile file
 
       --platform <PLATFORM>
-          Override navigator.platform; cannot accompany a persona file
+          Override navigator.platform; cannot accompany a profile file
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
@@ -175,7 +230,10 @@ Options:
           Write response metadata to a separate file
 
       --plugin <PLUGIN>
-          Install a bundled plugin name or JavaScript file; repeat in installer order
+          Select the complete plugin set by name or JavaScript file; repeat in installer order
+
+      --no-plugins
+          Disable default browser plugins (extraction output still installs its extractor)
 
       --plugin-options <PLUGIN_OPTIONS>
           NAME=JSON; file plugin names are their file stems
@@ -333,17 +391,17 @@ Options:
       --ca-bundle <CA_BUNDLE>
           PEM certificate authority bundle
 
-      --persona <PERSONA>
-          Load a validated browser persona JSON file
+      --profile <PROFILE>
+          Load a validated browser profile JSON file
 
       --user-agent <USER_AGENT>
-          Override the browser user agent; cannot accompany a persona file
+          Override the browser user agent; cannot accompany a profile file
 
       --languages <LANGUAGES>
-          Comma-separated navigator languages; cannot accompany a persona file
+          Comma-separated navigator languages; cannot accompany a profile file
 
       --platform <PLATFORM>
-          Override navigator.platform; cannot accompany a persona file
+          Override navigator.platform; cannot accompany a profile file
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
@@ -377,7 +435,10 @@ Options:
           Write response metadata to a separate file
 
       --plugin <PLUGIN>
-          Install a bundled plugin name or JavaScript file; repeat in installer order
+          Select the complete plugin set by name or JavaScript file; repeat in installer order
+
+      --no-plugins
+          Disable default browser plugins (extraction output still installs its extractor)
 
       --plugin-options <PLUGIN_OPTIONS>
           NAME=JSON; file plugin names are their file stems

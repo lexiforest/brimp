@@ -177,7 +177,7 @@ impl BridgeRuntime {
         let controller = js
             .eval(&format!(
                 "({})({:?})",
-                include_str!("../../js/runtime/bridge.js"),
+                include_str!("../../js/internal/bridge.js"),
                 realm
             ))?
             .to_object()?;

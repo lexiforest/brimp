@@ -742,7 +742,7 @@ fn evaluate(page: &Page, expression: &str) -> Result<Value, AutomationError> {
     let encoded = serde_json::to_string(expression)
         .map_err(|error| AutomationError::InvalidInput(error.to_string()))?;
     let source = render_script(
-        include_str!("../../js/runtime/page_handle/evaluate_json.js"),
+        include_str!("../../js/internal/page_handle/evaluate_json.js"),
         &[("__EXPRESSION__", &encoded)],
     );
     let json = page

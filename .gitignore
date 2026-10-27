@@ -20,3 +20,5 @@ benchmark/**/results/
 
 /docs/public/reference/
 /docs/tools/cli-reference/target/
+
+/.native/

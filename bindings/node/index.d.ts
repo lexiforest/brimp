@@ -2,6 +2,13 @@
 export type Headers = Record<string, string> | [string, string][];
 export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
 export interface IdentityOptions { userAgent?: string; languages?: string[]; platform?: string; }
+/** Partial interface-owned values, optionally produced by `brimp profile capture`. */
+export interface BrowserProfile {
+  format?: 'brimp-profile';
+  version?: 1;
+  values?: Record<string, Record<string, JSONValue>>;
+  capture?: JSONValue;
+}
 export interface DiagnosticsOptions { mode?: 'api' | 'recursive'; path?: string; include?: string[]; capacity?: number; stack?: boolean; }
 export interface TraceRecord { sequence: number; pageId: number; realmId: number; elapsedMs: number; kind: string; path: string; outcome: string; stack: string | null; details: {layer?: 'recursive'; note?: string; arguments?: JSONValue[]; argumentCount?: number; target?: string | null; property?: string | null} | null; }
 export interface DiagnosticCoverage { enabled: boolean; mode: 'api' | 'recursive'; include: string[]; limitations: string[]; }
@@ -15,10 +22,14 @@ export interface DiagnosticSummary {
   writeError: string | null; coverage: DiagnosticCoverage;
 }
 export interface SessionOptions {
+  /** Persist origin localStorage, CacheStorage and IndexedDB in this file. */
+  storagePath?: string | null;
   clock?: { mode?: 'system' | 'logical'; epochMs?: number };
   diagnostics?: DiagnosticsOptions;
 
   identity?: IdentityOptions;
+  profile?: BrowserProfile;
+  /** Omit for browser defaults; an explicit list replaces them. [] selects core only. */
   plugins?: PluginDescriptor[];
   headers?: Headers;
   /** Milliseconds. Default 30000. */
@@ -76,7 +87,30 @@ export class Session extends Requests {
 }
 export interface StreamingResponse { status: number; url: string; headers: [string,string][]; body: import("node:stream").Readable; cancel(): void; }
 /** A reusable browser realm and DOM. Navigation invalidates previous realm handles. */
+export interface ProfileField {
+  default: unknown;
+  type: string;
+  [constraint: string]: unknown;
+}
+export interface ProfileContract {
+  format: 'brimp-profile-contract';
+  version: 1;
+  interfaces: Array<{
+    scope: string;
+    owner: string;
+    version: number;
+    fields: Record<string, ProfileField>;
+    probe: string | null;
+    notes: string | null;
+  }>;
+}
+export interface ProfileReport {
+  defaultsUsed: string[];
+  capture: unknown;
+}
 export class Page extends Requests {
+  profileContract(): Promise<ProfileContract>;
+  profileReport(): Promise<ProfileReport>;
   advanceTime(milliseconds: number, options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
   runPendingTasks(options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
   /** Consume retained records and the dropped count. JSONL output is unaffected. */
@@ -195,9 +229,13 @@ export class HostContext {
   emit(channel: string, value: HostValue): void;
 }
 
-export function storagePlugin(): Plugin;
 export function canvasPlugin(options?: { rgba?: [number, number, number, number]; characterWidth?: number }): Plugin;
-export function servicesPlugin(options?: Record<string, JSONValue>): Plugin;
+export function environmentPlugin(options?: Record<string, JSONValue>): Plugin;
+export function permissionsPlugin(options?: Record<string, JSONValue>): Plugin;
+export function devicesPlugin(options?: Record<string, JSONValue>): Plugin;
+export function mediaPlugin(options?: Record<string, JSONValue>): Plugin;
+export function workersPlugin(options?: Record<string, JSONValue>): Plugin;
+export function trustedTypesPlugin(options?: Record<string, JSONValue>): Plugin;
 export function extractionPlugin(): Plugin;
 export interface ExtractionOptions { contentSelector?: string; removeImages?: boolean; language?: string; debug?: boolean; }
 export interface ExtractedDocument {
@@ -255,20 +293,19 @@ export interface Page {
   responseBody(requestId: number): Buffer;
 }
 
-export function geometryPlugin(): Plugin;
-export function cssTypedOmPlugin(): Plugin;
-export function schedulingPlugin(): Plugin;
 export function graphicsPlugin(options?: {rgba?: number[]; renderer?: string; webgpu?: boolean}, handlers?: PluginDescriptor['handlers']): Plugin;
 export function audioPlugin(options?: {sampleRate?: number}, handlers?: PluginDescriptor['handlers']): Plugin;
 export function rtcPlugin(): Plugin;
 
 export interface PluginInfo {
+  defaultEnabled: boolean;
   installers: {node: string; python: string};
   capabilities: string[];
   limitations: string[];
   lifetime: string;
   options: Record<string, {default: JSONValue; python?: string; hostOnly?: boolean}>;
 }
+export function browserPlugins(): Plugin[];
 export function pluginCatalog(): Record<string, PluginInfo>;
 export type StorageOperation = {type: 'get' | 'delete'; key: string} | {type: 'set'; key: string; value: HostValue} | {type: 'clear'};
 export interface HostStorageBackend {

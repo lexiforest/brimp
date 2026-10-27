@@ -1375,13 +1375,30 @@ fn exposes_file_api_and_validates_blob_inputs() {
 
 #[test]
 fn exposes_web_storage_and_storage_events() {
-    let browser = Session::new(Default::default()).unwrap();
-    let page = browser
-        .new_local_page(
-            PageOptions::builder()
-                .plugins(vec![brimp_runtime::runtime::plugins::bundled::storage()])
-                .build(),
-        )
+    struct Loader;
+    #[async_trait::async_trait]
+    impl brimp_runtime::network::ResourceLoader for Loader {
+        async fn fetch(
+            &self,
+            request: brimp_runtime::network::ResourceRequest,
+        ) -> Result<brimp_runtime::network::ResourceResponse, brimp_runtime::network::NetworkError>
+        {
+            Ok(brimp_runtime::network::ResourceResponse {
+                status: http::StatusCode::OK,
+                headers: Default::default(),
+                body: b"<body></body>".to_vec(),
+                effective_url: request.url,
+                metadata: Default::default(),
+            })
+        }
+    }
+    let browser =
+        Session::with_resource_loader(Default::default(), std::sync::Arc::new(Loader)).unwrap();
+    let mut page = browser.new_local_page(PageOptions::default()).unwrap();
+    tokio::runtime::Builder::new_current_thread()
+        .build()
+        .unwrap()
+        .block_on(page.goto("https://storage.test/"))
         .unwrap();
 
     assert_js(

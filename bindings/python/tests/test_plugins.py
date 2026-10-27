@@ -14,9 +14,9 @@ SOURCE = '''async ({global, host}) => {
 }'''
 
 
-def test_rtc_installer_is_opt_in_and_creates_local_channels():
+def test_rtc_installer_selection_and_local_channels():
     from brimp import plugins
-    with Session() as session, session.new_page() as page:
+    with Session(plugins=[]) as session, session.new_page() as page:
         assert page.evaluate('typeof RTCPeerConnection') == 'undefined'
     with Session(plugins=[plugins.rtc()]) as session, session.new_page() as page:
         assert page.evaluate('''(() => {
@@ -117,7 +117,7 @@ def test_navigation_cancels_host_call_without_contaminating_new_realm():
 
 def test_bundled_plugins_input_and_extraction():
     from brimp import plugins
-    with Session(plugins=[plugins.storage(), plugins.canvas(), plugins.services(), plugins.extraction()]) as session:
+    with Session(plugins=[ plugins.canvas(), plugins.environment(), plugins.permissions(), plugins.devices(), plugins.media(), plugins.workers(), plugins.trusted_types(), plugins.extraction()]) as session:
         page = session.new_page()
         page.evaluate("document.body.innerHTML='<article><h1>Native article</h1><p>This article is read from a DOM without a layout engine.</p></article><input id=edit><input id=check type=checkbox>'; null")
         page.fill('#edit', 'ab')
@@ -128,5 +128,40 @@ def test_bundled_plugins_input_and_extraction():
             checkbox.click()
             assert checkbox._value('node => node.checked') is True
         assert 'DOM' in page.extract(content_selector='article')['contentMarkdown']
-        assert page.evaluate("localStorage.x='yes';localStorage.getItem('x')") == 'yes'
         assert page.evaluate("Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)") == [0, 0, 0, 0]
+
+
+def test_environment_navigator_override_options_are_preserved():
+    from brimp import plugins
+    names = {"hardware_concurrency", "max_touch_points", "vendor", "product_sub",
+             "pdf_viewer_enabled", "device_memory_gb", "expose_global_privacy_control", "global_privacy_control"}
+    assert names <= plugins.catalog()["environment"]["options"].keys()
+    with Session(plugins=[plugins.environment(hardware_concurrency=2, max_touch_points=3,
+            vendor="Configured", product_sub="custom", pdf_viewer_enabled=False,
+            device_memory_gb=16, expose_global_privacy_control=True, global_privacy_control=True)]) as session:
+        page = session.new_page()
+        assert page.evaluate("[navigator.hardwareConcurrency,navigator.maxTouchPoints,navigator.vendor,navigator.productSub,navigator.pdfViewerEnabled,navigator.globalPrivacyControl,navigator.deviceMemory]") == [2,3,"Configured","custom",False,True,16]
+        assert page.evaluate("[typeof SQLTransaction,Object.hasOwn(window,'openDatabase'),typeof openDatabase]") == ["function",True,"undefined"]
+
+
+@pytest.mark.parametrize('name,expression,options,expected', [
+    ('environment', 'navigator.connection.rtt', {'connection_rtt_ms': 7}, 7),
+    ('permissions', 'Notification.requestPermission()', {'notification_permission': 'denied'}, 'denied'),
+    ('devices', 'navigator.bluetooth.getAvailability()', {'bluetooth_available': True}, True),
+    ('media', "[typeof MediaStream, typeof MediaEncryptedEvent, typeof navigator.mediaDevices]", {'media_devices_enabled': False}, ['function', 'function', 'undefined']),
+    ('workers', "new Worker('ignored').terminate() === undefined", {}, True),
+    ('trusted_types', 'trustedTypes.createPolicy() === undefined', {}, True),
+])
+def test_subsystem_installers(name, expression, options, expected):
+    from brimp import plugins
+    with Session(plugins=[getattr(plugins, name)(**options)]) as session:
+        with session.new_page() as page:
+            assert page.evaluate(expression) == expected
+
+
+def test_default_browser_plugins_and_explicit_empty_selection():
+    from brimp import plugins
+    assert {p.name for p in plugins.browser()} == {name for name, info in plugins.catalog().items() if info['defaultEnabled']}
+    for options, expected in [({}, ['function', 'function', 'function']), ({'plugins': []}, ['undefined'] * 3)]:
+        with Session(**options) as session, session.new_page() as page:
+            assert page.evaluate('[typeof Worker,typeof AudioContext,typeof RTCPeerConnection]') == expected

@@ -14,6 +14,46 @@ The host API sends typed commands with owned values to the page's owner thread.
 That thread owns the JavaScriptCore realm, protected JS values, Lexbor DOM arena
 and task queue. Native pointers stay on the owner thread.
 
+The Rust implementation keeps `Page` state, construction, realm reset and
+destruction together in `crates/runtime/src/runtime/page.rs`. Its child modules
+extend the same `Page` type:
+
+| Module under `runtime/page/` | Responsibility |
+| --- | --- |
+| `navigation.rs` | Navigation, load state and response metadata |
+| `network.rs` | Page fetches, streaming responses and WebSockets |
+| `tasks.rs` | Task execution, timers, clock advancement and deadlines |
+| `plugins.rs` | Plugin installation and disposal for each realm |
+| `profile.rs` | Profile installation, identity updates and host reports |
+| `options.rs` | Page configuration and its builder |
+| `scripts.rs` | Script discovery, loading and execution order |
+
+These are private implementation modules. Public types remain available through
+`brimp_runtime::runtime`; moving a method into a child module does not introduce
+a separate page object or change its resource ownership.
+
+The host API is organized separately under `runtime/native/`. Its parent
+`native.rs` exposes the public types at their existing paths:
+
+| Module under `runtime/native/` | Responsibility |
+| --- | --- |
+| `session.rs` | Host session setup and managed page creation |
+| `page.rs` | Host methods that submit work to a managed page |
+| `handles.rs` | JS/DOM references, shared disposal and element operations |
+| `options.rs` | Identity, session, request and file-upload configuration |
+| `operations.rs` | Owner-thread command execution and promise completion |
+| `streaming.rs` | Host response bodies, bounded buffering and backpressure |
+
+`native/page.rs` operates through a `PageHandle`; the `Page` implementation above
+owns the actual JavaScript realm and DOM. Handle roots and their release remain
+with the owner-thread bridge.
+
+Request policy lives in `runtime/request.rs`: buffered requests and shared cookie,
+identity and redirect handling. Its child `request/streaming.rs` applies that
+policy to callback-driven Fetch and EventSource streams inside the page. The host
+streaming API lives in `native/streaming.rs`, where consumers pull response chunks
+through `BodyStream`; it shares the request policy helpers.
+
 ## 2. Observe page script execution
 
 ```python
@@ -87,6 +127,6 @@ engine's microtask queue. Network and cancellation deadlines still use real time
 | Browser policy, sessions, plugins and task scheduling | `brimp-runtime` |
 | Engine bindings and protected values | `brimp-jsc` |
 | Safe DOM arena; private C/FFI boundary | `brimp-lexbor` |
-| HTTP and WebSocket transport | `brimp-net` |
+| HTTP and WebSocket transport | [`brimp-net`](/development/network/) |
 
 Next: [choose core APIs or a plugin](/architecture/subsystems/).

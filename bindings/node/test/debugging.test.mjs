@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createSession,geometryPlugin,cssTypedOmPlugin,schedulingPlugin,graphicsPlugin,audioPlugin} from '../index.js';
+import {createSession,graphicsPlugin,audioPlugin} from '../index.js';
 
 test('logical clock, diagnostics and optional plugin arithmetic',async()=>{
   const dir=await mkdtemp(join(tmpdir(),'brimp-debug-'));
   const path=join(dir,'trace.jsonl');
-  const session=await createSession({clock:{mode:'logical',epochMs:1000},diagnostics:{path,include:['Document.prototype','Reflect'],capacity:8},plugins:[geometryPlugin(),cssTypedOmPlugin(),schedulingPlugin()]});
+  const session=await createSession({clock:{mode:'logical',epochMs:1000},diagnostics:{path,include:['Document.prototype','Reflect'],capacity:8},plugins:[]});
   try {
     const page=await session.newPage();
     await page.evaluate('globalThis.seen=[];setTimeout(()=>seen.push([Date.now(),performance.now()]),20);null');

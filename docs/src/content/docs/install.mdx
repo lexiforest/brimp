@@ -19,8 +19,9 @@ git clone https://github.com/lexiforest/brimp.git
 cd brimp
 ```
 
-You need Rust/Cargo, a C compiler, make and Perl. Lexbor is vendored; WebCrypto
-builds its OpenSSL dependency from Cargo-pinned source.
+You need Rust/Cargo and the native SDK build tools. Lexbor is vendored; WebCrypto
+uses the BoringSSL instance in curl-impersonate. The curl SDK must include the
+WebCrypto exports; see [building the SDKs](/development/#native-prerequisites).
 
 ## 2. Point to your native SDKs
 
@@ -126,7 +127,7 @@ npm pack ./bindings/node
 ```
 
 These produce SDK-linked packages. For macOS relocation, follow
-[package assembly](https://github.com/lexiforest/brimp/blob/main/bindings/PACKAGING.md).
+[package assembly](/development/packaging/).
 Minimum macOS versions come from the actual native libraries; a wheel tag or
 source setting alone does not make a newer SDK run on an older OS. Linux and
 Windows currently use the SDK-linked workflow.

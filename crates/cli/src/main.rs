@@ -2,6 +2,7 @@ mod actions;
 mod args;
 mod output;
 mod plugins;
+mod profile;
 mod routes;
 mod signals;
 
@@ -110,6 +111,9 @@ fn main() -> std::process::ExitCode {
 }
 fn run(cli: Cli) -> Result<()> {
     match cli.command {
+        Command::Profile {
+            command: args::Profile::Capture(options),
+        } => profile::capture(options),
         Command::Plugins { command } => {
             let catalog = plugins::catalog();
             let value = match command {
@@ -130,7 +134,7 @@ fn run(cli: Cli) -> Result<()> {
             let _signals = signals::Signals::install(budget.cancellation.clone())?;
             let result = (|| {
                 let session = Session::new(SessionOptions {
-                    persona: persona(options.persona.as_deref())?,
+                    profile: profile(options.profile.as_deref())?,
                     timeout: options.timeout,
                     deadline: Some(budget.deadline),
                     cancellation: budget.cancellation.clone(),
@@ -169,9 +173,9 @@ fn run(cli: Cli) -> Result<()> {
         } => execute(url, Some(script), *options),
     }
 }
-fn persona(path: Option<&Path>) -> Result<Option<brimp_runtime::persona::PersonaConfig>> {
+fn profile(path: Option<&Path>) -> Result<Option<brimp_runtime::profile::BrowserProfile>> {
     path.map(|path| {
-        let value: brimp_runtime::persona::PersonaConfig =
+        let value: brimp_runtime::profile::BrowserProfile =
             serde_json::from_str(&read_text(path)?).map_err(invalid)?;
         value.validate().map_err(invalid)?;
         Ok(value)
@@ -235,7 +239,7 @@ fn headers(options: &Options) -> Result<Vec<(String, String)>> {
             ) || name.as_str().starts_with("sec-ch-ua")
             {
                 return Err(invalid(format!(
-                    "header {name} is owned by the identity/persona"
+                    "header {name} is owned by the identity/profile"
                 )));
             }
             http::HeaderValue::from_str(value.trim()).map_err(invalid)?;
@@ -356,7 +360,7 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
     }
     http::Method::from_bytes(options.method.as_bytes()).map_err(invalid)?;
     let request_headers = headers(&options)?;
-    let persona = persona(options.persona.as_deref())?;
+    let profile = profile(options.profile.as_deref())?;
     let body = match &options.data_file {
         Some(path) => Some(std::fs::read(path).map_err(invalid)?),
         None => options.data.as_ref().map(|value| value.as_bytes().to_vec()),
@@ -390,7 +394,18 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
         .transpose()?;
     let actions = actions::Actions::load(options.actions.as_deref())?;
     let routes = routes::Routes::load(options.routes.as_deref())?;
-    let plugins = plugins::load(&options.plugin, &options.plugin_options, extraction)?;
+    let selected_plugins = if options.plugin.is_empty() && !options.no_plugins {
+        plugins::catalog()
+            .as_object()
+            .unwrap()
+            .iter()
+            .filter(|(_, entry)| entry["defaultEnabled"] == true)
+            .map(|(name, _)| name.clone())
+            .collect()
+    } else {
+        options.plugin.clone()
+    };
+    let plugins = plugins::load(&selected_plugins, &options.plugin_options, extraction)?;
     let auth = options
         .auth
         .as_ref()
@@ -446,7 +461,8 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
     let _signals = signals::Signals::install(budget.cancellation.clone())?;
     let result = (|| {
         let session = Session::new(SessionOptions {
-            persona,
+            storage_path: None,
+            profile,
             deadline: Some(budget.deadline),
             cancellation: budget.cancellation.clone(),
             timeout: budget.remaining()?,

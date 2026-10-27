@@ -13,5 +13,10 @@ For a runnable introduction, follow the [Python tutorial](/examples/python/).
 
 Evaluation now copies undefined/null, BigInt, special numbers and binary buffers.
 Use JSHandle for identity, functions and cyclic values. The
-[value bridge guide](https://github.com/lexiforest/brimp/blob/main/bindings/BRIDGING.md)
+[value bridge guide](/guides/values/)
 covers reference calls, plugin callbacks, ownership and WebAssembly loading.
+
+## Browser profiles
+
+`page.profile_contract()` and `page.profile_report()` describe the loaded interface definitions and report
+defaulted values and capture provenance. See [browser capture profiles](/guides/profiles/).

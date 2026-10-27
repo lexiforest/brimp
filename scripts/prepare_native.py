@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download and verify the native SDKs used to build the Brimp runtime."""
+"""Prepare the pinned JSC SDK and an optional source-built curl SDK."""
 
 from __future__ import annotations
 
@@ -15,11 +15,7 @@ from pathlib import Path
 
 
 JSC_VERSION = "jsc-v2026082706"
-CURL_VERSION = "v2.1.1"
 JSC_BASE_URL = f"https://github.com/lexiforest/WebKit/releases/download/{JSC_VERSION}"
-CURL_BASE_URL = (
-    f"https://github.com/lexiforest/curl-impersonate/releases/download/{CURL_VERSION}"
-)
 
 
 @dataclass(frozen=True)
@@ -36,7 +32,6 @@ class Asset:
 @dataclass(frozen=True)
 class Target:
     jsc: Asset
-    curl: Asset
     windows: bool = False
 
 
@@ -47,22 +42,12 @@ TARGETS = {
             "ac72fd9de753dc0acdf2bfc389dc7bc4bd61c30f309eabeeec38930f367d3825",
             JSC_BASE_URL,
         ),
-        Asset(
-            "libcurl-impersonate-v2.1.1.x86_64-linux-gnu.tar.gz",
-            "18b22585da3d6a58926086c65b1e662a87768ccca646e8c2a6ed03137bf948f1",
-            CURL_BASE_URL,
-        ),
     ),
     "aarch64-unknown-linux-gnu": Target(
         Asset(
             f"JavaScriptCore-{JSC_VERSION}-linux-arm64.tar.gz",
             "653d458e3b0103da2f4d28c17193d468fbc71983b04bb5a788c98566bfa74011",
             JSC_BASE_URL,
-        ),
-        Asset(
-            "libcurl-impersonate-v2.1.1.aarch64-linux-gnu.tar.gz",
-            "db437a38f5c694f43ae08619cb53e3ad5061b05f720f9e56ee68688c91442805",
-            CURL_BASE_URL,
         ),
     ),
     "aarch64-apple-darwin": Target(
@@ -71,22 +56,12 @@ TARGETS = {
             "1d5b379d96f3dccd13a62674993fc8dadf9fd1091542edb1854ccb639c22168c",
             JSC_BASE_URL,
         ),
-        Asset(
-            "libcurl-impersonate-v2.1.1.arm64-macos.tar.gz",
-            "747ad70d1e6d302528aecd59fdf64d5c29412ec64f6217d0c7180feff1cad633",
-            CURL_BASE_URL,
-        ),
     ),
     "x86_64-pc-windows-msvc": Target(
         Asset(
             f"JavaScriptCore-{JSC_VERSION}-windows-x64.tar.gz",
             "28836e9afbed32c97aee0cacb9b4b27b11febc29c0c1ef13786f3a082e7a31b9",
             JSC_BASE_URL,
-        ),
-        Asset(
-            "libcurl-impersonate-v2.1.1.x86_64-win32.tar.gz",
-            "656ef0fe16393e2718d66112c7d0fcb230adfb4b0de42b0884ade598f6aea617",
-            CURL_BASE_URL,
         ),
         windows=True,
     ),
@@ -156,23 +131,28 @@ def append_environment(path: Path, values: dict[str, str]) -> None:
             output.write(f"{name}={value}\n")
 
 
-def prepare(target_name: str, output: Path) -> dict[str, str]:
+def prepare(target_name: str, output: Path, curl_sdk: Path | None = None) -> dict[str, str]:
     target = TARGETS[target_name]
     cache = output / "downloads"
     cache.mkdir(parents=True, exist_ok=True)
     jsc_archive = download(target.jsc, cache)
-    curl_archive = download(target.curl, cache)
 
     jsc_extract = output / "jsc"
-    curl_extract = output / "curl"
     extract(jsc_archive, jsc_extract)
-    extract(curl_archive, curl_extract)
     jsc_root = sole_directory(jsc_extract)
 
     jsc_lib = jsc_root / "lib"
-    curl_lib = curl_extract / "lib" if target.windows else curl_extract
-    runtime_dirs = [jsc_root / "bin", curl_lib] if target.windows else [jsc_lib, curl_lib]
-    for directory in [jsc_lib, curl_lib, *runtime_dirs]:
+    runtime_dirs = [jsc_root / "bin"] if target.windows else [jsc_lib]
+    curl_lib = None
+    if curl_sdk is not None:
+        require_files(curl_sdk, ("include/curl-impersonate/webcrypto.h",))
+        curl_lib = curl_sdk / "lib"
+        libraries = ("libcurl-impersonate_imp.lib", "libcurl-impersonate.dll") if target.windows else (
+            "libcurl-impersonate.dylib" if "apple-darwin" in target_name else "libcurl-impersonate.so",
+        )
+        require_files(curl_lib, libraries)
+        runtime_dirs.append(curl_lib)
+    for directory in [jsc_lib, *runtime_dirs]:
         if not directory.is_dir():
             raise RuntimeError(f"native SDK directory is missing: {directory}")
 
@@ -187,16 +167,11 @@ def prepare(target_name: str, output: Path) -> dict[str, str]:
                 "bin/icuuc77.dll",
             ),
         )
-        require_files(
-            curl_extract,
-            ("lib/libcurl-impersonate_imp.lib", "lib/libcurl-impersonate.dll"),
-        )
     elif "apple-darwin" in target_name:
         require_files(
             jsc_root,
             ("lib/JavaScriptCore.framework/JavaScriptCore",),
         )
-        require_files(curl_extract, ("libcurl-impersonate.dylib",))
     else:
         require_files(
             jsc_root,
@@ -207,18 +182,18 @@ def prepare(target_name: str, output: Path) -> dict[str, str]:
                 "lib/libicuuc.so.77",
             ),
         )
-        require_files(curl_extract, ("libcurl-impersonate.so",))
 
     sdk_licenses = jsc_root / "share/licenses"
     if not sdk_licenses.is_dir():
         raise RuntimeError(f"native SDK licenses are missing: {sdk_licenses}")
     values = {
         "BRIMP_JSC_LIB_DIR": str(jsc_lib.resolve()),
-        "BRIMP_CURL_LIB_DIR": str(curl_lib.resolve()),
         "BRIMP_NATIVE_RUNTIME_DIRS": os.pathsep.join(
             str(directory.resolve()) for directory in runtime_dirs
         ),
     }
+    if curl_lib is not None:
+        values["BRIMP_CURL_LIB_DIR"] = str(curl_lib.resolve())
     if target.windows:
         github_path = os.environ.get("GITHUB_PATH")
         if github_path:
@@ -245,9 +220,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", required=True, choices=TARGETS)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--curl-sdk", type=Path, help="Installed curl-impersonate SDK with the BoringSSL WebCrypto interface; omit for JSC-only builds")
     arguments = parser.parse_args()
     try:
-        values = prepare(arguments.target, arguments.output.resolve())
+        values = prepare(arguments.target, arguments.output.resolve(), arguments.curl_sdk.resolve() if arguments.curl_sdk else None)
         github_environment = os.environ.get("GITHUB_ENV")
         if github_environment:
             append_environment(Path(github_environment), values)

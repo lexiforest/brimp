@@ -1,0 +1,16 @@
+{
+  "todomvc": {
+    "repository": "https://github.com/tastejs/todomvc",
+    "revision": "ff43b02e59dfa604386bb382034b2cd07c2bcd8a",
+    "archive": "https://codeload.github.com/tastejs/todomvc/tar.gz/ff43b02e59dfa604386bb382034b2cd07c2bcd8a",
+    "sha256": "22fd7c5251b636773561cc0ab606896f48c8dbcad80e79b427989bfc0e134718",
+    "license": "MIT"
+  },
+  "creepjs": {
+    "repository": "https://github.com/abrahamjuliot/creepjs",
+    "revision": "10aa6724cd33a1015db1574211890518cd04f0cc",
+    "archive": "https://codeload.github.com/abrahamjuliot/creepjs/tar.gz/10aa6724cd33a1015db1574211890518cd04f0cc",
+    "sha256": "e6e177d2d8487169a7a0d03674f12c8657fff13ad5616cc092ce7e2d66e476ab",
+    "license": "MIT"
+  }
+}

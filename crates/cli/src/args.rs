@@ -13,6 +13,11 @@ pub struct Cli {
 }
 #[derive(Subcommand)]
 pub enum Command {
+    /// Capture a profile from a live browser on localhost.
+    Profile {
+        #[command(subcommand)]
+        command: Profile,
+    },
     /// Verify native initialization and basic DOM/JavaScript/crypto functionality.
     Doctor(Doctor),
     /// Fetch a URL, execute page scripts, and output its live DOM or an evaluated result.
@@ -37,15 +42,43 @@ pub enum Command {
     },
 }
 #[derive(Subcommand)]
+pub enum Profile {
+    Capture(Capture),
+}
+#[derive(Args)]
+pub struct Capture {
+    #[arg(long)]
+    pub output: PathBuf,
+    /// Export index.html and capture.js for independent hosting.
+    #[arg(long)]
+    pub directory: Option<PathBuf>,
+    /// Export the kit without starting the localhost server.
+    #[arg(long, requires = "directory")]
+    pub no_serve: bool,
+    #[arg(long, default_value_t = 0)]
+    pub port: u16,
+    #[arg(long, default_value = "10m", value_parser = duration)]
+    pub timeout: Duration,
+    #[arg(long)]
+    pub overwrite: bool,
+    /// Select the complete plugin set (bundled names or JavaScript files).
+    #[arg(long = "plugin", conflicts_with = "no_plugins")]
+    pub plugins: Vec<String>,
+    #[arg(long = "plugin-options")]
+    pub plugin_options: Vec<String>,
+    #[arg(long)]
+    pub no_plugins: bool,
+}
+#[derive(Subcommand)]
 pub enum Plugins {
     List,
     Show { name: String },
 }
 #[derive(Args)]
 pub struct Doctor {
-    /// Load a validated browser persona JSON file.
+    /// Load a validated browser profile JSON file.
     #[arg(long)]
-    pub persona: Option<PathBuf>,
+    pub profile: Option<PathBuf>,
     /// HTTP/SOCKS proxy URL.
     #[arg(long)]
     pub proxy: Option<String>,
@@ -132,16 +165,16 @@ pub struct Options {
     /// PEM certificate authority bundle.
     #[arg(long)]
     pub ca_bundle: Option<PathBuf>,
-    /// Load a validated browser persona JSON file.
+    /// Load a validated browser profile JSON file.
     #[arg(long, conflicts_with_all = ["user_agent", "languages", "platform"])]
-    pub persona: Option<PathBuf>,
-    /// Override the browser user agent; cannot accompany a persona file.
+    pub profile: Option<PathBuf>,
+    /// Override the browser user agent; cannot accompany a profile file.
     #[arg(long)]
     pub user_agent: Option<String>,
-    /// Comma-separated navigator languages; cannot accompany a persona file.
+    /// Comma-separated navigator languages; cannot accompany a profile file.
     #[arg(long, value_delimiter = ',')]
     pub languages: Vec<String>,
-    /// Override navigator.platform; cannot accompany a persona file.
+    /// Override navigator.platform; cannot accompany a profile file.
     #[arg(long)]
     pub platform: Option<String>,
     /// HTTP method. Supplying data does not automatically change it.
@@ -171,9 +204,12 @@ pub struct Options {
     /// Write response metadata to a separate file.
     #[arg(long)]
     pub response_info: Option<PathBuf>,
-    /// Install a bundled plugin name or JavaScript file; repeat in installer order.
+    /// Select the complete plugin set by name or JavaScript file; repeat in installer order.
     #[arg(long)]
     pub plugin: Vec<String>,
+    /// Disable default browser plugins (extraction output still installs its extractor).
+    #[arg(long, conflicts_with = "plugin")]
+    pub no_plugins: bool,
     /// NAME=JSON; file plugin names are their file stems.
     #[arg(long)]
     pub plugin_options: Vec<String>,

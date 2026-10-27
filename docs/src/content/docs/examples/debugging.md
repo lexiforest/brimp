@@ -6,7 +6,8 @@ description: Call browser functions repeatedly and inspect their observed API de
 Brimp's script harness uses the same Session/Page runtime as navigation. Load a
 classic or bundled script, retain a function with a handle, and call it with
 different inputs while its closure and DOM stay alive. Enable diagnostics to see
-the instrumented browser APIs it uses.
+the instrumented browser APIs it uses. For configuration and precise limits, see
+[Diagnostics and time](/guides/diagnostics/).
 
 ## Run the complete example
 
@@ -77,9 +78,10 @@ with page.evaluate_handle(source + '\n;compute') as fn:
 These snippets assume an existing page and source string, as in the complete
 examples. The appended expression selects the function in the same evaluation;
 it does not move the function to the host. Calls await returned Promises. Arguments
-are JSON-compatible values; results remain handles until copied with
-`jsonValue` / `json_value`. Bind an object method in the realm when it needs its
-original receiver, for example `service.compute.bind(service)`.
+use the [rich value bridge](/guides/values/), including nested handles and binary
+values. Results remain handles until copied with `value()` or explicitly
+serialized with `jsonValue` / `json_value`. Use `invoke` with an explicit receiver
+when calling a retained object method.
 
 Only select an expression available in that evaluation. A function hidden inside
 a closed module or IIFE needs an explicit export from the bundle. There is no

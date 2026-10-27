@@ -70,7 +70,7 @@ def test_node_and_cli_references():
     for member in ['evaluate', 'get', 'route', 'advanceTime', 'stream', 'configureNetwork', 'peekDiagnostics', 'summarizeDiagnostics']:
         assert f'id="{member.lower()}"' in page or f'id="{member}"' in page
     cli = (SITE / 'api/cli/index.html').read_text()
-    for flag in ['--actions', '--routes', '--persona', '--stream', '--clock', '--trace-report', '--trace-mode']:
+    for flag in ['--actions', '--routes', '--profile', '--stream', '--clock', '--trace-report', '--trace-mode']:
         assert flag in cli
     assert 'Generated from the CLI' in cli
 
@@ -83,7 +83,7 @@ def test_architecture_pngs():
 
 
 def test_removed_api_paths_do_not_return_in_guides():
-    bad = re.compile(r'brimp\.get\(|\blaunch\(|\.screenshot\(|brimp (?:eval|cdp|serve)\b|--timeout-ms|personaJson|persona_json')
+    bad = re.compile(r'brimp\.get\(|\blaunch\(|\.screenshot\(|brimp (?:eval|cdp|serve)\b|--timeout-ms|profileJson|profile_json')
     for source in (ROOT / 'docs/src/content/docs').rglob('*'):
         if source.suffix in ('.md', '.mdx'):
             assert not bad.search(source.read_text()), str(source)
