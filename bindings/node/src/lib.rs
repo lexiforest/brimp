@@ -421,6 +421,11 @@ impl NativePageBinding {
         blocking(move || page.html()).await
     }
     #[napi]
+    pub async fn load_html(&self, html: String, url: String) -> Result<()> {
+        let page = self.inner.clone();
+        blocking(move || page.load_html(&html, &url)).await
+    }
+    #[napi]
     pub async fn close(&self) -> Result<()> {
         let page = self.inner.clone();
         blocking(move || page.close()).await

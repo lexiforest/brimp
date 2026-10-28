@@ -20,6 +20,42 @@ impl Page {
         self.goto_request(request, true, 20).await
     }
 
+    /// Adds the fetch metadata Chromium attaches to a document navigation. The
+    /// transport orders these by Chrome position and drops client hints for
+    /// non-Chromium impersonation targets.
+    fn add_navigation_headers(&self, request: &mut ResourceRequest) {
+        if request.method != http::Method::GET && request.method != http::Method::HEAD {
+            return;
+        }
+        let current = self.browsing_context.current_url();
+        let site = match current.as_deref().and_then(|url| url::Url::parse(url).ok()) {
+            None => "none",
+            Some(current) => match url::Url::parse(&request.url) {
+                Ok(target) if target.origin() == current.origin() => "same-origin",
+                Ok(target) if target.host_str() == current.host_str() => "same-site",
+                Ok(_) => "cross-site",
+                Err(_) => "none",
+            },
+        };
+        for (name, value) in [
+            ("upgrade-insecure-requests", "1"),
+            ("sec-fetch-site", site),
+            ("sec-fetch-mode", "navigate"),
+            ("sec-fetch-user", "?1"),
+            ("sec-fetch-dest", "document"),
+        ] {
+            let Ok(name) = http::HeaderName::from_bytes(name.as_bytes()) else {
+                continue;
+            };
+            if request.headers.contains_key(name.as_str()) {
+                continue;
+            }
+            if let Ok(value) = http::HeaderValue::from_str(value) {
+                request.headers.append(name, value);
+            }
+        }
+    }
+
     pub async fn goto_request(
         &mut self,
         request: ResourceRequest,
@@ -36,6 +72,7 @@ impl Page {
         }
         let mut request = request;
         request.resource_type = Some("Document".into());
+        self.add_navigation_headers(&mut request);
         self.close_plugins();
         if let Some(network) = &self.network {
             network.routes.cancel_pending();

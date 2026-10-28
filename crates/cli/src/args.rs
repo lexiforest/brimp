@@ -30,8 +30,14 @@ pub enum Command {
     Run {
         #[arg(id = "program")]
         script: PathBuf,
-        #[arg(long)]
+        #[arg(long, conflicts_with = "html")]
         url: Option<String>,
+        /// Load a local HTML file as the page document instead of navigating.
+        #[arg(long)]
+        html: Option<PathBuf>,
+        /// URL assigned to the loaded HTML document; used as its base URL.
+        #[arg(long, requires = "html")]
+        html_url: Option<String>,
         #[command(flatten)]
         options: Box<Options>,
     },

@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import {createSession, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin,
   workersPlugin, trustedTypesPlugin, audioPlugin, pluginCatalog} from '../../../bindings/node/index.js';
 
+// navigator.connection is a Chromium-only surface, so that family runs under a
+// Chromium identity; every other family is identity-neutral.
+const CHROME_AGENT='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 const families = [
-  [environmentPlugin, 'navigator.connection', `navigator.connection.addEventListener('change',()=>{});`, {connection_rtt_ms:7}],
+  [environmentPlugin, 'navigator.connection', `navigator.connection.addEventListener('change',()=>{});`, {connection_rtt_ms:7}, true],
   [permissionsPlugin, 'Notification', `await Notification.requestPermission();await navigator.permissions.query({name:'notifications'});navigator.credentials.get();`, {notification_permission:'denied'}],
   [devicesPlugin, 'navigator.clipboard', `navigator.clipboard.readText();navigator.geolocation.getCurrentPosition();navigator.wakeLock.request();await navigator.bluetooth.getAvailability();`, {bluetooth_available:true}],
   [mediaPlugin, 'MediaStream', `new MediaStream().getTracks();new MediaEncryptedEvent('encrypted');navigator.mediaSession.setActionHandler();await navigator.mediaDevices.enumerateDevices();`, {}],
@@ -12,9 +15,12 @@ const families = [
   [trustedTypesPlugin, 'trustedTypes', `trustedTypes.createPolicy();trustedTypes.isHTML();`, {}],
   [audioPlugin, 'AudioContext', `const a=new AudioContext();a.createGain().connect(a.destination);new SpeechSynthesisUtterance('hello');await a.close();`, {}],
 ];
-for (const [installer, surface, calls, options] of families) {
+for (const [installer, surface, calls, options, chromium] of families) {
   test(`${installer.name} owns its surface independently and reinstalls on navigation`, async () => {
-    const session = await createSession({plugins:[installer(options)]});
+    const session = await createSession({
+      plugins:[installer(options)],
+      ...(chromium?{profile:{values:{identity:{user_agent:CHROME_AGENT}}}}:{}),
+    });
     try {
       const page = await session.newPage();
       for (let i=0;i<2;i++) {

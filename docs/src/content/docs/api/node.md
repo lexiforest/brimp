@@ -20,3 +20,10 @@ for plugin functions, ownership and WebAssembly loading.
 
 `page.profileContract()` and `page.profileReport()` describe the loaded interface definitions and report
 defaulted values and capture provenance. See [browser capture profiles](/guides/profiles/).
+
+## Saved HTML
+
+`page.loadHtml(html, url = 'about:blank')` installs `url` before parsing and
+runs no inline or external page scripts and fetches no subresources. Init
+scripts still run. Use it to call an extracted script against a saved document
+with correct relative URL and document URL resolution.

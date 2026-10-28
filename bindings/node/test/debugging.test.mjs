@@ -58,3 +58,24 @@ test('inspect and summarize a retained function without consuming its trace', as
     } finally { await fn.dispose(); }
   } finally { await session.close(); }
 });
+
+test('loadHtml installs the document URL and skips page scripts', async () => {
+  const session = await createSession({plugins: []});
+  try {
+    const page = await session.newPage();
+    await page.evaluate('globalThis.beforeLoad = 1');
+    await page.loadHtml(`<!doctype html><title>Saved</title>
+      <base href="../assets/"><a id="next" href="next?x=1">next</a>
+      <script>globalThis.pageScriptRan = true</script>`, 'https://example.test/dir/page.html');
+    assert.deepEqual(await page.evaluate(`({
+      title: document.title, url: location.href, base: document.baseURI,
+      href: document.getElementById('next').href,
+      pageScript: typeof globalThis.pageScriptRan,
+      beforeLoad: typeof globalThis.beforeLoad,
+      ready: document.readyState})`), {
+      title: 'Saved', url: 'https://example.test/dir/page.html',
+      base: 'https://example.test/assets/',
+      href: 'https://example.test/assets/next?x=1',
+      pageScript: 'undefined', beforeLoad: 'undefined', ready: 'complete'});
+  } finally { await session.close(); }
+});

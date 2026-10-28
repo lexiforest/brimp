@@ -446,7 +446,58 @@ function installAudio({ global, host, profile: settings }, options = {}) {
       );
     }
   }
-  Object.defineProperty(global, 'speechSynthesis', { value: {}, configurable: true });
+  // Silent engine: utterances are accepted and dropped and there are no voices
+  // to enumerate, but the callable surface stays because scripts probe it.
+  const speechSynthesisHandlers = new WeakMap();
+  class SpeechSynthesis extends EventTarget {
+    constructor() {
+      super();
+    }
+    get pending() {
+      return false;
+    }
+    get speaking() {
+      return false;
+    }
+    get paused() {
+      return false;
+    }
+    speak() {}
+    cancel() {}
+    pause() {}
+    resume() {}
+    getVoices() {
+      return [];
+    }
+  }
+  Object.defineProperty(SpeechSynthesis.prototype, 'onvoiceschanged', {
+    get() {
+      return speechSynthesisHandlers.get(this) ?? null;
+    },
+    set(value) {
+      speechSynthesisHandlers.set(this, typeof value === 'function' ? value : null);
+    },
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(SpeechSynthesis.prototype, Symbol.toStringTag, {
+    value: 'SpeechSynthesis',
+    configurable: true,
+  });
+  Object.defineProperty(SpeechSynthesis.prototype, 'constructor', {
+    value: SpeechSynthesis,
+    writable: true,
+    configurable: true,
+  });
+  Object.defineProperty(global, 'SpeechSynthesis', {
+    value: SpeechSynthesis,
+    writable: true,
+    configurable: true,
+  });
+  Object.defineProperty(global, 'speechSynthesis', {
+    value: new SpeechSynthesis(),
+    configurable: true,
+  });
   for (const [name, value] of Object.entries({
     BaseAudioContext,
     AudioContext,

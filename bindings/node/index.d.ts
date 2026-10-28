@@ -149,6 +149,8 @@ export class Page extends Requests {
   extract(options?: ExtractionOptions): Promise<ExtractedDocument>;
   /** Serialize the current DOM, including page-script and host edits. */
   html(): Promise<string>;
+  /** Load HTML at `url` without page scripts or subresources; `url` defaults to about:blank. */
+  loadHtml(html: string, url?: string): Promise<void>;
   close(): Promise<void>;
 }
 /** Original HTTP response bytes and metadata. Use Page.html() for the live DOM. */

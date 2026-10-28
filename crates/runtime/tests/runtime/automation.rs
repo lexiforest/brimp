@@ -5,6 +5,7 @@ use async_trait::async_trait;
 use brimp_runtime::network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse};
 use brimp_runtime::runtime::{AutomationError, PageOptions, Session};
 use http::{HeaderMap, HeaderValue, StatusCode};
+use serde_json::json;
 
 struct WorkflowLoader;
 #[async_trait]
@@ -44,6 +45,65 @@ fn reset_replaces_the_document_and_javascript_realm_without_closing_the_page() {
     page.navigate("https://example.test/reused", Duration::from_secs(1))
         .unwrap();
     assert_eq!(page.title().unwrap(), "Workflow");
+}
+
+#[test]
+fn load_html_uses_the_given_url_without_running_page_scripts() {
+    let browser = Session::new(Default::default()).unwrap();
+    let page = browser
+        .new_page_with_options(PageOptions::default())
+        .unwrap();
+    page.evaluate("globalThis.beforeLoad = 1").unwrap();
+    page.add_preload_script(
+        "init",
+        "globalThis.fromInit = location.href; globalThis.initReady = document.readyState; \
+         globalThis.sawLoad = false; addEventListener('load', () => { globalThis.sawLoad = true; })",
+    )
+    .unwrap();
+    page.load_html(
+        r#"<!doctype html><title>Saved</title>
+           <base href="../assets/">
+           <a id="next" href="next?x=1">next</a>
+           <script>globalThis.pageScriptRan = true</script>"#,
+        "https://example.test/dir/page.html",
+    )
+    .unwrap();
+
+    assert_eq!(page.title().unwrap(), "Saved");
+    assert_eq!(
+        page.evaluate("location.href").unwrap(),
+        json!("https://example.test/dir/page.html")
+    );
+    assert_eq!(
+        page.evaluate("document.URL").unwrap(),
+        json!("https://example.test/dir/page.html")
+    );
+    assert_eq!(
+        page.evaluate("document.baseURI").unwrap(),
+        json!("https://example.test/assets/")
+    );
+    assert_eq!(
+        page.evaluate("document.getElementById('next').href")
+            .unwrap(),
+        json!("https://example.test/assets/next?x=1")
+    );
+    assert_eq!(
+        page.evaluate("typeof globalThis.pageScriptRan").unwrap(),
+        json!("undefined")
+    );
+    assert_eq!(
+        page.evaluate("typeof globalThis.beforeLoad").unwrap(),
+        json!("undefined")
+    );
+    assert_eq!(
+        page.evaluate("globalThis.fromInit").unwrap(),
+        json!("https://example.test/dir/page.html")
+    );
+    assert_eq!(page.evaluate("globalThis.sawLoad").unwrap(), json!(true));
+    assert_eq!(
+        page.evaluate("document.readyState").unwrap(),
+        json!("complete")
+    );
 }
 
 struct HangingLoader;

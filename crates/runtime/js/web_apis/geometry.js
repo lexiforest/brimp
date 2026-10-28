@@ -3,6 +3,32 @@
   const points = new WeakMap(),
     rects = new WeakMap(),
     matrices = new WeakMap();
+  const rectLists = new WeakMap();
+  class DOMRectList {
+    constructor(rectangles = []) {
+      const items = rectangles.slice();
+      rectLists.set(this, items);
+      items.forEach((rect, index) =>
+        Object.defineProperty(this, index, {
+          value: rect,
+          enumerable: true,
+          configurable: true,
+        }),
+      );
+    }
+    get length() {
+      return rectLists.get(this).length;
+    }
+    item(index) {
+      return rectLists.get(this)[index] ?? null;
+    }
+    [Symbol.iterator]() {
+      return rectLists.get(this)[Symbol.iterator]();
+    }
+    forEach(callback, thisArg) {
+      rectLists.get(this).forEach(callback, thisArg);
+    }
+  }
   class DOMPointReadOnly {
     constructor(x = 0, y = 0, z = 0, w = 1) {
       points.set(this, [x, y, z, w].map(Number));
@@ -294,11 +320,32 @@
           enumerable: true,
         });
     }
+  // There is no layout engine, so element geometry is a zero rectangle at the
+  // origin rather than an absent value: scripts read `.width`, `.top`, `.right`
+  // and `rects.length` without special-casing this runtime.
+  const geometryElement = () =>
+    typeof Element === 'function' ? Element.prototype : global.Element.prototype;
+  for (const [name, method] of [
+    ['getBoundingClientRect', () => new DOMRect(0, 0, 0, 0)],
+    ['getClientRects', () => new DOMRectList([])],
+  ])
+    Object.defineProperty(geometryElement(), name, {
+      value: {
+        [name]() {
+          if (!(this instanceof Element)) throw new TypeError('Illegal invocation');
+          return method();
+        },
+      }[name],
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
   for (const [name, value] of Object.entries({
     DOMPointReadOnly,
     DOMPoint,
     DOMRectReadOnly,
     DOMRect,
+    DOMRectList,
     DOMQuad,
     DOMMatrixReadOnly,
     DOMMatrix,
@@ -308,5 +355,13 @@
       configurable: true,
     });
     Object.defineProperty(global, name, { value, writable: true, configurable: true });
+  }
+  // WebKit exposes its legacy CSS matrix interface as an alias of DOMMatrix.
+  if (typeof global.WebKitCSSMatrix !== 'function') {
+    Object.defineProperty(global, 'WebKitCSSMatrix', {
+      value: DOMMatrix,
+      writable: true,
+      configurable: true,
+    });
   }
 })({ global: globalThis });

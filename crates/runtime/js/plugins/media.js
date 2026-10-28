@@ -215,6 +215,108 @@ function installMedia({ global, profile: settings }, options = {}) {
     setMicrophoneActive() {}
     setPositionState() {}
   }
+  // Named interfaces without a media pipeline behind them: scripts probe for
+  // presence, so the constructors exist and refuse direct construction.
+  class MediaSource extends EventTarget {
+    constructor() {
+      super();
+      throw new TypeError('Illegal constructor');
+    }
+    get readyState() {
+      return 'closed';
+    }
+    get sourceBuffers() {
+      return Object.freeze([]);
+    }
+    get activeSourceBuffers() {
+      return Object.freeze([]);
+    }
+    get duration() {
+      return NaN;
+    }
+    addSourceBuffer() {
+      throw new DOMException('MediaSource is unavailable', 'NotSupportedError');
+    }
+    removeSourceBuffer() {}
+    endOfStream() {}
+    setLiveSeekableRange() {}
+    clearLiveSeekableRange() {}
+  }
+  class MediaStreamTrack extends EventTarget {
+    constructor() {
+      super();
+      throw new TypeError('Illegal constructor');
+    }
+    get kind() {
+      return '';
+    }
+    get label() {
+      return '';
+    }
+    get enabled() {
+      return false;
+    }
+    set enabled(value) {}
+    get muted() {
+      return false;
+    }
+    get readyState() {
+      return 'ended';
+    }
+    stop() {}
+    clone() {
+      throw new DOMException('MediaStreamTrack is unavailable', 'NotSupportedError');
+    }
+    getSettings() {
+      return {};
+    }
+    getCapabilities() {
+      return {};
+    }
+    getConstraints() {
+      return {};
+    }
+    applyConstraints() {
+      return Promise.resolve();
+    }
+  }
+  class VideoTrackList extends EventTarget {
+    constructor() {
+      super();
+      throw new TypeError('Illegal constructor');
+    }
+    get length() {
+      return 0;
+    }
+    get selectedIndex() {
+      return -1;
+    }
+    getTrackById() {
+      return null;
+    }
+    item() {
+      return null;
+    }
+    [Symbol.iterator]() {
+      return [][Symbol.iterator]();
+    }
+  }
+  class WebKitMediaKeyError {
+    constructor() {
+      throw new TypeError('Illegal constructor');
+    }
+    get code() {
+      return 0;
+    }
+  }
+  for (const [name, value] of Object.entries({
+    MediaSource,
+    MediaStreamTrack,
+    VideoTrackList,
+    WebKitMediaKeyError,
+  })) {
+    defineGlobalConstructor(name, value);
+  }
   defineGlobalConstructor('MediaCapabilities', MediaCapabilities);
   defineNavigatorValue('mediaCapabilities', new MediaCapabilities(constructToken));
   defineGlobalConstructor('MediaSession', MediaSession);

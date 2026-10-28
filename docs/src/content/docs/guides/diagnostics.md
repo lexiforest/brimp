@@ -59,6 +59,34 @@ list of `coverage.limitations`. An empty disabled trace is distinguishable from
 an enabled trace with no retained records. A thrown operation does not necessarily
 mean unsupported behavior, and successful operations may use configured mocks.
 
+## Unresolved reads and failed operations
+
+Recursive summaries also contain `unresolved`. Its `reads` entries are clustered
+`get` observations whose result was `undefined`; `operations` entries are
+synchronous throws. Each entry includes `count`, `path`, and an `owner`:
+
+| Owner | Meaning |
+| --- | --- |
+| `core` | A top-level environment object installed before plugins. |
+| `profile` | `navigator` or `screen`, whose values follow the browser profile. |
+| `plugin:<name>` | A top-level global introduced by an installed plugin. |
+| `unknown` | No installed surface owns the root; check the plugin catalog. |
+
+A read also has `present`. `present: false` means the member was absent;
+`present: true` means it existed but its value was `undefined`. A failed
+operation has a `failure` name when the thrown value exposes one. For example:
+
+```json
+{"path":"navigator.missing","target":"navigator","property":"missing",
+ "present":false,"count":1,"owner":"profile"}
+```
+
+`owner` names the nearest installed surface, not a required fix location. An
+unresolved read can be intentional (a browser-family-gated member, a capability
+probe, or a value that is genuinely undefined), and a trace miss is not proof
+that a page never touched an API. Do not treat this section as a conformance or
+support verdict.
+
 The CLI exposes the same summary with `--trace-report dependencies.json`, usable
 with or without `--trace trace.jsonl`. Reports are also written after ordinary
 script errors, preserving the failure exit code; initialization failure or an

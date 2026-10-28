@@ -68,13 +68,22 @@ test('Document heavy services preserve explicit placeholders without producing b
     const before=d.body.innerHTML;const pi=d.createProcessingInstruction('target','data');
     const noops=[d.exitFullscreen(),d.exitPictureInPicture(),d.exitPointerLock(),d.webkitExitFullscreen(),d.webkitCancelFullScreen()];
     let illegal;try{new CDATASection()}catch(e){illegal=e.name}
-    return [['all','fragmentDirective','timeline','lastModified'].map(n=>n in d&&d[n]===undefined),
+    const timeline=d.timeline,t=timeline.currentTime;
+    const clock=[timeline===d.timeline,Object.prototype.toString.call(timeline),t===null||typeof t==='number',
+      timeline.currentTime>=t,timeline.duration,typeof timeline.getAnimations,d.getAnimations().length];
+    let timelineIllegal;try{new DocumentTimeline()}catch(e){timelineIllegal=e.name}
+    const stamp=d.lastModified;
+    const modified=[typeof stamp,stamp===d.lastModified,stamp.length,stamp[2],stamp[5],stamp[10],
+      Number.isNaN(Date.parse(stamp))];
+    return [['all','fragmentDirective'].map(n=>n in d&&d[n]===undefined),
+      clock,timelineIllegal,modified,XMLDocument===Document,d instanceof XMLDocument,
       [d.fullscreen,d.webkitIsFullScreen,d.fullscreenEnabled,d.webkitFullscreenEnabled,d.pictureInPictureEnabled],
       [d.fullscreenElement,d.webkitFullscreenElement,d.webkitCurrentFullScreenElement,d.pictureInPictureElement,d.pointerLockElement],
       [d.referrer,d.xmlEncoding,d.xmlStandalone,d.xmlVersion,d.hidden,d.visibilityState,d.hasFocus()],
       cdata,pi===undefined,noops.every(v=>v===undefined),before===d.body.innerHTML,
       illegal,CDATASection.prototype instanceof Text,HTMLDocument===Document,d instanceof HTMLDocument,
       Object.prototype.toString.call(new DOMParser())];
-  })()`),[[true,true,true,true],[false,false,true,true,true],[null,null,null,null,null],
+  })()`),[[true,true],[true,'[object DocumentTimeline]',true,true,null,'undefined',0],'TypeError',
+    ['string',true,19,'/','/',' ',false],true,true,[false,false,true,true,true],[null,null,null,null,null],
     ['',null,false,null,false,'visible',true],'NotSupportedError',true,true,true,'TypeError',true,true,true,'[object DOMParser]']);
 });

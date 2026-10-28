@@ -51,6 +51,7 @@ pub struct Page {
     network: Option<Arc<super::networking::NetworkRuntime>>,
     plugins: Vec<super::plugins::Plugin>,
     plugin_runtime: Option<super::plugins::PluginRuntime>,
+    plugin_scopes: Vec<super::diagnostics::PluginScope>,
     pub(crate) bridge: super::bridge::BridgeRuntime,
     plugin_timeout: Duration,
     pub(crate) shutdown: Arc<AtomicBool>,
@@ -115,6 +116,9 @@ impl Page {
             .clone()
             .map(|options| super::diagnostics::Diagnostics::new(options, realm_id))
             .transpose()?;
+        let recursive_diagnostics = diagnostics
+            .as_ref()
+            .is_some_and(|log| log.mode() == super::diagnostics::TraceMode::Recursive);
         let js = JsRuntime::new()?;
         install_interrupt(
             &js,
@@ -182,6 +186,7 @@ impl Page {
             network: options.network,
             plugins: options.plugins,
             plugin_runtime: None,
+            plugin_scopes: Vec::new(),
             plugin_timeout: options.plugin_timeout,
             shutdown: options.shutdown,
             bindings,
@@ -211,7 +216,12 @@ impl Page {
             script_execution_deadline: None,
         };
         page.install_console_events()?;
+        page.js.eval(include_str!("../../js/web_apis/console.js"))?;
         page.initialize_plugins()?;
+        if recursive_diagnostics {
+            page.js
+                .eval("globalThis.__brimpDiagnosticsRecursive = true")?;
+        }
         page.profile_command("finish")?;
         page.bindings.finalize_exposure(&page.js)?;
         page.install_diagnostics()?;
@@ -234,6 +244,52 @@ impl Page {
 
     pub fn set_content(&mut self, html: &str) -> Result<(), JsException> {
         self.set_content_at(html, None)
+    }
+
+    /// Replace the page with a parsed document at `url` without running its
+    /// scripts or fetching subresources. The URL is installed as the
+    /// browsing-context URL before parsing, so relative URLs, `document.URL` and
+    /// `location.href` use it. Init scripts still run; inline and external page
+    /// scripts do not.
+    pub fn load_html(&mut self, html: &str, url: &str) -> Result<(), JsException> {
+        let url = if url.is_empty() { "about:blank" } else { url };
+        url::Url::parse(url)
+            .map_err(|error| JsException::from_message(format!("invalid document URL: {error}")))?;
+        self.reset_page_at(url, false, encoding_rs::UTF_8, "text/html")?;
+        self.events
+            .emit(crate::runtime::events::PageEvent::Lifecycle {
+                name: "navigation".into(),
+                url: url.to_owned(),
+            });
+        self.bindings.script_control(
+            &self.js,
+            serde_json::json!({"op":"ready", "state":"loading"}),
+        )?;
+        for (_, source) in &self.preload_scripts {
+            self.execute_page_script(source);
+        }
+        let document = BrowserDocument::parse(html);
+        document.set_encoding(document.root(), encoding_rs::UTF_8);
+        document.set_content_type(document.root(), "text/html");
+        *self.document.borrow_mut() = document;
+        self.bindings.reset_document(&self.js)?;
+        self.bindings.sync_window_named_properties(&self.js)?;
+        self.document_ready = true;
+        self.load_state = LoadState::Loading;
+        self.bindings.script_control(
+            &self.js,
+            serde_json::json!({"op":"ready", "state":"interactive"}),
+        )?;
+        self.execute_page_script(
+            "document.dispatchEvent(new Event('DOMContentLoaded', {bubbles:true}))",
+        );
+        self.events
+            .emit(crate::runtime::events::PageEvent::Lifecycle {
+                name: "dom_content_loaded".into(),
+                url: url.to_owned(),
+            });
+        self.finish_navigation_load()?;
+        Ok(())
     }
 
     fn set_content_at(&mut self, html: &str, _base_url: Option<&str>) -> Result<(), JsException> {
@@ -330,7 +386,16 @@ impl Page {
         self.js = js;
 
         self.install_console_events()?;
+        self.js.eval(include_str!("../../js/web_apis/console.js"))?;
         self.initialize_plugins()?;
+        if self
+            .diagnostics
+            .as_ref()
+            .is_some_and(|log| log.mode() == super::diagnostics::TraceMode::Recursive)
+        {
+            self.js
+                .eval("globalThis.__brimpDiagnosticsRecursive = true")?;
+        }
         self.profile_command("finish")?;
         self.bindings.finalize_exposure(&self.js)?;
         self.install_diagnostics()?;
@@ -478,6 +543,23 @@ impl Page {
         let Some(log) = self.diagnostics.clone() else {
             return Ok(());
         };
+        let names = self
+            .js
+            .eval("JSON.stringify(Object.getOwnPropertyNames(globalThis))")?
+            .to_string()?;
+        let names: Vec<String> = serde_json::from_str(&names).unwrap_or_default();
+        let mut owners: std::collections::BTreeMap<String, String> = names
+            .into_iter()
+            .map(|name| (name, "core".into()))
+            .collect();
+        for scope in &self.plugin_scopes {
+            for global in &scope.globals {
+                owners.insert(global.clone(), format!("plugin:{}", scope.name));
+            }
+        }
+        owners.insert("navigator".into(), "profile".into());
+        owners.insert("screen".into(), "profile".into());
+        log.set_owners(owners);
         let stack = log.stack();
         let recursive = log.mode() == super::diagnostics::TraceMode::Recursive;
         self.js.set_global_function("__brimpTrace", move |call| {

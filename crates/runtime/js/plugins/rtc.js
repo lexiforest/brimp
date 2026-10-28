@@ -266,6 +266,61 @@ function installRtc({ global, profile: settings }) {
     }
   }
 
+  class RTCError extends Error {
+    constructor(init = {}) {
+      super(init && init.errorDetail ? String(init.errorDetail) : '');
+      this.name = 'RTCError';
+      Object.defineProperties(this, {
+        errorDetail: {
+          value: init && init.errorDetail ? String(init.errorDetail) : 'data-channel-failure',
+        },
+        sdpLineNumber: { value: -1 },
+        httpRequestStatusCode: { value: -1 },
+        sctpCauseCode: { value: -1 },
+        receivedAlert: { value: 0 },
+        sentAlert: { value: 0 },
+      });
+    }
+  }
+  class RTCDtlsTransport extends EventTarget {
+    constructor() {
+      super();
+      throw new TypeError('Illegal constructor');
+    }
+    get state() {
+      return 'new';
+    }
+    get iceTransport() {
+      return null;
+    }
+    get remoteCertificates() {
+      return Object.freeze([]);
+    }
+  }
+  class RTCTrackEvent extends Event {
+    #track = null;
+    #receiver = null;
+    #streams = [];
+    constructor(type, init = {}) {
+      super(type, init);
+      this.#track = (init && init.track) ?? null;
+      this.#receiver = (init && init.receiver) ?? null;
+      this.#streams = Object.freeze(Array.from((init && init.streams) ?? []));
+    }
+    get track() {
+      return this.#track;
+    }
+    get receiver() {
+      return this.#receiver;
+    }
+    get streams() {
+      return this.#streams;
+    }
+    get transceiver() {
+      return null;
+    }
+  }
+
   function eventHandlers(prototype, names) {
     for (const name of names) {
       const handlers = new WeakMap();
@@ -309,6 +364,9 @@ function installRtc({ global, profile: settings }) {
     RTCSessionDescription,
     RTCPeerConnectionIceEvent,
     RTCSctpTransport,
+    RTCDtlsTransport,
+    RTCError,
+    RTCTrackEvent,
   ]) {
     Object.defineProperty(constructor.prototype, Symbol.toStringTag, {
       value: constructor.name,

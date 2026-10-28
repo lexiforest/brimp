@@ -12,12 +12,14 @@ function installPlugins(descriptors, codec) {
     disposing = false;
   const subscriptions = descriptors.map(() => new Map());
   const disposers = [];
+  const scopes = [];
   const { encode, ref } = codec;
   const functions = [];
   const decode = (wire, index) => codec.decode(wire, functions[index]);
   (async () => {
     for (let index = 0; index < descriptors.length; index++) {
       const descriptor = descriptors[index];
+      const before = new Set(Object.getOwnPropertyNames(globalThis));
       try {
         if (closed) throw new Error('plugin realm was closed');
         const allowed = new Set(descriptor.handlers);
@@ -88,6 +90,10 @@ function installPlugins(descriptors, codec) {
         });
         const dispose =
           typeof installed === 'function' ? installed : installed?.dispose?.bind(installed);
+        scopes.push({
+          name: descriptor.name,
+          globals: Object.getOwnPropertyNames(globalThis).filter((name) => !before.has(name)),
+        });
         if (dispose) {
           if (closed) await dispose();
           else disposers.push(dispose);
@@ -102,6 +108,10 @@ function installPlugins(descriptors, codec) {
         );
       }
     }
+    Object.defineProperty(globalThis, '__brimpPluginScopes', {
+      value: scopes,
+      configurable: true,
+    });
     ready = true;
   })().catch((cause) => {
     error = `${String(cause)}\n${cause?.stack || ''}`;

@@ -241,6 +241,7 @@ pub struct BindingRuntime {
     script_controller: ProtectedJsObject,
     exposure_finalizer: ProtectedJsObject,
     window_names: ProtectedJsObject,
+    document_sink: ProtectedJsObject,
 }
 
 pub struct BindingQueues {
@@ -583,6 +584,17 @@ struct Prototypes {
     element: ProtectedJsObject,
     svg_element: ProtectedJsObject,
     svg_graphics_element: ProtectedJsObject,
+    svg_geometry_element: ProtectedJsObject,
+    svg_svg_element: ProtectedJsObject,
+    svg_text_element: ProtectedJsObject,
+    svg_tspan_element: ProtectedJsObject,
+    svg_text_path_element: ProtectedJsObject,
+    mathml_element: ProtectedJsObject,
+    svg_animate_element: ProtectedJsObject,
+    svg_animate_motion_element: ProtectedJsObject,
+    svg_animate_transform_element: ProtectedJsObject,
+    svg_set_element: ProtectedJsObject,
+    svg_mpath_element: ProtectedJsObject,
     document: ProtectedJsObject,
     document_type: ProtectedJsObject,
     html_element: ProtectedJsObject,
@@ -662,6 +674,21 @@ impl BindingRuntime {
             element: runtime.eval("Element.prototype")?.to_object()?,
             svg_element: runtime.eval("SVGElement.prototype")?.to_object()?,
             svg_graphics_element: runtime.eval("SVGGraphicsElement.prototype")?.to_object()?,
+            svg_geometry_element: runtime.eval("SVGGeometryElement.prototype")?.to_object()?,
+            svg_svg_element: runtime.eval("SVGSVGElement.prototype")?.to_object()?,
+            svg_text_element: runtime.eval("SVGTextElement.prototype")?.to_object()?,
+            svg_tspan_element: runtime.eval("SVGTSpanElement.prototype")?.to_object()?,
+            svg_text_path_element: runtime.eval("SVGTextPathElement.prototype")?.to_object()?,
+            mathml_element: runtime.eval("MathMLElement.prototype")?.to_object()?,
+            svg_animate_element: runtime.eval("SVGAnimateElement.prototype")?.to_object()?,
+            svg_animate_motion_element: runtime
+                .eval("SVGAnimateMotionElement.prototype")?
+                .to_object()?,
+            svg_animate_transform_element: runtime
+                .eval("SVGAnimateTransformElement.prototype")?
+                .to_object()?,
+            svg_set_element: runtime.eval("SVGSetElement.prototype")?.to_object()?,
+            svg_mpath_element: runtime.eval("SVGMPathElement.prototype")?.to_object()?,
             document: runtime.eval("Document.prototype")?.to_object()?,
             document_type: runtime.eval("DocumentType.prototype")?.to_object()?,
             html_element: runtime.eval("HTMLElement.prototype")?.to_object()?,
@@ -780,6 +807,8 @@ impl BindingRuntime {
                 "../../js/web_apis/sync_window_named_properties.js"
             ))?
             .to_object()?;
+        let document_sink = runtime.eval("globalThis.__brimpSetDocument")?.to_object()?;
+        runtime.eval("delete globalThis.__brimpSetDocument")?;
         let bindings = Self {
             state,
             input_controller,
@@ -787,6 +816,7 @@ impl BindingRuntime {
             script_controller,
             exposure_finalizer,
             window_names,
+            document_sink,
         };
         bindings.reset_document(runtime)?;
         Ok(bindings)
@@ -873,8 +903,7 @@ impl BindingRuntime {
             self.state
                 .wrappers
                 .wrap_with_runtime_prototype(runtime, document_id, prototype);
-        runtime.set_global_object("document", &document)?;
-        runtime.eval("window.document = document")?;
+        runtime.call_function_with_object(&self.document_sink, &document)?;
         Ok(())
     }
 
@@ -1362,11 +1391,28 @@ fn node_value(
                 == Some("http://www.w3.org/2000/svg") =>
             {
                 match document.local_name(node_id).map_err(err)?.as_str() {
-                    "svg" | "g" | "a" | "circle" | "ellipse" | "rect" | "path" | "line"
-                    | "polyline" | "polygon" | "text" | "tspan" | "textPath" | "image" | "use"
-                    | "foreignObject" | "switch" => prototypes.svg_graphics_element.identity(),
+                    "svg" => prototypes.svg_svg_element.identity(),
+                    "circle" | "ellipse" | "rect" | "path" | "line" | "polyline" | "polygon" => {
+                        prototypes.svg_geometry_element.identity()
+                    }
+                    "animate" => prototypes.svg_animate_element.identity(),
+                    "animateMotion" => prototypes.svg_animate_motion_element.identity(),
+                    "animateTransform" => prototypes.svg_animate_transform_element.identity(),
+                    "set" => prototypes.svg_set_element.identity(),
+                    "mpath" => prototypes.svg_mpath_element.identity(),
+                    "text" => prototypes.svg_text_element.identity(),
+                    "tspan" => prototypes.svg_tspan_element.identity(),
+                    "textPath" => prototypes.svg_text_path_element.identity(),
+                    "g" | "a" | "image" | "use" | "foreignObject" | "switch" => {
+                        prototypes.svg_graphics_element.identity()
+                    }
                     _ => prototypes.svg_element.identity(),
                 }
+            }
+            1 if document.namespace(node_id).ok().as_deref()
+                == Some("http://www.w3.org/1998/Math/MathML") =>
+            {
+                prototypes.mathml_element.identity()
             }
             1 => prototypes.element.identity(),
             _ => prototypes.node.identity(),

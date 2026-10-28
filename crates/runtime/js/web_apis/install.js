@@ -220,11 +220,30 @@ globalThis.NodeFilter = NodeFilter;
 globalThis.TreeWalker = TreeWalker;
 globalThis.NodeIterator = NodeIterator;
 globalThis.Document = Document;
+globalThis.DocumentTimeline = DocumentTimeline;
 globalThis.HTMLDocument = Document;
+globalThis.XMLDocument = Document;
 globalThis.DOMParser = DOMParser;
 globalThis.Element = Element;
 globalThis.SVGElement = SVGElement;
 globalThis.SVGGraphicsElement = SVGGraphicsElement;
+globalThis.SVGGeometryElement = SVGGeometryElement;
+globalThis.SVGSVGElement = SVGSVGElement;
+globalThis.SVGTextPositioningElement = SVGTextPositioningElement;
+globalThis.SVGTextElement = SVGTextElement;
+globalThis.SVGTSpanElement = SVGTSpanElement;
+globalThis.SVGTextPathElement = SVGTextPathElement;
+globalThis.MathMLElement = MathMLElement;
+globalThis.StaticRange = StaticRange;
+globalThis.FragmentDirective = FragmentDirective;
+globalThis.CSSFontPaletteValuesRule = CSSFontPaletteValuesRule;
+globalThis.ContentVisibilityAutoStateChangeEvent = ContentVisibilityAutoStateChangeEvent;
+globalThis.SVGAnimationElement = SVGAnimationElement;
+globalThis.SVGAnimateElement = SVGAnimateElement;
+globalThis.SVGAnimateMotionElement = SVGAnimateMotionElement;
+globalThis.SVGAnimateTransformElement = SVGAnimateTransformElement;
+globalThis.SVGSetElement = SVGSetElement;
+globalThis.SVGMPathElement = SVGMPathElement;
 globalThis.HTMLElement = HTMLElement;
 globalThis.HTMLAnchorElement = HTMLAnchorElement;
 globalThis.HTMLUnknownElement = HTMLUnknownElement;
@@ -475,6 +494,7 @@ __makeWebIdlMembersEnumerable(HTMLAnchorElement.prototype, [
   'toString',
 ]);
 __makeWebIdlMembersEnumerable(HTMLTitleElement.prototype, ['text']);
+__makeWebIdlMembersEnumerable(HTMLIFrameElement.prototype, ['contentDocument', 'contentWindow']);
 __makeWebIdlMembersEnumerable(HTMLImageElement.prototype, [
   'complete',
   'currentSrc',
@@ -1167,17 +1187,17 @@ window.requestAnimationFrame = globalThis.requestAnimationFrame;
 window.cancelAnimationFrame = globalThis.cancelAnimationFrame;
 
 for (const name of Object.getOwnPropertyNames(globalThis)) {
+  if (__initialGlobalNames.has(name)) continue;
   const value = globalThis[name];
-  if (typeof value === 'function' && (!__initialGlobalNames.has(name) || /^[A-Z]/.test(name))) {
-    __markWebBuiltinInterface(value);
-    if (!__initialGlobalNames.has(name) && /^[A-Z]/.test(name)) {
-      Object.defineProperty(globalThis, name, {
-        value,
-        writable: true,
-        enumerable: false,
-        configurable: true,
-      });
-    }
+  if (typeof value !== 'function') continue;
+  __markWebBuiltinInterface(value);
+  if (/^[A-Z]/.test(name)) {
+    Object.defineProperty(globalThis, name, {
+      value,
+      writable: true,
+      enumerable: false,
+      configurable: true,
+    });
   }
 }
 for (const name of [
@@ -1197,5 +1217,5 @@ for (const name of [
   'removeEventListener',
   'dispatchEvent',
 ]) {
-  __markWebBuiltin(globalThis[name], `function ${name}() { [native code] }`);
+  __markWebBuiltin(globalThis[name], name, 'value');
 }

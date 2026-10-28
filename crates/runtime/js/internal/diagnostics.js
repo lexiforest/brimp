@@ -39,6 +39,8 @@ function installDiagnostics(stackEnabled, installRecursive) {
         details.target = metadata.target;
         details.property = metadata.property;
         if (metadata.note) details.note = metadata.note;
+        if (metadata.present !== undefined) details.present = metadata.present;
+        if (metadata.failure !== undefined) details.failure = metadata.failure;
       }
       if (kind === 'reflection') {
         details.target = paths.get(args[0]) ?? null;

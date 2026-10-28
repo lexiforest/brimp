@@ -97,7 +97,8 @@ impl BrowserProfile {
             .eval(&source)
             .and_then(|value| value.to_string())
             .map_err(|e| ProfileError::InvalidValue(e.to_string()))?;
-        let value = serde_json::from_str(&result)?;
+        let mut value: Value = serde_json::from_str(&result)?;
+        derive_transport_target(&mut value, &self.values);
         let _ = self.core.set(value);
         Ok(self.core.get().expect("resolved core profile"))
     }
@@ -138,8 +139,82 @@ impl BrowserProfile {
             ("accept-language", language),
             ("accept-encoding", text("network", "accept_encoding")),
         ]
+        .into_iter()
+        .chain(chromium_client_hints(core))
+        .collect()
     }
     pub(crate) fn request_headers(&self) -> Vec<(&'static str, String)> {
         self.headers(self.core())
     }
+}
+
+/// The transport fingerprint cannot be read from page JavaScript, so it is derived
+/// from the user-agent family unless the profile sets it explicitly. A WebKit
+/// default with a Chromium identity is the mismatch this avoids.
+fn derive_transport_target(core: &mut Value, provided: &Map<String, Value>) {
+    let explicit = provided
+        .get("network")
+        .and_then(|network| network.get("impersonation"))
+        .is_some();
+    if explicit {
+        return;
+    }
+    let Some(user_agent) = core["identity"]["user_agent"].as_str() else {
+        return;
+    };
+    let target = if user_agent.contains("Firefox/") {
+        "firefox147"
+    } else if user_agent.contains("Chrome/")
+        || user_agent.contains("Chromium/")
+        || user_agent.contains("Edg/")
+    {
+        "chrome150"
+    } else if user_agent.contains("Safari/") {
+        "safari270"
+    } else {
+        return;
+    };
+    core["network"]["impersonation"] = Value::String(target.to_owned());
+}
+
+/// Client hints Chromium sends for every request. Safari sends none, so they are
+/// derived from the profile identity and disappear with a WebKit user agent.
+fn chromium_client_hints(core: &Value) -> Vec<(&'static str, String)> {
+    let Some(user_agent) = core["identity"]["user_agent"].as_str() else {
+        return Vec::new();
+    };
+    let Some(major) = chromium_major_version(user_agent) else {
+        return Vec::new();
+    };
+    let platform = core["identity"]["platform"].as_str().unwrap_or("");
+    let mobile = user_agent.contains("Mobile") || platform == "Linux armv81";
+    let platform_label = match platform {
+        "MacIntel" => "macOS",
+        "Win32" => "Windows",
+        "iPhone" | "iPad" => "iOS",
+        _ if mobile => "Android",
+        _ => "Linux",
+    };
+    vec![
+        (
+            "sec-ch-ua",
+            format!(
+                "\"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"{major}\", \"Google Chrome\";v=\"{major}\""
+            ),
+        ),
+        (
+            "sec-ch-ua-mobile",
+            if mobile { "?1" } else { "?0" }.to_owned(),
+        ),
+        ("sec-ch-ua-platform", format!("\"{platform_label}\"")),
+    ]
+}
+
+/// Major version of a Chromium user agent, or `None` for WebKit/Gecko agents.
+fn chromium_major_version(user_agent: &str) -> Option<&str> {
+    let start = user_agent.find("Chrome/")? + "Chrome/".len();
+    let version = &user_agent[start..];
+    let end = version.find('.').unwrap_or(version.len());
+    let major = &version[..end];
+    (!major.is_empty() && major.bytes().all(|byte| byte.is_ascii_digit())).then_some(major)
 }

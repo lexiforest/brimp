@@ -113,4 +113,21 @@
     scheduler: new Scheduler(),
   }))
     Object.defineProperty(global, name, { value, writable: true, configurable: true });
+  // The scheduling API and idle callbacks are Chromium-only: real Safari 27
+  // exposes none of these names, and the search challenge reads
+  // requestIdleCallback while looking for it. Remove them once the identity is
+  // known.
+  globalThis.__brimpInstallScheduling = function (identity) {
+    if (/Chrome\/|Chromium\/|Edg\//.test(identity.user_agent)) return;
+    for (const name of [
+      'Scheduler',
+      'TaskController',
+      'TaskSignal',
+      'TaskPriorityChangeEvent',
+      'scheduler',
+      'requestIdleCallback',
+      'cancelIdleCallback',
+    ])
+      delete globalThis[name];
+  };
 })({ global: globalThis });

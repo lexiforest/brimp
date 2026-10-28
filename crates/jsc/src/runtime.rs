@@ -251,6 +251,14 @@ impl JsRuntime {
         self.call_function_with_arguments(function, &[argument.as_raw()])
     }
 
+    pub fn call_function_with_object(
+        &self,
+        function: &ProtectedJsObject,
+        object: &JsObject<'_>,
+    ) -> Result<JsValue<'_>, JsException> {
+        self.call_function_with_arguments(function, &[object.as_raw(self)])
+    }
+
     pub fn call_function_with_string_and_object(
         &self,
         function: &ProtectedJsObject,

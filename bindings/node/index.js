@@ -167,6 +167,11 @@ export class Page extends Requests {
   setInputFiles(selector, files) { return invoke(() => this._inner.setInputFiles(selector, fileRecords(files)), this._pageId); }
   extract(options = {}) { return invoke(() => this._inner.extract(options), this._pageId); }
   html() { return invoke(() => this._inner.html(), this._pageId); }
+  async loadHtml(html, url = 'about:blank') {
+    const result = await invoke(() => this._inner.loadHtml(html, url), this._pageId);
+    this.response = null;
+    return result;
+  }
   close() { return invoke(() => this._inner.close(), this._pageId); }
 }
 export class Response {

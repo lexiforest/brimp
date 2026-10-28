@@ -251,3 +251,146 @@ Object.defineProperty(CSS, Symbol.toStringTag, {
   enumerable: false,
   configurable: true,
 });
+
+// A computed style view without a layout engine. Values come from inline
+// declarations first and then from the element's default display model. The
+// object is live and cached per element, like the browser's declaration.
+const __computedStyleCache = new WeakMap();
+const __computedStyleElements = new WeakMap();
+const __inlineElements = new Set([
+  'a',
+  'abbr',
+  'b',
+  'bdi',
+  'bdo',
+  'br',
+  'button',
+  'cite',
+  'code',
+  'data',
+  'dfn',
+  'em',
+  'i',
+  'img',
+  'input',
+  'kbd',
+  'label',
+  'mark',
+  'q',
+  's',
+  'samp',
+  'select',
+  'small',
+  'span',
+  'strong',
+  'sub',
+  'sup',
+  'textarea',
+  'time',
+  'u',
+  'var',
+  'wbr',
+]);
+const __hiddenElements = new Set([
+  'base',
+  'head',
+  'link',
+  'meta',
+  'noscript',
+  'script',
+  'style',
+  'template',
+  'title',
+]);
+const __computedDefault = (element, name) => {
+  if (name === 'display') {
+    const tag = String(element.tagName).toLowerCase();
+    if (__hiddenElements.has(tag)) return 'none';
+    if (__inlineElements.has(tag)) return 'inline';
+    if (tag === 'table') return 'table';
+    return 'block';
+  }
+  if (name === 'visibility' || name === 'content-visibility') return 'visible';
+  if (name === 'opacity') return '1';
+  if (name === 'position') return 'static';
+  if (name === 'transform') return 'none';
+  return '';
+};
+class CSSComputedStyle {
+  constructor(element) {
+    __computedStyleElements.set(this, element);
+  }
+  __value(name) {
+    const element = __computedStyleElements.get(this);
+    try {
+      const inline = element.style?.getPropertyValue(name);
+      if (inline) return inline;
+    } catch {
+      // Detached or non-HTML elements can reject inline style access.
+    }
+    return __computedDefault(element, name);
+  }
+  get cssText() {
+    return '';
+  }
+  get length() {
+    return 0;
+  }
+  item() {
+    return '';
+  }
+  getPropertyValue(name) {
+    return this.__value(String(name));
+  }
+  getPropertyPriority() {
+    return '';
+  }
+  setProperty() {}
+  removeProperty() {
+    return '';
+  }
+  get parentRule() {
+    return null;
+  }
+  get display() {
+    return this.__value('display');
+  }
+  get visibility() {
+    return this.__value('visibility');
+  }
+  get opacity() {
+    return this.__value('opacity');
+  }
+  get position() {
+    return this.__value('position');
+  }
+  get transform() {
+    return this.__value('transform');
+  }
+  get contentVisibility() {
+    return this.__value('content-visibility');
+  }
+  [Symbol.iterator]() {
+    return [][Symbol.iterator]();
+  }
+}
+for (const key of Reflect.ownKeys(CSSComputedStyle.prototype)) {
+  if (key === 'constructor') continue;
+  const descriptor = Object.getOwnPropertyDescriptor(CSSComputedStyle.prototype, key);
+  if (typeof descriptor.value === 'function') __markWebBuiltin(descriptor.value, key, 'value');
+  if (typeof descriptor.get === 'function') __markWebBuiltin(descriptor.get, key, 'get');
+  if (typeof descriptor.set === 'function') __markWebBuiltin(descriptor.set, key, 'set');
+}
+function getComputedStyle(element, pseudoElement = null) {
+  if (!(element instanceof Element)) {
+    throw new TypeError('Window.getComputedStyle requires an Element');
+  }
+  String(pseudoElement);
+  let style = __computedStyleCache.get(element);
+  if (style === undefined) {
+    style = new CSSComputedStyle(element);
+    __computedStyleCache.set(element, style);
+  }
+  return style;
+}
+globalThis.getComputedStyle = getComputedStyle;

@@ -444,7 +444,41 @@ class HTMLImageElement extends HTMLElement {
   decode() {}
 }
 
+// Frames run in the page realm with their own window bound, so `parent` is a
+// view of the real window that reports the frame as the message source.
+function __frameParentView(context) {
+  if (context.parentView) return context.parentView;
+  context.parentView = new Proxy(window, {
+    get(target, property) {
+      if (property === 'postMessage') {
+        return (message, targetOrigin = '*', transfer = []) => {
+          const cloned = __prepareMessage(message, transfer);
+          const origin = String(targetOrigin);
+          const frameOrigin = context.window.location.origin;
+          if (origin !== '*' && origin !== window.location.origin) return;
+          setTimeout(() => {
+            const event = new MessageEvent('message', {
+              data: cloned,
+              origin: frameOrigin,
+              source: context.window,
+            });
+            __markTrustedEvent(event);
+            target.dispatchEvent(event);
+          }, 0);
+        };
+      }
+      return Reflect.get(target, property, target);
+    },
+    has(target, property) {
+      return Reflect.has(target, property);
+    },
+  });
+  return context.parentView;
+}
+
 function __runInChildWindow(context, source) {
+  const frameWindow = context.window;
+  const parentView = __frameParentView(context);
   return Function(
     'window',
     'document',
@@ -452,9 +486,97 @@ function __runInChildWindow(context, source) {
     'parent',
     'self',
     'top',
+    'addEventListener',
+    'removeEventListener',
+    'dispatchEvent',
+    'postMessage',
+    'navigator',
+    'screen',
+    'history',
+    'localStorage',
+    'sessionStorage',
+    'crypto',
+    'performance',
     source,
-  )(context.window, context.document, context.window.location, window, context.window, window);
+  )(
+    frameWindow,
+    context.document,
+    frameWindow.location,
+    parentView,
+    frameWindow,
+    parentView,
+    frameWindow.addEventListener.bind(frameWindow),
+    frameWindow.removeEventListener.bind(frameWindow),
+    frameWindow.dispatchEvent.bind(frameWindow),
+    frameWindow.postMessage,
+    frameWindow.navigator,
+    frameWindow.screen,
+    frameWindow.history,
+    frameWindow.localStorage,
+    frameWindow.sessionStorage,
+    frameWindow.crypto,
+    frameWindow.performance,
+  );
 }
+
+function __createFrameNavigator() {
+  const prototype = Object.create(Object.getPrototypeOf(Navigator.prototype));
+  Object.defineProperty(prototype, 'constructor', {
+    value: Navigator,
+    writable: true,
+    enumerable: false,
+    configurable: true,
+  });
+  Object.defineProperty(prototype, Symbol.toStringTag, {
+    value: 'Navigator',
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
+  for (const key of Reflect.ownKeys(Navigator.prototype)) {
+    if (key === 'constructor') continue;
+    const descriptor = Object.getOwnPropertyDescriptor(Navigator.prototype, key);
+    if (descriptor !== undefined) Object.defineProperty(prototype, key, descriptor);
+  }
+  return Object.create(prototype);
+}
+
+// A frame document needs the page realm's constructors reachable through its own
+// window object; bare identifiers already resolve there because the script runs in
+// the page realm.
+const __childWindowGlobals = [
+  'Event',
+  'CustomEvent',
+  'MessageEvent',
+  'ErrorEvent',
+  'Promise',
+  'URL',
+  'URLSearchParams',
+  'TextEncoder',
+  'TextDecoder',
+  'fetch',
+  'XMLHttpRequest',
+  'Image',
+  'WebAssembly',
+  'MessageChannel',
+  'MutationObserver',
+  'IntersectionObserver',
+  'ResizeObserver',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'getComputedStyle',
+  'atob',
+  'btoa',
+  'crypto',
+  'performance',
+  'navigator',
+  'screen',
+  'history',
+  'localStorage',
+  'sessionStorage',
+  'document',
+  'console',
+];
 
 function __childConstructor(context, creator) {
   return function (...arguments_) {
@@ -465,6 +587,33 @@ function __childConstructor(context, creator) {
 function __parseChildDocument(source) {
   if (source === '') source = '<!doctype html><html><head></head><body></body></html>';
   return new DOMParser().parseFromString(source, 'text/html');
+}
+
+async function __runChildDocumentScripts(context) {
+  for (const script of context.document.querySelectorAll('script')) {
+    const source = script.getAttribute('src');
+    if (!source) {
+      if (script.textContent) __runInChildWindow(context, script.textContent);
+      continue;
+    }
+    try {
+      const url = new URL(source, context.window.location.href).href;
+      const text = await (await fetch(url)).text();
+      __runInChildWindow(context, text);
+    } catch (error) {
+      // A failing subresource must not abort the rest of the document.
+    }
+  }
+  const onload = context.document.body?.getAttribute('onload');
+  if (onload) __runInChildWindow(context, onload);
+}
+
+function __finishChildDocument(context) {
+  const document = context.document;
+  document.dispatchEvent(new Event('readystatechange'));
+  document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true }));
+  context.window.dispatchEvent(new Event('load'));
+  document.dispatchEvent(new Event('load'));
 }
 
 class HTMLIFrameElement extends HTMLElement {
@@ -492,6 +641,7 @@ class HTMLIFrameElement extends HTMLElement {
             __documentURL(__callHost('ownerDocument', frame)) || 'about:blank',
           );
           __documentWindows.delete(context.document);
+          const remote = srcdoc === null && /^https?:/.test(location.href);
           context.document =
             srcdoc !== null
               ? __parseChildDocument(srcdoc)
@@ -500,15 +650,40 @@ class HTMLIFrameElement extends HTMLElement {
                 : __parseChildDocument('');
           __documentWindows.set(context.document, { window: childWindow, frame });
           __callHost('documentSetURL', context.document, location.href);
+          if (remote) {
+            // Remote frames load like a navigation: fetch outside the page's
+            // script path, parse, then run the document's scripts in order.
+            context.loading = true;
+            fetch(location.href)
+              .then((response) => response.text())
+              .then((html) => {
+                if (context.document !== undefined && context.aborted) return;
+                __documentWindows.delete(context.document);
+                context.document = __parseChildDocument(html);
+                __documentWindows.set(context.document, { window: childWindow, frame });
+                __callHost('documentSetURL', context.document, location.href);
+                return __runChildDocumentScripts(context).then(() =>
+                  __finishChildDocument(context),
+                );
+              })
+              .catch(() => {})
+              .finally(() => {
+                context.loading = false;
+                frame.dispatchEvent(new Event('load'));
+              });
+            return;
+          }
           for (const script of context.document.querySelectorAll('script')) {
             __runInChildWindow(context, script.textContent);
           }
           const onload = context.document.body?.getAttribute('onload');
           if (onload) __runInChildWindow(context, onload);
+          __finishChildDocument(context);
         },
       };
       __callHost('documentSetURL', context.document, 'about:blank');
       __documentWindows.set(context.document, { window: childWindow, frame });
+      __finishChildDocument(context);
       Object.defineProperties(childWindow, {
         location: {
           get() {
@@ -528,11 +703,42 @@ class HTMLIFrameElement extends HTMLElement {
           enumerable: true,
         },
         frameElement: { value: this, enumerable: true },
-        parent: { value: window, enumerable: true },
-        top: { value: window, enumerable: true },
+        parent: {
+          get() {
+            return __frameParentView(context);
+          },
+          enumerable: true,
+        },
+        top: {
+          get() {
+            return __frameParentView(context);
+          },
+          enumerable: true,
+        },
       });
+      for (const name of ['location', 'document', 'parent', 'top']) {
+        const descriptor = Object.getOwnPropertyDescriptor(childWindow, name);
+        if (descriptor?.get) __markWebBuiltin(descriptor.get, name, 'get');
+      }
       childWindow.window = childWindow;
       childWindow.self = childWindow;
+      const frameNavigator = __createFrameNavigator();
+      for (const name of __childWindowGlobals) {
+        if (name === 'navigator' || childWindow[name] !== undefined) continue;
+        const value = window[name];
+        if (value !== undefined) childWindow[name] = value;
+      }
+      Object.defineProperty(childWindow, 'navigator', {
+        get: __markWebBuiltin(
+          function () {
+            return frameNavigator;
+          },
+          'navigator',
+          'get',
+        ),
+        enumerable: true,
+        configurable: true,
+      });
       childWindow.setTimeout = setTimeout;
       childWindow.clearTimeout = clearTimeout;
       childWindow.setInterval = setInterval;
@@ -564,6 +770,16 @@ class HTMLIFrameElement extends HTMLElement {
       };
       __iframeBrowsingContexts.set(this, context);
     }
+    // Frames that arrive with the parsed document never pass through
+    // __finishNodeInsertion, so the first access connects them.
+    if (!context.connected && !context.connecting && this.isConnected) {
+      context.connecting = true;
+      try {
+        this.__connected();
+      } finally {
+        context.connecting = false;
+      }
+    }
     return context.window;
   }
   get contentDocument() {
@@ -580,12 +796,14 @@ class HTMLIFrameElement extends HTMLElement {
       srcdoc !== null ? 'about:srcdoc' : this.getAttribute('src') || 'about:blank',
       srcdoc,
     );
+    if (context.loading) return;
     setTimeout(() => this.dispatchEvent(new Event('load')), 0);
   }
   __navigate(url) {
     this.contentWindow;
     const context = __iframeBrowsingContexts.get(this);
     context.navigate(url);
+    if (context.loading) return;
     setTimeout(() => this.dispatchEvent(new Event('load')), 0);
   }
 }

@@ -906,7 +906,20 @@ function installGraphics({ global, host, canvas, profile: settings }, options = 
       return 'bgra8unorm';
     }
   }
-  Object.defineProperty(global.navigator, 'gpu', { value: new GPU(), configurable: true });
+  const gpuInstance = new GPU();
+  const gpuDescriptor = Object.getOwnPropertyDescriptor(
+    {
+      get gpu() {
+        return gpuInstance;
+      },
+    },
+    'gpu',
+  );
+  Object.defineProperty(Object.getPrototypeOf(global.navigator), 'gpu', {
+    get: gpuDescriptor.get,
+    enumerable: true,
+    configurable: true,
+  });
   for (const [name, value] of Object.entries({
     WebGLRenderingContext,
     WebGL2RenderingContext,

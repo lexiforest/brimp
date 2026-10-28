@@ -54,7 +54,11 @@ var __BrimpStorage = (() => {
       return void 0;
     }
   }
-  var schedulerPostTask = typeof scheduler !== "undefined" && ((fn) => scheduler.postTask(fn));
+  // Patched for Brimp: keep a local reference to the scheduler. The global is
+  // removed for WebKit identities, and a closure that resolves `scheduler` at
+  // call time would throw once it is gone.
+  var schedulerHandle = typeof scheduler !== "undefined" ? scheduler : void 0;
+  var schedulerPostTask = schedulerHandle && ((fn) => schedulerHandle.postTask(fn));
   var doSetTimeout = (fn) => setTimeout(fn, 0);
   var queueTask = (fn) => {
     const setImmediate = globalThis.setImmediate || getSetImmediateFromJsdom() || schedulerPostTask || doSetTimeout;

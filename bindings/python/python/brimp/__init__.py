@@ -183,6 +183,17 @@ class Page(_Requests):
             self._routes.discard(registration)
         return remove
 
+    def load_html(self, html, url="about:blank"):
+        """Load HTML at *url* without running its page scripts.
+
+        The URL becomes the browsing-context URL before parsing, so relative
+        URLs, document.URL and location.href use it. Subresources are not
+        fetched. Init scripts still run.
+        """
+        result = self._inner.load_html(html, url)
+        self.response = None
+        return result
+
     def set_identity(self, *, user_agent=None, languages=None, platform=None):
         self._inner.set_identity(json.dumps(dict(userAgent=user_agent, languages=languages, platform=platform)))
 

@@ -16,6 +16,14 @@ invalidates host handles from the old one.
 The sections below describe page-side JavaScript. For host handle ownership, see
 [Values and handles](/guides/values/).
 
+## Element geometry
+
+There is no layout engine, so `getBoundingClientRect()` returns a zero `DOMRect`
+at the origin and `getClientRects()` returns an empty `DOMRectList` rather than
+`undefined`. The result objects are real value objects, so scripts that read
+`.width`, `.top`, `.right` or `rects.length` keep working; nothing is measured,
+and unrelated receivers raise `TypeError` like other DOM methods.
+
 ## Parse and create documents
 
 HTML is parsed into one native DOM. Lifecycle events reflect script execution.
@@ -301,10 +309,12 @@ scrollingElement uses the standards root/quirks body fallback without checking
 CSS scrollability. HTMLDocument remains an alias of Document.
 Document browser-service placeholders expose inactive fullscreen/picture-in-picture/
 pointer-lock elements and saved Safari capability flags; they do not enable those
-features. fragmentDirective, timeline, all and lastModified retain legacy
-undefined defaults. FontFace/FontFaceSet metadata is described under
-[Window and environment](/web-platform/environment/#fonts). In particular, all is not an HTMLDDA collection and lastModified
-does not invent a timestamp. referrer is empty; XML metadata defaults to null/false/
+features. fragmentDirective and all retain legacy undefined defaults. timeline
+returns a stable per-document DocumentTimeline whose currentTime follows the realm
+clock, duration is null and getAnimations() is empty; lastModified formats the
+document load time once per document as `MM/DD/YYYY HH:MM:SS` in local time and
+does not read a response Last-Modified header. FontFace/FontFaceSet metadata is described under
+[Window and environment](/web-platform/environment/#fonts). In particular, all is not an HTMLDDA collection. referrer is empty; XML metadata defaults to null/false/
 null without XML declaration state. hidden/visibilityState/hasFocus retain fixed
 visible/focused defaults. createProcessingInstruction is a callable no-op;
 createCDATASection rejects with NotSupportedError (correct for HTML, also the

@@ -285,6 +285,8 @@ fn diagnostic_inspection_preserves_loss_and_distinguishes_disabled_from_empty() 
     let summary = page.summarize_diagnostics().unwrap();
     assert_eq!(summary["coverage"]["enabled"], false);
     assert_eq!(summary["dependencies"], json!([]));
+    assert_eq!(summary["unresolved"]["reads"], json!([]));
+    assert_eq!(summary["unresolved"]["operations"], json!([]));
     assert_eq!(summary["retained"], 0);
 }
 
@@ -336,4 +338,22 @@ fn recursive_tracing_reinstalls_on_navigation_and_keeps_page_sequences() {
         .unwrap();
     assert_ne!(missing["realmId"], last["realmId"]);
     assert!(missing["sequence"].as_u64().unwrap() > last["sequence"].as_u64().unwrap());
+    assert_eq!(missing["details"]["present"], json!(false));
+
+    page.evaluate("void navigator.missing; null").unwrap();
+    let summary = page.summarize_diagnostics().unwrap();
+    let read = |path: &str| {
+        summary["unresolved"]["reads"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entry| entry["path"] == path)
+            .unwrap()
+    };
+    let page_read = read("window.fixture.nested.missing");
+    assert_eq!(page_read["present"], json!(false));
+    assert_eq!(page_read["owner"], json!("unknown"));
+    let navigator_read = read("navigator.missing");
+    assert_eq!(navigator_read["present"], json!(false));
+    assert_eq!(navigator_read["owner"], json!("profile"));
 }

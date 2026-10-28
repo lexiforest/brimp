@@ -202,6 +202,9 @@ function Window() {
   throw new TypeError('Illegal constructor');
 }
 Window.prototype = Object.getPrototypeOf(globalThis);
+// WebKit keeps an intermediate WindowProperties prototype but its constructor
+// is inherited from EventTarget, so constructor.name walks as EventTarget.
+delete WindowProperties.prototype.constructor;
 Object.setPrototypeOf(Window.prototype, WindowProperties.prototype);
 Object.defineProperty(Window.prototype, 'constructor', {
   value: Window,
@@ -210,6 +213,27 @@ Object.defineProperty(Window.prototype, 'constructor', {
   configurable: true,
 });
 Object.defineProperties(Window.prototype, {
+  event: {
+    get() {
+      return undefined;
+    },
+    enumerable: true,
+    configurable: true,
+  },
+  offscreenBuffering: {
+    get() {
+      return true;
+    },
+    enumerable: true,
+    configurable: true,
+  },
+  webkitIndexedDB: {
+    get() {
+      return globalThis.indexedDB;
+    },
+    enumerable: true,
+    configurable: true,
+  },
   clientInformation: {
     get() {
       return this.navigator;

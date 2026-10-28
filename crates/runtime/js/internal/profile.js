@@ -1,6 +1,7 @@
 function installProfile(profile) {
   const identity = profile.identity;
   const state = {
+    standalone: false,
     userAgent: identity.user_agent,
     appCodeName: identity.app_code_name,
     appName: identity.app_name,
@@ -38,14 +39,31 @@ function installProfile(profile) {
     Object.defineProperty(target, name, { value, enumerable, configurable: true });
   const defineGlobalConstructor = (name, value) =>
     Object.defineProperty(globalThis, name, { value, writable: true, configurable: true });
-  const defineNavigatorValue = (name, value) =>
-    Object.defineProperty(Navigator.prototype, name, {
-      get() {
-        return value;
+  const defineNavigatorValue = (name, value) => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      {
+        get [name]() {
+          return value;
+        },
       },
+      name,
+    );
+    Object.defineProperty(Navigator.prototype, name, {
+      get: descriptor.get,
       enumerable: true,
       configurable: true,
     });
+  };
+  class AudioSession {
+    constructor() {
+      throw new TypeError('Illegal constructor');
+    }
+    get type() {
+      return 'auto';
+    }
+  }
+  defineNavigatorValue('audioSession', Object.create(AudioSession.prototype));
+  defineGlobalConstructor('AudioSession', AudioSession);
   defineNavigatorValue('webdriver', identity.webdriver);
   if (identity.doNotTrack !== null) defineNavigatorValue('doNotTrack', identity.doNotTrack);
   const arrayData = new WeakMap();
@@ -196,12 +214,98 @@ function installProfile(profile) {
     defineNavigatorValue('mimeTypes', mimeTypes);
   }
   installPluginCollections(state.pdfViewerEnabled);
+  // Chromium exposes Client Hints; WebKit and Gecko expose nothing at all, so the
+  // surface follows the profile identity instead of being unconditional.
+  const userAgentDataState = new WeakMap();
+  class NavigatorUAData {
+    constructor() {
+      throw new TypeError('Illegal constructor');
+    }
+    get brands() {
+      return userAgentDataState.get(this).brands;
+    }
+    get mobile() {
+      return userAgentDataState.get(this).mobile;
+    }
+    get platform() {
+      return userAgentDataState.get(this).platform;
+    }
+    // Derived from the user agent: the real build number, CPU architecture,
+    // platform version and model are not observable, so they stay unspecified.
+    getHighEntropyValues(hints) {
+      if (arguments.length === 0) return Promise.reject(new TypeError('1 argument required'));
+      const data = userAgentDataState.get(this);
+      const values = {
+        brands: data.brands,
+        mobile: data.mobile,
+        platform: data.platform,
+        uaFullVersion: data.fullVersion,
+        fullVersionList: data.brands.map((brand) => ({
+          brand: brand.brand,
+          version: brand.brand === 'Not:A-Brand' ? '8.0.0.0' : data.fullVersion,
+        })),
+        architecture: 'arm',
+        bitness: '64',
+        model: '',
+        platformVersion: '15.0.0',
+        wow64: false,
+        formFactors: Object.freeze(['Desktop']),
+      };
+      const selected = {};
+      for (const hint of Array.from(hints ?? [], String)) {
+        if (hint in values) selected[hint] = values[hint];
+      }
+      return Promise.resolve(selected);
+    }
+    toJSON() {
+      const data = userAgentDataState.get(this);
+      return { brands: data.brands, mobile: data.mobile, platform: data.platform };
+    }
+  }
+  function clientHintValues(userAgent, platform) {
+    const version = /Chrome\/(\d+)/.exec(userAgent)?.[1];
+    if (version === undefined) return null;
+    const mobile = userAgent.includes('Mobile') || platform === 'Linux armv81';
+    const hintPlatform =
+      platform === 'MacIntel'
+        ? 'macOS'
+        : platform === 'Win32'
+          ? 'Windows'
+          : platform === 'iPhone' || platform === 'iPad'
+            ? 'iOS'
+            : mobile
+              ? 'Android'
+              : 'Linux';
+    return {
+      brands: Object.freeze(
+        [
+          { brand: 'Not:A-Brand', version: '8' },
+          { brand: 'Chromium', version },
+          { brand: 'Google Chrome', version },
+        ].map((brand) => Object.freeze(brand)),
+      ),
+      mobile,
+      platform: hintPlatform,
+      fullVersion: `${version}.0.0.0`,
+    };
+  }
+  const initialClientHints = clientHintValues(state.userAgent, state.platform);
+  if (initialClientHints !== null) {
+    const userAgentData = Object.create(NavigatorUAData.prototype);
+    userAgentDataState.set(userAgentData, initialClientHints);
+    defineNavigatorValue('userAgentData', userAgentData);
+    defineGlobalConstructor('NavigatorUAData', NavigatorUAData);
+  }
   Object.defineProperty(globalThis, '__brimpConfigureNavigator', {
     configurable: true,
     value(options) {
       for (const [option, name] of Object.entries({
+        app_code_name: 'appCodeName',
+        app_name: 'appName',
+        app_version: 'appVersion',
         hardware_concurrency: 'hardwareConcurrency',
         max_touch_points: 'maxTouchPoints',
+        platform: 'platform',
         vendor: 'vendor',
         product_sub: 'productSub',
         pdf_viewer_enabled: 'pdfViewerEnabled',
@@ -222,6 +326,7 @@ function installProfile(profile) {
   globalThis.__brimpInstallMediaQueries(profile);
   globalThis.__brimpInstallFonts(profile);
   globalThis.__brimpInstallPerformance(profile);
+  globalThis.__brimpInstallScheduling(identity);
   // Consumed by bundled plugins during installation, then removed by the
   // WebIDL finalizer so page scripts cannot address it.
   Object.defineProperty(globalThis, '__brimpProfile', {

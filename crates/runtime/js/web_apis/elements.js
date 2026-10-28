@@ -498,7 +498,6 @@ class SVGElement extends Element {
   }
 }
 class SVGGraphicsElement extends SVGElement {
-  // Legacy placeholders: no SVG geometry, transforms or rendering backend.
   get requiredExtensions() {
     return '';
   }
@@ -508,9 +507,97 @@ class SVGGraphicsElement extends SVGElement {
   get transform() {
     return '';
   }
-  getBBox() {}
-  getCTM() {}
-  getScreenCTM() {}
+  // No layout or transform backend: report an empty box and the identity matrix,
+  // which keeps geometry-reading scripts working without inventing positions.
+  getBBox() {
+    return new DOMRect(0, 0, 0, 0);
+  }
+  getCTM() {
+    return new DOMMatrix();
+  }
+  getScreenCTM() {
+    return new DOMMatrix();
+  }
+}
+// Animation elements expose the interfaces browsers do, with no timeline behind
+// them: starting and stopping is accepted and every time query reports zero.
+class SVGAnimationElement extends SVGElement {
+  beginElement() {}
+  beginElementAt() {}
+  endElement() {}
+  endElementAt() {}
+  getCurrentTime() {
+    return 0;
+  }
+  getStartTime() {
+    return 0;
+  }
+  getSimpleDuration() {
+    return 0;
+  }
+}
+class SVGAnimateElement extends SVGAnimationElement {}
+class SVGAnimateMotionElement extends SVGAnimationElement {}
+class SVGAnimateTransformElement extends SVGAnimationElement {}
+class SVGSetElement extends SVGAnimationElement {}
+class SVGMPathElement extends SVGElement {}
+class SVGGeometryElement extends SVGGraphicsElement {
+  isPointInFill() {
+    return false;
+  }
+  isPointInStroke() {
+    return false;
+  }
+  getTotalLength() {
+    return 0;
+  }
+  getPointAtLength() {
+    return __createSVGPoint();
+  }
+}
+function __createSVGPoint() {
+  const point = {
+    x: 0,
+    y: 0,
+    z: 0,
+    w: 1,
+    matrixTransform: (matrix) => matrix.transformPoint(point),
+  };
+  Object.defineProperty(point, Symbol.toStringTag, { value: 'SVGPoint', configurable: true });
+  return point;
+}
+class SVGTextPositioningElement extends SVGGraphicsElement {
+  // Text layout is not implemented: the positioning attributes read back as
+  // empty animated length lists.
+  get x() {
+    return Object.freeze({ baseVal: Object.freeze([]), animVal: Object.freeze([]) });
+  }
+  get y() {
+    return Object.freeze({ baseVal: Object.freeze([]), animVal: Object.freeze([]) });
+  }
+  get dx() {
+    return Object.freeze({ baseVal: Object.freeze([]), animVal: Object.freeze([]) });
+  }
+  get dy() {
+    return Object.freeze({ baseVal: Object.freeze([]), animVal: Object.freeze([]) });
+  }
+  get rotate() {
+    return Object.freeze({ baseVal: Object.freeze([]), animVal: Object.freeze([]) });
+  }
+}
+class SVGTextElement extends SVGTextPositioningElement {}
+class SVGTSpanElement extends SVGTextPositioningElement {}
+class SVGTextPathElement extends SVGTextPositioningElement {}
+class SVGSVGElement extends SVGGraphicsElement {
+  createSVGPoint() {
+    return __createSVGPoint();
+  }
+  createSVGMatrix() {
+    return new DOMMatrix();
+  }
+  createSVGRect() {
+    return new DOMRect(0, 0, 0, 0);
+  }
 }
 
 class HTMLElement extends Element {

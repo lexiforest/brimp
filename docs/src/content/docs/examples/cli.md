@@ -72,6 +72,25 @@ printf '%s\n' 'document.body.innerHTML = "<h1>Local script</h1>"; document.body.
 Expect `"Local script"`. Use `brimp run script.js` for a file. Scripts run in a
 browser realm; bundle imports before passing a script to `run`.
 
+## 6. Load a saved HTML document
+
+```sh
+cat > saved.html <<'HTML'
+<!doctype html><title>Saved</title><a id="next" href="next?x=1">next</a>
+<script>globalThis.pageScriptRan = true</script>
+HTML
+
+printf '%s\n' 'void 0' | brimp run - --html saved.html \
+  --html-url https://example.com/dir/page.html \
+  --eval '({url: location.href, href: document.getElementById("next").href,
+            pageScript: typeof globalThis.pageScriptRan})'
+```
+
+Expect the link to resolve to `https://example.com/dir/next?x=1` and
+`pageScript` to be `undefined`. `--html` parses the file at `--html-url` (default
+`about:blank`) without running page scripts or fetching subresources. Init
+scripts still run. Do not combine `--html` with a navigation URL.
+
 Continue with [CLI workflows](/examples/cli-workflows/) for plugins, actions,
 routes, streaming and tracing. The [generated CLI reference](/api/cli/) lists
 all command flags and defaults.

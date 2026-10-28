@@ -349,8 +349,72 @@ impl Page {
             let value = http::HeaderValue::from_str(&value).map_err(|error| error.to_string())?;
             request.headers.append(name, value);
         }
+        self.add_fetch_metadata(&mut request);
         request.body = pending.body;
         Ok(request)
+    }
+
+    /// Headers a browser attaches to a script-issued request (fetch and XHR).
+    /// Session identity defaults only fill gaps, so these take precedence over
+    /// the document-oriented Accept and leave explicit script values alone.
+    fn add_fetch_metadata(&self, request: &mut ResourceRequest) {
+        let document_url = self
+            .browsing_context
+            .current_url()
+            .and_then(|url| url::Url::parse(&url).ok());
+        let target = url::Url::parse(&request.url).ok();
+        let site = match (document_url.as_ref(), target.as_ref()) {
+            (None, _) => "none",
+            (Some(_), None) => "none",
+            (Some(document), Some(target)) if document.origin() == target.origin() => "same-origin",
+            (Some(document), Some(target)) if document.host_str() == target.host_str() => {
+                "same-site"
+            }
+            _ => "cross-site",
+        };
+        let own_origin = document_url
+            .as_ref()
+            .map(|url| url.origin().ascii_serialization());
+        let same_origin = site == "same-origin";
+        let mut fields: Vec<(&'static str, String)> = vec![
+            ("sec-fetch-site", site.to_owned()),
+            ("sec-fetch-mode", "cors".to_owned()),
+            ("sec-fetch-dest", "empty".to_owned()),
+        ];
+        if !request.headers.contains_key("accept") {
+            fields.push(("accept", "*/*".to_owned()));
+        }
+        // Default referrer policy: full URL same-origin, origin only cross-origin.
+        if let (Some(document), Some(referrer)) = (document_url.as_ref(), document_url.as_ref()) {
+            let value = if same_origin {
+                let mut trimmed = referrer.clone();
+                trimmed.set_fragment(None);
+                trimmed.to_string()
+            } else {
+                document.origin().ascii_serialization()
+            };
+            if !request.headers.contains_key("referer") {
+                fields.push(("referer", value));
+            }
+        }
+        if request.method != http::Method::GET
+            && request.method != http::Method::HEAD
+            && !request.headers.contains_key("origin")
+            && let Some(origin) = own_origin
+        {
+            fields.push(("origin", origin));
+        }
+        for (name, value) in fields {
+            let Ok(name) = http::HeaderName::from_bytes(name.as_bytes()) else {
+                continue;
+            };
+            if request.headers.contains_key(name.as_str()) {
+                continue;
+            }
+            if let Ok(value) = http::HeaderValue::from_str(&value) {
+                request.headers.append(name, value);
+            }
+        }
     }
 
     fn complete_fetch(

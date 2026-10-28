@@ -97,22 +97,50 @@ function installRecursiveTracing(report) {
       internalDepth--;
     }
   }
-  function record(kind, path, key, result, args, note) {
+  function record(kind, path, key, result, args, note, extra) {
     path = bounded(path);
-    report(kind, key === null ? path : memberPath(path, key), result, args, {
+    const details = {
       layer: 'recursive',
       target: path,
       property: key === null ? null : bounded(propertyName(key)),
       note,
-    });
+    };
+    if (extra) {
+      for (const name of Object.keys(extra)) details[name] = extra[name];
+    }
+    report(kind, key === null ? path : memberPath(path, key), result, args, details);
   }
-  function observe(kind, path, key, args, fn) {
+  function failureName(error) {
+    try {
+      if (error === null) return 'null';
+      const type = typeof error;
+      if (type !== 'object' && type !== 'function') return type;
+      let current = error;
+      for (let depth = 0; current && depth < 4; depth++) {
+        const d = R.getOwnPropertyDescriptor(current, 'name');
+        if (d && 'value' in d && typeof d.value === 'string') return bounded(d.value);
+        current = R.getPrototypeOf(current);
+      }
+    } catch (_) {
+      /* a hostile error object must not break tracing */
+    }
+    return 'Error';
+  }
+  function observe(kind, path, key, args, fn, extra) {
     try {
       const result = internal(fn);
-      record(kind, path, key, result === null ? 'null' : typeof result, args);
+      let details = null;
+      if (extra) {
+        try {
+          details = extra(result);
+        } catch (_) {
+          /* presence is optional detail */
+        }
+      }
+      record(kind, path, key, result === null ? 'null' : typeof result, args, null, details);
       return result;
     } catch (error) {
-      record(kind, path, key, 'throw', args);
+      record(kind, path, key, 'throw', args, null, { failure: failureName(error) });
       throw error;
     }
   }
@@ -197,7 +225,14 @@ function installRecursiveTracing(report) {
     paths.set(value, path);
     const handler = {
       get(target, key) {
-        const result = observe('get', path, key, [], () => R.get(target, key, target));
+        const result = observe(
+          'get',
+          path,
+          key,
+          [],
+          () => R.get(target, key, target),
+          (value) => (value === undefined ? { present: internal(() => R.has(target, key)) } : null),
+        );
         const d = R.getOwnPropertyDescriptor(target, key);
         if (d && !d.configurable && 'value' in d && !d.writable) {
           if (objectLike(result))
@@ -350,7 +385,12 @@ function installRecursiveTracing(report) {
       configurable: true,
       get() {
         if (internalDepth) return read();
-        return outward(observe('get', 'window', key, [], read), propertyName(key));
+        return outward(
+          observe('get', 'window', key, [], read, (value) =>
+            value === undefined ? { present: internal(() => R.has(root, key)) } : null,
+          ),
+          propertyName(key),
+        );
       },
     };
     if (d.writable || d.set)

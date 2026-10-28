@@ -1,12 +1,13 @@
 //! Page plugin installation and disposal.
 
 use super::Page;
-use brimp_jsc::JsException;
+use brimp_jsc::{JsException, JsRuntime};
 use std::sync::atomic::Ordering;
 use std::time::{Duration, Instant};
 
 impl Page {
     pub(super) fn initialize_plugins(&mut self) -> Result<(), JsException> {
+        self.plugin_scopes.clear();
         if self.plugins.is_empty() {
             return Ok(());
         }
@@ -50,7 +51,9 @@ impl Page {
             self.js
                 .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
         }
-        result
+        result?;
+        self.plugin_scopes = read_plugin_scopes(&self.js)?;
+        Ok(())
     }
 
     pub(super) fn close_plugins(&mut self) {
@@ -68,4 +71,15 @@ impl Page {
         }
         self.js.clear_execution_time_limit();
     }
+}
+
+fn read_plugin_scopes(
+    js: &JsRuntime,
+) -> Result<Vec<crate::runtime::diagnostics::PluginScope>, JsException> {
+    let raw = js
+        .eval("JSON.stringify(globalThis.__brimpPluginScopes ?? [])")?
+        .to_string()?;
+    let _ = js.eval("delete globalThis.__brimpPluginScopes");
+    serde_json::from_str(&raw)
+        .map_err(|error| JsException::from_message(format!("plugin scopes: {error}")))
 }

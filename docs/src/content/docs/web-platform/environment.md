@@ -13,9 +13,20 @@ Captured values are fixed observations; they do not connect Brimp to live browse
 | Navigation and history | URL changes, cloned history state and supported traversal events; no cross-document history/bfcache |
 | Screen and viewport | Profile values, without layout or automatic resize/orientation events |
 | Media queries and fonts | Profile-based answers and local metadata, without font loading or shaping |
-| Time | Realm clocks, timers, prioritized tasks and idle callbacks; synthetic legacy timing |
+| Time | Realm clocks and timers; prioritized tasks and idle callbacks only for Chromium identities, since Safari has neither; synthetic legacy timing |
 | Storage and locks | Session/origin storage, page sessionStorage, cookie-jar access and coordinated Web Locks |
 | Browser UI and playback | UI calls are no-ops; media playback is unavailable |
+
+## Identity-gated surfaces
+
+Some surfaces exist only for a browser family, measured against the reference
+browsers rather than assumed. For WebKit identities the scheduling API
+(`Scheduler`, `TaskController`, `TaskSignal`, `TaskPriorityChangeEvent`,
+`scheduler`) and idle callbacks (`requestIdleCallback`, `cancelIdleCallback`) are
+absent, because Safari 27 exposes none of them and Google's search challenge
+reads `requestIdleCallback` while probing for automation. `navigator.connection`
+is likewise Chromium-only. `navigator.userAgentData` and the Chromium client hints
+follow the same rule.
 
 ## Storage and shared state
 

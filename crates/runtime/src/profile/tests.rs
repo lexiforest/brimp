@@ -31,6 +31,28 @@ fn partial_profiles_drive_native_headers_and_invalidate_resolved_cache() {
 }
 
 #[test]
+fn transport_target_follows_the_user_agent_family_unless_set() {
+    let chrome = BrowserProfile::from_json(
+        r#"{"values":{"identity":{"user_agent":"Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"}}}"#,
+    )
+    .unwrap();
+    assert_eq!(chrome.network_profile(), "chrome150");
+    let firefox = BrowserProfile::from_json(
+        r#"{"values":{"identity":{"user_agent":"Mozilla/5.0 (Macintosh; rv:146.0) Gecko/20100101 Firefox/146.0"}}}"#,
+    )
+    .unwrap();
+    assert_eq!(firefox.network_profile(), "firefox147");
+    let safari = BrowserProfile::default();
+    assert_eq!(safari.network_profile(), "safari270");
+    // An explicit choice wins, so deliberate mismatch experiments stay possible.
+    let explicit = BrowserProfile::from_json(
+        r#"{"values":{"identity":{"user_agent":"Mozilla/5.0 (Macintosh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36"},"network":{"impersonation":"safari270"}}}"#,
+    )
+    .unwrap();
+    assert_eq!(explicit.network_profile(), "safari270");
+}
+
+#[test]
 fn rejects_invalid_documents_and_interface_values() {
     for value in [
         json!({"schema": 1}),

@@ -13,6 +13,7 @@ const fixture = new Plugin('trace-fixture', `({global}) => {
     callback(fn) { return fn(nested); },
     [Symbol.for('trace')]: nested,
     fixed: Object.freeze({child: nested}), bytes: new Uint8Array([1, 2]),
+    undefinedValue: undefined,
   };
 }`);
 
@@ -24,7 +25,7 @@ test('recursive environment operations, aliases, symbols, invariants and safe lo
     assert.deepEqual(await page.evaluate(`(() => {
       const n = fixture.nested;
       const same = n === fixture.alias && n === n.self && n === fixture[Symbol.for('trace')];
-      n.value = 3; void n.missing;
+      n.value = 3; void n.missing; void fixture.undefinedValue;
       let getterReads = 0;
       const original = {get dangerous() { getterReads++; throw Error('must not inspect'); },
         toJSON() { throw Error('must not serialize'); }};
@@ -46,13 +47,15 @@ test('recursive environment operations, aliases, symbols, invariants and safe lo
     const batch = await page.peekDiagnostics();
     assert.equal(batch.coverage.mode, 'recursive');
     assert.equal(batch.dropped, 0);
+    assert.equal('owners' in batch, false);
     const records = batch.records.filter(r => r.details?.layer === 'recursive');
     for (const kind of ['get', 'set', 'has', 'defineProperty', 'getOwnPropertyDescriptor', 'ownKeys', 'deleteProperty', 'getPrototypeOf', 'setPrototypeOf', 'isExtensible', 'preventExtensions', 'call']) {
       assert.ok(records.some(r => r.kind === kind), kind);
     }
-    assert.ok(records.some(r => r.path === 'fixture.nested.missing' && r.outcome === 'undefined'));
-    assert.ok(records.some(r => r.path === 'fixture.nested.callbackMissing' && r.outcome === 'undefined'));
-    assert.ok(records.some(r => r.kind === 'call' && r.path === 'fixture.fail' && r.outcome === 'throw'));
+    assert.ok(records.some(r => r.path === 'fixture.nested.missing' && r.outcome === 'undefined' && r.details.present === false));
+    assert.ok(records.some(r => r.path === 'fixture.nested.callbackMissing' && r.outcome === 'undefined' && r.details.present === false));
+    assert.ok(records.some(r => r.path === 'fixture.undefinedValue' && r.outcome === 'undefined' && r.details.present === true));
+    assert.ok(records.some(r => r.kind === 'call' && r.path === 'fixture.fail' && r.outcome === 'throw' && r.details.failure === 'Error'));
     assert.ok(records.some(r => r.kind === 'coverage' && r.details.note.includes('Fixed')));
     assert.ok(records.some(r => r.kind === 'coverage' && r.details.note.includes('Binary')));
     assert.ok(records.some(r => r.details.property === 'Symbol(trace)'));
@@ -60,6 +63,13 @@ test('recursive environment operations, aliases, symbols, invariants and safe lo
     assert.ok(records.every(r => r.path.length <= 512 && (r.details.property?.length ?? 0) <= 512));
     const summary = await page.summarizeDiagnostics();
     assert.ok(summary.dependencies.some(r => r.layer === 'recursive' && r.target === 'fixture.nested' && r.property === 'missing'));
+    const unresolved = summary.unresolved;
+    const missing = unresolved.reads.find(r => r.path === 'fixture.nested.missing');
+    assert.deepEqual(missing && {present: missing.present, owner: missing.owner}, {present: false, owner: 'plugin:trace-fixture'});
+    assert.equal(unresolved.reads.find(r => r.path === 'fixture.undefinedValue').present, true);
+    const failure = unresolved.operations.find(r => r.path === 'fixture.fail');
+    assert.deepEqual(failure && {kind: failure.kind, failure: failure.failure, owner: failure.owner},
+      {kind: 'call', failure: 'Error', owner: 'plugin:trace-fixture'});
     assert.deepEqual(await page.takeDiagnostics(), batch);
   } finally { await session.close(); }
 });

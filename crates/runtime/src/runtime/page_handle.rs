@@ -183,6 +183,17 @@ impl PageHandle {
     pub fn html(&self) -> Result<String, AutomationError> {
         self.request(|response| Command::Html { response })?
     }
+    pub fn load_html(
+        &self,
+        html: impl Into<String>,
+        url: impl Into<String>,
+    ) -> Result<(), AutomationError> {
+        self.request(|response| Command::LoadHtml {
+            html: html.into(),
+            url: url.into(),
+            response,
+        })?
+    }
     pub(crate) fn set_identity(
         &self,
         identity: super::native::IdentityOptions,
@@ -417,6 +428,11 @@ enum Command {
     Html {
         response: mpsc::SyncSender<Result<String, AutomationError>>,
     },
+    LoadHtml {
+        html: String,
+        url: String,
+        response: mpsc::SyncSender<Result<(), AutomationError>>,
+    },
     SetNavigatorIdentityOverride {
         identity_override: String,
         response: mpsc::SyncSender<Result<(), AutomationError>>,
@@ -583,6 +599,16 @@ fn run_page(
             }
             Command::Html { response } => {
                 let _ = response.send(Ok(page.html()));
+            }
+            Command::LoadHtml {
+                html,
+                url,
+                response,
+            } => {
+                let result = page
+                    .load_html(&html, &url)
+                    .map_err(|error| AutomationError::JavaScript(error.to_string()));
+                let _ = response.send(result);
             }
 
             Command::SetNavigatorIdentityOverride {

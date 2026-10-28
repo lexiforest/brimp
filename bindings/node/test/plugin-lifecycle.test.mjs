@@ -17,7 +17,16 @@ test('file plugins receive options and trusted session identity', async () => {
     const [x,y,z] = await Promise.all([a,b,c].map(page=>page.evaluate('context()')));
     assert.equal(x.session,y.session); assert.notEqual(x.session,z.session); assert.notEqual(x.page,y.page);
     assert.equal(x.origin,null);
-    assert.deepEqual(await a.evaluate('Object.defineProperty(globalThis,"location",{value:{href:"https://spoof.test"},configurable:true}); context()'),x);
+    assert.deepEqual(await a.evaluate(`(() => {
+      let rejected = false;
+      try {
+        Object.defineProperty(globalThis, 'location', {value: {href: 'https://spoof.test'}, configurable: true});
+      } catch (error) {
+        rejected = error instanceof TypeError;
+      }
+      return [rejected, location.href !== 'https://spoof.test/'];
+    })()`), [true, true]);
+    assert.deepEqual(await a.evaluate('context()'), x);
   } finally { await first.close(); await second.close(); await rm(directory,{recursive:true,force:true}); }
 });
 

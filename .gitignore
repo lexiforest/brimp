@@ -22,3 +22,5 @@ benchmark/**/results/
 /docs/tools/cli-reference/target/
 
 /.native/
+
+/examples/*/.cache/

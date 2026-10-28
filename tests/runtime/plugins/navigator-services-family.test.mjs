@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSession, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin, workersPlugin, trustedTypesPlugin} from '../../../bindings/node/index.js';
 
-async function evaluate(source, plugins = []) {
-  const session = await createSession({plugins});
+const CHROME_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
+async function evaluate(source, plugins = [], identity) {
+  const session = await createSession({plugins, ...(identity ? {profile: {values: {identity: {user_agent: identity}}}} : {})});
   try {
     const page = await session.newPage();
     await page.route('https://core.test/**', route => route.fulfill({body:'<!doctype html><body></body>',headers:{'content-type':'text/html'}}));
@@ -65,9 +66,11 @@ test('existing service metadata, plugin collections, permissions, locks and stor
       permissions.state,navigator.permissions instanceof Permissions,lock,(await navigator.locks.query()).held.length,
       typeof estimate.usage,estimate.quota===null,navigator.hardwareConcurrency,navigator.maxTouchPoints,
       navigator.vendor,navigator.productSub,navigator.pdfViewerEnabled,navigator.webdriver,
-      navigator.deviceMemory,navigator.connection.rtt,await navigator.bluetooth.getAvailability(),
+      navigator.deviceMemory,await navigator.bluetooth.getAvailability(),
       ['doNotTrack','getBattery','getUserMedia','registerProtocolHandler','requestMIDIAccess','vibrate','xr','userAgentData'].every(n=>!(n in navigator))];
   })()`,[environmentPlugin(), permissionsPlugin(), devicesPlugin(), mediaPlugin(), workersPlugin(), trustedTypesPlugin()]),
   [2,2,'PDF Viewer','internal-pdf-viewer','Portable Document Format',2,'application/pdf','pdf','Portable Document Format',
-    true,true,true,2,true,true,2,true,true,true,true,'prompt',true,['local','exclusive'],0,'number',true,8,0,'Apple Computer, Inc.','20030107',true,false,undefined,50,false,true]);
+    true,true,true,2,true,true,2,true,true,true,true,'prompt',true,['local','exclusive'],0,'number',true,8,0,'Apple Computer, Inc.','20030107',true,false,undefined,false,true]);
+  // navigator.connection is Chromium-only, so it needs a Chromium identity.
+  assert.equal(await evaluate(`typeof navigator.connection`,[environmentPlugin()],CHROME_AGENT),'object');
 });

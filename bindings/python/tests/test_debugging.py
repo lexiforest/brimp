@@ -72,3 +72,23 @@ def test_graphics_audio_host_extensions_and_core_only_selection():
         assert page.evaluate("new AudioContext().processAsync(new Uint8Array([1,2])).then(v=>Array.from(v))") == [1,2]
         with pytest.raises(JavaScriptError, match='decoding unavailable'):
             page.evaluate('new AudioContext().decodeAudioData(new ArrayBuffer(1))')
+
+
+def test_load_html_uses_url_without_page_scripts():
+    with Session(plugins=[]) as session:
+        page = session.new_page()
+        page.evaluate('globalThis.beforeLoad = 1')
+        page.load_html('''<!doctype html><title>Saved</title>
+            <base href="../assets/"><a id="next" href="next?x=1">next</a>
+            <script>globalThis.pageScriptRan = true</script>''',
+                       'https://example.test/dir/page.html')
+        assert page.evaluate('''({
+            title: document.title, url: location.href, base: document.baseURI,
+            href: document.getElementById('next').href,
+            pageScript: typeof globalThis.pageScriptRan,
+            beforeLoad: typeof globalThis.beforeLoad,
+            ready: document.readyState})''') == {
+                'title': 'Saved', 'url': 'https://example.test/dir/page.html',
+                'base': 'https://example.test/assets/',
+                'href': 'https://example.test/assets/next?x=1',
+                'pageScript': 'undefined', 'beforeLoad': 'undefined', 'ready': 'complete'}

@@ -112,6 +112,27 @@ def test_run_stdin_promise_console_and_blank_init(tmp_path):
     run('run', '-', input=b'throw Error("broken")', code=13)
 
 
+def test_run_local_html_with_base_url(tmp_path):
+    html = write(tmp_path, 'saved.html', '''<!doctype html><title>Saved</title>
+        <base href="../assets/"><a id="next" href="next?x=1">next</a>
+        <script>globalThis.pageScriptRan = true</script>''')
+    value = json.loads(run('run', '-', '--html', html, '--html-url', 'https://example.test/dir/page.html',
+                           '--eval', '''({title: document.title, url: location.href,
+                               base: document.baseURI, href: document.getElementById('next').href,
+                               pageScript: typeof globalThis.pageScriptRan,
+                               ready: document.readyState})''', input=b'void 0').stdout)
+    assert value == dict(title='Saved', url='https://example.test/dir/page.html',
+                         base='https://example.test/assets/',
+                         href='https://example.test/assets/next?x=1',
+                         pageScript='undefined', ready='complete')
+    assert json.loads(run('run', '-', '--html', html, '--eval', 'location.href',
+                          input=b'void 0').stdout) == 'about:blank'
+    run('run', '-', '--html', html, '--html-url', 'not a URL', input=b'void 0', code=2)
+    run('run', '-', '--html', html, '--url', 'https://example.test/', input=b'void 0', code=2)
+    run('fetch', 'https://example.test/', '--html', html, code=2)
+    run('run', '-', '--html-url', 'https://example.test/', input=b'void 0', code=2)
+
+
 def test_trace_report_success_failure_loss_and_output_paths(tmp_path):
     report = tmp_path / 'dependencies.json'
     trace = tmp_path / 'trace.jsonl'
@@ -143,12 +164,17 @@ def test_trace_report_success_failure_loss_and_output_paths(tmp_path):
 def test_recursive_trace_mode(tmp_path):
     report = tmp_path / 'recursive.json'
     result = run('run', '-', '--trace-mode', 'recursive', '--trace-report', report,
-                 input=b'window.fixture={nested:{}};void window.fixture.nested.missing;window.fixture.nested.value=42;window.fixture.nested.value')
+                 input=b'window.fixture={nested:{}};void window.fixture.nested.missing;void navigator.missing;window.fixture.nested.value=42;window.fixture.nested.value')
     assert json.loads(result.stdout) == 42
     summary = json.loads(report.read_text())
     assert summary['coverage']['mode'] == 'recursive'
     assert any(entry['layer'] == 'recursive' and entry['kind'] == 'get'
                and entry['path'] == 'window.fixture.nested.missing' for entry in summary['dependencies'])
+    reads = {entry['path']: entry for entry in summary['unresolved']['reads']}
+    assert reads['window.fixture.nested.missing']['present'] is False
+    assert reads['window.fixture.nested.missing']['owner'] == 'unknown'
+    assert reads['navigator.missing']['present'] is False
+    assert reads['navigator.missing']['owner'] == 'profile'
     run('run', '-', '--trace-mode', 'recursive', input=b'42', code=2)
     run('run', '-', '--trace-mode', 'unknown', input=b'42', code=2)
     run('run', '-', '--trace-report', report, '--output', report, '--overwrite', input=b'42', code=2)

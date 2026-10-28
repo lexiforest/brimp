@@ -96,6 +96,13 @@ impl Coverage {
     }
 }
 
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PluginScope {
+    pub name: String,
+    pub globals: Vec<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct DiagnosticBatch<'a> {
@@ -103,6 +110,8 @@ struct DiagnosticBatch<'a> {
     dropped: u64,
     write_error: Option<&'a str>,
     coverage: Coverage,
+    #[serde(skip)]
+    owners: &'a BTreeMap<String, String>,
 }
 
 // An API wrapper and its native dispatch are separate observations, not two
@@ -133,13 +142,51 @@ impl DiagnosticBatch<'_> {
             return serde_json::to_value(self).expect("finite diagnostic data");
         }
         let mut dependencies = BTreeMap::<Dependency, Counts>::new();
+        let mut reads =
+            BTreeMap::<(String, String, Option<String>, Option<String>, bool), usize>::new();
+        let mut operations = BTreeMap::<(String, String, String, Option<String>), usize>::new();
         for record in self.records {
-            let recursive = record
-                .details
-                .as_ref()
-                .and_then(|d| d.get("layer"))
-                .and_then(|v| v.as_str())
-                == Some("recursive");
+            let recursive = is_recursive(record);
+            let layer = record_layer(record);
+            if recursive && record.kind == "get" && record.outcome == "undefined" {
+                let details = record.details.as_ref();
+                let present = details
+                    .and_then(|d| d.get("present"))
+                    .and_then(serde_json::Value::as_bool)
+                    .unwrap_or(true);
+                let target = details
+                    .and_then(|d| d.get("target"))
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned);
+                let property = details
+                    .and_then(|d| d.get("property"))
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned);
+                *reads
+                    .entry((
+                        layer.to_owned(),
+                        record.path.clone(),
+                        target,
+                        property,
+                        present,
+                    ))
+                    .or_default() += 1;
+            } else if record.outcome == "throw" {
+                let failure = record
+                    .details
+                    .as_ref()
+                    .and_then(|d| d.get("failure"))
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned);
+                *operations
+                    .entry((
+                        layer.to_owned(),
+                        record.path.clone(),
+                        record.kind.clone(),
+                        failure,
+                    ))
+                    .or_default() += 1;
+            }
             let detail = |key| {
                 if record.kind != "reflection" && !recursive {
                     return None;
@@ -147,15 +194,7 @@ impl DiagnosticBatch<'_> {
                 record.details.as_ref()?.get(key)?.as_str()
             };
             let dependency = Dependency {
-                layer: if recursive {
-                    "recursive"
-                } else {
-                    match record.kind.as_str() {
-                        "native" => "native",
-                        "reflection" => "reflection",
-                        _ => "api",
-                    }
-                },
+                layer,
                 path: &record.path,
                 kind: &record.kind,
                 target: detail("target"),
@@ -169,8 +208,40 @@ impl DiagnosticBatch<'_> {
             .into_iter()
             .map(|(dependency, counts)| DependencyUsage { dependency, counts })
             .collect();
+        let reads: Vec<_> = reads
+            .into_iter()
+            .map(|((layer, path, target, property, present), count)| {
+                serde_json::json!({
+                    "layer": layer,
+                    "path": path,
+                    "target": target,
+                    "property": property,
+                    "present": present,
+                    "count": count,
+                    "owner": owner_for(self.owners, &path),
+                })
+            })
+            .collect();
+        let operations: Vec<_> = operations
+            .into_iter()
+            .map(|((layer, path, kind, failure), count)| {
+                serde_json::json!({
+                    "layer": layer,
+                    "path": path,
+                    "kind": kind,
+                    "failure": failure,
+                    "count": count,
+                    "owner": owner_for(self.owners, &path),
+                })
+            })
+            .collect();
         serde_json::json!({
             "dependencies": dependencies,
+            "unresolved": {
+                "reads": reads,
+                "operations": operations,
+                "note": "Unresolved reads are retained observations whose result was undefined; failed operations are retained synchronous throws. A trace miss is not proof that a page never touched an API, and ownership names the nearest installed surface rather than a required fix location.",
+            },
             "retained": self.records.len(),
             "dropped": self.dropped,
             "writeError": self.write_error,
@@ -179,12 +250,44 @@ impl DiagnosticBatch<'_> {
     }
 }
 
+fn is_recursive(record: &TraceRecord) -> bool {
+    record
+        .details
+        .as_ref()
+        .and_then(|d| d.get("layer"))
+        .and_then(|v| v.as_str())
+        == Some("recursive")
+}
+
+fn record_layer(record: &TraceRecord) -> &'static str {
+    if is_recursive(record) {
+        "recursive"
+    } else {
+        match record.kind.as_str() {
+            "native" => "native",
+            "reflection" => "reflection",
+            _ => "api",
+        }
+    }
+}
+
+fn owner_for(owners: &BTreeMap<String, String>, path: &str) -> String {
+    let path = path.strip_prefix("window.").unwrap_or(path);
+    let root = path.split('.').next().unwrap_or(path);
+    owners
+        .get(root)
+        .cloned()
+        .unwrap_or_else(|| "unknown".into())
+}
+
 pub(crate) fn disabled(view: DiagnosticsView) -> serde_json::Value {
+    let owners = BTreeMap::new();
     DiagnosticBatch {
         records: &VecDeque::new(),
         dropped: 0,
         write_error: None,
         coverage: Coverage::new(None),
+        owners: &owners,
     }
     .value(view)
 }
@@ -200,6 +303,7 @@ struct State {
     page_id: u64,
     realm_id: u64,
     start: Instant,
+    owners: BTreeMap<String, String>,
 }
 impl Diagnostics {
     pub fn new(options: DiagnosticsOptions, page_id: u64) -> Result<Self, JsException> {
@@ -224,7 +328,11 @@ impl Diagnostics {
             page_id,
             realm_id: page_id,
             start: Instant::now(),
+            owners: BTreeMap::new(),
         }))))
+    }
+    pub fn set_owners(&self, owners: BTreeMap<String, String>) {
+        self.0.borrow_mut().owners = owners;
     }
     pub fn realm(&self, id: u64) {
         self.0.borrow_mut().realm_id = id;
@@ -289,6 +397,7 @@ impl Diagnostics {
             dropped: state.dropped,
             write_error: state.write_error.as_deref(),
             coverage: Coverage::new(Some(&state.options)),
+            owners: &state.owners,
         }
         .value(view);
         if matches!(view, DiagnosticsView::Take) {

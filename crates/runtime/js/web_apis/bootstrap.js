@@ -92,25 +92,60 @@ if (__nativeHost('clockLogical')) {
 }
 
 const __initialGlobalNames = new Set(Object.getOwnPropertyNames(globalThis));
+const __originalDate = globalThis.Date;
 const __nativeFunctions = new WeakSet();
-const __nativeSources = new WeakMap();
+const __nativeMembers = new WeakMap();
 const __finalizedWebIdlPrototypes = new WeakSet();
 const __originalFunctionToString = Function.prototype.toString;
-const __functionToString = {
-  toString() {
-    const exactSource = __nativeSources.get(this);
-    if (exactSource !== undefined) return exactSource;
-    if (__nativeFunctions.has(this)) {
-      return `function ${this.name || ''}() { [native code] }`;
-    }
-    return __originalFunctionToString.call(this);
-  },
-}.toString;
+// "webkit" is WebKit's multi-line native source; "chrome" is Blink's
+// single-line form with get/set prefixes. Brimp's engine is JSC, but a profile
+// can claim a Chromium identity, so the source style follows the identity.
+let __nativeStyle = 'webkit';
 
-function __markWebBuiltin(fn, source = undefined) {
+function __nativeSource(member) {
+  const name = member?.name ?? '';
+  const kind = member?.kind ?? 'value';
+  if (__nativeStyle === 'webkit') return `function ${name}() {\n    [native code]\n}`;
+  if (kind === 'get' || kind === 'set') return `function ${kind} ${name}() { [native code] }`;
+  return `function ${name}() { [native code] }`;
+}
+
+function __normalizeNativeName(fn, key, kind) {
+  if (typeof fn !== 'function' || typeof key !== 'string') return;
+  let name;
+  if (kind === 'value') {
+    if (fn.name !== '' && fn.name !== 'value' && fn.name !== 'anonymous') return;
+    name = key;
+  } else {
+    name = `${kind} ${key}`;
+  }
+  try {
+    if (fn.name !== name) Object.defineProperty(fn, 'name', { value: name, configurable: true });
+    if (kind === 'get' && fn.length !== 0)
+      Object.defineProperty(fn, 'length', { value: 0, configurable: true });
+    if (kind === 'set' && fn.length !== 1)
+      Object.defineProperty(fn, 'length', { value: 1, configurable: true });
+  } catch {
+    // Some engine functions reject redefinition; leave their observed shape.
+  }
+}
+
+function __markWebBuiltin(fn, key = undefined, kind = 'value') {
   if (typeof fn !== 'function') return fn;
-  if (source === undefined) __nativeFunctions.add(fn);
-  else __nativeSources.set(fn, source);
+  __nativeFunctions.add(fn);
+  __normalizeNativeName(fn, key, kind);
+  const usableName =
+    kind === 'value' && fn.name !== '' && fn.name !== 'value' && fn.name !== 'anonymous'
+      ? fn.name
+      : typeof key === 'string'
+        ? key
+        : fn.name || '';
+  const existing = __nativeMembers.get(fn);
+  if (existing === undefined) {
+    __nativeMembers.set(fn, { name: usableName, kind });
+  } else if ((existing.name === '' || existing.name === 'value') && usableName !== '') {
+    existing.name = usableName;
+  }
   return fn;
 }
 
@@ -120,27 +155,172 @@ function __markWebBuiltinInterface(constructor) {
   const prototype = constructor.prototype;
   if (prototype === null || typeof prototype !== 'object') return;
   for (const key of Reflect.ownKeys(prototype)) {
+    if (key === 'constructor') continue;
     const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
     if (descriptor === undefined) continue;
-    if (typeof descriptor.value === 'function') __markWebBuiltin(descriptor.value);
-    if (typeof descriptor.get === 'function') {
-      __markWebBuiltin(descriptor.get, `function get ${String(key)}() { [native code] }`);
-    }
-    if (typeof descriptor.set === 'function') {
-      __markWebBuiltin(descriptor.set, `function set ${String(key)}() { [native code] }`);
-    }
+    if (typeof descriptor.value === 'function') __markWebBuiltin(descriptor.value, key, 'value');
+    if (typeof descriptor.get === 'function') __markWebBuiltin(descriptor.get, key, 'get');
+    if (typeof descriptor.set === 'function') __markWebBuiltin(descriptor.set, key, 'set');
   }
 }
 
-function __nativeMemberSource(fn, key, kind) {
-  const exactSource = __nativeSources.get(fn);
-  if (exactSource !== undefined) return exactSource;
-  const name = kind === 'value' ? String(key) : `${kind} ${String(key)}`;
-  return `function ${name}() { [native code] }`;
+function __functionToString() {
+  const member = __nativeMembers.get(this);
+  if (member !== undefined) return __nativeSource(member);
+  if (__nativeFunctions.has(this)) return __nativeSource({ name: this.name || '', kind: 'value' });
+  return __originalFunctionToString.call(this);
 }
 
 const __lenientThisFunctions = new WeakSet();
+function __markConsoleMembers() {
+  const target = globalThis.console;
+  if (target === null || typeof target !== 'object') return;
+  for (const key of Reflect.ownKeys(target)) {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key);
+    if (descriptor !== undefined && typeof descriptor.value === 'function')
+      __markWebBuiltin(descriptor.value);
+  }
+}
+
+// Window IDL attributes belong to the global object itself. Brimp installs some
+// as data properties and some on Window.prototype; browsers expose all of them
+// as own accessors. This runs after every core API and plugin has installed its
+// surface, and before page scripts execute.
+const __windowNoSetter = new Set([
+  'document',
+  'window',
+  'top',
+  'navigator',
+  'history',
+  'crypto',
+  'closed',
+  'frameElement',
+  'isSecureContext',
+  'crossOriginIsolated',
+  'indexedDB',
+  'cookieStore',
+  'caches',
+  'trustedTypes',
+  'speechSynthesis',
+  'localStorage',
+  'sessionStorage',
+]);
+const __windowConfigurableFalse = new Set(['document', 'window', 'top', 'location']);
+const __windowDataNames = [
+  'window',
+  'self',
+  'parent',
+  'top',
+  'opener',
+  'document',
+  'navigator',
+  'history',
+  'performance',
+  'crypto',
+  'crossOriginIsolated',
+  'indexedDB',
+  'cookieStore',
+  'caches',
+  'trustedTypes',
+  'speechSynthesis',
+  'localStorage',
+  'sessionStorage',
+  'location',
+];
+let __windowDocument = globalThis.document;
+let __windowDocumentAccessorInstalled = false;
+const __windowOverrides = new Map();
+
+globalThis.__brimpSetDocument = (document) => {
+  __windowDocument = document;
+  if (!__windowDocumentAccessorInstalled) {
+    Object.defineProperty(globalThis, 'document', {
+      value: document,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+};
+
+function __windowGetter(name, originalGet) {
+  const getter = function () {
+    return __windowOverrides.has(name) ? __windowOverrides.get(name) : originalGet.call(globalThis);
+  };
+  return __markWebBuiltin(getter, name, 'get');
+}
+
+function __windowSetter(name) {
+  const setter = function (value) {
+    __windowOverrides.set(name, value);
+  };
+  return __markWebBuiltin(setter, name, 'set');
+}
+
+function __installWindowAccessors(diagnosticsRecursive = false) {
+  const prototype = Object.getPrototypeOf(globalThis);
+  if (prototype === null || prototype.constructor !== globalThis.Window) return;
+  if (__windowDocument === undefined) __windowDocument = globalThis.document;
+
+  // Move every Window.prototype member (IDL attributes and event handlers) onto
+  // the global object, where browsers expose them.
+  for (const key of Reflect.ownKeys(prototype)) {
+    if (key === 'constructor') continue;
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, key);
+    if (descriptor === undefined) continue;
+    delete prototype[key];
+    if (Object.hasOwn(globalThis, key)) continue;
+    if (typeof key !== 'string') {
+      Object.defineProperty(globalThis, key, descriptor);
+      continue;
+    }
+    const originalGet =
+      typeof descriptor.get === 'function' ? descriptor.get : () => descriptor.value;
+    const setter = descriptor.set ?? (__windowNoSetter.has(key) ? undefined : __windowSetter(key));
+    Object.defineProperty(globalThis, key, {
+      get: __windowGetter(key, originalGet),
+      set: setter,
+      enumerable: true,
+      configurable: diagnosticsRecursive || !__windowConfigurableFalse.has(key),
+    });
+  }
+
+  for (const name of __windowDataNames) {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, name);
+    if (descriptor === undefined) continue;
+    let originalGet;
+    if ('value' in descriptor) {
+      const value = descriptor.value;
+      originalGet = name === 'document' ? () => __windowDocument : () => value;
+    } else if (typeof descriptor.get === 'function') {
+      originalGet = () => descriptor.get.call(globalThis);
+    } else {
+      continue;
+    }
+    const setter =
+      descriptor.set ?? (__windowNoSetter.has(name) ? undefined : __windowSetter(name));
+    Object.defineProperty(globalThis, name, {
+      get: __windowGetter(name, originalGet),
+      set: setter,
+      enumerable: true,
+      configurable: diagnosticsRecursive || !__windowConfigurableFalse.has(name),
+    });
+  }
+  __windowDocumentAccessorInstalled = true;
+}
+
+function __detectNativeStyle() {
+  const agent = globalThis.__brimpProfile?.identity?.user_agent;
+  __nativeStyle =
+    typeof agent === 'string' && /Chrome\/|Chromium\/|Edg\//.test(agent) ? 'chrome' : 'webkit';
+}
+
 function __finalizeWebIdlInterfaces() {
+  const diagnosticsRecursive = globalThis.__brimpDiagnosticsRecursive === true;
+  delete globalThis.__brimpDiagnosticsRecursive;
+  __detectNativeStyle();
+  __installWindowAccessors(diagnosticsRecursive);
+  __markConsoleMembers();
   for (const name of Object.getOwnPropertyNames(globalThis)) {
     if (__initialGlobalNames.has(name)) continue;
     const constructor = Object.getOwnPropertyDescriptor(globalThis, name)?.value;
@@ -180,7 +360,6 @@ function __finalizeWebIdlInterfaces() {
         if (constructor === HTMLCollection && kind === 'value' && key === Symbol.iterator) continue;
         const fn = descriptor[kind];
         if (typeof fn !== 'function') continue;
-        const source = __nativeMemberSource(fn, key, kind);
         descriptor[kind] = new Proxy(fn, {
           apply(target, receiver, argumentsList) {
             // JSC resolves unqualified inherited global members with
@@ -250,7 +429,7 @@ function __finalizeWebIdlInterfaces() {
             return Reflect.apply(target, receiver, argumentsList);
           },
         });
-        __markWebBuiltin(descriptor[kind], source);
+        __markWebBuiltin(descriptor[kind], key, kind);
       }
       Object.defineProperty(prototype, key, descriptor);
     }
@@ -269,6 +448,10 @@ function __finalizeWebIdlInterfaces() {
   ]) {
     if (typeof Intl[name] === 'function') __markWebBuiltin(Intl[name]);
   }
+  // A logical-clock realm replaces Date with a JS function; it must be marked
+  // for every identity. Engine intrinsics stay untouched for WebKit so JSC's
+  // own multi-line native source is preserved.
+  if (globalThis.Date !== __originalDate) __markWebBuiltinInterface(globalThis.Date);
   for (const name of [
     'toLocaleString',
     'toLocaleDateString',
@@ -276,7 +459,7 @@ function __finalizeWebIdlInterfaces() {
     'getTimezoneOffset',
   ]) {
     if (typeof Date.prototype[name] === 'function') {
-      __markWebBuiltin(Date.prototype[name], `function ${name}() { [native code] }`);
+      __markWebBuiltin(Date.prototype[name], name, 'value');
     }
   }
   // Only run during trusted initialization. Inspect descriptors, never invoke
@@ -296,36 +479,74 @@ function __finalizeWebIdlInterfaces() {
     for (const key of Reflect.ownKeys(object)) {
       const descriptor = Object.getOwnPropertyDescriptor(object, key);
       if (!descriptor) continue;
-      if (typeof descriptor.get === 'function')
-        __markWebBuiltin(descriptor.get, `function get ${String(key)}() { [native code] }`);
-      if (typeof descriptor.set === 'function')
-        __markWebBuiltin(descriptor.set, `function set ${String(key)}() { [native code] }`);
+      if (typeof descriptor.get === 'function') __markWebBuiltin(descriptor.get, key, 'get');
+      if (typeof descriptor.set === 'function') __markWebBuiltin(descriptor.set, key, 'set');
       if ('value' in descriptor) visit(descriptor.value);
     }
     visit(Object.getPrototypeOf(object));
   }
+  // Some binding layers replace a core global after the initial marking pass
+  // (streaming fetch, for example). Re-assert their native names and sources.
+  for (const name of [
+    'atob',
+    'btoa',
+    'fetch',
+    'postMessage',
+    'getSelection',
+    'setTimeout',
+    'clearTimeout',
+    'setInterval',
+    'clearInterval',
+    'queueMicrotask',
+    'requestAnimationFrame',
+    'cancelAnimationFrame',
+    'addEventListener',
+    'removeEventListener',
+    'dispatchEvent',
+  ]) {
+    const value = globalThis[name];
+    if (typeof value !== 'function') continue;
+    __nativeFunctions.add(value);
+    try {
+      Object.defineProperty(value, 'name', { value: name, configurable: true });
+    } catch {
+      // Bound host functions can reject the rename; the source still uses name.
+    }
+    __nativeMembers.set(value, { name, kind: 'value' });
+  }
   for (const key of [
     '__brimpConfigureNavigator',
     '__brimpCanvasBackends',
+    '__brimpObjectUrls',
     '__brimpProfile',
     '__brimpInstallWindowEnvironment',
     '__brimpInstallIntlProfile',
     '__brimpInstallMediaQueries',
     '__brimpInstallFonts',
     '__brimpInstallPerformance',
+    '__brimpInstallScheduling',
+    '__brimpPluginScopes',
   ]) {
     delete globalThis[key];
   }
   visited.add(globalThis);
+  // Blink profiles need JSC's intrinsic sources rewritten too. Visiting the
+  // initial globals reaches JSON, Math, Reflect, Intl and every constructor
+  // prototype, not just the uppercase functions.
+  if (__nativeStyle === 'chrome') {
+    for (const key of Reflect.ownKeys(globalThis)) {
+      if (!__initialGlobalNames.has(key)) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+      if ('value' in descriptor) visit(descriptor.value);
+    }
+  }
   for (const key of Reflect.ownKeys(globalThis)) {
     if (__initialGlobalNames.has(key)) continue;
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
     if ('value' in descriptor) visit(descriptor.value);
     else {
-      if (descriptor.get)
-        __markWebBuiltin(descriptor.get, `function get ${String(key)}() { [native code] }`);
-      if (descriptor.set)
-        __markWebBuiltin(descriptor.set, `function set ${String(key)}() { [native code] }`);
+      if (descriptor.get) __markWebBuiltin(descriptor.get, key, 'get');
+      if (descriptor.set) __markWebBuiltin(descriptor.set, key, 'set');
     }
   }
 }
@@ -336,7 +557,9 @@ Object.defineProperty(Function.prototype, 'toString', {
   enumerable: false,
   configurable: true,
 });
-__markWebBuiltin(__functionToString);
+__markWebBuiltin(__functionToString, 'toString', 'value');
+Object.defineProperty(__functionToString, 'name', { value: 'toString', configurable: true });
+__nativeMembers.set(__functionToString, { name: 'toString', kind: 'value' });
 
 // Captured and removed by native initialization before plugin/page execution.
 Object.defineProperty(globalThis, '__brimpFinalizeWebIdl', {

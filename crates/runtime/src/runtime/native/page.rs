@@ -315,6 +315,10 @@ impl NativePage {
     pub fn html(&self) -> Result<String, AutomationError> {
         self.page.html()
     }
+    /// Load a document without running its scripts and use `url` as its base.
+    pub fn load_html(&self, html: &str, url: &str) -> Result<(), AutomationError> {
+        self.page.load_html(html, url)
+    }
     pub fn close(&self) -> Result<(), AutomationError> {
         self.check_callback()?;
         self.page.close();

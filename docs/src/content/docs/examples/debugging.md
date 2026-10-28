@@ -104,7 +104,11 @@ truncates JSONL output.
 
 A summary contains `retained`, the number of records summarized, and sorted
 `dependencies`. Each entry has a `layer`, `path`, `kind`, `count`, and `throws`.
-Reflection entries also retain `target` and `property` when known. For example:
+Reflection entries also retain `target` and `property` when known. Recursive
+summaries additionally contain `unresolved.reads` and `unresolved.operations`
+with an owner (`core`, `profile`, `plugin:<name>`, or `unknown`), presence and
+failure details. See [unresolved reads and failed operations](/guides/diagnostics/#unresolved-reads-and-failed-operations).
+For example:
 
 ```json
 {"layer":"api","path":"Document.prototype.querySelector","kind":"call","target":null,"property":null,"count":2,"throws":0}

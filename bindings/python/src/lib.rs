@@ -368,6 +368,10 @@ impl PyPage {
     fn html(&self, py: Python<'_>) -> PyResult<String> {
         py.detach(|| self.inner.html()).map_err(error)
     }
+    #[pyo3(signature = (html, url="about:blank"))]
+    fn load_html(&self, py: Python<'_>, html: &str, url: &str) -> PyResult<()> {
+        py.detach(|| self.inner.load_html(html, url)).map_err(error)
+    }
     fn close(&self, py: Python<'_>) -> PyResult<()> {
         py.detach(|| self.inner.close()).map_err(error)
     }

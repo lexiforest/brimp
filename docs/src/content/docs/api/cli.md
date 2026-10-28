@@ -38,7 +38,7 @@ Capture a profile from a live browser on localhost
 Usage: brimp profile <COMMAND>
 
 Commands:
-  capture
+  capture  
 
 Options:
   -h, --help
@@ -53,7 +53,7 @@ Usage: brimp profile capture [OPTIONS] --output <OUTPUT>
 
 Options:
       --output <OUTPUT>
-
+          
 
       --directory <DIRECTORY>
           Export index.html and capture.js for independent hosting
@@ -68,16 +68,16 @@ Options:
           [default: 10m]
 
       --overwrite
-
+          
 
       --plugin <PLUGINS>
           Select the complete plugin set (bundled names or JavaScript files)
 
       --plugin-options <PLUGIN_OPTIONS>
-
+          
 
       --no-plugins
-
+          
 
   -h, --help
           Print help
@@ -118,12 +118,12 @@ Usage: brimp fetch [OPTIONS] <URL>
 
 Arguments:
   <URL>
-
+          
 
 Options:
       --format <FORMAT>
           Raw response, live DOM, or Defuddle output. Fetch defaults to HTML
-
+          
           [possible values: raw, html, markdown, json]
 
       --output <OUTPUT>
@@ -158,7 +158,7 @@ Options:
 
       --wait <WAIT>
           domcontentloaded, load, networkidle, or nonnegative seconds
-
+          
           [default: load]
 
       --wait-selector <WAIT_SELECTOR>
@@ -166,12 +166,12 @@ Options:
 
       --network-idle <NETWORK_IDLE>
           Quiet interval used by network-idle waiting
-
+          
           [default: 500ms]
 
       --timeout <TIMEOUT>
           Wall-clock deadline for the entire command
-
+          
           [default: 30s]
 
       --header <HEADER>
@@ -200,7 +200,7 @@ Options:
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
-
+          
           [default: GET]
 
       --data <DATA>
@@ -217,7 +217,7 @@ Options:
 
       --max-redirects <MAX_REDIRECTS>
           Maximum number of redirects to follow
-
+          
           [default: 20]
 
       --fail-on-http-error
@@ -249,12 +249,12 @@ Options:
 
       --connect-timeout <CONNECT_TIMEOUT>
           Connection establishment timeout
-
+          
           [default: 10s]
 
       --max-response-bytes <MAX_RESPONSE_BYTES>
           Maximum response body size in bytes
-
+          
           [default: 67108864]
 
       --trace <TRACE>
@@ -265,7 +265,7 @@ Options:
 
       --trace-mode <TRACE_MODE>
           API descriptor tracing or recursive browser/environment object tracing
-
+          
           [default: api]
           [possible values: api, recursive]
 
@@ -277,7 +277,7 @@ Options:
 
       --trace-capacity <TRACE_CAPACITY>
           Retained diagnostic ring capacity, up to one million records
-
+          
           [default: 4096]
 
       --events <EVENTS>
@@ -285,7 +285,7 @@ Options:
 
       --clock <CLOCK>
           Use real system time or a programmable realm clock
-
+          
           [default: system]
           [possible values: system, logical]
 
@@ -297,7 +297,7 @@ Options:
 
       --max-tasks <MAX_TASKS>
           Maximum tasks per logical-time advance, up to one million
-
+          
           [default: 10000]
 
       --actions <ACTIONS>
@@ -320,15 +320,21 @@ Usage: brimp run [OPTIONS] <program>
 
 Arguments:
   <program>
-
+          
 
 Options:
       --url <URL>
+          
 
+      --html <HTML>
+          Load a local HTML file as the page document instead of navigating
+
+      --html-url <HTML_URL>
+          URL assigned to the loaded HTML document; used as its base URL
 
       --format <FORMAT>
           Raw response, live DOM, or Defuddle output. Fetch defaults to HTML
-
+          
           [possible values: raw, html, markdown, json]
 
       --output <OUTPUT>
@@ -363,7 +369,7 @@ Options:
 
       --wait <WAIT>
           domcontentloaded, load, networkidle, or nonnegative seconds
-
+          
           [default: load]
 
       --wait-selector <WAIT_SELECTOR>
@@ -371,12 +377,12 @@ Options:
 
       --network-idle <NETWORK_IDLE>
           Quiet interval used by network-idle waiting
-
+          
           [default: 500ms]
 
       --timeout <TIMEOUT>
           Wall-clock deadline for the entire command
-
+          
           [default: 30s]
 
       --header <HEADER>
@@ -405,7 +411,7 @@ Options:
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
-
+          
           [default: GET]
 
       --data <DATA>
@@ -422,7 +428,7 @@ Options:
 
       --max-redirects <MAX_REDIRECTS>
           Maximum number of redirects to follow
-
+          
           [default: 20]
 
       --fail-on-http-error
@@ -454,12 +460,12 @@ Options:
 
       --connect-timeout <CONNECT_TIMEOUT>
           Connection establishment timeout
-
+          
           [default: 10s]
 
       --max-response-bytes <MAX_RESPONSE_BYTES>
           Maximum response body size in bytes
-
+          
           [default: 67108864]
 
       --trace <TRACE>
@@ -470,7 +476,7 @@ Options:
 
       --trace-mode <TRACE_MODE>
           API descriptor tracing or recursive browser/environment object tracing
-
+          
           [default: api]
           [possible values: api, recursive]
 
@@ -482,7 +488,7 @@ Options:
 
       --trace-capacity <TRACE_CAPACITY>
           Retained diagnostic ring capacity, up to one million records
-
+          
           [default: 4096]
 
       --events <EVENTS>
@@ -490,7 +496,7 @@ Options:
 
       --clock <CLOCK>
           Use real system time or a programmable realm clock
-
+          
           [default: system]
           [possible values: system, logical]
 
@@ -502,7 +508,7 @@ Options:
 
       --max-tasks <MAX_TASKS>
           Maximum tasks per logical-time advance, up to one million
-
+          
           [default: 10000]
 
       --actions <ACTIONS>
@@ -524,8 +530,8 @@ Inspect available plugins without creating a page
 Usage: brimp plugins <COMMAND>
 
 Commands:
-  list
-  show
+  list  
+  show  
 
 Options:
   -h, --help
@@ -551,7 +557,7 @@ Usage: brimp plugins show <NAME>
 
 Arguments:
   <NAME>
-
+          
 
 Options:
   -h, --help

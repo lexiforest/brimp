@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createSession, mediaPlugin, environmentPlugin, devicesPlugin, audioPlugin} from '../../../bindings/node/index.js';
 
-async function evaluate(source, plugins = []) {
-  const session = await createSession({plugins});
+const CHROME_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
+async function evaluate(source, plugins = [], identity) {
+  const session = await createSession({plugins, ...(identity ? {profile: {values: {identity: {user_agent: identity}}}} : {})});
   try { return await (await session.newPage()).evaluate(source); }
   finally { await session.close(); }
 }
@@ -27,7 +28,8 @@ test('MediaStream supplies stable identity and legacy calls without tracks or ca
 test('SourceBuffer exposes legacy prototype contracts without constructing a media backend', async () => {
   assert.deepEqual(await evaluate(`(() => {
     let error;try{new SourceBuffer()}catch(e){error=e.name}
-    // A prototype fixture checks the shape only; there is no MediaSource factory.
+    // A prototype fixture checks the shape only; MediaSource exists as an
+    // interface without a media pipeline behind it.
     const fixture=Object.setPrototypeOf(new EventTarget(),SourceBuffer.prototype),other=Object.setPrototypeOf(new EventTarget(),SourceBuffer.prototype);
     const defaults=['appendWindowEnd','appendWindowStart','buffered','mode','timestampOffset','updating'].map(n=>fixture[n]);
     fixture.mode='sequence';fixture.timestampOffset=2;
@@ -36,7 +38,7 @@ test('SourceBuffer exposes legacy prototype contracts without constructing a med
     const initial=handlers.every(n=>fixture[n]===null);let events=0;
     for(const name of handlers){fixture[name]=()=>events++;fixture.dispatchEvent(new Event(name.slice(2)));fixture[name]=null;}
     return [error,defaults,noops,initial,events,fixture.mode,fixture.timestampOffset,other.mode,typeof MediaSource];
-  })()`,[mediaPlugin(), environmentPlugin(), devicesPlugin()]),['TypeError',['','','','','',''],true,true,5,'sequence','2','','undefined']);
+  })()`,[mediaPlugin(), environmentPlugin(), devicesPlugin()]),['TypeError',['','','','','',''],true,true,5,'sequence','2','','function']);
 });
 
 test('Speech utterances retain payloads and manual handlers while synthesis stays a legacy placeholder', async () => {
@@ -49,8 +51,11 @@ test('Speech utterances retain payloads and manual handlers while synthesis stay
     const initial=handlers.every(n=>utterance[n]===null);let events=0;
     for(const name of handlers){utterance[name]=()=>events++;utterance.dispatchEvent(new Event(name.slice(2)));utterance[name]=null;utterance.dispatchEvent(new Event(name.slice(2)));}
     return [defaults,[utterance.text,utterance.lang,utterance.pitch,utterance.rate,utterance.volume],utterance.voice===voice,
-      other.text,other.lang,initial,events,utterance instanceof EventTarget,Object.keys(speechSynthesis),typeof speechSynthesis.speak];
-  })()`,[audioPlugin()]),[['','',1,1,1,null],['local','en',1.5,2,0.5],true,'hello','',true,7,true,[],'undefined']);
+      other.text,other.lang,initial,events,utterance instanceof EventTarget,Object.keys(speechSynthesis),
+        typeof speechSynthesis.speak,Object.prototype.toString.call(speechSynthesis),speechSynthesis.getVoices().length,
+        [speechSynthesis.speaking,speechSynthesis.pending,speechSynthesis.paused],typeof SpeechSynthesis];
+  })()`,[audioPlugin()]),[['','',1,1,1,null],['local','en',1.5,2,0.5],true,'hello','',true,7,true,[],
+    'function','[object SpeechSynthesis]',0,[false,false,false],'function']);
 });
 
 test('Existing network and Bluetooth mocks remain opt-in Safari-absent extensions', async () => {
@@ -60,7 +65,7 @@ test('Existing network and Bluetooth mocks remain opt-in Safari-absent extension
       connection.downlink,connection.effectiveType,connection.rtt,connection.saveData,changes,
       await navigator.bluetooth.getAvailability(),navigator.bluetooth.constructor===Object,
       typeof Bluetooth,typeof NetworkInformation,'requestDevice' in navigator.bluetooth,'onchange' in connection];
-  })()`,[environmentPlugin({connection_downlink_mbps:12,connection_rtt_ms:8,connection_effective_type:'3g',connection_save_data:true}), devicesPlugin({bluetooth_available:true})]),
+  })()`,[environmentPlugin({connection_downlink_mbps:12,connection_rtt_ms:8,connection_effective_type:'3g',connection_save_data:true}), devicesPlugin({bluetooth_available:true})], CHROME_AGENT),
     [true,'[object EventTarget]','NetworkInformation',12,'3g',8,true,1,true,true,'undefined','undefined',false,false]);
 });
 

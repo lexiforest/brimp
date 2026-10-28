@@ -94,8 +94,8 @@ whitespace/layout semantics are not implemented.
 ## SVG
 
 SVG nodes participate in the DOM and expose selected reflection and graphics
-interfaces. Bounds/matrix methods return `undefined`; animated values have no
-animation engine.
+interfaces. Bounds/matrix methods return zero/identity value objects; animated
+values have no animation engine.
 
 <details>
 <summary>Detailed behavior and edge cases</summary>
@@ -103,12 +103,17 @@ animation engine.
 SVG elements share nonce, autofocus and tabIndex reflection, and expose their
 nearest SVG ancestor through ownerSVGElement/viewportElement. className is a
 stable baseVal/animVal facade backed by the class attribute; animVal mirrors the
-base value without an animation engine. Common SVG graphics elements use the
-SVGGraphicsElement interface; other SVG nodes retain generic SVGElement wrappers.
-getBBox/getCTM/getScreenCTM are legacy no-ops returning undefined, while transform,
+base value without an animation engine. The `svg` root uses SVGSVGElement,
+shape elements (circle, ellipse, rect, path, line, polyline, polygon) use
+SVGGeometryElement, other listed graphics elements use SVGGraphicsElement and the
+rest retain generic SVGElement wrappers. getBBox returns a zero DOMRect and
+getCTM/getScreenCTM return identity DOMMatrix values, while transform,
 requiredExtensions and systemLanguage retain legacy empty-string placeholders.
-There is no SVG renderer, matrix computation, animated transform list or full SVG
-interface hierarchy. DOM attributes, styles, events and cloning continue to work.
+SVGSVGElement adds createSVGPoint/createSVGMatrix/createSVGRect and
+SVGGeometryElement adds isPointInFill/isPointInStroke (false), getTotalLength (0)
+and getPointAtLength (the origin). There is no SVG renderer, matrix computation,
+animated transform list or full SVG interface hierarchy. DOM attributes, styles,
+events and cloning continue to work.
 
 </details>
 

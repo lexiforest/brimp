@@ -198,6 +198,69 @@ class URL {
     }
   }
 }
+// Object URLs keep the Blob in this realm: nothing here can stream from a blob
+// URL yet, so the registry only gives scripts a stable handle to revoke.
+const __objectUrls = new Map();
+let __objectUrlCounter = 1;
+Object.defineProperties(URL, {
+  createObjectURL: {
+    value: {
+      createObjectURL(blob) {
+        if (!(blob instanceof Blob)) throw new TypeError('createObjectURL expects a Blob');
+        const origin = location.origin === 'null' ? 'null' : location.origin;
+        const id = `${__objectUrlCounter++}`;
+        const url = `blob:${origin}/${id}`;
+        __objectUrls.set(url, blob);
+        return url;
+      },
+    }.createObjectURL,
+    writable: true,
+    configurable: true,
+  },
+  revokeObjectURL: {
+    value: {
+      revokeObjectURL(url) {
+        __objectUrls.delete(String(url));
+      },
+    }.revokeObjectURL,
+    writable: true,
+    configurable: true,
+  },
+});
+// Consumed by the workers plugin at install time, then removed by the WebIDL
+// finalizer so page scripts cannot reach it.
+Object.defineProperty(globalThis, '__brimpObjectUrls', {
+  configurable: true,
+  value: Object.freeze({
+    get(url) {
+      return __objectUrls.get(String(url)) ?? null;
+    },
+  }),
+});
+// Stream wrapper around the existing decoder; the stream plumbing is not
+// implemented, so the readable/writable halves are inert.
+class TextDecoderStream {
+  #encoding;
+  constructor(label = 'utf-8', options = {}) {
+    this.#encoding = new TextDecoder(label, options).encoding;
+  }
+  get encoding() {
+    return this.#encoding;
+  }
+  get fatal() {
+    return false;
+  }
+  get ignoreBOM() {
+    return false;
+  }
+  get readable() {
+    return null;
+  }
+  get writable() {
+    return null;
+  }
+}
+globalThis.TextDecoderStream = TextDecoderStream;
 globalThis.URL = URL;
 globalThis.URLSearchParams = URLSearchParams;
 

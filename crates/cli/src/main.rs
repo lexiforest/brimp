@@ -165,12 +165,14 @@ fn run(cli: Cli) -> Result<()> {
             budget.remaining()?;
             result
         }
-        Command::Fetch { url, options } => execute(Some(url), None, *options),
+        Command::Fetch { url, options } => execute(Some(url), None, *options, None, None),
         Command::Run {
             script,
             url,
+            html,
+            html_url,
             options,
-        } => execute(url, Some(script), *options),
+        } => execute(url, Some(script), *options, html, html_url),
     }
 }
 fn profile(path: Option<&Path>) -> Result<Option<brimp_runtime::profile::BrowserProfile>> {
@@ -299,8 +301,24 @@ fn check_paths(options: &Options) -> Result<()> {
     }
     Ok(())
 }
-fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Result<()> {
+fn execute(
+    url: Option<String>,
+    script: Option<PathBuf>,
+    options: Options,
+    html: Option<PathBuf>,
+    html_url: Option<String>,
+) -> Result<()> {
     let format = format(&options, script.is_some())?;
+    let html = html.as_deref().map(read_text).transpose()?;
+    if html.is_some() && url.is_some() {
+        return Err(invalid("--html cannot accompany a target URL"));
+    }
+    if html_url.is_some() && html.is_none() {
+        return Err(invalid("--html-url requires --html"));
+    }
+    if let Some(html_url) = &html_url {
+        url::Url::parse(html_url).map_err(invalid)?;
+    }
     let extraction = matches!(format, Some(Format::Markdown | Format::Json));
     if matches!(options.trace_mode, args::TraceMode::Recursive)
         && options.trace.is_none()
@@ -579,11 +597,14 @@ fn execute(url: Option<String>, script: Option<PathBuf>, options: Options) -> Re
                 ..Default::default()
             })?;
             for source in &init_scripts {
-                if url.is_some() {
+                if url.is_some() || html.is_some() {
                     page.add_init_script(source)?;
                 } else {
                     evaluate(&page, source)?;
                 }
+            }
+            if let Some(html) = &html {
+                page.load_html(html, html_url.as_deref().unwrap_or("about:blank"))?;
             }
             if let Some(url) = &url {
                 for (name, value) in cookies {

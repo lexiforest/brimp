@@ -120,8 +120,14 @@ average advances; it does not enumerate every installed font or reproduce shapin
 Canvas/WebGL/audio capture requires creating those browser objects. Media device
 capture does not request microphone or camera permission, so labels may be empty.
 HTTP header defaults and TLS impersonation cannot be inferred reliably from page
-JavaScript and remain explicitly unmeasured. Choose the transport impersonation
-separately when appropriate; capturing a browser does not capture its TLS stack.
+JavaScript and remain explicitly unmeasured; capturing a browser does not capture
+its TLS stack. To avoid pairing a Chromium user agent with a WebKit handshake, the
+transport target is derived from the user-agent family when the profile does not set
+`network.impersonation` — Chromium and Edge map to `chrome150`, Firefox to
+`firefox147`, WebKit to `safari270`. An explicit value always wins, and it is also
+what makes deliberate fingerprint-mismatch experiments possible. Version fidelity is
+not implied: the derived target is the nearest available handshake, not the exact
+build the user agent names.
 
 ## Define values in a plugin
 
