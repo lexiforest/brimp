@@ -22,6 +22,7 @@ pub(crate) enum Operation {
     },
     ProfileContract,
     ProfileReport,
+    ShapeManifest,
     Diagnostics(DiagnosticsView),
     NetworkContext,
     Input {
@@ -67,6 +68,7 @@ pub(crate) fn execute_operation(
     let result = match operation {
         Operation::ProfileContract => OperationResult::Value(page.profile_contract()?),
         Operation::ProfileReport => OperationResult::Value(page.profile_report()?),
+        Operation::ShapeManifest => OperationResult::Value(page.shape_manifest()),
         Operation::Diagnostics(view) => OperationResult::Value(page.diagnostics(view)),
         Operation::AdvanceTime {
             milliseconds,

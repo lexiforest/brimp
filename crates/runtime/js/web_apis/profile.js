@@ -20,11 +20,21 @@ function defineCoreProfile(profile) {
       onLine: true,
       cookieEnabled: true,
       webdriver: false,
+      oscpu: null,
+      build_id: null,
     },
     {
       version: 1,
       fields: {
         doNotTrack: {
+          type: 'string',
+          nullable: true,
+        },
+        oscpu: {
+          type: 'string',
+          nullable: true,
+        },
+        build_id: {
           type: 'string',
           nullable: true,
         },
@@ -52,6 +62,8 @@ function defineCoreProfile(profile) {
         onLine: read(() => navigator.onLine),
         cookieEnabled: read(() => navigator.cookieEnabled),
         webdriver: read(() => navigator.webdriver),
+        oscpu: read(() => navigator.oscpu),
+        build_id: read(() => navigator.buildID),
         timezone: read(() => Intl.DateTimeFormat().resolvedOptions().timeZone),
       }),
     },
@@ -307,6 +319,103 @@ function defineCoreProfile(profile) {
         'HTTP Accept/Accept-Encoding and TLS impersonation cannot be read reliably from page JavaScript; defaults are explicitly reported, not captured.',
     },
   );
+  const storage = profile.values(
+    'storage',
+    {
+      quota: null,
+      usage: 0,
+      persisted: false,
+    },
+    {
+      version: 1,
+      fields: {
+        quota: {
+          type: 'number',
+          nullable: true,
+          minimum: 0,
+        },
+        usage: {
+          type: 'number',
+          minimum: 0,
+        },
+        persisted: {
+          type: 'boolean',
+        },
+      },
+      notes:
+        'StorageManager estimate/persisted answers captured from the claimed browser; usage is a point-in-time sample, not a live counter.',
+      capture: async ({ read }) => ({
+        quota: await read(async () => (await navigator.storage?.estimate())?.quota),
+        usage: await read(async () => (await navigator.storage?.estimate())?.usage),
+        persisted: await read(async () => navigator.storage?.persisted()),
+      }),
+    },
+  );
+  const css = profile.values(
+    'css',
+    {
+      supports: [],
+    },
+    {
+      version: 1,
+      fields: {
+        supports: {
+          items: {
+            type: 'string',
+            nonempty: true,
+          },
+        },
+      },
+      notes:
+        'Declarations the claimed browser answers true for CSS.supports. Checked before the native property registry so properties the DOM parser does not carry still answer like the browser.',
+      capture: ({ read }) => ({
+        supports: read(() => {
+          const candidates = [
+            ['aspect-ratio', '1 / 1'],
+            ['backdrop-filter', 'blur(2px)'],
+            ['container-type', 'inline-size'],
+            ['container-name', 'sidebar'],
+            ['display', 'grid'],
+            ['display', 'flex'],
+            ['gap', '1px'],
+            ['inset', '0'],
+            ['position', 'sticky'],
+            ['object-fit', 'cover'],
+            ['mix-blend-mode', 'multiply'],
+            ['filter', 'blur(1px)'],
+            ['transform', 'rotate(1deg)'],
+            ['transition', 'all 1s'],
+            ['animation', 'none 1s'],
+            ['grid-template-columns', '1fr'],
+            ['font-variation-settings', '"wght" 400'],
+            ['text-wrap', 'balance'],
+            ['accent-color', 'red'],
+            ['color', 'color(display-p3 1 0 0)'],
+            ['scrollbar-gutter', 'stable'],
+            ['appearance', 'none'],
+            ['background-color', 'oklch(0.5 0.1 200)'],
+            ['border-radius', '1px'],
+            ['box-shadow', '0 0 1px red'],
+            ['user-select', 'none'],
+            ['touch-action', 'none'],
+            ['overscroll-behavior', 'contain'],
+            ['content-visibility', 'auto'],
+            ['contain-intrinsic-size', '1px'],
+            ['view-transition-name', 'none'],
+            ['scroll-timeline-name', 'none'],
+            ['anchor-name', '--none'],
+          ];
+          const supported = [];
+          for (const [property, value] of candidates) {
+            try {
+              if (CSS.supports(property, value)) supported.push(`${property}:${value}`);
+            } catch (error) {}
+          }
+          return supported;
+        }),
+      }),
+    },
+  );
   return {
     identity,
     device,
@@ -318,5 +427,7 @@ function defineCoreProfile(profile) {
     fonts,
     timing,
     network,
+    storage,
+    css,
   };
 }

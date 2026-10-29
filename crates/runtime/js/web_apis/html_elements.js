@@ -477,106 +477,143 @@ function __frameParentView(context) {
 }
 
 function __runInChildWindow(context, source) {
-  const frameWindow = context.window;
-  const parentView = __frameParentView(context);
-  return Function(
-    'window',
-    'document',
-    'location',
-    'parent',
-    'self',
-    'top',
-    'addEventListener',
-    'removeEventListener',
-    'dispatchEvent',
-    'postMessage',
-    'navigator',
-    'screen',
-    'history',
-    'localStorage',
-    'sessionStorage',
-    'crypto',
-    'performance',
-    source,
-  )(
-    frameWindow,
-    context.document,
-    frameWindow.location,
-    parentView,
-    frameWindow,
-    parentView,
-    frameWindow.addEventListener.bind(frameWindow),
-    frameWindow.removeEventListener.bind(frameWindow),
-    frameWindow.dispatchEvent.bind(frameWindow),
-    frameWindow.postMessage,
-    frameWindow.navigator,
-    frameWindow.screen,
-    frameWindow.history,
-    frameWindow.localStorage,
-    frameWindow.sessionStorage,
-    frameWindow.crypto,
-    frameWindow.performance,
-  );
-}
-
-function __createFrameNavigator() {
-  const prototype = Object.create(Object.getPrototypeOf(Navigator.prototype));
-  Object.defineProperty(prototype, 'constructor', {
-    value: Navigator,
-    writable: true,
-    enumerable: false,
-    configurable: true,
-  });
-  Object.defineProperty(prototype, Symbol.toStringTag, {
-    value: 'Navigator',
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  });
-  for (const key of Reflect.ownKeys(Navigator.prototype)) {
-    if (key === 'constructor') continue;
-    const descriptor = Object.getOwnPropertyDescriptor(Navigator.prototype, key);
-    if (descriptor !== undefined) Object.defineProperty(prototype, key, descriptor);
+  try {
+    __callHost('frameRealmEval', context.realmId, String(source));
+  } catch (error) {
+    // A frame script that throws is reported and does not abort later scripts.
+    try {
+      console.error(error);
+    } catch {}
   }
-  return Object.create(prototype);
 }
 
-// A frame document needs the page realm's constructors reachable through its own
-// window object; bare identifiers already resolve there because the script runs in
-// the page realm.
-const __childWindowGlobals = [
-  'Event',
-  'CustomEvent',
-  'MessageEvent',
-  'ErrorEvent',
-  'Promise',
-  'URL',
-  'URLSearchParams',
-  'TextEncoder',
-  'TextDecoder',
-  'fetch',
-  'XMLHttpRequest',
-  'Image',
-  'WebAssembly',
-  'MessageChannel',
-  'MutationObserver',
-  'IntersectionObserver',
-  'ResizeObserver',
-  'requestAnimationFrame',
-  'cancelAnimationFrame',
-  'getComputedStyle',
-  'atob',
-  'btoa',
-  'crypto',
-  'performance',
+// A frame document runs its scripts in a sibling JSC realm: its own global
+// object, the same VM. The page realm's interface objects are copied onto that
+// global, so frame code sees the same constructors and functions as the page,
+// while `var` declarations, `window` identity and `this` stay per frame.
+const __frameWindowSkip = new Set([
+  'window',
+  'self',
+  'globalThis',
+  'frames',
+  'top',
+  'parent',
+  'frameElement',
+  'document',
+  'location',
+  'origin',
+  'name',
+  'length',
+  'closed',
+  'opener',
   'navigator',
   'screen',
   'history',
   'localStorage',
   'sessionStorage',
-  'document',
+  'crypto',
+  'performance',
   'console',
-];
+  'customElements',
+  'visualViewport',
+  'addEventListener',
+  'removeEventListener',
+  'dispatchEvent',
+  'postMessage',
+  'setTimeout',
+  'clearTimeout',
+  'setInterval',
+  'clearInterval',
+  'queueMicrotask',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'requestIdleCallback',
+  'cancelIdleCallback',
+  'getComputedStyle',
+  'matchMedia',
+  'getSelection',
+  'innerWidth',
+  'innerHeight',
+  'outerWidth',
+  'outerHeight',
+  'screenX',
+  'screenY',
+  'screenLeft',
+  'screenTop',
+  'devicePixelRatio',
+  'scrollX',
+  'scrollY',
+  'pageXOffset',
+  'pageYOffset',
+  'status',
+]);
+
+// Language intrinsics stay the frame realm's own: `new Function`, literals and
+// `instanceof` must use the frame's realm, not the page's. Web interfaces are
+// copied, because the frame's document and nodes are page-realm objects.
+const __frameLanguageSkip = new Set([
+  'Object',
+  'Function',
+  'Array',
+  'String',
+  'Number',
+  'Boolean',
+  'Symbol',
+  'BigInt',
+  'Math',
+  'JSON',
+  'RegExp',
+  'Error',
+  'EvalError',
+  'RangeError',
+  'ReferenceError',
+  'SyntaxError',
+  'TypeError',
+  'URIError',
+  'AggregateError',
+  'Promise',
+  'Map',
+  'Set',
+  'WeakMap',
+  'WeakSet',
+  'WeakRef',
+  'FinalizationRegistry',
+  'Proxy',
+  'Reflect',
+  'ArrayBuffer',
+  'SharedArrayBuffer',
+  'Atomics',
+  'DataView',
+  'Int8Array',
+  'Uint8Array',
+  'Uint8ClampedArray',
+  'Int16Array',
+  'Uint16Array',
+  'Int32Array',
+  'Uint32Array',
+  'Float16Array',
+  'Float32Array',
+  'Float64Array',
+  'BigInt64Array',
+  'BigUint64Array',
+  'Iterator',
+  'WebAssembly',
+  'globalThis',
+  'undefined',
+  'NaN',
+  'Infinity',
+  'eval',
+  'isNaN',
+  'isFinite',
+  'parseInt',
+  'parseFloat',
+  'encodeURI',
+  'encodeURIComponent',
+  'decodeURI',
+  'decodeURIComponent',
+  'escape',
+  'unescape',
+]);
 
 function __childConstructor(context, creator) {
   return function (...arguments_) {
@@ -589,30 +626,220 @@ function __parseChildDocument(source) {
   return new DOMParser().parseFromString(source, 'text/html');
 }
 
+// A Location view whose reads follow the frame's current document and whose
+// writes drive frame navigation.
+function __createFrameLocation(context) {
+  const current = () => context.eventTarget.location;
+  return {
+    get href() {
+      return current().href;
+    },
+    set href(value) {
+      context.navigate(String(value));
+    },
+    get origin() {
+      return current().origin;
+    },
+    get protocol() {
+      return current().protocol;
+    },
+    get host() {
+      return current().host;
+    },
+    get hostname() {
+      return current().hostname;
+    },
+    get port() {
+      return current().port;
+    },
+    get pathname() {
+      return current().pathname;
+    },
+    get search() {
+      return current().search;
+    },
+    get hash() {
+      return current().hash;
+    },
+    replace(value) {
+      context.navigate(String(value));
+    },
+    assign(value) {
+      context.navigate(String(value));
+    },
+    reload() {
+      context.navigate(current().href);
+    },
+    toString() {
+      return current().href;
+    },
+  };
+}
+
+// Frame requests resolve relative URLs and their referrer against the frame
+// document. The page's constructors stay in place; these thin subclasses record
+// the issuing document on each request.
+function __createFrameXHR(context) {
+  const Base = window.XMLHttpRequest;
+  return class XMLHttpRequest extends Base {
+    open(method, url, ...rest) {
+      const base = __documentURL(context.document) || 'about:blank';
+      this.__brimpSetReferrer(base);
+      return super.open(method, new URL(String(url), base).href, ...rest);
+    }
+  };
+}
+
+function __createFrameFetch(context) {
+  const pageFetch = window.fetch.bind(window);
+  return (input, init = {}) => {
+    const base = __documentURL(context.document) || 'about:blank';
+    const options = { ...init };
+    if (options.referrer === undefined) options.referrer = base;
+    const target =
+      typeof input === 'string' || input instanceof URL ? new URL(String(input), base).href : input;
+    return pageFetch(target, options);
+  };
+}
+
+function __frameOverrides(context) {
+  const eventTarget = context.eventTarget;
+  const overrides = {};
+  // Window named access (frames[0], a frame's id/name) is not an interface
+  // member, and reading one would re-enter this frame's contentWindow getter.
+  const namedFrames = new Set();
+  for (const element of document.querySelectorAll(
+    'iframe[id],iframe[name],frame[id],frame[name]',
+  )) {
+    if (element.id) namedFrames.add(element.id);
+    const frameName = element.getAttribute('name');
+    if (frameName) namedFrames.add(frameName);
+  }
+  for (const name of Reflect.ownKeys(window)) {
+    if (typeof name !== 'string' || name.startsWith('__')) continue;
+    if (/^\d+$/.test(name) || namedFrames.has(name)) continue;
+    if (__frameWindowSkip.has(name) || __frameLanguageSkip.has(name)) continue;
+    const value = window[name];
+    if (value !== undefined) overrides[name] = value;
+  }
+  Object.assign(overrides, {
+    fetch: __createFrameFetch(context),
+    XMLHttpRequest: __createFrameXHR(context),
+    navigator: window.navigator,
+    screen: window.screen,
+    history: window.history,
+    localStorage: window.localStorage,
+    sessionStorage: window.sessionStorage,
+    crypto: window.crypto,
+    performance: window.performance,
+    console: window.console,
+    customElements: window.customElements,
+    visualViewport: window.visualViewport,
+    addEventListener: eventTarget.addEventListener.bind(eventTarget),
+    removeEventListener: eventTarget.removeEventListener.bind(eventTarget),
+    dispatchEvent: eventTarget.dispatchEvent.bind(eventTarget),
+    postMessage: eventTarget.postMessage,
+    setTimeout: window.setTimeout,
+    clearTimeout: window.clearTimeout,
+    setInterval: window.setInterval,
+    clearInterval: window.clearInterval,
+    queueMicrotask: window.queueMicrotask,
+    requestAnimationFrame: window.requestAnimationFrame?.bind(window),
+    cancelAnimationFrame: window.cancelAnimationFrame?.bind(window),
+    requestIdleCallback: window.requestIdleCallback?.bind(window),
+    cancelIdleCallback: window.cancelIdleCallback?.bind(window),
+    getComputedStyle: window.getComputedStyle?.bind(window),
+    matchMedia: window.matchMedia?.bind(window),
+    getSelection: window.getSelection?.bind(window),
+    innerWidth: window.innerWidth,
+    innerHeight: window.innerHeight,
+    outerWidth: window.outerWidth,
+    outerHeight: window.outerHeight,
+    screenX: window.screenX,
+    screenY: window.screenY,
+    screenLeft: window.screenX,
+    screenTop: window.screenY,
+    devicePixelRatio: window.devicePixelRatio,
+    scrollX: window.scrollX,
+    scrollY: window.scrollY,
+    pageXOffset: window.pageXOffset,
+    pageYOffset: window.pageYOffset,
+    name: context.frame.getAttribute('name') ?? '',
+    closed: false,
+    opener: null,
+    length: 0,
+    status: '',
+  });
+  return overrides;
+}
+
+// Frame-specific window members stay live across navigations, so they are
+// accessors on the realm's global rather than copied values.
+function __installFrameWindow(context, frameWindow) {
+  const eventTarget = context.eventTarget;
+  const define = (name, descriptor) =>
+    Object.defineProperty(frameWindow, name, {
+      configurable: true,
+      enumerable: true,
+      ...descriptor,
+    });
+  define('document', { get: () => context.document });
+  define('location', {
+    get: () => context.frameLocation,
+    set: (value) => context.navigate(String(value)),
+  });
+  define('parent', { get: () => __frameParentView(context) });
+  define('top', { get: () => __frameParentView(context) });
+  define('frameElement', { get: () => context.frame });
+  define('origin', { get: () => eventTarget.location.origin });
+  for (const name of Object.getOwnPropertyNames(eventTarget)) {
+    if (!name.startsWith('on')) continue;
+    define(name, {
+      get: () => eventTarget[name],
+      set: (value) => {
+        eventTarget[name] = value;
+      },
+    });
+  }
+}
+
 async function __runChildDocumentScripts(context) {
+  const deferred = [];
   for (const script of context.document.querySelectorAll('script')) {
     const source = script.getAttribute('src');
     if (!source) {
       if (script.textContent) __runInChildWindow(context, script.textContent);
       continue;
     }
-    try {
-      const url = new URL(source, context.window.location.href).href;
-      const text = await (await fetch(url)).text();
-      __runInChildWindow(context, text);
-    } catch (error) {
-      // A failing subresource must not abort the rest of the document.
+    // Deferred and async scripts run after the document's inline scripts. Async
+    // ordering is approximated as deferred; the tag uses `defer`.
+    if (script.defer || script.async) {
+      deferred.push(script);
+      continue;
     }
+    await __runChildExternalScript(context, source);
   }
+  for (const script of deferred)
+    await __runChildExternalScript(context, script.getAttribute('src'));
   const onload = context.document.body?.getAttribute('onload');
   if (onload) __runInChildWindow(context, onload);
+}
+
+async function __runChildExternalScript(context, source) {
+  try {
+    const url = new URL(source, context.eventTarget.location.href).href;
+    const text = await (await fetch(url)).text();
+    __runInChildWindow(context, text);
+  } catch (error) {
+    // A failing subresource must not abort the rest of the document.
+  }
 }
 
 function __finishChildDocument(context) {
   const document = context.document;
   document.dispatchEvent(new Event('readystatechange'));
   document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true }));
-  context.window.dispatchEvent(new Event('load'));
+  context.eventTarget.dispatchEvent(new Event('load'));
   document.dispatchEvent(new Event('load'));
 }
 
@@ -629,12 +856,16 @@ class HTMLIFrameElement extends HTMLElement {
     if (!context) {
       const frame = this;
       let location = new URL('about:blank');
-      const childWindow = new EventTarget();
-      __windowEventTargets.add(childWindow);
-      __defineEventHandlers(childWindow, __bodyWindowEventTypes);
+      const eventTarget = new EventTarget();
+      __windowEventTargets.add(eventTarget);
+      __defineEventHandlers(eventTarget, __bodyWindowEventTypes);
       context = {
         document: __parseChildDocument(''),
-        window: childWindow,
+        // `window` is the realm's global object, installed below.
+        window: null,
+        eventTarget,
+        frame,
+        realmId: 0,
         navigate(url, srcdoc = null) {
           location = new URL(
             url,
@@ -648,20 +879,20 @@ class HTMLIFrameElement extends HTMLElement {
               : location.protocol === 'data:'
                 ? __callHost('dataDocumentParse', null, location.href)
                 : __parseChildDocument('');
-          __documentWindows.set(context.document, { window: childWindow, frame });
           __callHost('documentSetURL', context.document, location.href);
+          __documentWindows.set(context.document, { window: context.window, frame });
           if (remote) {
             // Remote frames load like a navigation: fetch outside the page's
-            // script path, parse, then run the document's scripts in order.
+            // script path, parse, then run the document's scripts.
             context.loading = true;
             fetch(location.href)
               .then((response) => response.text())
               .then((html) => {
-                if (context.document !== undefined && context.aborted) return;
+                if (context.aborted) return;
                 __documentWindows.delete(context.document);
                 context.document = __parseChildDocument(html);
-                __documentWindows.set(context.document, { window: childWindow, frame });
                 __callHost('documentSetURL', context.document, location.href);
+                __documentWindows.set(context.document, { window: context.window, frame });
                 return __runChildDocumentScripts(context).then(() =>
                   __finishChildDocument(context),
                 );
@@ -673,18 +904,12 @@ class HTMLIFrameElement extends HTMLElement {
               });
             return;
           }
-          for (const script of context.document.querySelectorAll('script')) {
-            __runInChildWindow(context, script.textContent);
-          }
-          const onload = context.document.body?.getAttribute('onload');
-          if (onload) __runInChildWindow(context, onload);
+          __runChildDocumentScripts(context);
           __finishChildDocument(context);
         },
       };
       __callHost('documentSetURL', context.document, 'about:blank');
-      __documentWindows.set(context.document, { window: childWindow, frame });
-      __finishChildDocument(context);
-      Object.defineProperties(childWindow, {
+      Object.defineProperties(eventTarget, {
         location: {
           get() {
             const href = __documentURL(context.document);
@@ -696,78 +921,38 @@ class HTMLIFrameElement extends HTMLElement {
           },
           enumerable: true,
         },
-        document: {
-          get() {
-            return context.document;
-          },
-          enumerable: true,
-        },
-        frameElement: { value: this, enumerable: true },
-        parent: {
-          get() {
-            return __frameParentView(context);
-          },
-          enumerable: true,
-        },
-        top: {
-          get() {
-            return __frameParentView(context);
-          },
-          enumerable: true,
-        },
       });
-      for (const name of ['location', 'document', 'parent', 'top']) {
-        const descriptor = Object.getOwnPropertyDescriptor(childWindow, name);
-        if (descriptor?.get) __markWebBuiltin(descriptor.get, name, 'get');
-      }
-      childWindow.window = childWindow;
-      childWindow.self = childWindow;
-      const frameNavigator = __createFrameNavigator();
-      for (const name of __childWindowGlobals) {
-        if (name === 'navigator' || childWindow[name] !== undefined) continue;
-        const value = window[name];
-        if (value !== undefined) childWindow[name] = value;
-      }
-      Object.defineProperty(childWindow, 'navigator', {
-        get: __markWebBuiltin(
-          function () {
-            return frameNavigator;
-          },
-          'navigator',
-          'get',
-        ),
-        enumerable: true,
-        configurable: true,
-      });
-      childWindow.setTimeout = setTimeout;
-      childWindow.clearTimeout = clearTimeout;
-      childWindow.setInterval = setInterval;
-      childWindow.clearInterval = clearInterval;
-      childWindow.queueMicrotask = queueMicrotask;
-      childWindow.Comment = __childConstructor(context, (doc, data = '') =>
-        doc.createComment(String(data)),
-      );
-      childWindow.Text = __childConstructor(context, (doc, data = '') =>
-        doc.createTextNode(String(data)),
-      );
-      childWindow.DocumentFragment = __childConstructor(context, (doc) =>
-        doc.createDocumentFragment(),
-      );
-      childWindow.postMessage = (message, targetOrigin = '*', transfer = []) => {
+      const locationGetter = Object.getOwnPropertyDescriptor(eventTarget, 'location').get;
+      __markWebBuiltin(locationGetter, 'location', 'get');
+      context.frameLocation = __createFrameLocation(context);
+      eventTarget.postMessage = (message, targetOrigin = '*', transfer = []) => {
         const cloned = __prepareMessage(message, transfer);
         targetOrigin = String(targetOrigin);
-        if (targetOrigin !== '*' && targetOrigin !== '/' && targetOrigin !== location.origin)
-          return;
+        const frameOrigin = eventTarget.location.origin;
+        if (targetOrigin !== '*' && targetOrigin !== '/' && targetOrigin !== frameOrigin) return;
         setTimeout(() => {
           const event = new MessageEvent('message', {
             data: cloned,
-            origin: document.location?.origin ?? location.origin,
-            source: window,
+            origin: frameOrigin,
+            source: context.window,
           });
           __markTrustedEvent(event);
-          childWindow.dispatchEvent(event);
+          eventTarget.dispatchEvent(event);
         }, 0);
       };
+      const [realmId, frameWindow] = __callHost('frameRealmCreate', __frameOverrides(context));
+      context.realmId = realmId;
+      context.window = frameWindow;
+      // A child realm has its own SharedArrayBuffer intrinsic; do not expose it
+      // when the page's realm is not cross-origin isolated.
+      if (typeof window.SharedArrayBuffer === 'undefined') {
+        try {
+          delete frameWindow.SharedArrayBuffer;
+        } catch {}
+      }
+      __installFrameWindow(context, frameWindow);
+      __documentWindows.set(context.document, { window: frameWindow, frame });
+      __finishChildDocument(context);
       __iframeBrowsingContexts.set(this, context);
     }
     // Frames that arrive with the parsed document never pass through
@@ -992,8 +1177,21 @@ class HTMLMediaElement extends HTMLElement {
     __trustedMediaEvent(this, 'loadstart');
   }
   canPlayType(type) {
-    type = String(type).toLowerCase();
-    return /^(audio\/(wav|wave|x-wav|mpeg|mp4|aac|flac|ogg))\b/.test(type) ? 'probably' : '';
+    const base = String(type).toLowerCase().split(';')[0].trim();
+    const support = {
+      'audio/ogg': 'probably',
+      'audio/mpeg': 'maybe',
+      'audio/mpegurl': '',
+      'audio/wav': 'probably',
+      'audio/x-m4a': 'maybe',
+      'audio/aac': 'maybe',
+      'audio/3gpp': '',
+      'audio/flac': 'maybe',
+      'audio/mp4': 'maybe',
+      'audio/mp3': 'maybe',
+      'audio/webm': 'maybe',
+    };
+    return support[base] ?? '';
   }
 }
 for (const [name, value] of Object.entries({

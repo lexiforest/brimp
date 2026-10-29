@@ -6,8 +6,9 @@ use std::{
 };
 
 use crate::ffi::{
-    JSContextGetGlobalContext, JSContextRef, JSGlobalContextRelease, JSGlobalContextRetain,
-    JSObjectMake, JSObjectRef, JSObjectSetPrototype, JSValueProtect, JSValueUnprotect,
+    JSContextGetGlobalContext, JSContextGetGroup, JSContextRef, JSGlobalContextRelease,
+    JSGlobalContextRetain, JSObjectMake, JSObjectRef, JSObjectSetPrototype, JSValueProtect,
+    JSValueUnprotect,
 };
 
 use crate::{JsException, JsRuntime, runtime::exception_from_raw};
@@ -103,10 +104,9 @@ impl ProtectedJsObject {
     }
 
     pub fn handle<'runtime>(&self, runtime: &'runtime JsRuntime) -> JsObject<'runtime> {
-        assert_eq!(
-            self.context,
-            runtime.as_raw(),
-            "object belongs to another JSC runtime"
+        assert!(
+            same_vm(self.context, runtime.as_raw()),
+            "object belongs to another JSC VM"
         );
         // SAFETY: this adds an independent root in the same live context.
         unsafe { JSValueProtect(self.context, self.raw) };
@@ -135,10 +135,9 @@ impl ProtectedJsObject {
         context: JSContextRef,
         prototype: JsObjectIdentity,
     ) -> Self {
-        assert_eq!(
-            context,
-            prototype.context(),
-            "prototype belongs to another JSC context"
+        assert!(
+            same_vm(context, prototype.context()),
+            "prototype belongs to another JSC VM"
         );
         // SAFETY: the callback context is live and null class/data creates a plain object.
         let raw = unsafe { JSObjectMake(context, std::ptr::null_mut(), std::ptr::null_mut()) };
@@ -167,10 +166,9 @@ pub struct JsObject<'runtime> {
 
 impl JsObject<'_> {
     pub(crate) fn as_raw(&self, runtime: &JsRuntime) -> JSObjectRef {
-        assert_eq!(
-            self.context,
-            runtime.as_raw(),
-            "object belongs to another JSC runtime"
+        assert!(
+            same_vm(self.context, runtime.as_raw()),
+            "object belongs to another JSC VM"
         );
         self.raw
     }
@@ -181,6 +179,13 @@ impl JsObject<'_> {
             object: unsafe { ProtectedJsObject::from_raw(self.context, self.raw) },
         }
     }
+}
+
+/// Values are VM-scoped, not context-scoped: contexts created in one group share
+/// objects and can call each other's functions. Frame realms rely on this.
+pub(crate) fn same_vm(left: JSContextRef, right: JSContextRef) -> bool {
+    // SAFETY: both contexts are live for the duration of the comparison.
+    unsafe { JSContextGetGroup(left) == JSContextGetGroup(right) }
 }
 
 impl PartialEq for JsObject<'_> {

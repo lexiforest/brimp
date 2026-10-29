@@ -53,6 +53,127 @@ pub struct TraceRecord {
     pub details: Option<serde_json::Value>,
 }
 
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ShapeDifference {
+    kind: String,
+    path: String,
+    property: Option<String>,
+    expected: Option<serde_json::Value>,
+    observed: Option<serde_json::Value>,
+    message: String,
+    sequence: u64,
+}
+
+fn claim_for<'a>(
+    manifest: &'a serde_json::Value,
+    target: &str,
+    property: &str,
+) -> Option<(String, &'a serde_json::Value)> {
+    let claims = manifest.get("claims")?.as_object()?;
+    for prefix in ["", "window."] {
+        let path = format!("{prefix}{target}.{property}");
+        if let Some(claim) = claims.get(&path) {
+            return Some((path, claim));
+        }
+    }
+    None
+}
+
+fn shape_differences(
+    records: &VecDeque<TraceRecord>,
+    manifest: Option<&serde_json::Value>,
+) -> Vec<ShapeDifference> {
+    let Some(manifest) = manifest else {
+        return Vec::new();
+    };
+    let mut differences = Vec::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for record in records {
+        let Some(details) = record.details.as_ref() else {
+            continue;
+        };
+        let Some(target) = details.get("target").and_then(serde_json::Value::as_str) else {
+            continue;
+        };
+        let Some(property) = details.get("property").and_then(serde_json::Value::as_str) else {
+            continue;
+        };
+        let Some((path, claim)) = claim_for(manifest, target, property) else {
+            continue;
+        };
+        let mut push = |kind: &str,
+                        expected: Option<serde_json::Value>,
+                        observed: Option<serde_json::Value>,
+                        message: &str| {
+            let key = (kind.to_owned(), path.clone(), property.to_owned());
+            if differences.len() < 128 && seen.insert(key) {
+                differences.push(ShapeDifference {
+                    kind: kind.into(),
+                    path: path.clone(),
+                    property: Some(property.into()),
+                    expected,
+                    observed,
+                    message: message.into(),
+                    sequence: record.sequence,
+                });
+            }
+        };
+        if let Some(native) = details.get("native").and_then(serde_json::Value::as_bool) {
+            if claim.get("native").and_then(serde_json::Value::as_bool) == Some(true) && !native {
+                push(
+                    "nonNativeSource",
+                    claim.get("native").cloned(),
+                    Some(serde_json::json!(false)),
+                    "runtime function exposes implementation source",
+                );
+            }
+        }
+        if details.get("present").and_then(serde_json::Value::as_bool) == Some(false)
+            && record.kind == "get"
+        {
+            push(
+                "missingImplementation",
+                Some(claim.clone()),
+                Some(serde_json::json!({"present": false})),
+                "trace observed a missing property that the implementation claims",
+            );
+        }
+        let Some(descriptor) = details.get("descriptor") else {
+            continue;
+        };
+        let fields = [
+            "hasValue",
+            "valueType",
+            "writable",
+            "enumerable",
+            "configurable",
+            "hasGet",
+            "hasSet",
+        ];
+        let mut expected = serde_json::Map::new();
+        let mut observed = serde_json::Map::new();
+        for field in fields {
+            let expected_value = claim.get(field).cloned().unwrap_or(serde_json::Value::Null);
+            let observed_value = descriptor
+                .get(field)
+                .cloned()
+                .unwrap_or(serde_json::Value::Null);
+            expected.insert(field.into(), expected_value);
+            observed.insert(field.into(), observed_value);
+        }
+        if expected != observed {
+            push(
+                "descriptorMismatch",
+                Some(serde_json::Value::Object(expected)),
+                Some(serde_json::Value::Object(observed)),
+                "observed descriptor does not match the registered shape",
+            );
+        }
+    }
+    differences
+}
+
 #[derive(Clone, Copy)]
 pub(crate) enum DiagnosticsView {
     Take,
@@ -112,6 +233,8 @@ struct DiagnosticBatch<'a> {
     coverage: Coverage,
     #[serde(skip)]
     owners: &'a BTreeMap<String, String>,
+    #[serde(skip)]
+    shape_manifest: Option<&'a serde_json::Value>,
 }
 
 // An API wrapper and its native dispatch are separate observations, not two
@@ -138,8 +261,12 @@ struct DependencyUsage<'a> {
 }
 impl DiagnosticBatch<'_> {
     fn value(self, view: DiagnosticsView) -> serde_json::Value {
+        let differences = shape_differences(self.records, self.shape_manifest);
         if !matches!(view, DiagnosticsView::Summary) {
-            return serde_json::to_value(self).expect("finite diagnostic data");
+            let mut value = serde_json::to_value(self).expect("finite diagnostic data");
+            value["shapeDifferences"] =
+                serde_json::to_value(&differences).expect("finite shape differences");
+            return value;
         }
         let mut dependencies = BTreeMap::<Dependency, Counts>::new();
         let mut reads =
@@ -242,6 +369,7 @@ impl DiagnosticBatch<'_> {
                 "operations": operations,
                 "note": "Unresolved reads are retained observations whose result was undefined; failed operations are retained synchronous throws. A trace miss is not proof that a page never touched an API, and ownership names the nearest installed surface rather than a required fix location.",
             },
+            "shapeDifferences": differences,
             "retained": self.records.len(),
             "dropped": self.dropped,
             "writeError": self.write_error,
@@ -288,6 +416,7 @@ pub(crate) fn disabled(view: DiagnosticsView) -> serde_json::Value {
         write_error: None,
         coverage: Coverage::new(None),
         owners: &owners,
+        shape_manifest: None,
     }
     .value(view)
 }
@@ -304,6 +433,7 @@ struct State {
     realm_id: u64,
     start: Instant,
     owners: BTreeMap<String, String>,
+    shape_manifest: Option<serde_json::Value>,
 }
 impl Diagnostics {
     pub fn new(options: DiagnosticsOptions, page_id: u64) -> Result<Self, JsException> {
@@ -329,10 +459,14 @@ impl Diagnostics {
             realm_id: page_id,
             start: Instant::now(),
             owners: BTreeMap::new(),
+            shape_manifest: None,
         }))))
     }
     pub fn set_owners(&self, owners: BTreeMap<String, String>) {
         self.0.borrow_mut().owners = owners;
+    }
+    pub fn set_shape_manifest(&self, manifest: &str) {
+        self.0.borrow_mut().shape_manifest = serde_json::from_str(manifest).ok();
     }
     pub fn realm(&self, id: u64) {
         self.0.borrow_mut().realm_id = id;
@@ -398,6 +532,7 @@ impl Diagnostics {
             write_error: state.write_error.as_deref(),
             coverage: Coverage::new(Some(&state.options)),
             owners: &state.owners,
+            shape_manifest: state.shape_manifest.as_ref(),
         }
         .value(view);
         if matches!(view, DiagnosticsView::Take) {

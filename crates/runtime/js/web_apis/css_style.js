@@ -93,6 +93,21 @@ function __styleDeclarationProxy(target) {
   return proxy;
 }
 
+const __styleFontKeyword = new WeakMap();
+const __systemFontKeywords = new Set([
+  'caption',
+  'icon',
+  'menu',
+  'message-box',
+  'small-caption',
+  'status-bar',
+]);
+function __recordSystemFont(target, text) {
+  const match = /(?:^|;)\s*font\s*:\s*([a-z-]+)\s*(?:;|$)/i.exec(String(text));
+  if (match && __systemFontKeywords.has(match[1].toLowerCase()))
+    __styleFontKeyword.set(target, match[1].toLowerCase());
+}
+
 class CSSStyleDeclaration {
   constructor() {
     throw new TypeError('Illegal constructor');
@@ -105,7 +120,9 @@ class CSSStyleDeclaration {
   }
   set cssText(value) {
     const target = __requireWritableStyleDeclaration(this);
-    __callHost('styleSetCssText', target, String(value));
+    const text = String(value);
+    __recordSystemFont(target, text);
+    __callHost('styleSetCssText', target, text);
   }
   get length() {
     return this.__entries().length;
@@ -118,7 +135,12 @@ class CSSStyleDeclaration {
     if (arguments.length === 0) {
       throw new TypeError('CSSStyleDeclaration.getPropertyValue requires a property');
     }
-    return __callHost('styleGetProperty', __requireStyleDeclaration(this), name);
+    const target = __requireStyleDeclaration(this);
+    name = String(name).toLowerCase();
+    const font = __styleFontKeyword.get(target);
+    if (font && name === 'font') return font;
+    if (font && name === 'font-family') return '-apple-system';
+    return __callHost('styleGetProperty', target, name);
   }
   getPropertyPriority(name) {
     if (arguments.length === 0) {
@@ -176,10 +198,31 @@ class CSSStyleProperties extends CSSStyleDeclaration {
 }
 
 let __cssSupportProbe = null;
+let __cssCapturedDeclarations = null;
+function __normalizeCssDeclaration(property, value) {
+  const normalize = (text) => String(text).trim().replace(/\s+/g, ' ').toLowerCase();
+  return normalize(property) + ':' + normalize(value);
+}
+function __installCapturedCssSupports(entries) {
+  __cssCapturedDeclarations = new Set();
+  for (const entry of entries ?? []) {
+    const text = String(entry);
+    const colon = text.indexOf(':');
+    if (colon > 0)
+      __cssCapturedDeclarations.add(
+        __normalizeCssDeclaration(text.slice(0, colon), text.slice(colon + 1)),
+      );
+  }
+}
+Object.defineProperty(globalThis, '__brimpInstallCssSupport', {
+  value: __installCapturedCssSupports,
+  configurable: true,
+});
 function __cssSupportsDeclaration(property, value) {
   property = String(property).trim();
   value = String(value).trim();
   if (property === '' || value === '') return false;
+  if (__cssCapturedDeclarations?.has(__normalizeCssDeclaration(property, value))) return true;
   if (__cssSupportProbe === null) __cssSupportProbe = document.createElement('div');
   const style = __styleDeclarationTarget(__cssSupportProbe.style);
   __callHost('styleRemoveProperty', style, property);
@@ -369,6 +412,13 @@ class CSSComputedStyle {
   }
   get contentVisibility() {
     return this.__value('content-visibility');
+  }
+  get fontFamily() {
+    const element = __computedStyleElements.get(this);
+    const font = element?.style?.font ?? element?.style?.getPropertyValue('font') ?? '';
+    if (['caption', 'icon', 'menu', 'message-box', 'small-caption', 'status-bar'].includes(font))
+      return '-apple-system';
+    return this.__value('font-family') || 'Times New Roman';
   }
   [Symbol.iterator]() {
     return [][Symbol.iterator]();

@@ -5,6 +5,7 @@ function installMedia({ global, profile: settings }, options = {}) {
       media_devices_enabled: true,
       devices: [],
       supported_constraints: {},
+      decoding: [],
     },
     {
       version: 1,
@@ -23,6 +24,14 @@ function installMedia({ global, profile: settings }, options = {}) {
             type: 'boolean',
           },
         },
+        decoding: {
+          items: {
+            type: 'object',
+            additionalProperties: {
+              type: 'json',
+            },
+          },
+        },
       },
       notes:
         'Device enumeration does not request capture permission. Labels may be empty. media_devices_enabled remains a runtime exposure choice.',
@@ -38,6 +47,92 @@ function installMedia({ global, profile: settings }, options = {}) {
             : undefined,
         ),
         supported_constraints: read(() => navigator.mediaDevices?.getSupportedConstraints()),
+        decoding: await read(async () => {
+          const capabilities = navigator.mediaCapabilities;
+          if (!capabilities?.decodingInfo) return undefined;
+          const configurations = [
+            {
+              type: 'file',
+              video: {
+                contentType: 'video/webm; codecs="vp9"',
+                width: 1920,
+                height: 1080,
+                bitrate: 4000000,
+                framerate: 30,
+              },
+            },
+            {
+              type: 'file',
+              video: {
+                contentType: 'video/mp4; codecs="avc1.42E01E"',
+                width: 1920,
+                height: 1080,
+                bitrate: 4000000,
+                framerate: 30,
+              },
+            },
+            {
+              type: 'file',
+              video: {
+                contentType: 'video/mp4; codecs="hvc1.1.6.L93.B0"',
+                width: 1920,
+                height: 1080,
+                bitrate: 4000000,
+                framerate: 30,
+              },
+            },
+            {
+              type: 'file',
+              audio: {
+                contentType: 'audio/mp4; codecs="mp4a.40.2"',
+                channels: 2,
+                bitrate: 128000,
+                samplerate: 44100,
+              },
+            },
+            {
+              type: 'file',
+              audio: {
+                contentType: 'audio/webm; codecs="opus"',
+                channels: 2,
+                bitrate: 128000,
+                samplerate: 48000,
+              },
+            },
+            {
+              type: 'media-source',
+              audio: {
+                contentType: 'audio/mp4; codecs="mp4a.40.2"',
+                channels: 2,
+                bitrate: 128000,
+                samplerate: 44100,
+              },
+            },
+            {
+              type: 'webrtc',
+              video: {
+                contentType: 'video/VP8',
+                width: 640,
+                height: 480,
+                bitrate: 1000000,
+                framerate: 30,
+              },
+            },
+          ];
+          const results = [];
+          for (const configuration of configurations) {
+            try {
+              const info = await capabilities.decodingInfo(configuration);
+              results.push({
+                ...configuration,
+                supported: Boolean(info.supported),
+                smooth: Boolean(info.smooth),
+                powerEfficient: Boolean(info.powerEfficient),
+              });
+            } catch (error) {}
+          }
+          return results;
+        }),
       }),
     },
   );
@@ -183,11 +278,32 @@ function installMedia({ global, profile: settings }, options = {}) {
   }
 
   global.MediaEncryptedEvent = MediaEncryptedEvent;
+  const unsupportedCapability = { supported: false, smooth: false, powerEfficient: false };
   class MediaCapabilities {
     constructor(token) {
       if (token !== constructToken) throw new TypeError('Illegal constructor');
     }
-    decodingInfo() {}
+    decodingInfo(configuration = {}) {
+      const contentType = (part) => part?.contentType ?? null;
+      const match = (mediaProfile.decoding ?? []).find(
+        (entry) =>
+          entry.type === configuration.type &&
+          contentType(entry.video) === contentType(configuration.video) &&
+          contentType(entry.audio) === contentType(configuration.audio),
+      );
+      return Promise.resolve(
+        match
+          ? {
+              supported: Boolean(match.supported),
+              smooth: Boolean(match.smooth),
+              powerEfficient: Boolean(match.powerEfficient),
+            }
+          : { ...unsupportedCapability },
+      );
+    }
+    encodingInfo() {
+      return Promise.resolve({ ...unsupportedCapability });
+    }
   }
   class MediaSession {
     #metadata = null;
@@ -221,6 +337,10 @@ function installMedia({ global, profile: settings }, options = {}) {
     constructor() {
       super();
       throw new TypeError('Illegal constructor');
+    }
+    static isTypeSupported(type) {
+      const base = String(type).toLowerCase().split(';')[0].trim();
+      return ['audio/mp4', 'audio/webm', 'video/mp4', 'video/webm'].includes(base);
     }
     get readyState() {
       return 'closed';
@@ -309,11 +429,24 @@ function installMedia({ global, profile: settings }, options = {}) {
       return 0;
     }
   }
+  for (const [target, names] of [
+    [MediaSource, ['isTypeSupported']],
+    [MediaSource.prototype, ['addSourceBuffer', 'removeSourceBuffer', 'endOfStream']],
+  ]) {
+    for (const name of names) {
+      const descriptor = Object.getOwnPropertyDescriptor(target, name);
+      if (descriptor) Object.defineProperty(target, name, { ...descriptor, enumerable: true });
+    }
+  }
+  const userAgent = globalThis.navigator?.userAgent ?? '';
+  const exposeVideoTrackList = !/Firefox\//.test(userAgent);
+  const exposeWebKitMediaKeyError =
+    /AppleWebKit\//.test(userAgent) && !/Chrome\/|Chromium\/|Edg\//.test(userAgent);
   for (const [name, value] of Object.entries({
     MediaSource,
     MediaStreamTrack,
-    VideoTrackList,
-    WebKitMediaKeyError,
+    ...(exposeVideoTrackList ? { VideoTrackList } : {}),
+    ...(exposeWebKitMediaKeyError ? { WebKitMediaKeyError } : {}),
   })) {
     defineGlobalConstructor(name, value);
   }

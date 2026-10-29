@@ -27,3 +27,32 @@ test('canvas drawing workflow preserves state, painted pixels and configured bac
   } finally {await session.close();}
 });
 
+
+test('full counter-clockwise arcs render', async () => {
+  const session = await createSession({ plugins: [canvasPlugin()] });
+  try {
+    const page = await session.newPage();
+    const result = JSON.parse(
+      await page.evaluate(`(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 131;
+        canvas.height = 115;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#E3E';
+        context.beginPath();
+        context.arc(55, 55, 45, 0, Math.PI * 2, true);
+        context.closePath();
+        context.fill();
+        const data = context.getImageData(0, 0, 131, 115).data;
+        let painted = 0;
+        for (let index = 0; index < data.length; index += 4)
+          if (data[index] || data[index + 1] || data[index + 2] || data[index + 3])
+            painted++;
+        return JSON.stringify({ painted });
+      })()`),
+    );
+    assert.ok(result.painted > 0);
+  } finally {
+    await session.close();
+  }
+});

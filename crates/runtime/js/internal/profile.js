@@ -1,5 +1,11 @@
 function installProfile(profile) {
   const identity = profile.identity;
+  // Core services receive their profile values directly; no private global
+  // survives the installation.
+  globalThis.__brimpInstallStorageProfile?.(profile.storage);
+  globalThis.__brimpInstallCssSupport?.(profile.css?.supports ?? []);
+  delete globalThis.__brimpInstallStorageProfile;
+  delete globalThis.__brimpInstallCssSupport;
   const state = {
     standalone: false,
     userAgent: identity.user_agent,
@@ -66,6 +72,8 @@ function installProfile(profile) {
   defineGlobalConstructor('AudioSession', AudioSession);
   defineNavigatorValue('webdriver', identity.webdriver);
   if (identity.doNotTrack !== null) defineNavigatorValue('doNotTrack', identity.doNotTrack);
+  if (identity.oscpu !== null) defineNavigatorValue('oscpu', identity.oscpu);
+  if (identity.build_id !== null) defineNavigatorValue('buildID', identity.build_id);
   const arrayData = new WeakMap();
   class MimeType {
     constructor() {
@@ -212,6 +220,16 @@ function installProfile(profile) {
     const mimeTypes = makeArrayLike(MimeTypeArray, Object.values(mimeByType), mimeByType);
     defineNavigatorValue('plugins', plugins);
     defineNavigatorValue('mimeTypes', mimeTypes);
+  }
+  for (const [constructor, names] of [
+    [PluginArray, ['length']],
+    [Plugin, ['item', 'namedItem']],
+    [MimeType, ['type', 'suffixes', 'description', 'enabledPlugin']],
+  ]) {
+    for (const name of names) {
+      const descriptor = Object.getOwnPropertyDescriptor(constructor.prototype, name);
+      if (descriptor) Object.defineProperty(constructor.prototype, name, { ...descriptor, enumerable: true });
+    }
   }
   installPluginCollections(state.pdfViewerEnabled);
   // Chromium exposes Client Hints; WebKit and Gecko expose nothing at all, so the

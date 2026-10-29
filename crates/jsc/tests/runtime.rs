@@ -501,3 +501,71 @@ fn asynchronous_wasm_jobs_complete_on_each_owner_thread() {
         worker.join().unwrap();
     }
 }
+
+#[test]
+fn a_child_realm_shares_the_vm_but_keeps_its_own_global_scope() {
+    let parent = JsRuntime::new().unwrap();
+    parent
+        .eval("globalThis.shared = { x: 7 }; globalThis.inc = v => v + 1; var parentOnly = 'p';")
+        .unwrap();
+    let child = parent.new_child().unwrap();
+    let overrides = parent
+        .eval("({ shared: globalThis.shared, inc: globalThis.inc })")
+        .unwrap()
+        .to_object()
+        .unwrap();
+    child
+        .copy_properties_from(overrides.identity(), &[])
+        .unwrap();
+    child
+        .eval("var ddm = { cid: 'c' }; function bump() { return inc(shared.x); }")
+        .unwrap();
+    assert_eq!(child.eval("bump()").unwrap().to_number().unwrap(), 8.0);
+    assert_eq!(
+        child
+            .eval("typeof parentOnly")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "undefined",
+    );
+    // A `var` binding resolves through the global object even though it is not
+    // listed by `Object.getOwnPropertyNames`, which is why frame sync reads the
+    // child's window object directly instead of enumerating declared names.
+    assert_eq!(
+        child
+            .eval("globalThis.ddm.cid")
+            .unwrap()
+            .to_string()
+            .unwrap(),
+        "c",
+    );
+}
+
+#[test]
+fn parent_can_call_a_child_realm_function() {
+    let parent = JsRuntime::new().unwrap();
+    let child = parent.new_child().unwrap();
+    let function = child.eval("(x) => x * 2").unwrap().to_object().unwrap();
+    let value = parent
+        .call_function_with_string_and_object(
+            &function,
+            "21",
+            &parent.eval("({})").unwrap().to_object().unwrap(),
+        )
+        .unwrap();
+    eprintln!("called: {:?}", value.to_string().unwrap());
+}
+
+#[test]
+fn child_realm_microtasks_drain_with_its_own_execution() {
+    let parent = JsRuntime::new().unwrap();
+    let child = parent.new_child().unwrap();
+    child
+        .eval("globalThis.steps = []; Promise.resolve().then(() => steps.push('micro'))")
+        .unwrap();
+    assert_eq!(
+        child.eval("steps.join(',')").unwrap().to_string().unwrap(),
+        "micro",
+    );
+}

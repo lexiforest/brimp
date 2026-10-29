@@ -48,3 +48,18 @@ test('placeholder method surfaces and receiver checks match installed Safari', a
     return failures;
   })()`), []);
 });
+
+test('navigator.gpu exposes WGSL language features as a browser set', async () => {
+  assert.deepEqual(await evaluate(`(() => {
+    const gpu = navigator.gpu;
+    if (!gpu) return ['missing gpu'];
+    const features = gpu.wgslLanguageFeatures;
+    return [
+      features instanceof Set,
+      features.size > 0,
+      typeof features.has === 'function',
+      typeof features.values === 'function',
+      gpu.getPreferredCanvasFormat(),
+    ];
+  })()`), [true, true, true, true, 'bgra8unorm']);
+});

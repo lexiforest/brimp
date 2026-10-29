@@ -7,6 +7,7 @@ pub enum OpaqueJSContextGroup {}
 pub enum OpaqueJSValue {}
 pub enum OpaqueJSString {}
 pub enum OpaqueJSClass {}
+pub enum OpaqueJSPropertyNameArray {}
 
 pub type JSContextRef = *const OpaqueJSContext;
 pub type JSGlobalContextRef = *const OpaqueJSContext;
@@ -15,6 +16,7 @@ pub type JSValueRef = *const OpaqueJSValue;
 pub type JSObjectRef = *mut OpaqueJSValue;
 pub type JSStringRef = *mut OpaqueJSString;
 pub type JSClassRef = *mut OpaqueJSClass;
+pub type JSPropertyNameArrayRef = *mut OpaqueJSPropertyNameArray;
 pub type JSPropertyAttributes = c_uint;
 pub type JSTypedArrayType = c_uint;
 
@@ -214,6 +216,16 @@ unsafe extern "C" {
         exception: *mut JSValueRef,
     );
     pub fn JSObjectSetPrototype(ctx: JSContextRef, object: JSObjectRef, value: JSValueRef);
+    pub fn JSObjectCopyPropertyNames(
+        ctx: JSContextRef,
+        object: JSObjectRef,
+    ) -> JSPropertyNameArrayRef;
+    pub fn JSPropertyNameArrayGetCount(array: JSPropertyNameArrayRef) -> usize;
+    pub fn JSPropertyNameArrayGetNameAtIndex(
+        array: JSPropertyNameArrayRef,
+        index: usize,
+    ) -> JSStringRef;
+    pub fn JSPropertyNameArrayRelease(array: JSPropertyNameArrayRef);
 
     pub fn JSStringCreateWithCharacters(characters: *const u16, num_chars: usize) -> JSStringRef;
     pub fn JSStringGetLength(string: JSStringRef) -> usize;

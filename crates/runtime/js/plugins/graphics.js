@@ -124,11 +124,24 @@ function installGraphics({ global, host, canvas, profile: settings }, options = 
     {
       rgba: [0, 0, 0, 0],
       webgpu: false,
+      wgsl_language_features: [
+        'packed_4x8_integer_dot_product',
+        'pointer_composite_access',
+        'readonly_and_readwrite_storage_textures',
+        'unrestricted_pointer_parameters',
+      ],
     },
     {
       version: 1,
+      fields: {
+        wgsl_language_features: {
+          items: {
+            type: 'string',
+          },
+        },
+      },
       notes:
-        'RGBA is the initial cleared buffer; WebGPU availability does not enable native GPU execution.',
+        'RGBA is the initial cleared buffer; WebGPU availability does not enable native GPU execution. The WGSL language feature list is the browser value exposed by navigator.gpu.',
       capture: async ({ read }) => ({
         rgba: read(() => {
           const gl = document.createElement('canvas').getContext('webgl');
@@ -143,6 +156,9 @@ function installGraphics({ global, host, canvas, profile: settings }, options = 
         }),
         webgpu: await read(async () =>
           navigator.gpu ? Boolean(await navigator.gpu.requestAdapter()) : undefined,
+        ),
+        wgsl_language_features: read(() =>
+          navigator.gpu ? Array.from(navigator.gpu.wgslLanguageFeatures ?? []) : undefined,
         ),
       }),
     },
@@ -899,6 +915,9 @@ function installGraphics({ global, host, canvas, profile: settings }, options = 
     }
   }
   class GPU {
+    constructor() {
+      this.wgslLanguageFeatures = new Set(graphicsProfile.wgsl_language_features ?? []);
+    }
     async requestAdapter() {
       return (options.webgpu ?? graphicsProfile.webgpu) === true ? new GPUAdapter() : null;
     }

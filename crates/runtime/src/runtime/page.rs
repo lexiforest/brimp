@@ -560,6 +560,7 @@ impl Page {
         owners.insert("navigator".into(), "profile".into());
         owners.insert("screen".into(), "profile".into());
         log.set_owners(owners);
+        log.set_shape_manifest(&self.bindings.shape_manifest());
         let stack = log.stack();
         let recursive = log.mode() == super::diagnostics::TraceMode::Recursive;
         self.js.set_global_function("__brimpTrace", move |call| {
@@ -593,6 +594,11 @@ impl Page {
                 .trace_internal_controls(&self.js, &controls.to_object()?)?;
         }
         Ok(())
+    }
+
+    pub(crate) fn shape_manifest(&self) -> serde_json::Value {
+        serde_json::from_str(&self.bindings.shape_manifest())
+            .unwrap_or_else(|_| serde_json::json!({"format":"brimp-shape","version":1,"claims":{}}))
     }
 
     pub(crate) fn diagnostics(

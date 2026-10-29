@@ -1,5 +1,5 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::{HashMap, VecDeque},
     rc::Rc,
     sync::{Arc, Mutex},
@@ -66,6 +66,7 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/storage_host.js"),
     include_str!("../../js/web_apis/scheduling.js"),
     include_str!("../../js/web_apis/install.js"),
+    include_str!("../../js/web_apis/shape_placeholders.js"),
     "\n})();\n",
     include_str!("../../js/web_apis/geometry.js"),
     include_str!("../../js/web_apis/css-typed-om.js"),
@@ -92,6 +93,9 @@ pub struct PendingFetch {
     pub headers_json: String,
     pub body: Option<Vec<u8>>,
     pub streaming: bool,
+    /// The issuing document's URL when it is not the page's own document
+    /// (frame scripts). Fetch metadata and same-origin checks use it.
+    pub referrer: Option<String>,
 }
 
 pub enum PendingWebSocketOperation {
@@ -240,6 +244,7 @@ pub struct BindingRuntime {
     parser_mutations: ProtectedJsObject,
     script_controller: ProtectedJsObject,
     exposure_finalizer: ProtectedJsObject,
+    shape_manifest: RefCell<String>,
     window_names: ProtectedJsObject,
     document_sink: ProtectedJsObject,
 }
@@ -577,6 +582,10 @@ struct BindingState {
     streaming: Rc<RefCell<StreamingQueue>>,
     websocket_delivery: RefCell<Option<ProtectedJsObject>>,
     fetch_stream_delivery: RefCell<Option<ProtectedJsObject>>,
+    // One script realm per frame element, created on first access. Realms are
+    // VM siblings of the page realm: they share values but keep their own globals.
+    frame_realms: RefCell<HashMap<u64, Rc<JsRuntime>>>,
+    next_frame_realm: Cell<u64>,
 }
 
 struct Prototypes {
@@ -636,6 +645,8 @@ impl BindingRuntime {
             streaming: queues.streaming,
             websocket_delivery: RefCell::new(None),
             fetch_stream_delivery: RefCell::new(None),
+            frame_realms: RefCell::new(HashMap::new()),
+            next_frame_realm: Cell::new(1),
         });
         let callback_state = Rc::clone(&state);
         runtime.set_global_function("__brimp", move |call| dispatch(&callback_state, &call))?;
@@ -643,6 +654,7 @@ impl BindingRuntime {
         runtime.eval(include_str!("../../js/vendor/core.bundle.js"))?;
         runtime.eval(include_str!("../../js/web_apis/locks.js"))?;
         runtime.eval(include_str!("../../js/vendor/storage.bundle.js"))?;
+        runtime.eval(include_str!("../../js/internal/storage_profile.js"))?;
         let streaming_state = Rc::clone(&state);
         runtime.set_global_function("__brimpStreamingHost", move |call| {
             dispatch(&streaming_state, &call)
@@ -815,6 +827,7 @@ impl BindingRuntime {
             parser_mutations,
             script_controller,
             exposure_finalizer,
+            shape_manifest: RefCell::new(String::new()),
             window_names,
             document_sink,
         };
@@ -834,7 +847,15 @@ impl BindingRuntime {
 
     pub(crate) fn finalize_exposure(&self, runtime: &JsRuntime) -> Result<(), JsException> {
         runtime.call_function(&self.exposure_finalizer)?;
+        let manifest = runtime
+            .eval("globalThis.__brimpShapeManifest")?
+            .to_string()?;
+        runtime.eval("delete globalThis.__brimpShapeManifest")?;
+        *self.shape_manifest.borrow_mut() = manifest;
         Ok(())
+    }
+    pub(crate) fn shape_manifest(&self) -> String {
+        self.shape_manifest.borrow().clone()
     }
 
     pub(crate) fn trace_internal_controls(
@@ -990,6 +1011,40 @@ fn dispatch_operation(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "frameRealmCreate" => {
+            let overrides = required_object(call, 1, "frame overrides")?;
+            let realm = Rc::new(call.child_runtime()?);
+            realm.set_global_self("window").map_err(err)?;
+            realm.set_global_self("self").map_err(err)?;
+            realm.set_global_self("frames").map_err(err)?;
+            realm.copy_properties_from(overrides, &[]).map_err(err)?;
+            let id = state.next_frame_realm.get();
+            state.next_frame_realm.set(id + 1);
+            let global = realm.global_object();
+            state.frame_realms.borrow_mut().insert(id, realm);
+            call.make_value_array(vec![
+                NativeValue::Number(id as f64),
+                NativeValue::Object(global),
+            ])
+            .map(NativeValue::ProtectedObject)
+        }
+        "frameRealmEval" => {
+            let id = call
+                .argument(1)
+                .ok_or_else(|| NativeError::new("missing frame realm id"))?
+                .to_number()? as u64;
+            let source = required_string(call, 2, "frame script")?;
+            let realm = state
+                .frame_realms
+                .borrow()
+                .get(&id)
+                .cloned()
+                .ok_or_else(|| NativeError::new("unknown frame realm"))?;
+            // Do not hold the realm map across evaluation: frame code can create
+            // nested frames, which inserts into the same map.
+            realm.eval(&source).map_err(err)?;
+            Ok(NativeValue::Undefined)
+        }
         "mutationObserved" => Ok(NativeValue::Boolean(state.events.has_listener("mutation"))),
         "mutationNode" => node_value(
             state,

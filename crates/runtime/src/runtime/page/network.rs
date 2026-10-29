@@ -349,7 +349,7 @@ impl Page {
             let value = http::HeaderValue::from_str(&value).map_err(|error| error.to_string())?;
             request.headers.append(name, value);
         }
-        self.add_fetch_metadata(&mut request);
+        self.add_fetch_metadata(&mut request, pending.referrer.as_deref());
         request.body = pending.body;
         Ok(request)
     }
@@ -357,11 +357,15 @@ impl Page {
     /// Headers a browser attaches to a script-issued request (fetch and XHR).
     /// Session identity defaults only fill gaps, so these take precedence over
     /// the document-oriented Accept and leave explicit script values alone.
-    fn add_fetch_metadata(&self, request: &mut ResourceRequest) {
-        let document_url = self
-            .browsing_context
-            .current_url()
-            .and_then(|url| url::Url::parse(&url).ok());
+    fn add_fetch_metadata(&self, request: &mut ResourceRequest, referrer: Option<&str>) {
+        // Frame scripts issue requests for their own document, not the page's.
+        let document_url = referrer
+            .and_then(|url| url::Url::parse(url).ok())
+            .or_else(|| {
+                self.browsing_context
+                    .current_url()
+                    .and_then(|url| url::Url::parse(&url).ok())
+            });
         let target = url::Url::parse(&request.url).ok();
         let site = match (document_url.as_ref(), target.as_ref()) {
             (None, _) => "none",

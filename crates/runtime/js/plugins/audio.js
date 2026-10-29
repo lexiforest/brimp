@@ -446,10 +446,106 @@ function installAudio({ global, host, profile: settings }, options = {}) {
       );
     }
   }
-  // Silent engine: utterances are accepted and dropped and there are no voices
-  // to enumerate, but the callable surface stays because scripts probe it.
+  const speechProfile = settings.values(
+    'speech',
+    {
+      voices: [],
+    },
+    {
+      version: 1,
+      fields: {
+        voices: {
+          items: {
+            type: 'object',
+            additionalProperties: {
+              type: 'json',
+            },
+          },
+        },
+      },
+      notes:
+        'Installed voice list captured from the claimed browser. Speech output and the utterance queue remain local placeholders.',
+      capture: async ({ read }) => {
+        const synthesis = globalThis.speechSynthesis;
+        const list = () =>
+          Array.from(synthesis?.getVoices?.() ?? [], (voice) => ({
+            voiceURI: voice.voiceURI,
+            name: voice.name,
+            lang: voice.lang,
+            localService: voice.localService,
+            default: voice.default,
+          }));
+        return {
+          voices: await read(async () => {
+            if (!synthesis) return undefined;
+            if (synthesis.getVoices().length > 0) return list();
+            // Safari publishes its installed voices after the first call.
+            await new Promise((resolve) => {
+              const timer = setTimeout(resolve, 1500);
+              synthesis.addEventListener(
+                'voiceschanged',
+                () => {
+                  clearTimeout(timer);
+                  resolve();
+                },
+                { once: true },
+              );
+            });
+            return list();
+          }),
+        };
+      },
+    },
+  );
+
+  const voiceToken = Symbol('SpeechSynthesisVoice construction');
+  class SpeechSynthesisVoice {
+    #voice;
+    constructor(token, voice) {
+      if (token !== voiceToken) throw new TypeError('Illegal constructor');
+      this.#voice = voice;
+    }
+    get voiceURI() {
+      return this.#voice.voiceURI;
+    }
+    get name() {
+      return this.#voice.name;
+    }
+    get lang() {
+      return this.#voice.lang;
+    }
+    get localService() {
+      return this.#voice.localService;
+    }
+    get default() {
+      return this.#voice.default;
+    }
+  }
+  Object.defineProperty(SpeechSynthesisVoice.prototype, Symbol.toStringTag, {
+    value: 'SpeechSynthesisVoice',
+    configurable: true,
+  });
+  Object.defineProperty(global, 'SpeechSynthesisVoice', {
+    value: SpeechSynthesisVoice,
+    writable: true,
+    configurable: true,
+  });
+  const installedVoices = speechProfile.voices.map(
+    (voice) =>
+      new SpeechSynthesisVoice(voiceToken, {
+        voiceURI: String(voice.voiceURI ?? voice.name ?? ''),
+        name: String(voice.name ?? ''),
+        lang: String(voice.lang ?? ''),
+        localService: Boolean(voice.localService ?? true),
+        default: Boolean(voice.default ?? false),
+      }),
+  );
+  // Silent engine: utterances are accepted and dropped. The captured voice list
+  // is published on the first getVoices() call, as Safari does after startup.
   const speechSynthesisHandlers = new WeakMap();
   class SpeechSynthesis extends EventTarget {
+    #published = false;
+    #scheduled = false;
     constructor() {
       super();
     }
@@ -467,6 +563,14 @@ function installAudio({ global, host, profile: settings }, options = {}) {
     pause() {}
     resume() {}
     getVoices() {
+      if (this.#published) return installedVoices.slice();
+      if (!this.#scheduled) {
+        this.#scheduled = true;
+        setTimeout(() => {
+          this.#published = true;
+          this.dispatchEvent(new Event('voiceschanged'));
+        }, 0);
+      }
       return [];
     }
   }

@@ -1,5 +1,6 @@
 pub mod bridge;
 mod cancellation;
+mod canvas;
 pub mod clock;
 pub mod diagnostics;
 mod error;

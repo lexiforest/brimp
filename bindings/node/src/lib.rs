@@ -165,6 +165,11 @@ impl NativePageBinding {
         blocking(move || page.profile_report()).await
     }
     #[napi]
+    pub async fn shape_manifest(&self) -> Result<Value> {
+        let page = self.inner.clone();
+        blocking(move || page.shape_manifest()).await
+    }
+    #[napi]
     pub async fn take_diagnostics(&self) -> Result<Value> {
         let page = self.inner.clone();
         blocking(move || page.take_diagnostics()).await

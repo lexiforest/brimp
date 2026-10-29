@@ -365,6 +365,9 @@ function __sheetForOwner(owner) {
     return null;
   }
   const source = owner instanceof HTMLStyleElement ? owner.textContent : owner.href;
+  // A receiver outside the two reflected element interfaces has no sheet; the
+  // getter is shared with frame documents, whose owners can arrive unlinked.
+  if (source === undefined) return null;
   let entry = __ownerSheets.get(owner);
   if (entry?.source === source) {
     if (entry.sheet && entry.media !== owner.media) {

@@ -12,7 +12,20 @@ export interface BrowserProfile {
 export interface DiagnosticsOptions { mode?: 'api' | 'recursive'; path?: string; include?: string[]; capacity?: number; stack?: boolean; }
 export interface TraceRecord { sequence: number; pageId: number; realmId: number; elapsedMs: number; kind: string; path: string; outcome: string; stack: string | null; details: {layer?: 'recursive'; note?: string; arguments?: JSONValue[]; argumentCount?: number; target?: string | null; property?: string | null} | null; }
 export interface DiagnosticCoverage { enabled: boolean; mode: 'api' | 'recursive'; include: string[]; limitations: string[]; }
-export interface DiagnosticBatch { records: TraceRecord[]; dropped: number; writeError: string | null; coverage: DiagnosticCoverage; }
+export interface ShapeDifference {
+  kind: string; path: string; property: string | null;
+  expected: unknown; observed: unknown; message: string; sequence: number;
+}
+export interface ShapeClaim {
+  type: string; kind: string; hasValue: boolean; valueType: string;
+  writable: boolean; enumerable: boolean; configurable: boolean;
+  hasGet: boolean; hasSet: boolean; native: boolean;
+  name: string | null; length: number | null; property: string | null;
+}
+export interface ShapeManifest {
+  format: 'brimp-shape'; version: 1; claims: Record<string, ShapeClaim>;
+}
+export interface DiagnosticBatch { records: TraceRecord[]; dropped: number; writeError: string | null; coverage: DiagnosticCoverage; shapeDifferences: ShapeDifference[]; }
 export interface DependencyUsage {
   layer: 'api' | 'native' | 'reflection' | 'recursive'; path: string; kind: string;
   target: string | null; property: string | null; count: number; throws: number;
@@ -20,6 +33,7 @@ export interface DependencyUsage {
 export interface DiagnosticSummary {
   dependencies: DependencyUsage[]; retained: number; dropped: number;
   writeError: string | null; coverage: DiagnosticCoverage;
+  shapeDifferences: ShapeDifference[];
 }
 export interface SessionOptions {
   /** Persist origin localStorage, CacheStorage and IndexedDB in this file. */
@@ -110,6 +124,8 @@ export interface ProfileReport {
 }
 export class Page extends Requests {
   profileContract(): Promise<ProfileContract>;
+  /** Registered runtime API shape claims, used to generate a browser capture plugin. */
+  shapeManifest(): Promise<ShapeManifest>;
   profileReport(): Promise<ProfileReport>;
   advanceTime(milliseconds: number, options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
   runPendingTasks(options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;

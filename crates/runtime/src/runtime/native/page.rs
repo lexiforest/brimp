@@ -73,6 +73,13 @@ impl NativePage {
         };
         Ok(value)
     }
+    /// Describe the shape claims registered by installed core APIs and plugins.
+    pub fn shape_manifest(&self) -> Result<Value, AutomationError> {
+        let OperationResult::Value(value) = self.operation(Operation::ShapeManifest)? else {
+            unreachable!()
+        };
+        Ok(value)
+    }
     pub fn take_diagnostics(&self) -> Result<Value, AutomationError> {
         self.diagnostics(DiagnosticsView::Take)
     }

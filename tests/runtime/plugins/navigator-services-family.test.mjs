@@ -29,7 +29,7 @@ test('navigator keeps common metadata in core and optional service families out 
 test('service placeholders support ignored-result calls without callbacks, UI or worker startup', async () => {
   assert.deepEqual(await evaluate(`(async () => {
     const families={clipboard:['read','readText','write','writeText'],credentials:['create','get','preventSilentAccess','store'],
-      geolocation:['clearWatch','getCurrentPosition','watchPosition'],mediaCapabilities:['decodingInfo'],
+      geolocation:['clearWatch','getCurrentPosition','watchPosition'],
       mediaSession:['setActionHandler','setCameraActive','setMicrophoneActive','setPositionState'],
       serviceWorker:['getRegistration','getRegistrations','register','startMessages'],wakeLock:['request'],
       mediaDevices:['getUserMedia','getDisplayMedia']};
@@ -39,6 +39,8 @@ test('service placeholders support ignored-result calls without callbacks, UI or
       for(const method of methods)results.push(service[method](()=>callbacks++)===undefined);
     }
     for(const method of ['canShare','getGamepads','requestMediaKeySystemAccess','share'])results.push(navigator[method]()===undefined);
+    const decoding=navigator.mediaCapabilities.decodingInfo({type:'file',audio:{contentType:'audio/mp4; codecs="mp4a.40.2"'}});
+    results.push(decoding instanceof Promise,(await decoding).supported===false);
     const initial=[navigator.mediaSession.metadata,navigator.mediaSession.playbackState,navigator.serviceWorker.controller];
     const metadata={title:'local'};navigator.mediaSession.metadata=metadata;navigator.mediaSession.playbackState='playing';
     navigator.serviceWorker.ready.then(()=>ready=true);

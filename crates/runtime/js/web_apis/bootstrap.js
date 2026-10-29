@@ -315,10 +315,152 @@ function __detectNativeStyle() {
     typeof agent === 'string' && /Chrome\/|Chromium\/|Edg\//.test(agent) ? 'chrome' : 'webkit';
 }
 
+function __normalizeWebIdlShape() {
+  const constant = /^[A-Z][A-Z0-9_]*$/;
+  const normalize = (object, prototype = false) => {
+    if (object === null || (typeof object !== 'object' && typeof object !== 'function')) return;
+    for (const key of Reflect.ownKeys(object)) {
+      if (typeof key !== 'string' || key === 'constructor') continue;
+      if (prototype && (key === 'length' || key === 'name' || key === 'prototype')) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(object, key);
+      if (descriptor === undefined || !descriptor.configurable) continue;
+      const next = { ...descriptor };
+      if ('value' in descriptor && typeof descriptor.value === 'function') {
+        if (!prototype && (key === 'length' || key === 'name' || key === 'prototype')) continue;
+        next.enumerable = true;
+        if (constant.test(key) && !prototype) {
+          next.writable = false;
+          next.configurable = false;
+        }
+      } else if (constant.test(key) && 'value' in descriptor) {
+        next.enumerable = true;
+        next.writable = false;
+        next.configurable = false;
+      } else if (descriptor.get || descriptor.set) {
+        next.enumerable = true;
+      }
+      if (
+        next.enumerable !== descriptor.enumerable ||
+        next.writable !== descriptor.writable ||
+        next.configurable !== descriptor.configurable
+      )
+        Object.defineProperty(object, key, next);
+    }
+  };
+  for (const key of Reflect.ownKeys(globalThis)) {
+    if (typeof key !== 'string' || key.startsWith('__') || __initialGlobalNames.has(key)) continue;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+    if (descriptor === undefined) continue;
+    const value = 'value' in descriptor ? descriptor.value : undefined;
+    if (
+      typeof value === 'function' &&
+      /^[A-Z]/.test(key) &&
+      descriptor.configurable &&
+      descriptor.enumerable
+    )
+      Object.defineProperty(globalThis, key, { ...descriptor, enumerable: false });
+    if (typeof value === 'function') {
+      const prototype = Object.getOwnPropertyDescriptor(value, 'prototype')?.value;
+      normalize(prototype, true);
+      normalize(value);
+    } else if (value !== null && typeof value === 'object') {
+      normalize(value);
+    }
+  }
+}
+
+function __buildShapeManifest() {
+  const claims = Object.create(null);
+  const seen = new WeakSet();
+  let count = 0;
+  const describe = (value, descriptor, key) => {
+    const fn = typeof value === 'function';
+    const propertyValue = 'value' in descriptor ? descriptor.value : undefined;
+    return {
+      type: typeof propertyValue,
+      kind:
+        'value' in descriptor
+          ? 'value'
+          : typeof descriptor.get === 'function' && typeof descriptor.set === 'function'
+            ? 'accessor'
+            : typeof descriptor.get === 'function'
+              ? 'get'
+              : typeof descriptor.set === 'function'
+                ? 'set'
+                : 'unknown',
+      hasValue: 'value' in descriptor,
+      valueType: 'value' in descriptor ? typeof descriptor.value : 'undefined',
+      writable: descriptor.writable === true,
+      enumerable: descriptor.enumerable === true,
+      configurable: descriptor.configurable === true,
+      hasGet: typeof descriptor.get === 'function',
+      hasSet: typeof descriptor.set === 'function',
+      native: typeof propertyValue === 'function'
+        ? /\[native code\]/.test(__functionToString.call(propertyValue))
+        : null,
+      name: typeof propertyValue === 'function' ? String(propertyValue.name ?? '') : null,
+      length: typeof propertyValue === 'function' ? Number(propertyValue.length) : null,
+      property: typeof key === 'string' ? key : null,
+    };
+  };
+  const record = (path, descriptor, key) => {
+    if (count >= 20000 || path.length > 512) return;
+    if (path in claims) return;
+    const value = 'value' in descriptor ? descriptor.value : descriptor.get ?? descriptor.set;
+    claims[path] = describe(value, descriptor, key);
+    count++;
+  };
+  const walk = (path, object) => {
+    if (object === null || (typeof object !== 'object' && typeof object !== 'function')) return;
+    if (seen.has(object)) return;
+    seen.add(object);
+    for (const key of Reflect.ownKeys(object)) {
+      if (typeof key !== 'string' || key.startsWith('__')) continue;
+      const descriptor = Object.getOwnPropertyDescriptor(object, key);
+      if (descriptor === undefined) continue;
+      const childPath = `${path}.${key}`;
+      record(childPath, descriptor, key);
+      if (!('value' in descriptor)) continue;
+      const value = descriptor.value;
+      if (value !== null && (typeof value === 'object' || typeof value === 'function')) {
+        walk(childPath, value);
+      }
+    }
+  };
+  const aliases = new Set(['window', 'self', 'globalThis', 'top', 'parent', 'frames', 'opener']);
+  for (const key of Reflect.ownKeys(globalThis)) {
+    if (typeof key !== 'string' || key.startsWith('__') || aliases.has(key)) continue;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+    if (descriptor === undefined) continue;
+    record(`window.${key}`, descriptor, key);
+    if ('value' in descriptor) {
+      const value = descriptor.value;
+      if (value !== null && (typeof value === 'object' || typeof value === 'function')) {
+        walk(`window.${key}`, value);
+      }
+    }
+  }
+  return JSON.stringify({ format: 'brimp-shape', version: 1, claims });
+}
+
 function __finalizeWebIdlInterfaces() {
   const diagnosticsRecursive = globalThis.__brimpDiagnosticsRecursive === true;
   delete globalThis.__brimpDiagnosticsRecursive;
   __detectNativeStyle();
+  if (/Firefox\//.test(globalThis.navigator?.userAgent ?? '')) {
+    globalThis.__brimpInstallShapePlaceholders?.();
+    for (const name of [
+      'webkitRequestAnimationFrame',
+      'webkitCancelAnimationFrame',
+      'VideoTrackList',
+      'WebKitMediaKeyError',
+    ]) {
+      try {
+        delete globalThis[name];
+      } catch {}
+    }
+  }
+  delete globalThis.__brimpInstallShapePlaceholders;
   __installWindowAccessors(diagnosticsRecursive);
   __markConsoleMembers();
   for (const name of Object.getOwnPropertyNames(globalThis)) {
@@ -549,6 +691,13 @@ function __finalizeWebIdlInterfaces() {
       if (descriptor.set) __markWebBuiltin(descriptor.set, key, 'set');
     }
   }
+  __normalizeWebIdlShape();
+  Object.defineProperty(globalThis, '__brimpShapeManifest', {
+    value: __buildShapeManifest(),
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  });
 }
 
 Object.defineProperty(Function.prototype, 'toString', {

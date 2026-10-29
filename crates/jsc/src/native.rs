@@ -44,6 +44,11 @@ impl<'call> NativeCall<'call> {
         self.arguments.len()
     }
 
+    /// Creates a sibling global object (a frame's script realm) in this call's VM.
+    pub fn child_runtime(&self) -> Result<crate::JsRuntime, NativeError> {
+        crate::runtime::new_child_context(self.context).map_err(NativeError::new)
+    }
+
     pub fn make_object_with_prototype(&self, prototype: JsObjectIdentity) -> ProtectedJsObject {
         // SAFETY: this call and the prototype belong to the live callback context.
         unsafe { ProtectedJsObject::with_prototype(self.context, prototype) }
@@ -58,10 +63,11 @@ impl<'call> NativeCall<'call> {
         &self,
         values: &[JsObjectIdentity],
     ) -> Result<ProtectedJsObject, NativeError> {
-        if values.iter().any(|value| value.context() != self.context) {
-            return Err(NativeError::new(
-                "array element belongs to another JSC context",
-            ));
+        if values
+            .iter()
+            .any(|value| !crate::object::same_vm(value.context(), self.context))
+        {
+            return Err(NativeError::new("array element belongs to another JSC VM"));
         }
         let values = values
             .iter()
@@ -367,14 +373,14 @@ impl NativeValue {
                     object
                 }
                 Self::Object(object) => {
-                    if object.context() != context {
-                        return Err(NativeError::new("object belongs to another JSC context"));
+                    if !crate::object::same_vm(object.context(), context) {
+                        return Err(NativeError::new("object belongs to another JSC VM"));
                     }
                     object.as_raw()
                 }
                 Self::ProtectedObject(object) => {
-                    if object.context() != context {
-                        return Err(NativeError::new("object belongs to another JSC context"));
+                    if !crate::object::same_vm(object.context(), context) {
+                        return Err(NativeError::new("object belongs to another JSC VM"));
                     }
                     object.as_raw()
                 }

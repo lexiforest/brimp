@@ -489,6 +489,11 @@ pub(super) fn dispatch(
                     serde_json::from_str::<Vec<u8>>(&value).map_err(err)
                 })
                 .transpose()?;
+            let referrer = call
+                .argument(6)
+                .filter(|value| !value.is_null_or_undefined())
+                .map(|value| value.to_string())
+                .transpose()?;
             let (promise, settlement) = call.make_deferred_promise()?.into_parts();
             let mut fetches = state.fetches.borrow_mut();
             let id = fetches.next_id();
@@ -500,6 +505,7 @@ pub(super) fn dispatch(
                     headers_json,
                     body,
                     streaming: operation == "fetchStream",
+                    referrer,
                 },
                 settlement,
             );

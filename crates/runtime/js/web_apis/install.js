@@ -1176,8 +1176,11 @@ globalThis.requestAnimationFrame = (callback) => {
 globalThis.cancelAnimationFrame = (id) => {
   __animationFrameCallbacks.delete(Number(id));
 };
-globalThis.webkitRequestAnimationFrame = globalThis.requestAnimationFrame;
-globalThis.webkitCancelAnimationFrame = globalThis.cancelAnimationFrame;
+const __isFirefox = /Firefox\//.test(navigator.userAgent);
+if (!__isFirefox) {
+  globalThis.webkitRequestAnimationFrame = globalThis.requestAnimationFrame;
+  globalThis.webkitCancelAnimationFrame = globalThis.cancelAnimationFrame;
+}
 window.setTimeout = globalThis.setTimeout;
 window.clearTimeout = globalThis.clearTimeout;
 window.setInterval = globalThis.setInterval;

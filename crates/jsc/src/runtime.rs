@@ -12,12 +12,14 @@ use std::{
 
 use crate::ffi::{
     JSClassCreate, JSClassDefinition, JSClassRelease, JSContextGetGlobalObject, JSContextGetGroup,
-    JSContextGroupClearExecutionTimeLimit, JSContextGroupSetExecutionTimeLimit, JSContextRef,
-    JSEvaluateScript, JSGarbageCollect, JSGlobalContextCreateInGroup, JSGlobalContextRef,
-    JSGlobalContextRelease, JSObjectCallAsFunction, JSObjectGetProperty, JSObjectMake,
-    JSObjectMakeFunctionWithCallback, JSObjectSetProperty, JSValueIsNull, JSValueIsObject,
-    JSValueIsUndefined, JSValueMakeString, JSValueMakeUndefined, JSValueRef, JSValueToObject,
-    K_JS_PROPERTY_ATTRIBUTE_NONE,
+    JSContextGroupClearExecutionTimeLimit, JSContextGroupRef, JSContextGroupSetExecutionTimeLimit,
+    JSContextRef, JSEvaluateScript, JSGarbageCollect, JSGlobalContextCreateInGroup,
+    JSGlobalContextRef, JSGlobalContextRelease, JSObjectCallAsFunction, JSObjectCopyPropertyNames,
+    JSObjectGetProperty, JSObjectMake, JSObjectMakeFunctionWithCallback, JSObjectRef,
+    JSObjectSetProperty, JSPropertyNameArrayGetCount, JSPropertyNameArrayGetNameAtIndex,
+    JSPropertyNameArrayRelease, JSStringGetCharactersPtr, JSStringGetLength, JSValueIsNull,
+    JSValueIsObject, JSValueIsUndefined, JSValueMakeString, JSValueMakeUndefined, JSValueRef,
+    JSValueToObject, K_JS_PROPERTY_ATTRIBUTE_NONE,
 };
 
 use crate::{
@@ -67,6 +69,8 @@ unsafe extern "C" fn should_terminate(context: JSContextRef, data: *mut std::ffi
 pub struct JsRuntime {
     context: NonNull<crate::ffi::OpaqueJSContext>,
     execution_guard: Box<ExecutionGuard>,
+    // Only the runtime that created the VM owns the group's execution watchdog.
+    owns_group_watchdog: bool,
     _thread_bound: PhantomData<Rc<()>>,
 }
 
@@ -92,50 +96,47 @@ impl JsRuntime {
                 "JavaScriptCore rejected the SharedArrayBuffer runtime option",
             ));
         }
-        let global_definition = JSClassDefinition {
-            version: 0,
-            attributes: 0,
-            class_name: c"Window".as_ptr(),
-            parent_class: ptr::null_mut(),
-            static_values: ptr::null(),
-            static_functions: ptr::null(),
-            initialize: ptr::null(),
-            finalize: ptr::null(),
-            has_property: ptr::null(),
-            get_property: ptr::null(),
-            set_property: ptr::null(),
-            delete_property: ptr::null(),
-            get_property_names: ptr::null(),
-            call_as_function: ptr::null(),
-            call_as_constructor: ptr::null(),
-            has_instance: ptr::null(),
-            convert_to_type: ptr::null(),
-        };
-        // SAFETY: the definition contains only null callbacks and static data. The
-        // context retains the class, so the caller's reference can be released.
-        let global_class = unsafe { JSClassCreate(&global_definition) };
-        if global_class.is_null() {
-            return Err(JsException::from_message(
-                "JavaScriptCore failed to create the global object class",
-            ));
-        }
         // Request a unique VM explicitly. JSGlobalContextCreate can select a
         // legacy process-shared VM on Darwin when loaded by Node/Python; that
         // allows another page owner to drain this page's microtask queue.
-        // SAFETY: null creates a new group; global_class is live.
-        let context = unsafe { JSGlobalContextCreateInGroup(ptr::null(), global_class) };
-        // SAFETY: the context retained its own reference during creation.
-        unsafe { JSClassRelease(global_class) };
-        let context = NonNull::new(context.cast_mut()).ok_or_else(|| {
-            JsException::from_message("JavaScriptCore failed to create a global context")
-        })?;
+        let context = create_global_context(ptr::null())?;
         let runtime = Self {
             context,
             execution_guard: Box::default(),
+            owns_group_watchdog: true,
             _thread_bound: PhantomData,
         };
         runtime.set_console_callback(|message| eprintln!("{message}"))?;
         Ok(runtime)
+    }
+
+    /// Creates a second global object (a frame's script realm) in this VM.
+    ///
+    /// Values and functions cross between the two contexts because they share a
+    /// VM, while each context keeps its own global scope: `var` and `function`
+    /// declarations land on the child's global object and stay invisible to the
+    /// parent. The child does not own the group's execution watchdog, so the
+    /// parent page's deadline and interrupt keep applying to frame scripts.
+    pub fn new_child(&self) -> Result<Self, JsException> {
+        new_child_context(self.as_raw())
+    }
+
+    /// The global object of this runtime, as an identity usable by sibling
+    /// contexts in the same VM.
+    pub fn global_object(&self) -> crate::JsObjectIdentity {
+        // SAFETY: the context retains its live global object.
+        let global = unsafe { JSContextGetGlobalObject(self.as_raw()) };
+        // SAFETY: the object belongs to this live context.
+        unsafe { crate::JsObjectIdentity::from_raw(self.as_raw(), global) }
+    }
+
+    /// Sets a property of this runtime's global object to the global object
+    /// itself, as a browser's `window`/`self`/`frames` do.
+    pub fn set_global_self(&self, name: &str) -> Result<(), JsException> {
+        let name = JsString::new(name)?;
+        // SAFETY: the context owns its live global object.
+        let global = unsafe { JSContextGetGlobalObject(self.as_raw()) };
+        set_property(self.as_raw(), global, &name, global as JSValueRef)
     }
 
     pub fn eval(&self, source: &str) -> Result<JsValue<'_>, JsException> {
@@ -315,6 +316,54 @@ impl JsRuntime {
         unsafe { ProtectedJsObject::with_prototype(self.as_raw(), prototype) }
     }
 
+    /// Copies the own properties of `source` (an object in a sibling context of
+    /// the same VM) onto this runtime's global object. Frame setup uses this to
+    /// give a child realm the parent's interface objects.
+    pub fn copy_properties_from(
+        &self,
+        source: crate::JsObjectIdentity,
+        skip: &[&str],
+    ) -> Result<Vec<String>, JsException> {
+        let names = property_names(source.context(), source.as_raw())?;
+        let mut copied = Vec::new();
+        for name in names {
+            if skip.contains(&name.as_str()) || name.starts_with("__brimp") {
+                continue;
+            }
+            let key = JsString::new(&name)?;
+            let mut exception = ptr::null();
+            // SAFETY: the source object is live; both contexts share one VM.
+            let value = unsafe {
+                JSObjectGetProperty(
+                    source.context(),
+                    source.as_raw(),
+                    key.as_raw(),
+                    &mut exception,
+                )
+            };
+            if !exception.is_null() {
+                // SAFETY: the exception belongs to the source context.
+                return Err(exception_from_raw(source.context(), exception));
+            }
+            let mut exception = ptr::null();
+            // SAFETY: the target global is live; a sibling-context value is valid here.
+            unsafe {
+                JSObjectSetProperty(
+                    self.as_raw(),
+                    JSContextGetGlobalObject(self.as_raw()),
+                    key.as_raw(),
+                    value,
+                    K_JS_PROPERTY_ATTRIBUTE_NONE,
+                    &mut exception,
+                );
+            }
+            if exception.is_null() {
+                copied.push(name);
+            }
+        }
+        Ok(copied)
+    }
+
     pub fn set_global_object(&self, name: &str, object: &JsObject<'_>) -> Result<(), JsException> {
         let name = JsString::new(name)?;
         // SAFETY: this context owns its live global object.
@@ -417,20 +466,114 @@ impl JsRuntime {
 
 impl Drop for JsRuntime {
     fn drop(&mut self) {
-        CONSOLE_CALLBACKS.with(|callbacks| {
-            callbacks.borrow_mut().remove(&(self.as_raw() as usize));
+        let context = self.as_raw() as usize;
+        // Callbacks capture runtime state (and frame realms capture child
+        // runtimes), so drop them after releasing each callback map's borrow.
+        let console = CONSOLE_CALLBACKS.with(|callbacks| callbacks.borrow_mut().remove(&context));
+        let native: Vec<NativeCallback> = NATIVE_CALLBACKS.with(|callbacks| {
+            let mut callbacks = callbacks.borrow_mut();
+            let keys: Vec<(usize, usize)> = callbacks
+                .keys()
+                .filter(|(owner, _)| *owner == context)
+                .copied()
+                .collect();
+            keys.into_iter()
+                .filter_map(|key| callbacks.remove(&key))
+                .collect()
         });
-        NATIVE_CALLBACKS.with(|callbacks| {
-            callbacks
-                .borrow_mut()
-                .retain(|(context, _), _| *context != self.as_raw() as usize);
-        });
+        drop(console);
+        drop(native);
         // SAFETY: this runtime uniquely owns the global context.
         unsafe {
-            JSContextGroupClearExecutionTimeLimit(JSContextGetGroup(self.as_raw()));
+            if self.owns_group_watchdog {
+                JSContextGroupClearExecutionTimeLimit(JSContextGetGroup(self.as_raw()));
+            }
             JSGlobalContextRelease(self.as_raw());
         };
     }
+}
+
+pub(crate) fn new_child_context(parent: JSContextRef) -> Result<JsRuntime, JsException> {
+    // SAFETY: the parent context is live and its group outlives the child.
+    let group = unsafe { JSContextGetGroup(parent) };
+    let context = create_global_context(group)?;
+    Ok(JsRuntime {
+        context,
+        execution_guard: Box::default(),
+        owns_group_watchdog: false,
+        _thread_bound: PhantomData,
+    })
+}
+
+fn create_global_context(
+    group: JSContextGroupRef,
+) -> Result<NonNull<crate::ffi::OpaqueJSContext>, JsException> {
+    let global_definition = JSClassDefinition {
+        version: 0,
+        attributes: 0,
+        class_name: c"Window".as_ptr(),
+        parent_class: ptr::null_mut(),
+        static_values: ptr::null(),
+        static_functions: ptr::null(),
+        initialize: ptr::null(),
+        finalize: ptr::null(),
+        has_property: ptr::null(),
+        get_property: ptr::null(),
+        set_property: ptr::null(),
+        delete_property: ptr::null(),
+        get_property_names: ptr::null(),
+        call_as_function: ptr::null(),
+        call_as_constructor: ptr::null(),
+        has_instance: ptr::null(),
+        convert_to_type: ptr::null(),
+    };
+    // SAFETY: the definition contains only null callbacks and static data. The
+    // context retains the class, so the caller's reference can be released.
+    let global_class = unsafe { JSClassCreate(&global_definition) };
+    if global_class.is_null() {
+        return Err(JsException::from_message(
+            "JavaScriptCore failed to create the global object class",
+        ));
+    }
+    // SAFETY: a null group creates a new VM; a live group shares it. The class is live.
+    let context = unsafe { JSGlobalContextCreateInGroup(group, global_class) };
+    // SAFETY: the context retained its own reference during creation.
+    unsafe { JSClassRelease(global_class) };
+    NonNull::new(context.cast_mut()).ok_or_else(|| {
+        JsException::from_message("JavaScriptCore failed to create a global context")
+    })
+}
+
+fn property_names(context: JSContextRef, object: JSObjectRef) -> Result<Vec<String>, JsException> {
+    // SAFETY: the context and object are live and belong to the same VM.
+    let names = unsafe { JSObjectCopyPropertyNames(context, object) };
+    if names.is_null() {
+        return Err(JsException::from_message(
+            "JavaScriptCore returned no property names",
+        ));
+    }
+    // SAFETY: the copied array is live until released below.
+    let count = unsafe { JSPropertyNameArrayGetCount(names) };
+    let mut result = Vec::with_capacity(count);
+    for index in 0..count {
+        // SAFETY: the index is in range and the name array owns the string.
+        let name = unsafe { JSPropertyNameArrayGetNameAtIndex(names, index) };
+        if name.is_null() {
+            continue;
+        }
+        // SAFETY: the string is live and its UTF-16 storage is readable for its length.
+        let length = unsafe { JSStringGetLength(name) };
+        let characters = unsafe { JSStringGetCharactersPtr(name) };
+        if characters.is_null() {
+            continue;
+        }
+        // SAFETY: JSC guarantees the pointer covers `length` UTF-16 code units until the array is released.
+        let units = unsafe { slice::from_raw_parts(characters, length) };
+        result.push(String::from_utf16_lossy(units));
+    }
+    // SAFETY: the array was returned by JSObjectCopyPropertyNames above.
+    unsafe { JSPropertyNameArrayRelease(names) };
+    Ok(result)
 }
 
 fn set_property(

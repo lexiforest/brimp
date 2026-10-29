@@ -41,10 +41,14 @@ function installDiagnostics(stackEnabled, installRecursive) {
         if (metadata.note) details.note = metadata.note;
         if (metadata.present !== undefined) details.present = metadata.present;
         if (metadata.failure !== undefined) details.failure = metadata.failure;
+        if (metadata.native !== undefined) details.native = metadata.native;
+        if (metadata.descriptor !== undefined) details.descriptor = metadata.descriptor;
+        if (metadata.names !== undefined) details.names = metadata.names;
       }
       if (kind === 'reflection') {
-        details.target = paths.get(args[0]) ?? null;
-        details.property = typeof args[1] === 'string' ? apply(substring, args[1], [0, 256]) : null;
+        if (details.target === undefined) details.target = paths.get(args[0]) ?? null;
+        if (details.property === undefined)
+          details.property = typeof args[1] === 'string' ? apply(substring, args[1], [0, 256]) : null;
       }
       emit(
         kind,
@@ -59,7 +63,8 @@ function installDiagnostics(stackEnabled, installRecursive) {
   }
   if (installRecursive) return installRecursive(report);
   function wrap(fn, kind, path) {
-    return new Proxy(fn, {
+    let wrapped;
+    wrapped = new Proxy(fn, {
       apply(target, receiver, args) {
         try {
           const result = apply(target, receiver, args);
@@ -70,7 +75,47 @@ function installDiagnostics(stackEnabled, installRecursive) {
             !paths.has(result)
           )
             paths.set(result, path);
-          report(kind, path, result === null ? 'null' : typeof result, args);
+          let metadata = null;
+          if (path === 'Function.prototype.toString' && typeof result === 'string') {
+            metadata = {
+              native: /\[native code\]/.test(result),
+              target: paths.get(args[0]) ?? null,
+              property: 'toString',
+            };
+          } else if (
+            (path === 'Object.getOwnPropertyDescriptor' ||
+              path === 'Reflect.getOwnPropertyDescriptor') &&
+            result !== null &&
+            typeof result === 'object'
+          ) {
+            metadata = {
+              target: paths.get(args[0]) ?? null,
+              property: typeof args[1] === 'string' ? args[1] : null,
+              descriptor: {
+                hasValue: 'value' in result,
+                valueType: typeof result.value,
+                writable: result.writable === true,
+                enumerable: result.enumerable === true,
+                configurable: result.configurable === true,
+                hasGet: typeof result.get === 'function',
+                hasSet: typeof result.set === 'function',
+              },
+            };
+          } else if (
+            (path === 'Object.getOwnPropertyNames' ||
+              path === 'Object.keys' ||
+              path === 'Reflect.ownKeys') &&
+            Array.isArray(result)
+          ) {
+            metadata = {
+              target: paths.get(args[0]) ?? null,
+              names: result
+                .filter((name) => typeof name === 'string')
+                .slice(0, 64)
+                .map((name) => apply(substring, name, [0, 128])),
+            };
+          }
+          report(kind, path, result === null ? 'null' : typeof result, args, metadata);
           return result;
         } catch (error) {
           report(kind, path, 'throw', args);
@@ -89,6 +134,8 @@ function installDiagnostics(stackEnabled, installRecursive) {
         }
       },
     });
+    paths.set(wrapped, path);
+    return wrapped;
   }
   function instrument(object, path) {
     if (!object || visited.has(object)) return;

@@ -238,6 +238,7 @@ globalThis.fetch = (input, init = {}) => {
     request.method,
     JSON.stringify([...request.headers]),
     request.__bodyBytes === null ? null : JSON.stringify(Array.from(request.__bodyBytes)),
+    request.referrer === 'about:client' ? null : request.referrer,
   ).then(
     (serialized) => {
       const payload = JSON.parse(serialized);
@@ -271,6 +272,8 @@ function __xhrProgressEvent(type, loaded = 0, total = 0) {
     total,
   });
 }
+
+const __xhrReferrers = new WeakMap();
 
 class XMLHttpRequest extends XMLHttpRequestEventTarget {
   constructor() {
@@ -340,6 +343,13 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
     this.dispatchEvent(new Event('readystatechange'));
   }
 
+  // Frame realms resolve relative URLs and the referrer against their own
+  // document, not the page's.
+  __brimpSetReferrer(value) {
+    if (value == null) __xhrReferrers.delete(this);
+    else __xhrReferrers.set(this, String(value));
+  }
+
   setRequestHeader(name, value) {
     if (this.readyState !== XMLHttpRequest.OPENED || this.__sent) {
       throw new DOMException('The object is in an invalid state', 'InvalidStateError');
@@ -395,6 +405,7 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
       body,
       credentials: this.withCredentials ? 'include' : 'same-origin',
       signal: controller.signal,
+      referrer: __xhrReferrers.get(this),
     })
       .then(async (response) => {
         if (generation !== this.__generation || !this.__sent) return;

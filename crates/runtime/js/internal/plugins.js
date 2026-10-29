@@ -2,6 +2,8 @@ function installPlugins(descriptors, codec) {
   const profiles = globalThis.__brimpProfileRegistry;
   const native = globalThis.__brimpPluginHost;
   delete globalThis.__brimpPluginHost;
+  const nativeSync = globalThis.__brimpPluginHostSync;
+  delete globalThis.__brimpPluginHostSync;
   const canvas = globalThis.__brimpCanvasBackends;
   delete globalThis.__brimpCanvasBackends;
   const PublicError = DOMException;
@@ -56,6 +58,25 @@ function installPlugins(descriptors, codec) {
                   throw new PublicError('The operation failed.', 'OperationError');
                 },
               );
+          },
+          callSync(name, ...args) {
+            if (typeof nativeSync !== 'function')
+              throw new PublicError('Synchronous host calls are unavailable.', 'OperationError');
+            try {
+              codec.checkCall();
+            } catch (error) {
+              throw error;
+            }
+            if (closed && !disposing) throw new Error('plugin realm was closed');
+            if (!allowed.has(name)) throw new Error(`unregistered host handler: ${name}`);
+            const wire = encode(args);
+            try {
+              const result = nativeSync(index, name, JSON.stringify(wire.value));
+              return decode(JSON.parse(result), index);
+            } catch (error) {
+              codec.release(wire);
+              throw error;
+            }
           },
           subscribe(channel, listener) {
             if (closed) throw new Error('plugin realm was closed');

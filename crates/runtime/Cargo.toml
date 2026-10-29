@@ -24,6 +24,7 @@ http = { version = "1" }
 indexmap = { version = "2", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
+skia-safe = { version = "0.99", default-features = false, features = ["binary-cache"] }
 swc_common = { version = "26" }
 swc_ecma_ast = { version = "29" }
 swc_ecma_codegen = { version = "32" }

@@ -14,6 +14,8 @@ use std::{
     },
 };
 
+use std::time::Duration;
+
 const MAX_PENDING_CALLS: usize = 1024;
 const NOTIFICATION_CAPACITY: usize = 256;
 
@@ -204,6 +206,8 @@ impl PluginRuntime {
         let (notify, notifications) = mpsc::sync_channel(NOTIFICATION_CAPACITY);
         let callback_state = state.clone();
         let descriptors = plugins.to_vec();
+        let callback_descriptors = descriptors.clone();
+        let callback_browsing = browsing_context.clone();
         let endpoint = bridge.endpoint();
         js.set_global_function("__brimpPluginHost", move |call| {
             let index = call
@@ -222,7 +226,7 @@ impl PluginRuntime {
             if callback_cancelled.load(Ordering::Acquire) {
                 return Err(NativeError::new("plugin realm is closed"));
             }
-            let plugin = descriptors
+            let plugin = callback_descriptors
                 .get(index)
                 .ok_or_else(|| NativeError::new("unknown plugin"))?;
             let handler = plugin
@@ -250,7 +254,7 @@ impl PluginRuntime {
                     },
                 );
             }
-            let url = browsing_context.current_url();
+            let url = callback_browsing.current_url();
             let origin = url
                 .as_deref()
                 .and_then(|value| url::Url::parse(value).ok())
@@ -283,6 +287,113 @@ impl PluginRuntime {
             // foreign-language object or raw JSC value is sent to the adapter.
             let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler(invocation)));
             Ok(NativeValue::ProtectedObject(promise))
+        })?;
+        if plugins.iter().any(|plugin| plugin.name == "canvas") {
+            js.set_global_function("__brimpCanvas2D", move |call| {
+                let operation = call
+                    .argument(0)
+                    .ok_or_else(|| NativeError::new("missing canvas operation"))?
+                    .to_string()?;
+                let id = call
+                    .argument(1)
+                    .ok_or_else(|| NativeError::new("missing canvas id"))?
+                    .to_number()? as u64;
+                let wire = call
+                    .argument(2)
+                    .ok_or_else(|| NativeError::new("missing canvas arguments"))?
+                    .to_string()?;
+                let values: Vec<serde_json::Value> =
+                    serde_json::from_str(&wire).map_err(NativeError::new)?;
+                let mut arguments: Vec<BridgeValue> =
+                    values.into_iter().map(BridgeValue::from_json).collect();
+                arguments.insert(0, BridgeValue::String(operation));
+                arguments.insert(1, BridgeValue::Number(id as f64));
+                let value =
+                    crate::runtime::canvas::dispatch(&arguments).map_err(NativeError::new)?;
+                Ok(match value {
+                    BridgeValue::Undefined => NativeValue::Undefined,
+                    BridgeValue::Null => NativeValue::Null,
+                    BridgeValue::Boolean(value) => NativeValue::Boolean(value),
+                    BridgeValue::Number(value) => NativeValue::Number(value),
+                    BridgeValue::String(value) => NativeValue::String(value),
+                    BridgeValue::Binary(value) => NativeValue::Bytes(value),
+                    _ => return Err(NativeError::new("unsupported canvas result")),
+                })
+            })?;
+        }
+        let sync_state = state.clone();
+        let sync_descriptors = descriptors.clone();
+        let sync_context = browsing_context.clone();
+        let sync_endpoint = bridge.endpoint();
+        js.set_global_function("__brimpPluginHostSync", move |call| {
+            let index = call
+                .argument(0)
+                .ok_or_else(|| NativeError::new("missing plugin"))?
+                .to_number()? as usize;
+            let name = call
+                .argument(1)
+                .ok_or_else(|| NativeError::new("missing handler"))?
+                .to_string()?;
+            let wire = call
+                .argument(2)
+                .ok_or_else(|| NativeError::new("missing arguments"))?
+                .to_string()?;
+            let cancelled = sync_state.borrow().cancellation.clone();
+            if cancelled.load(Ordering::Acquire) {
+                return Err(NativeError::new("plugin realm is closed"));
+            }
+            let plugin = sync_descriptors
+                .get(index)
+                .ok_or_else(|| NativeError::new("unknown plugin"))?;
+            let handler = plugin
+                .handlers
+                .get(&name)
+                .ok_or_else(|| NativeError::new(format!("unregistered host handler: {name}")))?
+                .clone();
+            let arguments: Vec<BridgeValue> =
+                serde_json::from_str(&wire).map_err(NativeError::new)?;
+            let url = sync_context.current_url();
+            let origin = url
+                .as_deref()
+                .and_then(|value| url::Url::parse(value).ok())
+                .and_then(|value| match value.origin() {
+                    url::Origin::Tuple(..) => Some(value.origin().ascii_serialization()),
+                    url::Origin::Opaque(_) => None,
+                });
+            let (sender, receiver) = mpsc::sync_channel(1);
+            let (notify, _notifications) = mpsc::sync_channel(1);
+            let invocation = HostInvocation {
+                context: HostContext {
+                    session_id,
+                    url,
+                    origin,
+                    page_id,
+                    realm_id,
+                    plugin_name: plugin.name.clone(),
+                    plugin_index: index,
+                    cancelled: cancelled.clone(),
+                    notifications: notify,
+                    wake: std::thread::current(),
+                    bridge: sync_endpoint.clone(),
+                },
+                arguments,
+                completion: HostCompletion {
+                    wake: std::thread::current(),
+                    sender: Some(sender),
+                    cancelled,
+                },
+            };
+            let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler(invocation)));
+            match receiver.recv_timeout(Duration::from_secs(5)) {
+                Ok(Ok(value)) => Ok(NativeValue::String(
+                    serde_json::to_string(&value)
+                        .map_err(|error| NativeError::new(error.to_string()))?,
+                )),
+                Ok(Err(error)) => Err(NativeError::new(error)),
+                Err(_) => Err(NativeError::new(
+                    "synchronous host handler did not complete",
+                )),
+            }
         })?;
         let config = plugins.iter().map(|plugin| serde_json::json!({"name":plugin.name,"source":plugin.source,"handlers":plugin.handlers.keys().collect::<Vec<_>>()})).collect::<Vec<_>>();
         let source = include_str!("../../js/internal/plugins.js");
@@ -403,6 +514,7 @@ impl Drop for PluginRuntime {
 /// Explicit bundled installers. Calling these functions does not enable a plugin globally.
 pub mod bundled {
     use super::Plugin;
+    use crate::runtime::canvas;
     /// Default browser subsystems; extraction and host integrations stay explicit.
     pub fn browser() -> Vec<Plugin> {
         vec![
@@ -450,6 +562,7 @@ pub mod bundled {
                 options
             ),
         )
+        .with_handler("canvas2d", canvas::handler())
     }
     pub fn environment(options: serde_json::Value) -> Plugin {
         Plugin::new(

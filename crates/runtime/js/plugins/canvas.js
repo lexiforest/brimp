@@ -1,4 +1,4 @@
-function installCanvas({ global, canvas, profile: settings }, options = {}) {
+function installCanvas({ global, canvas, host, profile: settings }, options = {}) {
   const profile = globalThis.__brimpProfile;
   const canvasProfile = settings.values(
     'canvas',
@@ -35,6 +35,57 @@ function installCanvas({ global, canvas, profile: settings }, options = {}) {
   const alpha = new WeakMap();
   let nextResource = 1;
   const surfaces = new WeakMap();
+  const nativeIds = new WeakMap();
+  const nativeReady = new WeakMap();
+  let nextNative = 1;
+  const nativeCanvas = globalThis.__brimpCanvas2D;
+  delete globalThis.__brimpCanvas2D;
+  const canNative = typeof nativeCanvas === 'function';
+  const releaseRegistry =
+    canNative && typeof FinalizationRegistry === 'function'
+      ? new FinalizationRegistry((id) => {
+          try {
+            nativeCanvas('canvas2dRelease', id, '[]');
+          } catch {}
+        })
+      : null;
+  function nativeId(receiver) {
+    let id = nativeIds.get(receiver);
+    if (id === undefined) {
+      id = nextNative++;
+      nativeIds.set(receiver, id);
+      releaseRegistry?.register(receiver, id);
+    }
+    return id;
+  }
+  function nativeCall(operation, receiver, ...args) {
+    return nativeCanvas(
+      operation,
+      nativeId(receiver),
+      JSON.stringify(args.map((value) => (ArrayBuffer.isView(value) ? Array.from(value) : value))),
+    );
+  }
+  const nativeOperations = new Set([
+    'canvas2dFillRect',
+    'canvas2dStrokeRect',
+    'canvas2dClearRect',
+    'canvas2dBeginPath',
+    'canvas2dClosePath',
+    'canvas2dPathPoint',
+    'canvas2dPathArc',
+    'canvas2dPathEllipse',
+    'canvas2dPathRect',
+    'canvas2dPathRoundRect',
+    'canvas2dPathArcTo',
+    'canvas2dDrawPath',
+    'canvas2dClip',
+    'canvas2dDrawText',
+    'canvas2dPutImageData',
+    'canvas2dGetImageData',
+    'canvasEncode',
+    'canvas2dSave',
+    'canvas2dRestore',
+  ]);
 
   function surface(canvas, width, height) {
     let value = surfaces.get(canvas);
@@ -329,15 +380,44 @@ function installCanvas({ global, canvas, profile: settings }, options = {}) {
   }
 
   function call(operation, receiver, ...args) {
+    if (
+      canNative &&
+      (nativeReady.get(receiver) || operation === 'canvas2dAcquire') &&
+      nativeOperations.has(operation)
+    ) {
+      if (operation === 'canvas2dGetImageData') {
+        const bytes = nativeCall(operation, receiver, ...args);
+        const data = bytes instanceof Uint8ClampedArray ? bytes : new Uint8ClampedArray(bytes);
+        if (args[7] === 'rgba-float16' && typeof Float16Array !== 'undefined') {
+          const output = new Float16Array(data.length);
+          for (let index = 0; index < data.length; index++) output[index] = data[index] / 255;
+          return new Uint8Array(output.buffer);
+        }
+        return data;
+      }
+      return nativeCall(operation, receiver, ...args);
+    }
     switch (operation) {
       case 'canvasOriginClean':
         return true;
-      case 'canvas2dAcquire':
+      case 'canvas2dAcquire': {
         alpha.set(receiver, args[2]);
         surface(receiver, args[0], args[1]);
+        let ready = false;
+        if (canNative) {
+          try {
+            ready = nativeCall('canvas2dAcquire', receiver, args[0], args[1], args[2]) === true;
+          } catch (error) {
+            ready = false;
+          }
+        }
+        nativeReady.set(receiver, ready);
         return true;
+      }
       case 'canvasReset':
         resetSurface(receiver, args[0], args[1]);
+        if (canNative && nativeReady.get(receiver))
+          nativeCall('canvas2dReset', receiver, args[0], args[1], alpha.get(receiver) !== false);
         return undefined;
       case 'canvas2dCreateGradient':
       case 'canvas2dCreatePath':
@@ -554,6 +634,7 @@ function installCanvas({ global, canvas, profile: settings }, options = {}) {
       sweep %= turn;
       return sweep < 0 ? sweep + turn : sweep;
     }
+    if (sweep >= turn) return -turn;
     if (-sweep >= turn) return -turn;
     sweep %= turn;
     return sweep > 0 ? sweep - turn : sweep;
@@ -2203,7 +2284,7 @@ function installCanvas({ global, canvas, profile: settings }, options = {}) {
         x,
         y,
         fontSize(this.__font),
-        fontFamily(this.__font),
+        fontFamilyName(this.__font),
         maxWidth,
         stroke,
         strokePayload(this),

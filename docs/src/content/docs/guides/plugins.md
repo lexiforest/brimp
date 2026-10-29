@@ -347,8 +347,9 @@ offline context itself, matching Safari; the buffer exposes its channel count.
 SpeechSynthesisUtterance stores local text/language, numeric pitch/rate/volume and
 voice payloads with Safari's empty-utterance defaults. Its event handlers support
 manual dispatch only. Numeric assignments are stored without full Web IDL/range
-validation. speechSynthesis copies the legacy empty object: no speech methods,
-queue, installed voices or audio output are provided.
+validation. speechSynthesis exposes the profile's captured voice list and
+publishes it asynchronously with `voiceschanged`, as browsers do; the utterance
+queue and audio output remain local placeholders.
 The canvas plugin adds legacy captureStream/transferControlToOffscreen no-ops.
 Path2D calls retain validation and opaque path identities without rendering.
 Existing toBlob/toDataURL encode a real PNG for painted rectangles and

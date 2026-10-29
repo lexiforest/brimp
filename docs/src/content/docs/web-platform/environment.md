@@ -39,7 +39,9 @@ configuration and current IndexedDB/CacheStorage subset.
 
 ImageData remains a core DOM value object. MediaEncryptedEvent belongs to the
 media plugin and SpeechSynthesisUtterance to audio. These payloads do not require
-a playback or speech backend. Navigator identity and plugin/MIME collections come from the profile.
+a playback or speech backend. Navigator identity, plugin/MIME collections,
+speech voices, media decoding answers, storage estimates and captured
+`CSS.supports` declarations come from the profile.
 
 ## Window and navigation
 

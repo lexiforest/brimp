@@ -54,6 +54,57 @@ lifetime total. Filters and ring loss also apply to summaries. API wrappers and
 native dispatch remain separate layers so callers need not count them as separate
 browser dependencies.
 
+All retrieval modes include `shapeDifferences`, a bounded comparison between
+observed reflection metadata and the shape manifest built from the installed
+runtime surface. Entries report descriptor mismatches, missing claimed
+properties, and non-native source returned by `Function.prototype.toString`.
+The manifest is available as `page.shapeManifest()` / `shape_manifest()` and can
+be turned into a real-browser capture plugin with
+`examples/datadome-interstitial/generate-shape-capture.mjs`.
+
+## Closing environment-shape gaps
+
+Diagnostics and profile capture are intended to close the gap between Brimp's
+observable browser surface and the claimed browser. The loop is:
+
+1. **Trace the challenge.** Run the script with recursive tracing enabled and
+   collect the properties, descriptors, `toString` calls and missing reads it
+   visits. Keep the trace bounded; a challenge can touch tens of thousands of
+   paths.
+2. **Compare against the implementation.** Brimp builds a shape manifest from
+   the installed core APIs and plugins. `page.shapeManifest()` returns those
+   claims; `shapeDifferences` compares observed reflection metadata against
+   them and reports descriptor mismatches, missing claimed properties and
+   non-native function sources.
+3. **Capture the real browser.** Generate a profile-capture plugin from the
+   manifest and run it in the claimed browser. The capture records values and
+   descriptor/`toString` shape for exactly the paths Brimp claims to provide.
+4. **Apply and re-check.** Fix missing interfaces or descriptors in the
+   implementation, load the captured values as a profile, and repeat the trace
+   until the observed paths match. A profile supplies values; it cannot add a
+   missing property or change a descriptor.
+
+A runnable CLI and Node walkthrough for each step is in
+[`examples/shape-loop`](https://github.com/lexiforest/brimp/tree/main/examples/shape-loop).
+
+The manifest and generated capture flow are exposed by:
+
+```javascript
+const manifest = await page.shapeManifest();
+```
+
+```sh
+node examples/datadome-interstitial/generate-shape-capture.mjs \
+  shape-manifest.json > shape-plugin.js
+brimp profile capture --plugin ./shape-plugin.js --output shape-profile.json
+```
+
+A trace miss is not proof that a property was never inspected. Recursive tracing
+does not observe every `in`/`delete`, computed property name or engine-internal
+lookup, and frame/worker realms may be outside the current trace. Use the
+manifest diff together with an instrumented challenge, and compare against a
+capture from the real browser before changing shape.
+
 All retrieval modes include `coverage.enabled`, `coverage.mode`, `coverage.include`, and an explicit
 list of `coverage.limitations`. An empty disabled trace is distinguishable from
 an enabled trace with no retained records. A thrown operation does not necessarily

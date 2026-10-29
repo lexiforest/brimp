@@ -163,6 +163,12 @@ function __mediaFeature(feature, value) {
     case 'hover':
     case 'any-hover':
       return value === profile.media.hover;
+    case 'color-gamut':
+      return value === 'srgb';
+    case 'dynamic-range':
+      return value === 'standard';
+    case 'display-mode':
+      return value === 'browser';
     case 'forced-colors':
       return value === 'none';
     case 'scripting':

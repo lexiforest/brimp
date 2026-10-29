@@ -75,6 +75,7 @@ export class Page extends Requests {
   advanceTime(milliseconds, {maxTasks = 10000} = {}) { return invoke(() => this._inner.advanceTime(milliseconds, maxTasks), this._pageId); }
   runPendingTasks({maxTasks = 10000} = {}) { return invoke(() => this._inner.runPendingTasks(maxTasks), this._pageId); }
   profileContract() { return invoke(() => this._inner.profileContract(), this._pageId); }
+  shapeManifest() { return invoke(() => this._inner.shapeManifest(), this._pageId); }
   profileReport() { return invoke(() => this._inner.profileReport(), this._pageId); }
   takeDiagnostics() { return invoke(() => this._inner.takeDiagnostics(), this._pageId); }
   peekDiagnostics() { return invoke(() => this._inner.peekDiagnostics(), this._pageId); }
