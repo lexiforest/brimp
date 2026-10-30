@@ -1,5 +1,18 @@
 use std::{fs, path::Path};
 
+fn copy_tree(source: &Path, destination: &Path) {
+    fs::create_dir_all(destination).expect("create license subdirectory");
+    for entry in fs::read_dir(source).expect("read license directory") {
+        let path = entry.expect("license entry").path();
+        let target = destination.join(path.file_name().unwrap());
+        if path.is_dir() {
+            copy_tree(&path, &target);
+        } else {
+            fs::copy(&path, &target).expect("package native license");
+        }
+    }
+}
+
 pub fn package_plugins(destination: &str) {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let source = root.join("crates/runtime/js/plugins");
@@ -65,5 +78,18 @@ pub fn package_plugins(destination: &str) {
         let path = root.join(source);
         println!("cargo:rerun-if-changed={}", path.display());
         fs::copy(path, output.join(name)).expect("package dependency notice");
+    }
+    let native = output.join("native");
+    println!("cargo:rerun-if-env-changed=BRIMP_LICENSE_DIR");
+    if native.exists() {
+        fs::remove_dir_all(&native).expect("remove obsolete native licenses");
+    }
+    if let Some(source) = std::env::var_os("BRIMP_LICENSE_DIR") {
+        let source = Path::new(&source);
+        if !source.is_dir() {
+            panic!("BRIMP_LICENSE_DIR is not a directory: {}", source.display());
+        }
+        println!("cargo:rerun-if-changed={}", source.display());
+        copy_tree(source, &native);
     }
 }

@@ -196,7 +196,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "brimp-runtime",
  "clap",
@@ -214,14 +214,14 @@ dependencies = [
 
 [[package]]
 name = "brimp-jsc"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "libc",
 ]
 
 [[package]]
 name = "brimp-lexbor"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "cc",
  "serde",
@@ -230,7 +230,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-net"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "bytes",
  "http",
@@ -246,7 +246,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-node"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "brimp-runtime",
  "napi",
@@ -258,7 +258,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-python"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "brimp-runtime",
  "pyo3",
@@ -268,7 +268,7 @@ dependencies = [
 
 [[package]]
 name = "brimp-runtime"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "async-trait",
  "base64",

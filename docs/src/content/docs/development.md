@@ -50,26 +50,26 @@ cargo test -p brimp-net
 
 ## Native prerequisites
 
-Set `BRIMP_JSC_LIB_DIR` and `BRIMP_CURL_LIB_DIR` as shown in
-[installation](/install/#2-point-to-your-native-sdks). The repository helper
-`scripts/prepare_native.py` downloads the pinned JSC SDK. Pass `--curl-sdk`
-the installation prefix of a source-built curl-impersonate SDK for runtime
-builds; omit it for standalone JSC tests:
+The repository pins Rust `1.99.1` in `rust-toolchain.toml`.
+
+The repository helper downloads the pinned JavaScriptCore SDK and
+curl-impersonate release, then prints the environment required to link them:
 
 ```sh
-cmake -S ../curl-impersonate -B ../curl-impersonate/build -DCMAKE_INSTALL_PREFIX="$PWD/.native/curl-sdk"
-cmake --build ../curl-impersonate/build --parallel
-cmake --install ../curl-impersonate/build
-python3 scripts/prepare_native.py --target aarch64-apple-darwin --output .native/jsc --curl-sdk .native/curl-sdk
+python3 scripts/prepare_native.py --target aarch64-apple-darwin --output .native/release --curl-release
 ```
 
 Select the appropriate target for your platform. Outside GitHub Actions, export
-the environment variables printed by the script before building or testing.
-Inspect the available targets with:
+the environment variables printed by the script before building or testing. Omit
+`--curl-release` for standalone JSC tests, or pass `--curl-sdk` the installation
+prefix of a source-built curl-impersonate SDK. Inspect the available targets
+with:
 
 ```sh
 python3 scripts/prepare_native.py --help
 ```
+
+See [installation](/install/#build-from-source) for the full source workflow.
 
 On macOS, local defaults are the adjacent `WebKit/WebKitBuild/Release` directory
 and `/usr/local/lib` for curl. When using that WebKit build, run:

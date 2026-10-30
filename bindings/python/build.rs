@@ -1,6 +1,11 @@
 #[path = "../build_plugins.rs"]
 mod build_plugins;
 fn main() {
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos") {
+        // install_name_tool rewrites dependency paths when packaging; leave room
+        // in the Mach-O header so the rewrite cannot corrupt the string pool.
+        println!("cargo:rustc-link-arg=-Wl,-headerpad_max_install_names");
+    }
     build_plugins::package_plugins("python/brimp/bundled");
     pyo3_build_config::add_extension_module_link_args();
     if std::env::var("CARGO_CFG_TARGET_OS").as_deref() != Ok("windows") {

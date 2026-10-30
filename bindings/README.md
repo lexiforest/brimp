@@ -17,8 +17,13 @@ PYTHONPATH=bindings/python/python python3 -m pytest bindings/python/tests
 node --test bindings/node/test/*.test.mjs
 ```
 
-These are SDK-linked development builds. For distributable macOS archives, see
-[package assembly](../docs/src/content/docs/development/packaging.md).
+These are SDK-linked development builds. Release workflows build self-contained
+wheels and Node platform packages for macOS arm64, Linux x86_64/arm64 and
+Windows x64; see [package assembly](../docs/src/content/docs/development/packaging.md).
+
+`npm install @brimp/brimp` installs the `@brimp/brimp-<platform>-<arch>` optional
+dependency selected for the host. A source checkout keeps using the local
+`bindings/node/brimp.node` fallback after `prepare_local.py`.
 
 ## Documentation
 

@@ -93,7 +93,7 @@ fn acquire(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
     let width = number_arg(args, 2)? as i32;
     let height = number_arg(args, 3)? as i32;
     let alpha = boolean_arg(args, 4)?;
-    let mut surface = Surface::new_raster_n32_premul((width.max(1), height.max(1)))
+    let mut surface = skia_safe::surfaces::raster_n32_premul((width.max(1), height.max(1)))
         .ok_or_else(|| "unable to create canvas surface".to_string())?;
     surface.canvas().clear(if alpha {
         Color::TRANSPARENT
@@ -118,7 +118,7 @@ fn reset(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
     let height = number_arg(args, 3)? as i32;
     let alpha = boolean_arg(args, 4).unwrap_or(true);
     with_canvas(id, |canvas| {
-        let mut surface = Surface::new_raster_n32_premul((width.max(1), height.max(1)))
+        let mut surface = skia_safe::surfaces::raster_n32_premul((width.max(1), height.max(1)))
             .ok_or_else(|| "unable to create canvas surface".to_string())?;
         surface.canvas().clear(if alpha {
             Color::TRANSPARENT
@@ -582,7 +582,7 @@ fn encode(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
         Ok(canvas
             .surface
             .image_snapshot()
-            .encode_to_data(EncodedImageFormat::PNG))
+            .encode(None, EncodedImageFormat::PNG, None))
     })?;
     match data {
         Some(data) => Ok(BridgeValue::String(format!(

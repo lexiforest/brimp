@@ -4,14 +4,37 @@ build-backend = "maturin"
 
 [project]
 name = "brimp"
-version = "0.1.1"
+dynamic = ["version"]
 requires-python = ">=3.11"
-description = "In-process DOM automation with JavaScriptCore"
+description = "Requests-style JavaScript-rendering browser client"
+readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Riverside AI LLC" }]
+keywords = ["browser", "headless", "requests", "javascriptcore", "dom", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://brimp.ai"
+Documentation = "https://docs.brimp.ai"
+Repository = "https://github.com/lexiforest/brimp"
+Issues = "https://github.com/lexiforest/brimp/issues"
 
 [tool.maturin]
 python-source = "python"
 module-name = "brimp._brimp"
+features = ["pyo3/extension-module"]
+strip = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

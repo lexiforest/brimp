@@ -1,7 +1,24 @@
 {
   "name": "@brimp/brimp",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "description": "In-process browser JavaScript runtime with JavaScriptCore, Lexbor and curl-impersonate",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lexiforest/brimp.git"
+  },
+  "homepage": "https://docs.brimp.ai",
+  "bugs": {
+    "url": "https://github.com/lexiforest/brimp/issues"
+  },
+  "keywords": [
+    "browser",
+    "headless",
+    "automation",
+    "javascriptcore",
+    "dom",
+    "scraping"
+  ],
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
@@ -10,10 +27,17 @@
     "index.d.ts",
     "brimp.node",
     "README.md",
+    "LICENSE",
     "plugins.js",
     "values.js",
     "bundled"
   ],
+  "optionalDependencies": {
+    "@brimp/brimp-darwin-arm64": "0.1.2",
+    "@brimp/brimp-linux-x64-gnu": "0.1.2",
+    "@brimp/brimp-linux-arm64-gnu": "0.1.2",
+    "@brimp/brimp-win32-x64": "0.1.2"
+  },
   "scripts": {
     "test": "node --test test/*.test.mjs"
   },

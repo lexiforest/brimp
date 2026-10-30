@@ -60,7 +60,8 @@ runtime surface. Entries report descriptor mismatches, missing claimed
 properties, and non-native source returned by `Function.prototype.toString`.
 The manifest is available as `page.shapeManifest()` / `shape_manifest()` and can
 be turned into a real-browser capture plugin with
-`examples/datadome-interstitial/generate-shape-capture.mjs`.
+`../brimp-examples/datadome-interstitial/generate-shape-capture.mjs` from the
+sibling [brimp-examples](https://github.com/lexiforest/brimp-examples) checkout.
 
 ## Closing environment-shape gaps
 
@@ -85,7 +86,7 @@ observable browser surface and the claimed browser. The loop is:
    missing property or change a descriptor.
 
 A runnable CLI and Node walkthrough for each step is in
-[`examples/shape-loop`](https://github.com/lexiforest/brimp/tree/main/examples/shape-loop).
+[`brimp-examples/shape-loop`](https://github.com/lexiforest/brimp-examples/tree/main/shape-loop).
 
 The manifest and generated capture flow are exposed by:
 
@@ -94,7 +95,7 @@ const manifest = await page.shapeManifest();
 ```
 
 ```sh
-node examples/datadome-interstitial/generate-shape-capture.mjs \
+node ../brimp-examples/datadome-interstitial/generate-shape-capture.mjs \
   shape-manifest.json > shape-plugin.js
 brimp profile capture --plugin ./shape-plugin.js --output shape-profile.json
 ```

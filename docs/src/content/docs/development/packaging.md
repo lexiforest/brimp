@@ -1,47 +1,102 @@
 ---
 title: Package native bindings
-description: Assemble and verify relocatable Python and Node packages.
+description: Build, bundle and validate release wheels and Node.js platform packages.
 ---
 
-Development builds link against the installed SDKs. For macOS distribution,
-assemble relocatable packages from an already built wheel and Node extension:
+The release workflow builds self-contained artifacts for four targets:
+
+| Target | Wheel tag | Node.js package |
+| --- | --- | --- |
+| macOS arm64 | `macosx_11_0_arm64` | `@brimp/brimp-darwin-arm64` |
+| Linux x86_64 | `manylinux_2_34_x86_64` | `@brimp/brimp-linux-x64-gnu` |
+| Linux arm64 | `manylinux_2_34_aarch64` | `@brimp/brimp-linux-arm64-gnu` |
+| Windows x64 | `win_amd64` | `@brimp/brimp-win32-x64` |
+
+Intel macOS and Windows arm64 are not built. The pinned JavaScriptCore SDK
+does not publish those artifacts. Linux wheels require glibc 2.34 or newer; the
+Skia build depends on FreeType 2.10+.
+
+## Pinned native SDKs
+
+`scripts/prepare_native.py` downloads and verifies:
+
+- JavaScriptCore `jsc-v2026082706` from `lexiforest/WebKit`;
+- curl-impersonate `v2.3.2` from `lexiforest/curl-impersonate`, including its
+  BoringSSL WebCrypto interface.
+
+The release bundles the SDK shared libraries, ICU, the Visual C++ runtime DLLs
+used by the Windows JSC SDK, and the SDK licenses. `BRIMP_LICENSE_DIR` points
+the binding build scripts at the collected license tree; both Python and Node
+packages include it under `bundled/licenses/native` (the Node platform package
+also carries a copy under `licenses/`).
+
+## Python wheels
+
+Build a wheel with maturin. `--auditwheel repair` performs auditwheel repair on
+Linux, delocate on macOS and delvewheel on Windows:
 
 ```sh
-cargo build -p brimp-python -p brimp-node
-python3 bindings/prepare_local.py
-maturin build --locked --manifest-path bindings/python/Cargo.toml --out /tmp/brimp-wheels
-python3 bindings/package_native.py \
-  --wheel /tmp/brimp-wheels/brimp-0.1.1-cp311-abi3-macosx_11_0_arm64.whl \
-  --jsc ../WebKit/WebKitBuild/Release/JavaScriptCore.framework/JavaScriptCore \
-  --curl .native/curl-sdk/lib/libcurl-impersonate.dylib \
-  --notices ../WebKit/Source/JavaScriptCore \
-  --notices ../WebKit/Source/WTF \
-  --notices ../curl-impersonate/LICENSE \
-  --notices ../curl-impersonate/build/deps/src \
-  --out /tmp/brimp-packages
+python scripts/prepare_native.py \
+  --target aarch64-apple-darwin --output .native/release --curl-release
+python -m pip install 'maturin>=1.9,<2'
+maturin build --release --locked \
+  --auditwheel repair --compatibility pypi \
+  --manifest-path bindings/python/Cargo.toml --out dist/raw
 ```
 
-Supply the SDK libraries and notices matching the actual build. The assembler
-copies inputs into temporary staging directories, rewrites their load commands,
-ad-hoc signs the copies, rebuilds wheel RECORD hashes, and emits SHA-256 files.
-It never edits the SDK or the original extension. Input and bundled library
-hashes, dependencies, architecture and minimum OS are recorded in
-`native/manifest.json`. Archive ordering, ownership and timestamps are fixed.
-Unknown non-system dependencies fail assembly instead of silently producing an
-incomplete package. SDK notices are copied from the supplied files/directories.
-All native inputs must contain the single current-host architecture; universal
-binaries and cross-compilation are outside this assembler's contract.
+Use `--compatibility manylinux_2_34` inside a manylinux_2_34 container for
+Linux. On Windows, run `bindings/python/bundle_windows_runtime.py` after maturin
+to add `msvcp140.dll`, `msvcp140_2.dll`, `vcruntime140.dll` and
+`vcruntime140_1.dll` to `brimp.libs`.
 
-The wheel platform tag is derived from the maximum minimum-macOS version across
-the extension and supplied libraries. The local development SDK currently
-requires macOS 27, so those artifacts are tagged `macosx_27_0_arm64`; they must
-not be advertised as macOS 11-compatible. Build SDKs targeting an older supported
-OS to produce an older-OS package. The npm package declares its platform/CPU;
-its manifest records the minimum OS.
+Validate and clean-install without the build SDKs:
 
-Test the assembled wheel and npm archive outside the source checkout, with
-`DYLD_FRAMEWORK_PATH`, `DYLD_LIBRARY_PATH`, `PYTHONPATH` and SDK-path overrides
-removed. The bundled libraries should be sufficient. This is package relocation,
-not Apple notarization or a claim of release verification on other OS versions.
-Linux and Windows retain the existing SDK-linked workflow. Their native bundling
-has not been implemented or verified by this macOS assembly step.
+```sh
+python bindings/python/validate_wheel.py \
+  --target aarch64-apple-darwin --directory dist/wheels
+python bindings/python/test_wheel.py \
+  --target aarch64-apple-darwin --directory dist/wheels
+```
+
+`test_wheel.py` hides `.native`, removes the SDK environment, installs the wheel
+into a fresh virtual environment with `--no-index`, and runs
+`bindings/python/smoke.py`.
+
+## Node.js packages
+
+The `@brimp/brimp` wrapper selects a native platform package at runtime and
+falls back to a local `brimp.node` for development builds. Each platform archive
+contains `brimp.node`, the native libraries and licenses. Build and pack it from
+the prepared SDK:
+
+```sh
+cargo build --release --locked -p brimp-node
+python bindings/prepare_local.py --release --only node
+python bindings/package_node.py \
+  --jsc-sdk .native/release/jsc \
+  --curl-sdk .native/release/curl \
+  --package --main \
+  --out dist/node
+```
+
+macOS rewrites install names to `@loader_path/native`, Linux rewrites RPATH to
+`$ORIGIN/native` with `patchelf`, and Windows places the DLLs next to
+`brimp.node`. `--main` packs the JavaScript wrapper without a native binary;
+that package declares the four platform packages as optional dependencies.
+
+Validate an artifact set:
+
+```sh
+python bindings/package_node.py --validate --all --out dist/node
+```
+
+## Release workflow
+
+`.github/workflows/release.yml` runs on `v*` tags. It builds the four wheels and
+the four platform packages, installs and smoke-tests them, verifies the tag
+matches the workspace version, writes `SHA256SUMS`, publishes wheels to PyPI
+with trusted publishing, publishes npm packages with provenance, and creates a
+GitHub release.
+
+PyPI trusted publishing must be configured for the `pypi` environment and the
+`NPM_TOKEN` repository secret must be able to publish the `@brimp` scope.

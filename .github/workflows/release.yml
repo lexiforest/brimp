@@ -1,0 +1,338 @@
+name: Release
+
+run-name: Release ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  verify:
+    name: Verify release metadata
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Check versions and licenses
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            python scripts/check_versions.py --tag "$GITHUB_REF_NAME"
+          else
+            python scripts/check_versions.py
+          fi
+      - name: Run packaging helper tests
+        run: |
+          python -m pip install pytest
+          python -m pytest scripts/test_prepare_native.py bindings/python/test_packaging.py
+
+  linux:
+    name: Build Linux ${{ matrix.target }}
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-24.04
+            image: quay.io/pypa/manylinux_2_34_x86_64
+            node_suffix: linux-x64
+            node_arch: x64
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-24.04-arm
+            image: quay.io/pypa/manylinux_2_34_aarch64
+            node_suffix: linux-arm64
+            node_arch: arm64
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.image }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.99.1
+
+      - name: Select build Python
+        run: echo "/opt/python/cp311-cp311/bin" >> "$GITHUB_PATH"
+
+      - name: Install Linux tools
+        run: dnf install -y fontconfig-devel freetype-devel pkgconf-pkg-config patchelf ninja-build clang
+
+      - name: Download pinned native SDKs
+        run: >-
+          python scripts/prepare_native.py
+          --target "${{ matrix.target }}"
+          --output .native/release
+          --curl-release
+
+      - name: Install build tools
+        run: python -m pip install 'maturin>=1.9,<2'
+
+      - name: Build and repair wheel
+        run: |
+          maturin build --release --locked \
+            --auditwheel repair --compatibility manylinux_2_34 \
+            --manifest-path bindings/python/Cargo.toml --out dist/raw
+          mkdir -p dist/wheels
+          cp dist/raw/*.whl dist/wheels/
+
+      - name: Validate and clean-install wheel
+        run: |
+          python bindings/python/validate_wheel.py \
+            --target "${{ matrix.target }}" --directory dist/wheels
+          python bindings/python/test_wheel.py \
+            --target "${{ matrix.target }}" --directory dist/wheels
+
+      - name: Build Node binding
+        run: |
+          cargo build --release --locked -p brimp-node
+          python bindings/prepare_local.py --release --only node
+
+      - name: Package Node modules
+        run: >-
+          python bindings/package_node.py
+          --jsc-sdk "$BRIMP_JSC_SDK"
+          --curl-sdk "$BRIMP_CURL_SDK"
+          --package --main
+          --out dist/node
+
+      - name: Install Node.js
+        run: |
+          curl -fsSL "https://nodejs.org/dist/v22.19.0/node-v22.19.0-linux-${{ matrix.node_arch }}.tar.gz" -o /tmp/node.tar.gz
+          tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1
+          node --version
+
+      - name: Test Node packages
+        run: |
+          test_dir="$RUNNER_TEMP/brimp-node-test"
+          rm -rf "$test_dir"
+          mkdir -p "$test_dir"
+          npm install --prefix "$test_dir" --ignore-scripts --no-audit --no-fund --omit=optional dist/node/*.tgz
+          cp bindings/node/smoke.mjs "$test_dir/"
+          (cd "$test_dir" && node smoke.mjs)
+
+      - name: Validate Node packages
+        run: python bindings/package_node.py --validate --out dist/node
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.target }}
+          path: dist/wheels/*.whl
+          if-no-files-found: error
+
+      - name: Upload Node platform package
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-${{ matrix.target }}
+          path: dist/node/brimp-${{ matrix.node_suffix }}-*.tgz
+          if-no-files-found: error
+
+  native:
+    name: Build ${{ matrix.target }}
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-15
+            deployment_target: "11.0"
+            node_suffix: darwin-arm64
+          - target: x86_64-pc-windows-msvc
+            runner: windows-2022
+            deployment_target: ""
+            node_suffix: win32-x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: bash
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.99.1
+
+      - name: Download pinned native SDKs
+        run: >-
+          python scripts/prepare_native.py
+          --target "${{ matrix.target }}"
+          --output .native/release
+          --curl-release
+
+      - name: Install build tools
+        run: python -m pip install 'maturin>=1.9,<2'
+
+      - name: Build and repair wheel
+        run: |
+          maturin build --release --locked \
+            --auditwheel repair --compatibility pypi \
+            --manifest-path bindings/python/Cargo.toml --out dist/raw
+          mkdir -p dist/wheels
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            python bindings/python/bundle_windows_runtime.py \
+              --wheel dist/raw/*.whl --out dist/wheels
+          else
+            cp dist/raw/*.whl dist/wheels/
+          fi
+
+      - name: Validate and clean-install wheel
+        run: |
+          python bindings/python/validate_wheel.py \
+            --target "${{ matrix.target }}" --directory dist/wheels
+          python bindings/python/test_wheel.py \
+            --target "${{ matrix.target }}" --directory dist/wheels
+
+      - name: Build Node binding
+        run: |
+          cargo build --release --locked -p brimp-node
+          python bindings/prepare_local.py --release --only node
+
+      - name: Package Node modules
+        run: >-
+          python bindings/package_node.py
+          --jsc-sdk "$BRIMP_JSC_SDK"
+          --curl-sdk "$BRIMP_CURL_SDK"
+          --package --main
+          --out dist/node
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.19.0"
+
+      - name: Test Node packages
+        run: |
+          test_dir="$RUNNER_TEMP/brimp-node-test"
+          rm -rf "$test_dir"
+          mkdir -p "$test_dir"
+          npm install --prefix "$test_dir" --ignore-scripts --no-audit --no-fund --omit=optional dist/node/*.tgz
+          cp bindings/node/smoke.mjs "$test_dir/"
+          (cd "$test_dir" && node smoke.mjs)
+
+      - name: Validate Node packages
+        run: python bindings/package_node.py --validate --out dist/node
+
+      - name: Upload wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.target }}
+          path: dist/wheels/*.whl
+          if-no-files-found: error
+
+      - name: Upload Node platform package
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-${{ matrix.target }}
+          path: dist/node/brimp-${{ matrix.node_suffix }}-*.tgz
+          if-no-files-found: error
+
+      - name: Upload Node wrapper package
+        if: matrix.node_suffix == 'darwin-arm64'
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-main
+          path: dist/node/brimp-npm-*.tgz
+          if-no-files-found: error
+
+  publish:
+    name: Publish release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - linux
+      - native
+    runs-on: ubuntu-24.04
+    environment: pypi
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheel-*
+          path: dist/wheels
+          merge-multiple: true
+
+      - name: Download Node packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: node-*
+          path: dist/node
+          merge-multiple: true
+
+      - name: Validate release artifacts
+        run: |
+          for target in \
+            x86_64-unknown-linux-gnu \
+            aarch64-unknown-linux-gnu \
+            aarch64-apple-darwin \
+            x86_64-pc-windows-msvc
+          do
+            python bindings/python/validate_wheel.py \
+              --target "$target" --directory dist/wheels \
+              --tag "$GITHUB_REF_NAME"
+          done
+          test "$(find dist/wheels -maxdepth 1 -name '*.whl' | wc -l)" -eq 4
+          python bindings/package_node.py --validate --all --out dist/node
+          python scripts/check_versions.py --tag "$GITHUB_REF_NAME"
+
+      - name: Write checksums
+        run: |
+          cd dist
+          sha256sum wheels/*.whl node/*.tgz > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publish wheels to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/wheels/
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22.19.0"
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish npm packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          for package in \
+            dist/node/brimp-darwin-arm64-*.tgz \
+            dist/node/brimp-linux-x64-*.tgz \
+            dist/node/brimp-linux-arm64-*.tgz \
+            dist/node/brimp-win32-x64-*.tgz
+          do
+            npm publish "$package" --access public --provenance
+          done
+          npm publish dist/node/brimp-npm-*.tgz --access public --provenance
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            dist/wheels/*.whl
+            dist/node/*.tgz
+            dist/SHA256SUMS

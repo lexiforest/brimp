@@ -8,6 +8,7 @@ import sys
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--release', action='store_true')
+    parser.add_argument('--only', choices=('both', 'python', 'node'), default='both')
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     build = root / 'target' / ('release' if args.release else 'debug')
@@ -21,8 +22,16 @@ def main():
         root / 'bindings/python/python/brimp' / ('_brimp.pyd' if sys.platform == 'win32' else '_brimp.abi3.so'),
         root / 'bindings/node/brimp.node',
     )
-    for source, destination in zip(libraries, destinations):
-        shutil.copy2(build / source, destination)
+    selected = (
+        [(libraries[0], destinations[0])] if args.only == 'python' else
+        [(libraries[1], destinations[1])] if args.only == 'node' else
+        list(zip(libraries, destinations))
+    )
+    for source, destination in selected:
+        path = build / source
+        if not path.is_file():
+            raise SystemExit(f'missing build artifact: {path}')
+        shutil.copy2(path, destination)
         print(destination.relative_to(root))
 
 

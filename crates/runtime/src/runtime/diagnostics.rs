@@ -119,15 +119,16 @@ fn shape_differences(
                 });
             }
         };
-        if let Some(native) = details.get("native").and_then(serde_json::Value::as_bool) {
-            if claim.get("native").and_then(serde_json::Value::as_bool) == Some(true) && !native {
-                push(
-                    "nonNativeSource",
-                    claim.get("native").cloned(),
-                    Some(serde_json::json!(false)),
-                    "runtime function exposes implementation source",
-                );
-            }
+        if let Some(native) = details.get("native").and_then(serde_json::Value::as_bool)
+            && claim.get("native").and_then(serde_json::Value::as_bool) == Some(true)
+            && !native
+        {
+            push(
+                "nonNativeSource",
+                claim.get("native").cloned(),
+                Some(serde_json::json!(false)),
+                "runtime function exposes implementation source",
+            );
         }
         if details.get("present").and_then(serde_json::Value::as_bool) == Some(false)
             && record.kind == "get"

@@ -4,7 +4,30 @@ import { Readable } from 'node:stream';
 import { callbackContext, configurePlugins, browserPlugins } from './plugins.js';
 export { Plugin, HostContext, browserPlugins, pluginCatalog, hostStoragePlugin, canvasPlugin, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin, workersPlugin, trustedTypesPlugin, extractionPlugin, graphicsPlugin, audioPlugin, rtcPlugin } from './plugins.js';
 import { createRequire } from 'node:module';
-const native = createRequire(import.meta.url)('./brimp.node');
+const require = createRequire(import.meta.url);
+const platformPackages = {
+  'darwin arm64': '@brimp/brimp-darwin-arm64',
+  'linux x64': '@brimp/brimp-linux-x64-gnu',
+  'linux arm64': '@brimp/brimp-linux-arm64-gnu',
+  'win32 x64': '@brimp/brimp-win32-x64',
+};
+function loadNative() {
+  const platformPackage = platformPackages[`${process.platform} ${process.arch}`];
+  if (platformPackage) {
+    try {
+      return require(platformPackage);
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') throw error;
+    }
+  }
+  try {
+    return require('./brimp.node');
+  } catch (error) {
+    if (error.code !== 'MODULE_NOT_FOUND') throw error;
+    throw new Error(`@brimp/brimp has no native build for ${process.platform}-${process.arch}`);
+  }
+}
+const native = loadNative();
 const eventNames = {requestFinished:'request_finished',requestFailed:'request_failed',webSocket:'websocket',eventSource:'eventsource'};
 const publicEventNames = Object.fromEntries(Object.entries(eventNames).map(([publicName, nativeName]) => [nativeName, publicName]));
 function eventRecord(wire) {
