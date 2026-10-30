@@ -48,7 +48,8 @@ function installDiagnostics(stackEnabled, installRecursive) {
       if (kind === 'reflection') {
         if (details.target === undefined) details.target = paths.get(args[0]) ?? null;
         if (details.property === undefined)
-          details.property = typeof args[1] === 'string' ? apply(substring, args[1], [0, 256]) : null;
+          details.property =
+            typeof args[1] === 'string' ? apply(substring, args[1], [0, 256]) : null;
       }
       emit(
         kind,

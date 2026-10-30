@@ -234,9 +234,10 @@ unsafe extern "C" {
 }
 
 // The pinned SDK exposes WTF's single nonblocking event-loop iteration on
-// Linux and Windows. Its scalar C++ ABI is the same as an extern C call.
-#[cfg(not(target_os = "macos"))]
-#[link(name = "JavaScriptCore")]
+// every platform, including macOS (which uses the generic loop, not CFRunLoop).
+// Its scalar C++ ABI is the same as an extern C call.
+#[cfg_attr(target_os = "macos", link(name = "JavaScriptCore", kind = "framework"))]
+#[cfg_attr(not(target_os = "macos"), link(name = "JavaScriptCore"))]
 unsafe extern "C" {
     #[cfg_attr(
         target_env = "msvc",
@@ -244,14 +245,4 @@ unsafe extern "C" {
     )]
     #[cfg_attr(not(target_env = "msvc"), link_name = "_ZN3WTF7RunLoop5cycleEj")]
     pub fn run_loop_cycle(mode: c_uint) -> c_int;
-}
-#[cfg(target_os = "macos")]
-#[link(name = "CoreFoundation", kind = "framework")]
-unsafe extern "C" {
-    pub static kCFRunLoopDefaultMode: *const c_void;
-    pub fn CFRunLoopRunInMode(
-        mode: *const c_void,
-        seconds: c_double,
-        return_after_source: u8,
-    ) -> c_int;
 }

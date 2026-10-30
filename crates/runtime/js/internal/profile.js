@@ -228,7 +228,8 @@ function installProfile(profile) {
   ]) {
     for (const name of names) {
       const descriptor = Object.getOwnPropertyDescriptor(constructor.prototype, name);
-      if (descriptor) Object.defineProperty(constructor.prototype, name, { ...descriptor, enumerable: true });
+      if (descriptor)
+        Object.defineProperty(constructor.prototype, name, { ...descriptor, enumerable: true });
     }
   }
   installPluginCollections(state.pdfViewerEnabled);

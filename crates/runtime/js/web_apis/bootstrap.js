@@ -395,9 +395,10 @@ function __buildShapeManifest() {
       configurable: descriptor.configurable === true,
       hasGet: typeof descriptor.get === 'function',
       hasSet: typeof descriptor.set === 'function',
-      native: typeof propertyValue === 'function'
-        ? /\[native code\]/.test(__functionToString.call(propertyValue))
-        : null,
+      native:
+        typeof propertyValue === 'function'
+          ? /\[native code\]/.test(__functionToString.call(propertyValue))
+          : null,
       name: typeof propertyValue === 'function' ? String(propertyValue.name ?? '') : null,
       length: typeof propertyValue === 'function' ? Number(propertyValue.length) : null,
       property: typeof key === 'string' ? key : null,
@@ -406,7 +407,7 @@ function __buildShapeManifest() {
   const record = (path, descriptor, key) => {
     if (count >= 20000 || path.length > 512) return;
     if (path in claims) return;
-    const value = 'value' in descriptor ? descriptor.value : descriptor.get ?? descriptor.set;
+    const value = 'value' in descriptor ? descriptor.value : (descriptor.get ?? descriptor.set);
     claims[path] = describe(value, descriptor, key);
     count++;
   };

@@ -171,9 +171,6 @@ impl JsRuntime {
         // SAFETY: JsRuntime is thread-bound and this services only the current
         // thread's loop. No JS value or VM is accessed from a foreign thread.
         unsafe {
-            #[cfg(target_os = "macos")]
-            crate::ffi::CFRunLoopRunInMode(crate::ffi::kCFRunLoopDefaultMode, 0.0, 1);
-            #[cfg(not(target_os = "macos"))]
             crate::ffi::run_loop_cycle(0);
         }
     }

@@ -62,7 +62,8 @@
   }
   for (const name of ['getContext', 'convertToBlob']) {
     const descriptor = Object.getOwnPropertyDescriptor(OffscreenCanvas.prototype, name);
-    if (descriptor) Object.defineProperty(OffscreenCanvas.prototype, name, { ...descriptor, enumerable: true });
+    if (descriptor)
+      Object.defineProperty(OffscreenCanvas.prototype, name, { ...descriptor, enumerable: true });
   }
   Object.defineProperty(OffscreenCanvas.prototype, Symbol.toStringTag, {
     value: 'OffscreenCanvas',

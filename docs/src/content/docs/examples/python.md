@@ -6,7 +6,7 @@ description: Read live HTML, send requests, keep cookies, edit the DOM and confi
 **You'll build:** a small script that requests a page, changes its DOM and saves
 the result. Each example is a complete program.
 
-**Before you start:** install the [Python binding](/install/#3-build-your-interface)
+**Before you start:** install the [Python binding](/install/#2-build-an-interface)
 and start the [local tutorial server](/quick-start/#1-start-the-example-site).
 
 ## 1. Compare the response with the live page
