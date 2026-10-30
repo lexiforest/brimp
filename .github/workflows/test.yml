@@ -40,6 +40,8 @@ jobs:
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
       PYTHONUTF8: "1"
+      # Use the components installed below instead of adding local formatting tools.
+      RUSTUP_TOOLCHAIN: "1.99.1"
 
     steps:
       - name: Check out source

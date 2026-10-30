@@ -14,6 +14,8 @@ permissions:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  # Release builds do not need the development components in rust-toolchain.toml.
+  RUSTUP_TOOLCHAIN: "1.99.1"
 
 jobs:
   verify:
