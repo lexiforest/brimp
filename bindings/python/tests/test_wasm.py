@@ -56,9 +56,8 @@ def wasm_server():
 def test_real_browser_wasm_through_fetch_and_streaming(wasm_server):
     with Session() as session:
         page = session.new_page()
-        result = page.evaluate(
-            f"({(FIXTURES / 'wasm-workload.js').read_text()})({json.dumps(wasm_server)})"
-        )
+        source = (FIXTURES / "wasm-workload.js").read_text()
+        result = page.evaluate(f"{source}\nrunWasmWorkload({json.dumps(wasm_server)})")
         assert result == {
             "hash32": "fb0077f9",
             "hash64": "26c7827d889f6da3",

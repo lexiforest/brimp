@@ -45,7 +45,7 @@ test('real browser WASM package, fetched modules and streaming', async () => {
   try {
     const page = await session.newPage();
     const source = await readFile(new URL('wasm-workload.js', fixture), 'utf8');
-    assert.deepEqual(await page.evaluate(`(${source})(${JSON.stringify(url)})`), {
+    assert.deepEqual(await page.evaluate(`${source}\nrunWasmWorkload(${JSON.stringify(url)})`), {
       hash32: 'fb0077f9',
       hash64: '26c7827d889f6da3',
       incremental: 0x26c7827d889f6da3n,

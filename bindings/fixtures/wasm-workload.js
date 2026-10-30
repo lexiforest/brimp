@@ -1,4 +1,4 @@
-async (url) => {
+async function runWasmWorkload(url) {
   const bundle = await (await fetch(url + '/xxhash-wasm.js')).text();
   (0, eval)(bundle);
   const hasher = await xxhash();
@@ -43,4 +43,4 @@ async (url) => {
     table: typeof table.get(0),
     again: typeof again.exports.xxh32,
   };
-};
+}
