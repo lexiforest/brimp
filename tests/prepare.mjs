@@ -33,8 +33,9 @@ for (const [name, source] of Object.entries(sources)) {
   const destination = join(root, '.cache', name);
   await rm(destination, { recursive: true, force: true });
   await mkdir(destination, { recursive: true });
-  // GNU tar interprets the colon in a Windows drive path as a remote host.
-  execFileSync('tar', ['-xzf', '-', '--strip-components=1', '-C', destination], {
+  // Keep native paths out of tar's arguments: Git's tar on Windows uses MSYS paths.
+  execFileSync('tar', ['-xzf', '-', '--strip-components=1'], {
+    cwd: destination,
     input: archive,
   });
   const notices = join(staging, 'notices', name);
