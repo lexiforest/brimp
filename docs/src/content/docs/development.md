@@ -5,18 +5,24 @@ description: Build one layer, run local checks and regenerate the documentation.
 
 Use this workflow to make a change and verify the layer it affects.
 
-Runtime JavaScript uses pinned Prettier tooling installed from the repository root:
+Install the pinned local formatting tools from the repository root:
 
 ```sh
 npm ci --ignore-scripts
-npm run format:runtime
-npm run format:runtime:check
+python -m pip install -r requirements-dev.txt
+git config core.hooksPath .githooks
+make format
+make format-check
 ```
 
-The configuration lives in `crates/runtime/js/.prettierrc.json`. Generated bundles
-and the generated CSS property table are excluded. After editing vendor adapters,
-regenerate their bundles with `npm run build --prefix crates/runtime/js/vendor`.
-Run the formatting check locally before committing runtime JavaScript changes.
+`make format` runs Prettier for JavaScript, Ruff for Python, and rustfmt for the
+Rust workspace and standalone CLI reference tool. `make format-check` checks the
+same files without rewriting them and runs in the pre-commit hook.
+
+Configuration lives in `.prettierrc.json` and `ruff.toml`; Ruff targets Python 3.11.
+Generated bundles, vendored code and installed dependencies are excluded. After
+editing vendor adapters, regenerate their bundles with
+`npm run build --prefix crates/runtime/js/vendor`.
 
 ## 1. Find the owning crate
 

@@ -1,4 +1,4 @@
-import {createSafariSession} from './webdriver.mjs';
+import { createSafariSession } from './webdriver.mjs';
 
 // Shared by field-contract tests so the same assertions run in both runtimes.
 export async function createSession(options = {}) {

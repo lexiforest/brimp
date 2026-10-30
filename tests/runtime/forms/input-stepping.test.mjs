@@ -1,18 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {inputSteppingCases,measureInputStepping} from '../../../scripts/coverage/input-stepping-cases.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
-test(`input stepping: ${inputSteppingCases.length} Safari reference cases`,async()=>{
-  const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/input-stepping.safari.json',import.meta.url))).cases;
-  assert.deepEqual(reference.map(({expected,...c})=>c),inputSteppingCases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measureInputStepping})(${JSON.stringify(inputSteppingCases)}))`));
-  assert.deepEqual(inputSteppingCases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference[i].expected)?[]:[{...c,actual:actual[i],expected:reference[i].expected}]),[]);
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  inputSteppingCases,
+  measureInputStepping,
+} from '../../../scripts/coverage/input-stepping-cases.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
+test(`input stepping: ${inputSteppingCases.length} Safari reference cases`, async () => {
+  const reference = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/input-stepping.safari.json', import.meta.url)),
+  ).cases;
+  assert.deepEqual(
+    reference.map(({ expected, ...c }) => c),
+    inputSteppingCases,
+  );
+  const actual = JSON.parse(
+    await evaluate(
+      `JSON.stringify((${measureInputStepping})(${JSON.stringify(inputSteppingCases)}))`,
+    ),
+  );
+  assert.deepEqual(
+    inputSteppingCases.flatMap((c, i) =>
+      JSON.stringify(actual[i]) === JSON.stringify(reference[i].expected)
+        ? []
+        : [{ ...c, actual: actual[i], expected: reference[i].expected }],
+    ),
+    [],
+  );
 });
 
-test('stepping descriptors, receiver checks and count conversion follow Safari',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('stepping descriptors, receiver checks and count conversion follow Safari', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const name of ['stepUp','stepDown']){
       const d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,name),fn=d.value;
@@ -29,11 +56,14 @@ test('stepping descriptors, receiver checks and count conversion follow Safari',
     try{input.stepUp({valueOf(){calls++;throw new RangeError('conversion');}});}catch(e){error=e.name;}
     if(error!=='RangeError'||calls!==1)failures.push('conversion before step error');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('stepping uses canonical input state and preserves clone/reset and event semantics',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('stepping uses canonical input state and preserves clone/reset and event semantics', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),input=document.createElement('input');
     document.body.append(form);form.append(input);input.type='number';input.defaultValue='0.2';input.step='0.1';
     const observer=new MutationObserver(()=>{});observer.observe(input,{attributes:true});const events=[];
@@ -47,16 +77,21 @@ test('stepping uses canonical input state and preserves clone/reset and event se
     for(const name of ['type','value','valueAsNumber','min','max','step','defaultValue'])Object.defineProperty(input,name,{get(){throw Error(name);},set(){throw Error(name);}});
     input.stepUp();if(nativeValue.call(input)!=='0.6')failures.push('canonical state');
     observer.disconnect();form.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('repeated stepping avoids drift and handles calendar rollover and time saturation',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('repeated stepping avoids drift and handles calendar rollover and time saturation', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const result=[],input=document.createElement('input');input.type='number';input.step='0.1';input.value='0';
     for(let i=0;i<100;i++)input.stepUp();result.push(input.value);
     for(let i=0;i<100;i++)input.stepDown();result.push(input.value);
     input.type='date';input.step='1';input.value='2000-02-27';for(let i=0;i<4;i++)input.stepUp();result.push(input.value);
     input.type='time';input.step='0.001';input.value='23:59:59.99';for(let i=0;i<20;i++)input.stepUp();result.push(input.value);
     return result;
-  })()`),['10','0','2000-03-02','23:59:59.999']);
+  })()`),
+    ['10', '0', '2000-03-02', '23:59:59.999'],
+  );
 });

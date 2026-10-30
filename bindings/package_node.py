@@ -18,7 +18,15 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MAIN_FILES = ("index.js", "index.d.ts", "plugins.js", "values.js", "README.md", "LICENSE", "bundled")
+MAIN_FILES = (
+    "index.js",
+    "index.d.ts",
+    "plugins.js",
+    "values.js",
+    "README.md",
+    "LICENSE",
+    "bundled",
+)
 
 PLATFORMS = {
     ("darwin", "arm64"): ("@brimp/brimp-darwin-arm64", "darwin", "arm64", "darwin-arm64"),
@@ -29,8 +37,14 @@ PLATFORMS = {
 }
 
 SYSTEM_LIBRARIES = {
-    "libc.so.6", "libm.so.6", "libdl.so.2", "librt.so.1", "libpthread.so.0",
-    "libstdc++.so.6", "libgcc_s.so.1", "libatomic.so.1",
+    "libc.so.6",
+    "libm.so.6",
+    "libdl.so.2",
+    "librt.so.1",
+    "libpthread.so.0",
+    "libstdc++.so.6",
+    "libgcc_s.so.1",
+    "libatomic.so.1",
 }
 WINDOWS_RUNTIME = ("msvcp140.dll", "msvcp140_2.dll", "vcruntime140.dll", "vcruntime140_1.dll")
 
@@ -48,10 +62,16 @@ def sha(path: Path) -> str:
 
 
 def npm_archive(package: Path, output: Path) -> None:
-    with output.open("wb") as stream, gzip.GzipFile(filename="", fileobj=stream, mode="wb", mtime=0) as compressed, tarfile.open(fileobj=compressed, mode="w") as archive:
+    with (
+        output.open("wb") as stream,
+        gzip.GzipFile(filename="", fileobj=stream, mode="wb", mtime=0) as compressed,
+        tarfile.open(fileobj=compressed, mode="w") as archive,
+    ):
         for path in sorted(package.rglob("*")):
             if path.is_file():
-                info = archive.gettarinfo(str(path), "package/" + path.relative_to(package).as_posix())
+                info = archive.gettarinfo(
+                    str(path), "package/" + path.relative_to(package).as_posix()
+                )
                 info.uid = info.gid = info.mtime = 0
                 info.uname = info.gname = ""
                 with path.open("rb") as content:
@@ -90,7 +110,10 @@ def replace_platform_files(package: dict, os_name: str | None) -> dict:
 
 
 def dependencies(path: Path) -> list[str]:
-    return [line.strip().split(" (compatibility")[0] for line in run("otool", "-L", path).splitlines()[1:]]
+    return [
+        line.strip().split(" (compatibility")[0]
+        for line in run("otool", "-L", path).splitlines()[1:]
+    ]
 
 
 def macos_library(dep: str) -> str | None:
@@ -109,12 +132,24 @@ def relocate_macos(binary: Path, libraries: dict[str, str], *, extension: bool) 
             continue
         name = macos_library(dep)
         if name:
-            subprocess.run(["install_name_tool", "-change", dep, prefix + name, str(binary)], check=True, capture_output=True)
+            subprocess.run(
+                ["install_name_tool", "-change", dep, prefix + name, str(binary)],
+                check=True,
+                capture_output=True,
+            )
         elif not dep.startswith(("/usr/lib/", "/System/Library/")):
             raise RuntimeError(f"unbundled macOS dependency in {binary.name}: {dep}")
     if not extension:
-        subprocess.run(["install_name_tool", "-id", "@rpath/" + binary.name, str(binary)], check=True, capture_output=True)
-    subprocess.run(["codesign", "--force", "--sign", "-", "--timestamp=none", str(binary)], check=True, capture_output=True)
+        subprocess.run(
+            ["install_name_tool", "-id", "@rpath/" + binary.name, str(binary)],
+            check=True,
+            capture_output=True,
+        )
+    subprocess.run(
+        ["codesign", "--force", "--sign", "-", "--timestamp=none", str(binary)],
+        check=True,
+        capture_output=True,
+    )
 
 
 def package_macos(source: Path, jsc: Path, curl: Path, package: Path) -> None:
@@ -181,6 +216,7 @@ def ldconfig_map() -> dict[str, Path]:
                         libraries.setdefault(path.name, path)
     return libraries
 
+
 def package_linux(source: Path, jsc: Path, curl: Path, package: Path) -> None:
     if shutil.which("patchelf") is None:
         raise RuntimeError("patchelf is required to assemble Linux Node packages")
@@ -203,9 +239,17 @@ def package_linux(source: Path, jsc: Path, curl: Path, package: Path) -> None:
         destination.chmod(0o755)
         copied[name] = destination
         pending.extend(needed(destination))
-    subprocess.run(["patchelf", "--set-rpath", "$ORIGIN/native", str(package / "brimp.node")], check=True, capture_output=True)
+    subprocess.run(
+        ["patchelf", "--set-rpath", "$ORIGIN/native", str(package / "brimp.node")],
+        check=True,
+        capture_output=True,
+    )
     for destination in copied.values():
-        subprocess.run(["patchelf", "--set-rpath", "$ORIGIN", str(destination)], check=True, capture_output=True)
+        subprocess.run(
+            ["patchelf", "--set-rpath", "$ORIGIN", str(destination)],
+            check=True,
+            capture_output=True,
+        )
 
 
 def package_windows(source: Path, jsc: Path, curl: Path, package: Path, runtime: Path) -> None:
@@ -273,15 +317,21 @@ def validate(directory: Path, *, complete: bool = False) -> None:
     main = [path for path in archives if path.name.startswith("brimp-npm-")]
     platform_packages = [path for path in archives if path not in main]
     if complete and (len(main) != 1 or len(platform_packages) != 4):
-        raise RuntimeError(f"expected one main and four platform packages in {directory}: {[path.name for path in archives]}")
+        raise RuntimeError(
+            f"expected one main and four platform packages in {directory}: {[path.name for path in archives]}"
+        )
     if not complete and (len(main) > 1 or not platform_packages):
-        raise RuntimeError(f"expected platform packages in {directory}: {[path.name for path in archives]}")
+        raise RuntimeError(
+            f"expected platform packages in {directory}: {[path.name for path in archives]}"
+        )
     for archive in archives:
         with tarfile.open(archive, "r:gz") as package:
             names = package.getnames()
             manifest = json.load(package.extractfile("package/package.json"))
             if manifest["version"] != expected_version:
-                raise RuntimeError(f"{archive.name} has version {manifest['version']}, expected {expected_version}")
+                raise RuntimeError(
+                    f"{archive.name} has version {manifest['version']}, expected {expected_version}"
+                )
             if archive == main[0]:
                 if manifest["name"] != "@brimp/brimp" or "package/brimp.node" in names:
                     raise RuntimeError(f"invalid main package: {archive.name}")
@@ -296,7 +346,9 @@ def validate(directory: Path, *, complete: bool = False) -> None:
                 raise RuntimeError(f"platform package is missing brimp.node: {archive.name}")
             if "package/LICENSE" not in names:
                 raise RuntimeError(f"platform package is missing LICENSE: {archive.name}")
-            if not any(name.startswith("package/native/") or name.endswith(".dll") for name in names):
+            if not any(
+                name.startswith("package/native/") or name.endswith(".dll") for name in names
+            ):
                 raise RuntimeError(f"platform package is missing native libraries: {archive.name}")
 
 
@@ -322,14 +374,27 @@ def main() -> int:
             arguments.package = True
         if arguments.main:
             archive = package_main(arguments.source, arguments.out)
-            archive.with_name(archive.name + ".sha256").write_text(f"{sha(archive)}  {archive.name}\n")
+            archive.with_name(archive.name + ".sha256").write_text(
+                f"{sha(archive)}  {archive.name}\n"
+            )
             print(archive)
         if arguments.package:
             if arguments.jsc_sdk is None or arguments.curl_sdk is None:
                 raise RuntimeError("--jsc-sdk and --curl-sdk are required for platform packages")
-            runtime = arguments.vc_runtime_dir or Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
-            archive = package_platform(arguments.source, arguments.jsc_sdk.resolve(), arguments.curl_sdk.resolve(), arguments.out, runtime)
-            archive.with_name(archive.name + ".sha256").write_text(f"{sha(archive)}  {archive.name}\n")
+            runtime = (
+                arguments.vc_runtime_dir
+                or Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+            )
+            archive = package_platform(
+                arguments.source,
+                arguments.jsc_sdk.resolve(),
+                arguments.curl_sdk.resolve(),
+                arguments.out,
+                runtime,
+            )
+            archive.with_name(archive.name + ".sha256").write_text(
+                f"{sha(archive)}  {archive.name}\n"
+            )
             print(archive)
     except (OSError, RuntimeError, subprocess.CalledProcessError) as error:
         print(f"package-node: {error}", file=sys.stderr)

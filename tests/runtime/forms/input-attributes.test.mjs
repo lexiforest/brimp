@@ -1,15 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {inputAutocompleteCases as cases,measureAutocomplete} from '../../../scripts/coverage/input-autocomplete-cases.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  inputAutocompleteCases as cases,
+  measureAutocomplete,
+} from '../../../scripts/coverage/input-autocomplete-cases.mjs';
 
-const strings=['accept','align','alt','dirName','name','pattern','placeholder','useMap','formTarget'];
-const booleans=['disabled','formNoValidate','multiple','readOnly','required'];
+const strings = [
+  'accept',
+  'align',
+  'alt',
+  'dirName',
+  'name',
+  'pattern',
+  'placeholder',
+  'useMap',
+  'formTarget',
+];
+const booleans = ['disabled', 'formNoValidate', 'multiple', 'readOnly', 'required'];
 
-test('input string reflections preserve well-formed DOMStrings, attribute identity and canonical access',async()=>{
-  const session=await createSession();
-  try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('input string reflections preserve well-formed DOMStrings, attribute identity and canonical access', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[];
     for(const name of ${JSON.stringify(strings)}){
       const i=document.createElement('input'),attribute=name.toLowerCase();
@@ -33,12 +50,21 @@ test('input string reflections preserve well-formed DOMStrings, attribute identi
       }
     }
     return failures;
-  })()`),[]);}finally{await session.close();}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('input boolean reflections use attribute presence and WebIDL boolean conversion',async()=>{
-  const session=await createSession();
-  try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('input boolean reflections use attribute presence and WebIDL boolean conversion', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[];
     for(const name of ${JSON.stringify(booleans)}){
       const i=document.createElement('input'),attribute=name.toLowerCase();
@@ -60,14 +86,23 @@ test('input boolean reflections use attribute presence and WebIDL boolean conver
     const f=document.createElement('fieldset');f.disabled=true;f.appendChild(i);if(i.disabled)failures.push('disabled reflects own attribute only');
     if('incremental' in i||Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'incremental'))failures.push('incremental absent in Safari');
     return failures;
-  })()`),[]);}finally{await session.close();}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('input reflections emit Safari attribute records for repeated assignments and removals',async()=>{
-  const session=await createSession();
-  try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('input reflections emit Safari attribute records for repeated assignments and removals', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[];
-    const names=${JSON.stringify([...strings,...booleans,'autocomplete'])};
+    const names=${JSON.stringify([...strings, ...booleans, 'autocomplete'])};
     const i=document.createElement('input');
     for(const name of names){
       const attribute=name.toLowerCase(),boolean=${JSON.stringify(booleans)}.includes(name);
@@ -78,22 +113,47 @@ test('input reflections emit Safari attribute records for repeated assignments a
       if(JSON.stringify(records)!==JSON.stringify(expected.map(([a,old])=>[a,old,null])))failures.push([name,'records',records]);
     }
     return failures;
-  })()`),[]);}finally{await session.close();}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('input autocomplete follows the measured Safari token grammar and live type changes',async()=>{
-  const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/input-autocomplete.safari.json',import.meta.url),'utf8'));
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),cases);
-  const session=await createSession();
-  try{
-    const actual=await(await session.newPage()).evaluate(`(${measureAutocomplete})(${JSON.stringify(cases)})`);
-    assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference.cases[i].expected)?[]:[{...c,actual:actual[i],expected:reference.cases[i].expected}]),[]);
-  }finally{await session.close();}
+test('input autocomplete follows the measured Safari token grammar and live type changes', async () => {
+  const reference = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/input-autocomplete.safari.json', import.meta.url), 'utf8'),
+  );
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const session = await createSession();
+  try {
+    const actual = await (
+      await session.newPage()
+    ).evaluate(`(${measureAutocomplete})(${JSON.stringify(cases)})`);
+    assert.deepEqual(
+      cases.flatMap((c, i) =>
+        JSON.stringify(actual[i]) === JSON.stringify(reference.cases[i].expected)
+          ? []
+          : [{ ...c, actual: actual[i], expected: reference.cases[i].expected }],
+      ),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('autocomplete uses canonical attributes, DOMString conversion and Safari descriptors',async()=>{
-  const session=await createSession();
-  try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('autocomplete uses canonical attributes, DOMString conversion and Safari descriptors', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[],i=document.createElement('input');
     for(const value of [null,undefined,123n,{toString(){return 'SECTION-X SHIPPING EMAIL';}}]){i.autocomplete=value;if(i.getAttribute('autocomplete')!==String(value))failures.push('conversion');}
     try{i.autocomplete=Symbol();failures.push('symbol');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
@@ -105,5 +165,10 @@ test('autocomplete uses canonical attributes, DOMString conversion and Safari de
     if(!d.enumerable||!d.configurable||d.get.name!=='get autocomplete'||d.set.name!=='set autocomplete')failures.push('descriptor');
     for(const fn of [d.get,d.set])try{fn.call({},'email');failures.push('brand');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
     return failures;
-  })()`),[]);}finally{await session.close();}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });

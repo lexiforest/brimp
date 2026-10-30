@@ -15,9 +15,7 @@ class PackagingTests(unittest.TestCase):
             wheel = directory / f"brimp-{TEST_VERSION}-cp311-abi3-manylinux_2_34_x86_64.whl"
             wheel.touch()
             self.assertEqual(
-                validate_wheel.find_wheel(
-                    directory, "x86_64-unknown-linux-gnu", TEST_VERSION
-                ),
+                validate_wheel.find_wheel(directory, "x86_64-unknown-linux-gnu", TEST_VERSION),
                 wheel,
             )
 

@@ -17,9 +17,7 @@ from pathlib import Path
 JSC_VERSION = "jsc-v2026082706"
 JSC_BASE_URL = f"https://github.com/lexiforest/WebKit/releases/download/{JSC_VERSION}"
 CURL_VERSION = "v2.3.2"
-CURL_BASE_URL = (
-    f"https://github.com/lexiforest/curl-impersonate/releases/download/{CURL_VERSION}"
-)
+CURL_BASE_URL = f"https://github.com/lexiforest/curl-impersonate/releases/download/{CURL_VERSION}"
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -294,9 +292,7 @@ def prepare(
         if curl_lib is not None:
             require_files(curl_lib, ("libcurl-impersonate.so",))
 
-    licenses = collect_licenses(
-        jsc_root, curl_root, output, required=curl_release
-    )
+    licenses = collect_licenses(jsc_root, curl_root, output, required=curl_release)
     values = {
         "BRIMP_JSC_SDK": str(jsc_root.resolve()),
         "BRIMP_JSC_LIB_DIR": str(jsc_lib.resolve()),
@@ -315,11 +311,7 @@ def prepare(
                 for directory in runtime_dirs:
                     output_file.write(f"{directory.resolve()}\n")
         else:
-            values["PATH"] = (
-                values["BRIMP_NATIVE_RUNTIME_DIRS"]
-                + os.pathsep
-                + os.environ["PATH"]
-            )
+            values["PATH"] = values["BRIMP_NATIVE_RUNTIME_DIRS"] + os.pathsep + os.environ["PATH"]
     elif "apple-darwin" in target_name:
         values["DYLD_LIBRARY_PATH"] = values["BRIMP_NATIVE_RUNTIME_DIRS"]
         # WebKit SDK frameworks may retain the system framework install name.

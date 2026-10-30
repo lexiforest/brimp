@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
-  const session=await createSession();
-  try{return await(await session.newPage()).evaluate(source);}
-  finally{await session.close();}
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('input clones and imports preserve edited values, checkedness and dirty flags', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],foreign=document.implementation.createHTMLDocument();
     const types=['text','search','url','email','password','number','range','date','time','datetime-local','color','checkbox','radio','hidden','button'];
     for(const type of types)for(const dirty of [false,true])for(const imported of [false,true]) {
@@ -25,11 +29,14 @@ test('input clones and imports preserve edited values, checkedness and dirty fla
       if(i.checked!==!dirty||i.value!==expected)failures.push([type,'independence']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('clones preserve raw range state and pre-file values without copying file lists or custom validity', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],i=document.createElement('input');i.value='edited';i.type='file';i.indeterminate=true;i.setCustomValidity('invalid');
     const transfer=new DataTransfer();transfer.items.add(new File(['x'],'x.txt'));i.files=transfer.files;
     const c=i.cloneNode();if(c.files.length||c.files===i.files||c.value!==''||c.validationMessage!==''||!c.indeterminate)failures.push('file clone');
@@ -39,11 +46,14 @@ test('clones preserve raw range state and pre-file values without copying file l
     const r=range.cloneNode();if(r.value!=='80')failures.push(['raw range',r.value]);r.max='60';if(r.value!=='51'||range.value!=='80')failures.push('range independence');
     const form=document.createElement('form');form.appendChild(c);c.defaultValue='reset';form.reset();if(c.value!=='reset')failures.push('reset dirty clone');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('input and textarea cloning resets selection, omits listeners and retains dirty textarea text', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const tag of ['input','textarea'])for(const deep of [false,true]) {
       const i=document.createElement(tag);i.defaultValue='default';i.value='edited';i.setSelectionRange(1,3,'backward');i.setCustomValidity('invalid');
@@ -56,11 +66,14 @@ test('input and textarea cloning resets selection, omits listeners and retains d
     }
     const clean=document.createElement('textarea');clean.defaultValue='default';const c=clean.cloneNode(true);c.defaultValue='new';if(c.value!=='new')failures.push('pristine textarea');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('deep element, fragment, document and template clones copy nested control state using canonical nodes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],foreign=document.implementation.createHTMLDocument();
     for(const kind of ['element','fragment','document','template'])for(const imported of [false,true]) {
       if(kind==='document'&&imported)continue;
@@ -82,11 +95,14 @@ test('deep element, fragment, document and template clones copy nested control s
       if(kind!=='document'&&(kind==='template'?shallow.content:shallow).childNodes.length)failures.push([kind,'shallow']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('textarea defaults use direct child text, preserve raw line endings and respect the dirty value flag', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[],t=document.createElement('textarea'),nested=document.createElement('span');nested.textContent='nested';
     t.appendChild(document.createTextNode('a\rb\r\nc'));t.appendChild(nested);t.appendChild(document.createComment('comment'));t.appendChild(document.createTextNode('d'));
     if(t.defaultValue!=='a\rb\r\ncd'||t.value!=='a\nb\ncd')failures.push(['child text',t.defaultValue,t.value]);
@@ -104,5 +120,7 @@ test('textarea defaults use direct child text, preserve raw line endings and res
       for(const fn of [d.get,d.set]){try{fn.call({},'x');failures.push([name,'brand']);}catch(e){if(e.name!=='TypeError')failures.push([name,e.name]);}}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

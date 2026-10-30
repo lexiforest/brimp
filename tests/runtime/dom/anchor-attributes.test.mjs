@@ -1,15 +1,43 @@
-import test from'node:test';import assert from'node:assert/strict';import fs from'node:fs';
-import{createSession}from'../../../scripts/coverage/session.mjs';import{anchorStringFields,anchorAttributeCases as cases,measureAnchorAttributes as measure}from'../../../scripts/coverage/anchor-attribute-cases.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close()}}
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  anchorStringFields,
+  anchorAttributeCases as cases,
+  measureAnchorAttributes as measure,
+} from '../../../scripts/coverage/anchor-attribute-cases.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('anchor attributes and text match 208 Safari conversion and mutation cases',async()=>{
- const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/anchor-attributes.safari.json',import.meta.url))).cases;assert.deepEqual(ref.map(({expected,...c})=>c),cases);
- const actual=JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`));
- assert.deepEqual(ref.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test('anchor attributes and text match 208 Safari conversion and mutation cases', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/anchor-attributes.safari.json', import.meta.url)),
+  ).cases;
+  assert.deepEqual(
+    ref.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const actual = JSON.parse(
+    await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`),
+  );
+  assert.deepEqual(
+    ref.flatMap((c, i) =>
+      JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test('anchor reflections use canonical null-namespace attributes, preserve UTF-16, and have Safari descriptors',async()=>{
- assert.deepEqual(await evaluate(`(()=>{
+test('anchor reflections use canonical null-namespace attributes, preserve UTF-16, and have Safari descriptors', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
  const failures=[];
  for(const name of ${JSON.stringify(anchorStringFields)}){
   const a=document.createElement('a'),d=Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype,name);
@@ -29,11 +57,14 @@ test('anchor reflections use canonical null-namespace attributes, preserve UTF-1
   a.getAttribute=a.setAttribute=a.hasAttribute=()=>{throw Error('override')};a[name]='canonical';if(a[name]!=='canonical')failures.push('canonical');
  }
  return failures;
- })()`),[]);
+ })()`),
+    [],
+  );
 });
 
-test('anchor referrerPolicy reflects Safari keywords without trimming or accepting legacy aliases',async()=>{
- assert.deepEqual(await evaluate(`(()=>{
+test('anchor referrerPolicy reflects Safari keywords without trimming or accepting legacy aliases', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
  const failures=[],a=document.createElement('a');const words=['','no-referrer','no-referrer-when-downgrade','same-origin','origin','strict-origin','origin-when-cross-origin','strict-origin-when-cross-origin','unsafe-url'];
  for(const value of [...words,...words.map(s=>s.toUpperCase()),' same-origin','origin ','always','never','default','ſame-origin','ORİGIN',null,undefined]){
   a.referrerPolicy=value;const raw=String(value),lower=raw.replace(/[A-Z]/g,c=>c.toLowerCase());
@@ -43,11 +74,14 @@ test('anchor referrerPolicy reflects Safari keywords without trimming or accepti
  a.getAttribute=a.setAttribute=()=>{throw Error('override')};a.referrerPolicy='ORIGIN';if(a.referrerPolicy!=='origin')failures.push('canonical');
  if('hrefTranslate' in a||Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype,'hrefTranslate')!==undefined)failures.push('unsupported hrefTranslate');
  return failures;
- })()`),[]);
+ })()`),
+    [],
+  );
 });
 
-test('anchor text is canonical descendant text and replaces children independently of the text content attribute',async()=>{
- assert.deepEqual(await evaluate(`(()=>{
+test('anchor text is canonical descendant text and replaces children independently of the text content attribute', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
  const failures=[],a=document.createElement('a');
  a.innerHTML='<span>one</span><!--ignored--><script>two</script><style>three</style><template>ignored</template>four';
  if(a.text!=='onetwothreefour')failures.push('descendants');
@@ -60,5 +94,7 @@ test('anchor text is canonical descendant text and replaces children independent
   let converted=false;try{d.set.call(receiver,{toString(){converted=true;return 'x'}});failures.push('receiver')}catch(e){if(e.name!=='TypeError'||converted)failures.push('brand before conversion')}
  }
  return failures;
- })()`),[]);
+ })()`),
+    [],
+  );
 });

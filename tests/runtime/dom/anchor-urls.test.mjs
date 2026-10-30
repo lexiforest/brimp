@@ -1,13 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {anchorURLFields, anchorURLReadCases, anchorURLWriteCases, measureAnchorURLs} from '../../../scripts/coverage/anchor-url-cases.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  anchorURLFields,
+  anchorURLReadCases,
+  anchorURLWriteCases,
+  measureAnchorURLs,
+} from '../../../scripts/coverage/anchor-url-cases.mjs';
 
-for (const [name, cases] of [['reads', anchorURLReadCases], ['writes', anchorURLWriteCases]]) {
+for (const [name, cases] of [
+  ['reads', anchorURLReadCases],
+  ['writes', anchorURLWriteCases],
+]) {
   test(`anchor URL ${name} match ${cases.length} Safari cases`, async (t) => {
-    const ref = JSON.parse(fs.readFileSync(new URL('../fixtures/anchor-urls.safari.json', import.meta.url)))[name];
-    assert.deepEqual(ref.map(({expected, ...c}) => c), cases);
+    const ref = JSON.parse(
+      fs.readFileSync(new URL('../fixtures/anchor-urls.safari.json', import.meta.url)),
+    )[name];
+    assert.deepEqual(
+      ref.map(({ expected, ...c }) => c),
+      cases,
+    );
     const session = await createSession();
     try {
       const differences = [];
@@ -18,25 +31,42 @@ for (const [name, cases] of [['reads', anchorURLReadCases], ['writes', anchorURL
           // Independent cases must not accumulate all 4,568 documents in one realm.
           const page = await session.newPage();
           try {
-            const actual = JSON.parse(await page.evaluate(`JSON.stringify((${measureAnchorURLs})(${JSON.stringify(batch)},${name === 'writes'}))`));
-            for (let j = 0; j < batch.length; ++j) if (JSON.stringify(actual[j]) !== JSON.stringify(ref[i + j].expected))
-              differences.push({...ref[i + j], actual: actual[j]});
-          } finally { await page.close(); }
+            const actual = JSON.parse(
+              await page.evaluate(
+                `JSON.stringify((${measureAnchorURLs})(${JSON.stringify(batch)},${name === 'writes'}))`,
+              ),
+            );
+            for (let j = 0; j < batch.length; ++j)
+              if (JSON.stringify(actual[j]) !== JSON.stringify(ref[i + j].expected))
+                differences.push({ ...ref[i + j], actual: actual[j] });
+          } finally {
+            await page.close();
+          }
         });
       }
-      assert.equal(differences.length, 0, JSON.stringify({total: differences.length, first: differences.slice(0, 12)}, null, 2));
-    } finally { await session.close(); }
+      assert.equal(
+        differences.length,
+        0,
+        JSON.stringify({ total: differences.length, first: differences.slice(0, 12) }, null, 2),
+      );
+    } finally {
+      await session.close();
+    }
   });
 }
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('anchor URL descriptors, conversion and receiver checks match Safari', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures = [], fields = ${JSON.stringify(anchorURLFields)};
     for (const name of fields) {
       const d = Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype, name);
@@ -63,11 +93,14 @@ test('anchor URL descriptors, conversion and receiver checks match Safari', asyn
     a.port = {toString() { a.removeAttribute('href'); return '80'; }};
     if (a.hasAttribute('href')) failures.push('removed during conversion');
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('anchor URLs use canonical attributes and live owning-document bases through cloning and adoption', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures = [], owner = document.implementation.createHTMLDocument();
     const base = owner.createElement('base'); base.href = 'https://first.test/dir/'; owner.head.append(base);
     const a = owner.createElement('a'); a.setAttributeNS('urn:other', 'href', 'https://foreign.test/');
@@ -94,13 +127,21 @@ test('anchor URLs use canonical attributes and live owning-document bases throug
     foreign.adoptNode(a);
     if (href.get.call(a) !== imported.href || a.getAttributeNS('urn:other','href') !== 'https://foreign.test/') failures.push('adoption');
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('anchor query encoding follows its owning document without rewriting raw href attributes', async () => {
-  const {measureAnchorURLEncoding} = await import('../../../scripts/coverage/anchor-url-encoding.mjs');
-  const expected = JSON.parse(fs.readFileSync(new URL('../fixtures/anchor-url-encoding.safari.json', import.meta.url)));
+  const { measureAnchorURLEncoding } =
+    await import('../../../scripts/coverage/anchor-url-encoding.mjs');
+  const expected = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/anchor-url-encoding.safari.json', import.meta.url)),
+  );
   const session = await createSession();
-  try { assert.deepEqual(await measureAnchorURLEncoding(await session.newPage()), expected); }
-  finally { await session.close(); }
+  try {
+    assert.deepEqual(await measureAnchorURLEncoding(await session.newPage()), expected);
+  } finally {
+    await session.close();
+  }
 });

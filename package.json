@@ -5,8 +5,8 @@
     "node": ">=22.19"
   },
   "scripts": {
-    "format:runtime": "prettier --write \"crates/runtime/js/**/*.{js,mjs}\"",
-    "format:runtime:check": "prettier --check \"crates/runtime/js/**/*.{js,mjs}\""
+    "format": "prettier --write --ignore-path .gitignore --ignore-path .prettierignore \"**/*.{js,mjs,cjs}\"",
+    "format:check": "prettier --check --ignore-path .gitignore --ignore-path .prettierignore \"**/*.{js,mjs,cjs}\""
   },
   "devDependencies": {
     "prettier": "3.9.10"

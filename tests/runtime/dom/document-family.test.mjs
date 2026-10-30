@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../bindings/node/index.js';
+import { createSession } from '../../../bindings/node/index.js';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('Document creation, adoption, collections and traversal share canonical DOM nodes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const parsed=new DOMParser().parseFromString('<!doctype html><p id="p" class="item" name="item">text</p>','text/html');
     const p=parsed.getElementById('p'),copy=document.importNode(p,true);
     document.body.append(copy);const live=document.getElementsByClassName('item');
@@ -23,11 +27,14 @@ test('Document creation, adoption, collections and traversal share canonical DOM
       document.getElementsByName('item').length,document.getElementsByTagName('p').length,
       document.getElementsByTagNameNS('http://www.w3.org/2000/svg','svg')[0]===svg,
       walker.nextNode().data,iterator.nextNode()===p,attr.ownerElement===p,p.getAttributeNS('urn:test','value'),p.lastChild.data];
-  })()`),[true,true,null,true,'text',2,2,2,true,'text',true,true,'namespaced','tail']);
+  })()`),
+    [true, true, null, true, 'text', 2, 2, 2, true, 'text', true, true, 'namespaced', 'tail'],
+  );
 });
 
 test('Document editing state and root/focus relationships stay local to each document', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const other=document.implementation.createHTMLDocument('other'),empty=new Document();
     const button=document.createElement('button');document.body.append(button);button.focus();
     const focused=[document.activeElement===button,other.activeElement===other.body];button.remove();
@@ -39,11 +46,25 @@ test('Document editing state and root/focus relationships stay local to each doc
     empty.replaceChildren(empty.createComment('before'),svg);empty.prepend(empty.createComment('first'));
     return [focused,document.activeElement===document.body,edit,roots,empty.childNodes.length,
       document.defaultView===window,other.defaultView,other.currentScript,other.readyState,other.title];
-  })()`),[[true,true],true,['off','off',true,'off','on',false],[true,null,true,true],3,true,null,null,'complete','other']);
+  })()`),
+    [
+      [true, true],
+      true,
+      ['off', 'off', true, 'off', 'on', false],
+      [true, null, true, true],
+      3,
+      true,
+      null,
+      null,
+      'complete',
+      'other',
+    ],
+  );
 });
 
 test('Document writing, XPath, ranges, events and stylesheet state remain functional', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const doc=document.implementation.createHTMLDocument();const opened=doc.open()===doc;
     doc.write('<!doctype html><html><head></head><body><p id="p">hello</p>');doc.writeln('<p>world</p>');doc.close();
     const p=doc.getElementById('p'),range=doc.createRange();range.selectNodeContents(p);
@@ -59,11 +80,26 @@ test('Document writing, XPath, ranges, events and stylesheet state remain functi
       doc.evaluate('string(//p[@id="p"])',doc,null,XPathResult.STRING_TYPE,null).stringValue,calls,
       document.styleSheets[0]===style.sheet,document.adoptedStyleSheets[0]===sheet,
       [doc.bgColor,doc.fgColor,doc.linkColor,doc.alinkColor,doc.vlinkColor]];
-  })()`),[true,2,'hello','hello',2,'function','hello',1,true,true,['red','blue','green','yellow','purple']]);
+  })()`),
+    [
+      true,
+      2,
+      'hello',
+      'hello',
+      2,
+      'function',
+      'hello',
+      1,
+      true,
+      true,
+      ['red', 'blue', 'green', 'yellow', 'purple'],
+    ],
+  );
 });
 
 test('Document heavy services preserve explicit placeholders without producing browser effects', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const d=document;let cdata;try{d.createCDATASection('text')}catch(e){cdata=e.name}
     const before=d.body.innerHTML;const pi=d.createProcessingInstruction('target','data');
     const noops=[d.exitFullscreen(),d.exitPictureInPicture(),d.exitPointerLock(),d.webkitExitFullscreen(),d.webkitCancelFullScreen()];
@@ -83,7 +119,26 @@ test('Document heavy services preserve explicit placeholders without producing b
       cdata,pi===undefined,noops.every(v=>v===undefined),before===d.body.innerHTML,
       illegal,CDATASection.prototype instanceof Text,HTMLDocument===Document,d instanceof HTMLDocument,
       Object.prototype.toString.call(new DOMParser())];
-  })()`),[[true,true],[true,'[object DocumentTimeline]',true,true,null,'undefined',0],'TypeError',
-    ['string',true,19,'/','/',' ',false],true,true,[false,false,true,true,true],[null,null,null,null,null],
-    ['',null,false,null,false,'visible',true],'NotSupportedError',true,true,true,'TypeError',true,true,true,'[object DOMParser]']);
+  })()`),
+    [
+      [true, true],
+      [true, '[object DocumentTimeline]', true, true, null, 'undefined', 0],
+      'TypeError',
+      ['string', true, 19, '/', '/', ' ', false],
+      true,
+      true,
+      [false, false, true, true, true],
+      [null, null, null, null, null],
+      ['', null, false, null, false, 'visible', true],
+      'NotSupportedError',
+      true,
+      true,
+      true,
+      'TypeError',
+      true,
+      true,
+      true,
+      '[object DOMParser]',
+    ],
+  );
 });

@@ -38,7 +38,9 @@ def archive(root: Path, output: Path) -> None:
             if path.is_file():
                 info = zipfile.ZipInfo(path.relative_to(root).as_posix(), (1980, 1, 1, 0, 0, 0))
                 info.compress_type = zipfile.ZIP_DEFLATED
-                info.external_attr = (0o100755 if path.suffix in (".so", ".pyd", ".dll") else 0o100644) << 16
+                info.external_attr = (
+                    0o100755 if path.suffix in (".so", ".pyd", ".dll") else 0o100644
+                ) << 16
                 wheel.writestr(info, path.read_bytes())
 
 
@@ -48,7 +50,9 @@ def main() -> int:
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--runtime-dir", type=Path)
     arguments = parser.parse_args()
-    runtime = arguments.runtime_dir or Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+    runtime = (
+        arguments.runtime_dir or Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+    )
     arguments.out.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix="brimp-wheel-runtime-"))
     try:

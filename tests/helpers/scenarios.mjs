@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {setTimeout as delay} from 'node:timers/promises';
+import { setTimeout as delay } from 'node:timers/promises';
 
 export async function until(page, source, timeout = 8000) {
   const deadline = Date.now() + timeout;
@@ -15,7 +15,8 @@ export async function until(page, source, timeout = 8000) {
 export async function runScenario(workload, page, origin, checkpoint) {
   await page.goto(origin + '/');
   if (workload.id.startsWith('todomvc-')) {
-    const rows = 'Array.from(document.querySelectorAll(".todo-list li label"), node => node.textContent)';
+    const rows =
+      'Array.from(document.querySelectorAll(".todo-list li label"), node => node.textContent)';
     await until(page, '!!document.querySelector(".new-todo")');
     for (const title of ['first observation', 'second observation']) {
       await page.fill('.new-todo', title);
@@ -25,11 +26,16 @@ export async function runScenario(workload, page, origin, checkpoint) {
     assert.deepEqual(await page.evaluate(rows), ['first observation', 'second observation']);
     checkpoint('add');
     // Dispatch the DOM dblclick used by the reference run; layout is not measured.
-    await page.evaluate('document.querySelector(".todo-list li label").dispatchEvent(new MouseEvent("dblclick", {bubbles:true})); null');
+    await page.evaluate(
+      'document.querySelector(".todo-list li label").dispatchEvent(new MouseEvent("dblclick", {bubbles:true})); null',
+    );
     await until(page, '!!document.querySelector(".todo-list li.editing .edit")');
     await page.fill('.todo-list li.editing .edit', 'edited observation');
     await page.press('.todo-list li.editing .edit', 'Enter');
-    await until(page, 'document.querySelector(".todo-list li label").textContent === "edited observation"');
+    await until(
+      page,
+      'document.querySelector(".todo-list li label").textContent === "edited observation"',
+    );
     checkpoint('edit');
     await page.click('.todo-list li .toggle');
     await until(page, 'document.querySelectorAll(".todo-list li.completed").length === 1');
@@ -50,7 +56,7 @@ export async function runScenario(workload, page, origin, checkpoint) {
     // Their actual reload contract is reset, not localStorage persistence.
     assert.deepEqual(await page.evaluate(rows), [], 'upstream app must reset on reload');
     checkpoint('reload-reset');
-    return {remainingBeforeReload: ['second observation'], remainingAfterReload: []};
+    return { remainingBeforeReload: ['second observation'], remainingAfterReload: [] };
   }
   if (workload.id === 'htmx') {
     await page.click('[hx-get]');
@@ -64,7 +70,7 @@ export async function runScenario(workload, page, origin, checkpoint) {
     const text = await page.evaluate('document.querySelector("#saved-contact").textContent');
     assert.equal(text, 'Ada Lovelace ada@example.test');
     checkpoint('submit-and-swap');
-    return {text};
+    return { text };
   }
   await until(page, 'typeof runWorkload === "function"');
   const result = await page.evaluate('runWorkload()');

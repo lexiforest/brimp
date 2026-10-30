@@ -1,19 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {customValidityCases as cases,measureCustomValidity as measure} from '../../../scripts/coverage/custom-validity-cases.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  customValidityCases as cases,
+  measureCustomValidity as measure,
+} from '../../../scripts/coverage/custom-validity-cases.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test(`custom validity matches ${cases.length} Safari conversion and event cases`,async()=>{
-  const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/custom-validity.safari.json',import.meta.url))).cases;
-  assert.deepEqual(reference.map(({expected,...c})=>c),cases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`));
-  assert.deepEqual(reference.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test(`custom validity matches ${cases.length} Safari conversion and event cases`, async () => {
+  const reference = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/custom-validity.safari.json', import.meta.url)),
+  ).cases;
+  assert.deepEqual(
+    reference.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const actual = JSON.parse(
+    await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`),
+  );
+  assert.deepEqual(
+    reference.flatMap((c, i) =>
+      JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test('custom validity methods and button validity descriptors are branded with Safari shape',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('custom validity methods and button validity descriptors are branded with Safari shape', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [tag,ctor] of [['input',HTMLInputElement],['button',HTMLButtonElement]]){
       const control=document.createElement(tag),method=ctor.prototype.setCustomValidity;
@@ -46,11 +69,14 @@ test('custom validity methods and button validity descriptors are branded with S
     if(Object.getOwnPropertyNames(ValidityState.prototype).some(name=>name!=='constructor'&&!flags.includes(name)))failures.push('extra public helpers');
     try{new ValidityState();failures.push('constructible state');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button validity is live custom-error state independent of input-like properties and public overrides',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button validity is live custom-error state independent of input-like properties and public overrides', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],button=document.createElement('button'),state=button.validity;
     button.required=true;button.pattern='x';button.min='10';button.max='1';button.minLength=20;button.maxLength=1;
     button.setAttribute('required','');button.setAttribute('pattern','x');button.value='';
@@ -69,11 +95,14 @@ test('button validity is live custom-error state independent of input-like prope
     Object.defineProperty(input,'value',{get(){throw Error('input value');}});Object.defineProperty(input,'required',{get(){throw Error('input required');}});
     input.setCustomValidity('private');if(!inputState.customError)failures.push('independent custom flag');input.setCustomValidity('');if(inputState.customError)failures.push('independent clear');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('custom validity survives reset/adoption but is not cloned, and assignments emit no DOM events or mutations',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('custom validity survives reset/adoption but is not cloned, and assignments emit no DOM events or mutations', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const tag of ['input','button']){
       const form=document.createElement('form'),control=document.createElement(tag);form.append(control);document.body.append(form);
@@ -89,11 +118,14 @@ test('custom validity survives reset/adoption but is not cloned, and assignments
       control.disabled=false;if(control.validationMessage!=='persistent')failures.push([tag,'reenabled']);form.remove();
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button checkValidity dispatches a trusted cancelable invalid event and returns the pre-event result',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button checkValidity dispatches a trusted cancelable invalid event and returns the pre-event result', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),button=document.createElement('button');form.append(button);document.body.append(form);
     button.setCustomValidity('first');const log=[];
     form.addEventListener('invalid',e=>log.push(['capture',e.target===button]),true);
@@ -105,5 +137,7 @@ test('button checkValidity dispatches a trusted cancelable invalid event and ret
     if(button.checkValidity()!==false||!button.checkValidity()||!button.validity.customError)failures.push('disabled and detached during event');
     button.disabled=false;let detached=0;button.addEventListener('invalid',()=>detached++);if(button.checkValidity()!==false||detached!==1)failures.push('detached invalid');
     form.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

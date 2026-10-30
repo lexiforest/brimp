@@ -1,27 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {embeddedInterfaces,embeddedFields,embeddedAttributeCases,measureEmbeddedAttributes,sandboxTokens,measureSandboxSupport} from '../../../scripts/coverage/embedded-attribute-cases.mjs';
-import {measureControlIdentity} from '../../../scripts/coverage/control-identity-cases.mjs';
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/embedded-attributes.safari.json',import.meta.url)));
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  embeddedInterfaces,
+  embeddedFields,
+  embeddedAttributeCases,
+  measureEmbeddedAttributes,
+  sandboxTokens,
+  measureSandboxSupport,
+} from '../../../scripts/coverage/embedded-attribute-cases.mjs';
+import { measureControlIdentity } from '../../../scripts/coverage/control-identity-cases.mjs';
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/embedded-attributes.safari.json', import.meta.url)),
+);
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('embedded/body attributes match Safari conversion, enum and mutation cases',async()=>{
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),embeddedAttributeCases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measureEmbeddedAttributes})(${JSON.stringify(embeddedAttributeCases)}))`));
-  assert.deepEqual(reference.cases.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test('embedded/body attributes match Safari conversion, enum and mutation cases', async () => {
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    embeddedAttributeCases,
+  );
+  const actual = JSON.parse(
+    await evaluate(
+      `JSON.stringify((${measureEmbeddedAttributes})(${JSON.stringify(embeddedAttributeCases)}))`,
+    ),
+  );
+  assert.deepEqual(
+    reference.cases.flatMap((c, i) =>
+      JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test('embedded and body interfaces retain Safari prototype identity and construction policy',async()=>{
-  assert.deepEqual(reference.interfaces,embeddedInterfaces);
-  assert.deepEqual(await evaluate(`(${measureControlIdentity})(${JSON.stringify(embeddedInterfaces)})`),reference.identity);
+test('embedded and body interfaces retain Safari prototype identity and construction policy', async () => {
+  assert.deepEqual(reference.interfaces, embeddedInterfaces);
+  assert.deepEqual(
+    await evaluate(`(${measureControlIdentity})(${JSON.stringify(embeddedInterfaces)})`),
+    reference.identity,
+  );
 });
 
-test('embedded reflections are canonical, branded and live through cloning and adoption',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('embedded reflections are canonical, branded and live through cloning and adoption', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
-    for(const [tag,name,attribute,kind] of ${JSON.stringify(embeddedFields.filter(x=>x[3]!=='tokens'))}){
+    for(const [tag,name,attribute,kind] of ${JSON.stringify(embeddedFields.filter((x) => x[3] !== 'tokens'))}){
       const e=document.createElement(tag),d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),name),read=()=>e[name];
       const initial=read(),defaultValue=kind==='boolean'?false:name==='crossOrigin'?null:name==='loading'?'eager':name==='decoding'?'auto':'';
       if(initial!==defaultValue)failures.push(name+' default');
@@ -44,12 +76,18 @@ test('embedded reflections are canonical, branded and live through cloning and a
     }
     const frame=document.createElement('iframe');for(const name of ['allowPaymentRequest','csp','featurePolicy'])if(name in frame)failures.push('Safari absent '+name);
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('iframe sandbox retains token identity and forwards value assignments like Safari',async()=>{
-  assert.deepEqual(await evaluate(`(${measureSandboxSupport})(${JSON.stringify(sandboxTokens)})`),reference.sandboxSupport);
-  assert.deepEqual(await evaluate(`(()=>{
+test('iframe sandbox retains token identity and forwards value assignments like Safari', async () => {
+  assert.deepEqual(
+    await evaluate(`(${measureSandboxSupport})(${JSON.stringify(sandboxTokens)})`),
+    reference.sandboxSupport,
+  );
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],e=document.createElement('iframe'),list=e.sandbox,d=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'sandbox');
     if(!(list instanceof DOMTokenList)||list!==e.sandbox||list.value!==''||list.length!==0)failures.push('default');
     if(!d.enumerable||!d.configurable||d.get.name!=='get sandbox'||d.set.name!=='set sandbox'||d.get.length!==0||d.set.length!==1)failures.push('descriptor');
@@ -64,5 +102,7 @@ test('iframe sandbox retains token identity and forwards value assignments like 
     d.set.call(e,supplied);if(received!==supplied||gets!==1)failures.push('forward unconverted value');
     for(const receiver of [{},document.createElement('div'),Object.create(HTMLIFrameElement.prototype)])try{d.get.call(receiver);failures.push('getter brand')}catch(err){if(err.name!=='TypeError')failures.push(err.name)}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

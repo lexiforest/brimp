@@ -1,19 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../bindings/node/index.js';
-import {canvasPlugin, graphicsPlugin} from '../../../bindings/node/plugins.js';
+import { createSession } from '../../../bindings/node/index.js';
+import { canvasPlugin, graphicsPlugin } from '../../../bindings/node/plugins.js';
 
-const reference = JSON.parse(fs.readFileSync(new URL('../fixtures/webgl.safari.json', import.meta.url)));
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/webgl.safari.json', import.meta.url)),
+);
 async function evaluate(source, plugins = [graphicsPlugin()]) {
-  const session = await createSession({plugins});
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  const session = await createSession({ plugins });
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 // These deliberate legacy contracts do not claim Safari execution semantics.
 test('every added WebGL placeholder returns undefined without processing arguments or GL state', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const methods=${JSON.stringify(reference.placeholderMethods)}, failures=[];
     for(const type of ['webgl','webgl2']) {
       const gl=document.createElement('canvas').getContext(type);
@@ -28,11 +34,15 @@ test('every added WebGL placeholder returns undefined without processing argumen
       if(String(gl.getParameter(gl.COLOR_CLEAR_VALUE))!=='0.25,0.5,0.75,1')failures.push([type,'clear color']);
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('ignored-result graphics workload continues while existing buffers and readback still work', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(
+      `(() => {
     const canvas=document.createElement('canvas');canvas.width=2;canvas.height=1;
     const gl=canvas.getContext('webgl');
     const texture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);
@@ -53,17 +63,39 @@ test('ignored-result graphics workload continues while existing buffers and read
     return {completed:true,error:gl.getError(),pixels:[...out],
       compiled:gl.getShaderParameter(shader,gl.COMPILE_STATUS),
       same:canvas.getContext('webgl')===gl,other:canvas.getContext('2d')};
-  })()` , [canvasPlugin(),graphicsPlugin({rgba:[1,2,3,4]})]),
-  {completed:true,error:0,pixels:[1,2,3,4,1,2,3,4],compiled:false,same:true,other:null});
+  })()`,
+      [canvasPlugin(), graphicsPlugin({ rgba: [1, 2, 3, 4] })],
+    ),
+    {
+      completed: true,
+      error: 0,
+      pixels: [1, 2, 3, 4, 1, 2, 3, 4],
+      compiled: false,
+      same: true,
+      other: null,
+    },
+  );
 });
 
 test('WebGL remains an optional graphics plugin surface', async () => {
-  assert.deepEqual(await evaluate(`(() => ({
+  assert.deepEqual(
+    await evaluate(
+      `(() => ({
     webgl:typeof WebGLRenderingContext,webgl2:typeof WebGL2RenderingContext,
     getContext:typeof document.createElement('canvas').getContext
-  }))()`, []), {webgl:'undefined',webgl2:'undefined',getContext:'function'});
-  assert.deepEqual(await evaluate(`(() => ({
+  }))()`,
+      [],
+    ),
+    { webgl: 'undefined', webgl2: 'undefined', getContext: 'function' },
+  );
+  assert.deepEqual(
+    await evaluate(
+      `(() => ({
     webgl:typeof WebGLRenderingContext,webgl2:typeof WebGL2RenderingContext,
     context:document.createElement('canvas').getContext('webgl')
-  }))()`, [canvasPlugin()]), {webgl:'undefined',webgl2:'undefined',context:null});
+  }))()`,
+      [canvasPlugin()],
+    ),
+    { webgl: 'undefined', webgl2: 'undefined', context: null },
+  );
 });

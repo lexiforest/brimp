@@ -1,21 +1,40 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession, environmentPlugin, permissionsPlugin, devicesPlugin, mediaPlugin, workersPlugin, trustedTypesPlugin} from '../../../bindings/node/index.js';
+import {
+  createSession,
+  environmentPlugin,
+  permissionsPlugin,
+  devicesPlugin,
+  mediaPlugin,
+  workersPlugin,
+  trustedTypesPlugin,
+} from '../../../bindings/node/index.js';
 
-const CHROME_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
+const CHROME_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 async function evaluate(source, plugins = [], identity) {
-  const session = await createSession({plugins, ...(identity ? {profile: {values: {identity: {user_agent: identity}}}} : {})});
+  const session = await createSession({
+    plugins,
+    ...(identity ? { profile: { values: { identity: { user_agent: identity } } } } : {}),
+  });
   try {
     const page = await session.newPage();
-    await page.route('https://core.test/**', route => route.fulfill({body:'<!doctype html><body></body>',headers:{'content-type':'text/html'}}));
+    await page.route('https://core.test/**', (route) =>
+      route.fulfill({
+        body: '<!doctype html><body></body>',
+        headers: { 'content-type': 'text/html' },
+      }),
+    );
     await page.get('https://core.test/');
     return await page.evaluate(source);
+  } finally {
+    await session.close();
   }
-  finally { await session.close(); }
 }
 
 test('navigator keeps common metadata in core and optional service families out of core', async () => {
-  assert.deepEqual(await evaluate(`[
+  assert.deepEqual(
+    await evaluate(`[
     navigator.appCodeName,navigator.appName,navigator.product,navigator.vendorSub,navigator.javaEnabled(),
     navigator.sendBeacon('https://example.test/unused','ignored')===undefined,
     typeof navigator.userAgent,typeof navigator.appVersion,typeof navigator.platform,typeof navigator.language,
@@ -23,11 +42,34 @@ test('navigator keeps common metadata in core and optional service families out 
     navigator instanceof Navigator,
     navigator.userActivation===navigator.userActivation,navigator.userActivation.isActive,navigator.userActivation.hasBeenActive,
     ['clipboard','credentials','geolocation','mediaCapabilities','mediaSession','serviceWorker','wakeLock','mediaDevices'].every(n=>!(n in navigator))
-  ]`),['Mozilla','Netscape','Gecko','',false,true,'string','string','string','string',true,'boolean','boolean',true,true,false,false,true]);
+  ]`),
+    [
+      'Mozilla',
+      'Netscape',
+      'Gecko',
+      '',
+      false,
+      true,
+      'string',
+      'string',
+      'string',
+      'string',
+      true,
+      'boolean',
+      'boolean',
+      true,
+      true,
+      false,
+      false,
+      true,
+    ],
+  );
 });
 
 test('service placeholders support ignored-result calls without callbacks, UI or worker startup', async () => {
-  assert.deepEqual(await evaluate(`(async () => {
+  assert.deepEqual(
+    await evaluate(
+      `(async () => {
     const families={clipboard:['read','readText','write','writeText'],credentials:['create','get','preventSilentAccess','store'],
       geolocation:['clearWatch','getCurrentPosition','watchPosition'],
       mediaSession:['setActionHandler','setCameraActive','setMicrophoneActive','setPositionState'],
@@ -52,11 +94,24 @@ test('service placeholders support ignored-result calls without callbacks, UI or
       navigator.mediaSession.playbackState,devices,navigator.mediaDevices.getSupportedConstraints(),
       navigator.clipboard instanceof Clipboard,navigator.mediaDevices instanceof MediaDevices,navigator.serviceWorker instanceof ServiceWorkerContainer,
       navigator.serviceWorker.ready===navigator.serviceWorker.ready];
-  })()`,[environmentPlugin(), permissionsPlugin(), devicesPlugin(), mediaPlugin(), workersPlugin(), trustedTypesPlugin()]),[true,0,false,2,[null,'none',null],true,'playing',[],{},true,true,true,true]);
+  })()`,
+      [
+        environmentPlugin(),
+        permissionsPlugin(),
+        devicesPlugin(),
+        mediaPlugin(),
+        workersPlugin(),
+        trustedTypesPlugin(),
+      ],
+    ),
+    [true, 0, false, 2, [null, 'none', null], true, 'playing', [], {}, true, true, true, true],
+  );
 });
 
 test('existing service metadata, plugin collections, permissions, locks and storage remain usable', async () => {
-  assert.deepEqual(await evaluate(`(async () => {
+  assert.deepEqual(
+    await evaluate(
+      `(async () => {
     const plugins=navigator.plugins,mimes=navigator.mimeTypes,p=plugins.item(0),m=mimes.namedItem('application/pdf');
     const lock=await navigator.locks.request('local',lock=>[lock.name,lock.mode]);
     const permissions=await navigator.permissions.query({name:'notifications'});
@@ -70,9 +125,57 @@ test('existing service metadata, plugin collections, permissions, locks and stor
       navigator.vendor,navigator.productSub,navigator.pdfViewerEnabled,navigator.webdriver,
       navigator.deviceMemory,await navigator.bluetooth.getAvailability(),
       ['doNotTrack','getBattery','getUserMedia','registerProtocolHandler','requestMIDIAccess','vibrate','xr','userAgentData'].every(n=>!(n in navigator))];
-  })()`,[environmentPlugin(), permissionsPlugin(), devicesPlugin(), mediaPlugin(), workersPlugin(), trustedTypesPlugin()]),
-  [2,2,'PDF Viewer','internal-pdf-viewer','Portable Document Format',2,'application/pdf','pdf','Portable Document Format',
-    true,true,true,2,true,true,2,true,true,true,true,'prompt',true,['local','exclusive'],0,'number',true,8,0,'Apple Computer, Inc.','20030107',true,false,undefined,false,true]);
+  })()`,
+      [
+        environmentPlugin(),
+        permissionsPlugin(),
+        devicesPlugin(),
+        mediaPlugin(),
+        workersPlugin(),
+        trustedTypesPlugin(),
+      ],
+    ),
+    [
+      2,
+      2,
+      'PDF Viewer',
+      'internal-pdf-viewer',
+      'Portable Document Format',
+      2,
+      'application/pdf',
+      'pdf',
+      'Portable Document Format',
+      true,
+      true,
+      true,
+      2,
+      true,
+      true,
+      2,
+      true,
+      true,
+      true,
+      true,
+      'prompt',
+      true,
+      ['local', 'exclusive'],
+      0,
+      'number',
+      true,
+      8,
+      0,
+      'Apple Computer, Inc.',
+      '20030107',
+      true,
+      false,
+      undefined,
+      false,
+      true,
+    ],
+  );
   // navigator.connection is Chromium-only, so it needs a Chromium identity.
-  assert.equal(await evaluate(`typeof navigator.connection`,[environmentPlugin()],CHROME_AGENT),'object');
+  assert.equal(
+    await evaluate(`typeof navigator.connection`, [environmentPlugin()], CHROME_AGENT),
+    'object',
+  );
 });

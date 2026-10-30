@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('Attr exposes names, namespaces, readonly metadata and ordinary interface identity', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const plain = document.createAttribute('TITLE'), namespaced = document.createAttributeNS('urn:test', 'p:label');
     const element = document.createElement('div'); element.setAttributeNodeNS(namespaced);
     const describe = attr => [attr.name, attr.localName, attr.prefix, attr.namespaceURI, attr.specified];
@@ -22,15 +26,29 @@ test('Attr exposes names, namespaces, readonly metadata and ordinary interface i
       plain.ownerDocument === document, Object.getPrototypeOf(plain) === Attr.prototype,
       Object.getPrototypeOf(Attr.prototype) === Node.prototype, Attr.prototype.constructor === Attr,
       Attr.prototype[Symbol.toStringTag], error, descriptors];
-  })()`), [
-    ['title', 'title', null, null, true], ['p:label', 'label', 'p', 'urn:test', true],
-    null, true, true, true, true, true, 'Attr', 'TypeError',
-    [...Array.from({length: 6}, () => [true, true, 'function', 'undefined']), [true, true, 'function', 'function']],
-  ]);
+  })()`),
+    [
+      ['title', 'title', null, null, true],
+      ['p:label', 'label', 'p', 'urn:test', true],
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      'Attr',
+      'TypeError',
+      [
+        ...Array.from({ length: 6 }, () => [true, true, 'function', 'undefined']),
+        [true, true, 'function', 'function'],
+      ],
+    ],
+  );
 });
 
 test('Attr value updates the owner attribute and emits mutation records', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const element = document.createElement('div'); element.setAttribute('title', 'old');
     element.setAttributeNS('urn:test', 'p:label', 'before');
     const attr = element.getAttributeNode('title'), ns = element.getAttributeNodeNS('urn:test', 'label');
@@ -44,14 +62,24 @@ test('Attr value updates the owner attribute and emits mutation records', async 
     const conversions = []; for (const v of [null, undefined, 42, '😀']) { attr.value = v; conversions.push(attr.value); }
     let error; try { attr.value = Symbol(); } catch (e) { error = e.name; }
     return [values, records, live, conversions, error, attr.value];
-  })()`), [
-    ['new', 'after', 'new', 'after'], [['title', null, 'old'], ['label', 'urn:test', 'before']],
-    'reflected', ['null', 'undefined', '42', '😀'], 'TypeError', '😀',
-  ]);
+  })()`),
+    [
+      ['new', 'after', 'new', 'after'],
+      [
+        ['title', null, 'old'],
+        ['label', 'urn:test', 'before'],
+      ],
+      'reflected',
+      ['null', 'undefined', '42', '😀'],
+      'TypeError',
+      '😀',
+    ],
+  );
 });
 
 test('Attr removal retains the last value and does not reconnect old wrappers', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const element = document.createElement('div'); element.hidden = true;
     const removed = element.getAttributeNode('hidden');
     element.setAttribute('hidden', 'latest'); element.hidden = false;
@@ -62,11 +90,14 @@ test('Attr removal retains the last value and does not reconnect old wrappers', 
     const values = [removed.value, element.getAttribute('hidden')];
     const returned = element.removeAttributeNode(replacement);
     return [state, values, returned === replacement, replacement.ownerElement, replacement.value];
-  })()`), [[null, 'latest', true, true], ['detached', 'replacement'], true, null, 'replacement']);
+  })()`),
+    [[null, 'latest', true, true], ['detached', 'replacement'], true, null, 'replacement'],
+  );
 });
 
 test('Attr cloning, adoption and custom-element reactions retain useful DOM semantics', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const calls = [];
     customElements.define('attr-check', class extends HTMLElement {
       static get observedAttributes() { return ['data-value', 'flag']; }
@@ -82,7 +113,23 @@ test('Attr cloning, adoption and custom-element reactions retain useful DOM sema
     element.removeAttributeNS('urn:test', 'flag');
     return [calls, clone.ownerElement, clone.value, clone.ownerDocument === document,
       attr.ownerElement, attr.value, attr.ownerDocument === other, element.hasAttribute('data-value')];
-  })()`), [[['data-value', null, 'one', null], ['data-value', 'one', 'two', null], ['data-value', 'two', null, null],
-    ['flag', null, 'yes', 'urn:test'], ['flag', 'yes', 'no', 'urn:test'], ['flag', 'no', null, 'urn:test']],
-    null, 'clone', true, null, 'two', true, false]);
+  })()`),
+    [
+      [
+        ['data-value', null, 'one', null],
+        ['data-value', 'one', 'two', null],
+        ['data-value', 'two', null, null],
+        ['flag', null, 'yes', 'urn:test'],
+        ['flag', 'yes', 'no', 'urn:test'],
+        ['flag', 'no', null, 'urn:test'],
+      ],
+      null,
+      'clone',
+      true,
+      null,
+      'two',
+      true,
+      false,
+    ],
+  );
 });

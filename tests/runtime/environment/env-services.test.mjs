@@ -1,12 +1,12 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import test from 'node:test';
+import assert from 'node:assert/strict';
 import {
   createSession,
   environmentPlugin,
   permissionsPlugin,
-} from "../../../bindings/node/index.js";
+} from '../../../bindings/node/index.js';
 
-test("matchMedia returns profile-evaluated MediaQueryList objects", async () => {
+test('matchMedia returns profile-evaluated MediaQueryList objects', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -30,36 +30,15 @@ test("matchMedia returns profile-evaluated MediaQueryList objects", async () => 
       ];
     })()`),
       [
-        ["(min-width: 700px)", true, true, "function", "function", null],
-        ["(max-width: 700px)", false, true, "function", "function", null],
-        [
-          "(prefers-color-scheme: light)",
-          true,
-          true,
-          "function",
-          "function",
-          null,
-        ],
-        [
-          "(prefers-color-scheme: dark)",
-          false,
-          true,
-          "function",
-          "function",
-          null,
-        ],
-        [
-          "screen and (orientation: landscape)",
-          true,
-          true,
-          "function",
-          "function",
-          null,
-        ],
-        ["(hover)", true, true, "function", "function", null],
-        ["(color)", true, true, "function", "function", null],
-        ["not all", false, true, "function", "function", null],
-        ["(unknown-feature: value)", false, true, "function", "function", null],
+        ['(min-width: 700px)', true, true, 'function', 'function', null],
+        ['(max-width: 700px)', false, true, 'function', 'function', null],
+        ['(prefers-color-scheme: light)', true, true, 'function', 'function', null],
+        ['(prefers-color-scheme: dark)', false, true, 'function', 'function', null],
+        ['screen and (orientation: landscape)', true, true, 'function', 'function', null],
+        ['(hover)', true, true, 'function', 'function', null],
+        ['(color)', true, true, 'function', 'function', null],
+        ['not all', false, true, 'function', 'function', null],
+        ['(unknown-feature: value)', false, true, 'function', 'function', null],
       ],
     );
   } finally {
@@ -67,7 +46,7 @@ test("matchMedia returns profile-evaluated MediaQueryList objects", async () => 
   }
 });
 
-test("document.fonts answers from profile families and retains added FontFace objects", async () => {
+test('document.fonts answers from profile families and retains added FontFace objects', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -89,10 +68,10 @@ test("document.fonts answers from profile families and retains added FontFace ob
       return [initial, after, loaded === face, face.status, ready === fonts, load, deleted, fonts.size];
     })()`),
       [
-        [true, "loaded", 0, true, false, true, true, false],
-        [true, 1, true, "unloaded", "Local Face", "normal", "auto", true],
+        [true, 'loaded', 0, true, false, true, true, false],
+        [true, 1, true, 'unloaded', 'Local Face', 'normal', 'auto', true],
         true,
-        "loaded",
+        'loaded',
         true,
         [],
         true,
@@ -104,7 +83,7 @@ test("document.fonts answers from profile families and retains added FontFace ob
   }
 });
 
-test("performance timing offsets come from the profile and memory stays absent", async () => {
+test('performance timing offsets come from the profile and memory stays absent', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -117,14 +96,14 @@ test("performance timing offsets come from the profile and memory stays absent",
         timing.loadEventEnd - timing.navigationStart,
         typeof performance.memory];
     })()`),
-      [true, 180, 310, 420, "undefined"],
+      [true, 180, 310, 420, 'undefined'],
     );
   } finally {
     await session.close();
   }
 });
 
-test("services plugin uses profile plugins, permissions and connection values", async () => {
+test('services plugin uses profile plugins, permissions and connection values', async () => {
   const session = await createSession({
     plugins: [environmentPlugin(), permissionsPlugin()],
     // navigator.connection is Chromium-only; Safari has no such surface.
@@ -132,7 +111,7 @@ test("services plugin uses profile plugins, permissions and connection values", 
       values: {
         identity: {
           user_agent:
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36',
         },
       },
     },
@@ -151,11 +130,11 @@ test("services plugin uses profile plugins, permissions and connection values", 
       internal: Object.getOwnPropertyNames(globalThis).filter(name => name.startsWith('__brimp')),
     }))()`),
       {
-        plugins: [2, ["PDF Viewer", "WebKit built-in PDF"]],
-        mimeTypes: [2, ["application/pdf", "text/pdf"]],
-        notification: "default",
-        permission: "prompt",
-        connection: ["wifi", 50, 10, "4g"],
+        plugins: [2, ['PDF Viewer', 'WebKit built-in PDF']],
+        mimeTypes: [2, ['application/pdf', 'text/pdf']],
+        notification: 'default',
+        permission: 'prompt',
+        connection: ['wifi', 50, 10, '4g'],
         deviceMemory: true,
         internal: [],
       },
@@ -165,11 +144,11 @@ test("services plugin uses profile plugins, permissions and connection values", 
   }
 });
 
-test("a supplied profile changes media, font and timing answers", async () => {
+test('a supplied profile changes media, font and timing answers', async () => {
   const custom = { values: { mediaQueries: {}, fonts: {}, timing: {} } };
-  custom.values.mediaQueries.prefers_color_scheme = "dark";
-  custom.values.mediaQueries.prefers_reduced_motion = "reduce";
-  custom.values.fonts.families = ["Arial"];
+  custom.values.mediaQueries.prefers_color_scheme = 'dark';
+  custom.values.mediaQueries.prefers_reduced_motion = 'reduce';
+  custom.values.fonts.families = ['Arial'];
   custom.values.fonts.metrics = { Arial: 0.5 };
   custom.values.timing.navigation_start_offset_ms = 10;
   custom.values.timing.dom_content_loaded_ms = 20;

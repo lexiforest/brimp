@@ -1,32 +1,36 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 // Expected values measured in installed Safari 27.0. Property, content attribute,
 // missing value, assigned value, reflected value, serialized attribute.
 const cases = [
-  ['title','title','','Example','Example','Example'],
-  ['lang','lang','','ZH-TW','ZH-TW','ZH-TW'],
-  ['accessKey','accesskey','','a b','a b','a b'],
-  ['dir','dir','','RTL','rtl','RTL'],
-  ['enterKeyHint','enterkeyhint','','SEARCH','search','SEARCH'],
-  ['inputMode','inputmode','','NUMERIC','numeric','NUMERIC'],
-  ['autofocus','autofocus',false,true,true,''],
-  ['hidden','hidden',false,'UNTIL-FOUND','until-found','until-found'],
-  ['contentEditable','contenteditable','inherit','TRUE','true','true'],
-  ['draggable','draggable',false,true,true,'true'],
-  ['spellcheck','spellcheck',true,false,false,'false'],
-  ['translate','translate',true,false,false,'no'],
+  ['title', 'title', '', 'Example', 'Example', 'Example'],
+  ['lang', 'lang', '', 'ZH-TW', 'ZH-TW', 'ZH-TW'],
+  ['accessKey', 'accesskey', '', 'a b', 'a b', 'a b'],
+  ['dir', 'dir', '', 'RTL', 'rtl', 'RTL'],
+  ['enterKeyHint', 'enterkeyhint', '', 'SEARCH', 'search', 'SEARCH'],
+  ['inputMode', 'inputmode', '', 'NUMERIC', 'numeric', 'NUMERIC'],
+  ['autofocus', 'autofocus', false, true, true, ''],
+  ['hidden', 'hidden', false, 'UNTIL-FOUND', 'until-found', 'until-found'],
+  ['contentEditable', 'contenteditable', 'inherit', 'TRUE', 'true', 'true'],
+  ['draggable', 'draggable', false, true, true, 'true'],
+  ['spellcheck', 'spellcheck', true, false, false, 'false'],
+  ['translate', 'translate', true, false, false, 'no'],
 ];
 
 test('HTML global attributes reflect state with Safari descriptors and receiver checks', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [property,attribute,missing,input,expected,raw] of ${JSON.stringify(cases)}) {
       const e=document.createElement('div'),d=Object.getOwnPropertyDescriptor(HTMLElement.prototype,property);
@@ -43,13 +47,16 @@ test('HTML global attributes reflect state with Safari descriptors and receiver 
       }
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('HTML string and enum reflections perform single DOMString conversion and preserve raw attributes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
-    for(const [name,attribute] of ${JSON.stringify(cases.slice(0,6))}) {
+    for(const [name,attribute] of ${JSON.stringify(cases.slice(0, 6))}) {
       const e=document.createElement('div'),hints=[];
       e[name]={[Symbol.toPrimitive](hint){hints.push(hint);return 'RTL';}};
       if(hints.join()!=='string' || e.getAttribute(attribute)!=='RTL')failures.push(name+': conversion');
@@ -69,11 +76,14 @@ test('HTML string and enum reflections perform single DOMString conversion and p
       for(const invalid of ['bogus',' '+keywords[0],keywords[0]+' ','İ']){e.setAttribute(attribute,invalid);if(e[name]!=='')failures.push(name+': invalid keyword');}
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('contentEditable and hidden implement their distinct keyword and conversion rules', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],e=document.createElement('div');
     for(const [raw,expected] of [['','true'],['TRUE','true'],['FALSE','false'],['PLAINTEXT-ONLY','plaintext-only'],['inherit','inherit'],[' true ','inherit']]) {
       e.setAttribute('contenteditable',raw);if(e.contentEditable!==expected)failures.push('contentEditable getter '+raw);
@@ -94,11 +104,14 @@ test('contentEditable and hidden implement their distinct keyword and conversion
     }
     try{e.hidden=Symbol();failures.push('hidden symbol accepted');}catch(error){if(error.name!=='TypeError')failures.push('hidden symbol error');}
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('spellcheck and translate inherit live state, including Safari namespace and shadow behavior', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const property of ['spellcheck','translate']) {
       const parent=document.createElement('div'),child=document.createElement('span');parent.appendChild(child);
@@ -118,11 +131,14 @@ test('spellcheck and translate inherit live state, including Safari namespace an
       if(!e.spellcheck)failures.push(type+': default');parent.spellcheck=false;if(e.spellcheck)failures.push(type+': inheritance');
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('draggable auto defaults and boolean setters follow Safari without a rendering engine', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [tag,automatic] of [['div',false],['img',true],['a',false],['area',false],['object',false]]) {
       const e=document.createElement(tag);
@@ -139,14 +155,17 @@ test('draggable auto defaults and boolean setters follow Safari without a render
       }
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('HTML reflections use null-namespace attributes and deliver custom-element reactions', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],reactions=[];
     customElements.define('global-reflections',class extends HTMLElement {
-      static observedAttributes=${JSON.stringify(cases.map(c=>c[1]))};
+      static observedAttributes=${JSON.stringify(cases.map((c) => c[1]))};
       attributeChangedCallback(...args){reactions.push(args);}
     });
     for(const [property,attribute,missing,input,expected,raw] of ${JSON.stringify(cases)}) {
@@ -164,14 +183,17 @@ test('HTML reflections use null-namespace attributes and deliver custom-element 
       e[property]=input;if(e[property]!==expected)failures.push(property+': public override');
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('autofocus reactions are delayed, and a synchronous reaction flushes preceding attribute changes', async () => {
-  const session=await createSession();
+  const session = await createSession();
   try {
-    const page=await session.newPage();
-    assert.deepEqual(await page.evaluate(`(() => {
+    const page = await session.newPage();
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       window.attributeLog=[];
       customElements.define('autofocus-reactions',class extends HTMLElement {
         static observedAttributes=['autofocus','title'];
@@ -180,17 +202,27 @@ test('autofocus reactions are delayed, and a synchronous reaction flushes preced
       const e=document.createElement('autofocus-reactions');
       e.autofocus=true;e.autofocus=false;
       return attributeLog.slice();
-    })()`),[]);
-    assert.deepEqual(await page.evaluate('attributeLog'),[
-      ['autofocus',null,'',null],['autofocus','',null,null],
+    })()`),
+      [],
+    );
+    assert.deepEqual(await page.evaluate('attributeLog'), [
+      ['autofocus', null, '', null],
+      ['autofocus', '', null, null],
     ]);
-    assert.deepEqual(await page.evaluate(`(() => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       attributeLog=[];
       const e=document.createElement('autofocus-reactions');
       e.autofocus=true;e.title='x';
       return attributeLog.slice();
-    })()`),[['autofocus',null,'',null],['title',null,'x',null]]);
-    assert.deepEqual(await page.evaluate(`(() => {
+    })()`),
+      [
+        ['autofocus', null, '', null],
+        ['title', null, 'x', null],
+      ],
+    );
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       const log=[];
       customElements.define('nested-attribute-reactions',class extends HTMLElement {
         static observedAttributes=['title','lang'];
@@ -198,12 +230,17 @@ test('autofocus reactions are delayed, and a synchronous reaction flushes preced
       });
       document.createElement('nested-attribute-reactions').title='x';
       return log;
-    })()`),['title','lang','after lang']);
-  } finally { await session.close(); }
+    })()`),
+      ['title', 'lang', 'after lang'],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
 test('offset placeholders match Safari detached defaults and read-only API shape', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],e=document.createElement('div');
     for(const name of ['offsetHeight','offsetLeft','offsetParent','offsetTop','offsetWidth']) {
       const d=Object.getOwnPropertyDescriptor(HTMLElement.prototype,name),expected=name==='offsetParent'?null:0;
@@ -212,5 +249,7 @@ test('offset placeholders match Safari detached defaults and read-only API shape
       try{d.get.call({});failures.push(name+': receiver');}catch(error){if(error.name!=='TypeError')failures.push(name+': error');}
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });

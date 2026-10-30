@@ -1,5 +1,5 @@
-import test from "node:test";
-import assert from "node:assert/strict";
+import test from 'node:test';
+import assert from 'node:assert/strict';
 import {
   createSession,
   workersPlugin,
@@ -7,30 +7,28 @@ import {
   canvasPlugin,
   graphicsPlugin,
   environmentPlugin,
-} from "../../../bindings/node/index.js";
+} from '../../../bindings/node/index.js';
 async function evaluate(source, plugins, identity) {
   const session = await createSession({
     plugins,
-    ...(identity
-      ? { profile: { values: { identity: { user_agent: identity } } } }
-      : {}),
+    ...(identity ? { profile: { values: { identity: { user_agent: identity } } } } : {}),
   });
   try {
     const page = await session.newPage();
-    await page.route("https://core.test/**", (r) =>
+    await page.route('https://core.test/**', (r) =>
       r.fulfill({
-        body: "<body></body>",
-        headers: { "content-type": "text/html" },
+        body: '<body></body>',
+        headers: { 'content-type': 'text/html' },
       }),
     );
-    await page.get("https://core.test/");
+    await page.get('https://core.test/');
     return await page.evaluate(source);
   } finally {
     await session.close();
   }
 }
 
-test("CookieStore shares document cookies and SQL placeholders retain their contract", async () => {
+test('CookieStore shares document cookies and SQL placeholders retain their contract', async () => {
   assert.deepEqual(
     await evaluate(
       `(async () => {
@@ -42,11 +40,11 @@ test("CookieStore shares document cookies and SQL placeholders retain their cont
   })()`,
       [],
     ),
-    ["value", "name=value", null, "function", "undefined"],
+    ['value', 'name=value', null, 'function', 'undefined'],
   );
 });
 
-test("Trusted Types and Worker placeholders accept calls without policies, code execution or threads", async () => {
+test('Trusted Types and Worker placeholders accept calls without policies, code execution or threads', async () => {
   assert.deepEqual(
     await evaluate(
       `(() => {
@@ -71,19 +69,19 @@ test("Trusted Types and Worker placeholders accept calls without policies, code 
       [0, 0],
       1,
       1,
-      "undefined",
+      'undefined',
       false,
       false,
       true,
       true,
       null,
-      "",
-      "",
+      '',
+      '',
       false,
-      "name",
-      "x",
-      "x",
-      "x",
+      'name',
+      'x',
+      'x',
+      'x',
       true,
       true,
       true,
@@ -91,7 +89,7 @@ test("Trusted Types and Worker placeholders accept calls without policies, code 
   );
 });
 
-test("Canvas and Path2D preserve configured readback, painted fills and a real PNG", async () => {
+test('Canvas and Path2D preserve configured readback, painted fills and a real PNG', async () => {
   assert.deepEqual(
     await evaluate(
       `(async () => {
@@ -116,7 +114,7 @@ test("Canvas and Path2D preserve configured readback, painted fills and a real P
       [255, 0, 0, 255],
       false,
       {
-        prefix: "data:image/png;base64,",
+        prefix: 'data:image/png;base64,',
         signature: [80, 78, 71],
         width: 2,
         height: 3,
@@ -132,7 +130,7 @@ test("Canvas and Path2D preserve configured readback, painted fills and a real P
   );
 });
 
-test("WebGL debug renderer extension reports profile identity with Safari constants", async () => {
+test('WebGL debug renderer extension reports profile identity with Safari constants', async () => {
   assert.deepEqual(
     await evaluate(
       `(() => {
@@ -142,29 +140,29 @@ test("WebGL debug renderer extension reports profile identity with Safari consta
       gl.getParameter(ext.UNMASKED_VENDOR_WEBGL),gl.getParameter(ext.UNMASKED_RENDERER_WEBGL),gl.getExtension('unknown'),
       typeof WebGLDebugRendererInfo,Object.getOwnPropertyDescriptor(ext,'UNMASKED_VENDOR_WEBGL').writable];
   })()`,
-      [canvasPlugin(), graphicsPlugin({ renderer: "configured mock" })],
+      [canvasPlugin(), graphicsPlugin({ renderer: 'configured mock' })],
     ),
     [
       true,
       true,
       true,
-      "[object WebGLDebugRendererInfo]",
+      '[object WebGLDebugRendererInfo]',
       true,
       37445,
       37446,
-      "Apple Inc.",
-      "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+      'Apple Inc.',
+      'ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)',
       null,
-      "undefined",
+      'undefined',
       false,
     ],
   );
 });
 
 const CHROME_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36";
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 
-test("Core scheduling runs prioritized tasks and idle callbacks under Chromium", async () => {
+test('Core scheduling runs prioritized tasks and idle callbacks under Chromium', async () => {
   assert.deepEqual(
     await evaluate(
       `(async () => {
@@ -179,7 +177,7 @@ test("Core scheduling runs prioritized tasks and idle callbacks under Chromium",
       [],
       CHROME_AGENT,
     ),
-    [true, ["high", "low"], "cancelled", [0, false]],
+    [true, ['high', 'low'], 'cancelled', [0, false]],
   );
   assert.deepEqual(
     await evaluate(
@@ -187,58 +185,39 @@ test("Core scheduling runs prioritized tasks and idle callbacks under Chromium",
       [],
       CHROME_AGENT,
     ),
-    ["object", "function", "undefined", "undefined", "object", "undefined"],
+    ['object', 'function', 'undefined', 'undefined', 'object', 'undefined'],
   );
 });
 
-test("WebKit exposes no scheduling API, idle callbacks or network information", async () => {
+test('WebKit exposes no scheduling API, idle callbacks or network information', async () => {
   // Measured against Safari 27: none of these names exist, and the search
   // challenge reads requestIdleCallback and navigator.connection while probing.
   const names = [
-    "Scheduler",
-    "TaskController",
-    "TaskSignal",
-    "TaskPriorityChangeEvent",
-    "scheduler",
-    "requestIdleCallback",
-    "cancelIdleCallback",
+    'Scheduler',
+    'TaskController',
+    'TaskSignal',
+    'TaskPriorityChangeEvent',
+    'scheduler',
+    'requestIdleCallback',
+    'cancelIdleCallback',
   ];
   assert.deepEqual(
     await evaluate(`${JSON.stringify(names)}.map(n=>typeof globalThis[n])`, []),
-    names.map(() => "undefined"),
+    names.map(() => 'undefined'),
   );
-  assert.equal(
-    await evaluate(`typeof navigator.connection`, [environmentPlugin()]),
-    "undefined",
-  );
+  assert.equal(await evaluate(`typeof navigator.connection`, [environmentPlugin()]), 'undefined');
   // The same surfaces stay in place for a Chromium identity.
   assert.deepEqual(
-    await evaluate(
-      `${JSON.stringify(names)}.map(n=>typeof globalThis[n])`,
-      [],
-      CHROME_AGENT,
-    ),
-    [
-      "function",
-      "function",
-      "function",
-      "function",
-      "object",
-      "function",
-      "function",
-    ],
+    await evaluate(`${JSON.stringify(names)}.map(n=>typeof globalThis[n])`, [], CHROME_AGENT),
+    ['function', 'function', 'function', 'function', 'object', 'function', 'function'],
   );
   assert.equal(
-    await evaluate(
-      `typeof navigator.connection`,
-      [environmentPlugin()],
-      CHROME_AGENT,
-    ),
-    "object",
+    await evaluate(`typeof navigator.connection`, [environmentPlugin()], CHROME_AGENT),
+    'object',
   );
 });
 
-test("core SQLTransaction preserves synthetic callbacks without executing SQL", async () => {
+test('core SQLTransaction preserves synthetic callbacks without executing SQL', async () => {
   assert.deepEqual(
     await evaluate(
       `(() => {
@@ -250,13 +229,6 @@ test("core SQLTransaction preserves synthetic callbacks without executing SQL", 
   })()`,
       [],
     ),
-    [
-      true,
-      42,
-      [true, { insertId: "", rows: { value: "0" }, rowsAffected: "" }],
-      true,
-      true,
-      true,
-    ],
+    [true, 42, [true, { insertId: '', rows: { value: '0' }, rowsAffected: '' }], true, true, true],
   );
 });

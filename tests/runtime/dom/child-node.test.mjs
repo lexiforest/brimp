@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('ChildNode inserts, moves, replaces and removes elements, text and comments', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const kind of ['element','text','comment']) {
       const make=()=>kind==='element'?document.createElement('i'):kind==='text'?document.createTextNode('x'):document.createComment('x');
@@ -35,11 +39,14 @@ test('ChildNode inserts, moves, replaces and removes elements, text and comments
       n.remove();
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('ChildNode converts before method steps and preserves conversion exceptions', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const method of ['before','after','replaceWith']) for(const attached of [false,true]) {
       const p=document.createElement('div'), n=document.createElement('i');
@@ -58,11 +65,14 @@ test('ChildNode converts before method steps and preserves conversion exceptions
     n.before(null,undefined,false,42);
     if(Array.from(p.childNodes).slice(0,4).map(n=>n.data).join('|')!=='null|undefined|false|42')failures.push('DOMString values');
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('ChildNode validates hierarchy, adopts nodes and bypasses overridden mutation methods', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const method of ['before','after','replaceWith']) {
       const p=document.createElement('div'),n=document.createElement('i');p.appendChild(n);
@@ -82,11 +92,14 @@ test('ChildNode validates hierarchy, adopts nodes and bypasses overridden mutati
     n.before('a');n.after('b');n.replaceWith('c');p.firstChild.remove();
     if(p.textContent!=='cb')failures.push('internal mutation');
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
-test('remove reads the native parent independently of a shadowed parentNode property',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('remove reads the native parent independently of a shadowed parentNode property', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const node of [document.createElement('i'),document.createTextNode('text'),document.createComment('comment')]){
       const parent=document.createElement('div');parent.append(node);
@@ -102,11 +115,14 @@ test('remove reads the native parent independently of a shadowed parentNode prop
       if(iterator.referenceNode!==parent||iterator.nextNode()!==null)failures.push('iterator');
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('ChildNode Web IDL descriptors and unscopables exclude only standard members', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const ctor of [Element,CharacterData])for(const name of ['before','after','replaceWith','remove']) {
       const d=Object.getOwnPropertyDescriptor(ctor.prototype,name);
@@ -130,5 +146,7 @@ test('ChildNode Web IDL descriptors and unscopables exclude only standard member
     if(resolve(document.createElement('i'))!=='undefined')failures.push('with scope');
     if(Object.hasOwn(Text.prototype,'remove'))failures.push('redundant Text.remove');
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });

@@ -35,17 +35,13 @@ def main() -> int:
         )
     for name, expected in node.get("optionalDependencies", {}).items():
         if expected != version:
-            raise RuntimeError(
-                f"{name} is pinned to {expected}, expected {version}"
-            )
+            raise RuntimeError(f"{name} is pinned to {expected}, expected {version}")
     license_text = (ROOT / "LICENSE").read_text()
     for path in (ROOT / "bindings/python/LICENSE", ROOT / "bindings/node/LICENSE"):
         if path.read_text() != license_text:
             raise RuntimeError(f"{path.relative_to(ROOT)} does not match the root LICENSE")
     if arguments.tag and arguments.tag != f"v{version}":
-        raise RuntimeError(
-            f"release tag {arguments.tag!r} does not match version v{version}"
-        )
+        raise RuntimeError(f"release tag {arguments.tag!r} does not match version v{version}")
     print(version)
     return 0
 

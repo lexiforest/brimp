@@ -12,7 +12,7 @@ function installCapturePage(contract, probes, configuration) {
     try {
       const profile = await captureBrowserProfile(contract, probes, createProfileRegistry, {
         ...configuration,
-        onProgress({path, status: state, reason}) {
+        onProgress({ path, status: state, reason }) {
           const row = document.createElement('tr');
           for (const text of [path, state, reason ?? '']) {
             const cell = document.createElement('td');
@@ -25,17 +25,21 @@ function installCapturePage(contract, probes, configuration) {
       });
       const json = JSON.stringify(profile, null, 2) + '\n';
       if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-      downloadUrl = URL.createObjectURL(new Blob([json], {type: 'application/json'}));
+      downloadUrl = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
       download.href = downloadUrl;
       download.hidden = false;
-      const captured = Object.values(profile.capture.results).filter(r => r.status === 'captured').length;
+      const captured = Object.values(profile.capture.results).filter(
+        (r) => r.status === 'captured',
+      ).length;
       const summary = `${captured} values captured; ${profile.capture.defaultsUsed.length} defaulted paths.`;
       status.textContent = `${summary} Download your profile below.`;
       const token = new URL(location.href).searchParams.get('token');
       if (token && /^https?:$/.test(location.protocol)) {
         try {
           const response = await fetch('profile', {
-            method: 'POST', headers: {'Content-Type': 'application/json', 'X-Brimp-Capture': token}, body: json,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Brimp-Capture': token },
+            body: json,
           });
           const result = await response.json();
           if (!response.ok) throw new Error(result.error ?? `HTTP ${response.status}`);

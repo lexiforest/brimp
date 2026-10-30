@@ -1,14 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
-  const session=await createSession();
-  try {return await(await session.newPage()).evaluate(source);}finally{await session.close();}
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
-test('selectors match elements, ancestors and static query results using canonical DOM state',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('selectors match elements, ancestors and static query results using canonical DOM state', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const root=document.createElement('section');root.id='selector-root';
     root.innerHTML='<div class="group"><span class="item" data-key="a"></span><span class="item"></span></div>';
     document.body.append(root);
@@ -24,11 +29,14 @@ test('selectors match elements, ancestors and static query results using canonic
     const shadow=root.attachShadow({mode:'open'}),child=document.createElement('b');shadow.append(child);
     initial.push(child.closest('section')===null,leaf.closest('.missing')===null);
     return initial;
-  })()`),[true,true,true,true,2,true,true,1,2,true,1,true,true]);
+  })()`),
+    [true, true, true, true, 2, true, true, 1, 2, true, 1, true, true],
+  );
 });
 
-test('selector methods require a selector and reject Symbols and invalid CSS',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('selector methods require a selector and reject Symbols and invalid CSS', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const errors=[];
     for(const [receiver,names]of [[document,['querySelector','querySelectorAll']],
       [document.createElement('div'),['querySelector','querySelectorAll','matches','webkitMatchesSelector','closest']]]) {
@@ -37,11 +45,14 @@ test('selector methods require a selector and reject Symbols and invalid CSS',as
       }
     }
     return errors;
-  })()`),Array.from({length:7},()=>['TypeError','TypeError','SyntaxError']).flat());
+  })()`),
+    Array.from({ length: 7 }, () => ['TypeError', 'TypeError', 'SyntaxError']).flat(),
+  );
 });
 
-test('part is a live token list on HTML and SVG elements through cloning and adoption',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('part is a live token list on HTML and SVG elements through cloning and adoption', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const results=[];
     for(const e of [document.createElement('div'),document.createElementNS('http://www.w3.org/2000/svg','g')]) {
       const list=e.part;e.part='label label active';list.remove('active');list.add('icon');
@@ -51,11 +62,23 @@ test('part is a live token list on HTML and SVG elements through cloning and ado
       try{list.supports('label');results.push('none');}catch(error){results.push(error.name);}
     }
     return results;
-  })()`),Array.from({length:2},()=>[true,true,['label','icon'],'label icon','label icon',true,'updated','TypeError']).flat());
+  })()`),
+    Array.from({ length: 2 }, () => [
+      true,
+      true,
+      ['label', 'icon'],
+      'label icon',
+      'label icon',
+      true,
+      'updated',
+      'TypeError',
+    ]).flat(),
+  );
 });
 
-test('element fullscreen handlers register and cancel script-dispatched events',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('element fullscreen handlers register and cancel script-dispatched events', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const results=[];
     for(const e of [document.createElement('div'),document.createElementNS('http://www.w3.org/2000/svg','g')]) {
       for(const type of ['fullscreenchange','fullscreenerror','webkitfullscreenchange','webkitfullscreenerror']) {
@@ -66,11 +89,14 @@ test('element fullscreen handlers register and cancel script-dispatched events',
       }
     }
     return results.every(Boolean);
-  })()`),true);
+  })()`),
+    true,
+  );
 });
 
-test('Safari-absent legacy fields remain absent on the corresponding DOM interfaces',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('Safari-absent legacy fields remain absent on the corresponding DOM interfaces', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [object,names] of [[document,['featurePolicy','onbeforexrselect','onfreeze','onpointerrawupdate','onresume','onsearch','wasDiscarded','webkitHidden','webkitVisibilityState']],
       [Element.prototype,['elementTiming','getInnerHTML','onsearch']],
@@ -78,5 +104,7 @@ test('Safari-absent legacy fields remain absent on the corresponding DOM interfa
       for(const name of names)if(name in object)failures.push(name);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

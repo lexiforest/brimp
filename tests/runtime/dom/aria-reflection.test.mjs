@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 // Explicit public IDL/content-attribute pairs, independent of the implementation.
 const attributes = `role role
@@ -46,15 +46,22 @@ ariaSort aria-sort
 ariaValueMax aria-valuemax
 ariaValueMin aria-valuemin
 ariaValueNow aria-valuenow
-ariaValueText aria-valuetext`.split('\n').map(line=>line.split(' '));
+ariaValueText aria-valuetext`
+  .split('\n')
+  .map((line) => line.split(' '));
 
 async function withPage(run) {
-  const session=await createSession();
-  try { await run(await session.newPage()); } finally { await session.close(); }
+  const session = await createSession();
+  try {
+    await run(await session.newPage());
+  } finally {
+    await session.close();
+  }
 }
 
-test('ARIA nullable strings reflect live content attributes on HTML and SVG elements', async () => withPage(async page => {
-  const failures=await page.evaluate(`(() => {
+test('ARIA nullable strings reflect live content attributes on HTML and SVG elements', async () =>
+  withPage(async (page) => {
+    const failures = await page.evaluate(`(() => {
     const failures=[];
     for(const svg of [false,true]) for(const [property,attribute] of ${JSON.stringify(attributes)}) {
       const el=svg?document.createElementNS('http://www.w3.org/2000/svg','g'):document.createElement('div');
@@ -77,11 +84,13 @@ test('ARIA nullable strings reflect live content attributes on HTML and SVG elem
     }
     return failures;
   })()`);
-  assert.deepEqual(failures,[]);
-}));
+    assert.deepEqual(failures, []);
+  }));
 
-test('ARIA descriptors and conversions enforce Web IDL shape and receiver rules', async () => withPage(async page => {
-  assert.deepEqual(await page.evaluate(`(() => {
+test('ARIA descriptors and conversions enforce Web IDL shape and receiver rules', async () =>
+  withPage(async (page) => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
     const failures=[],el=document.createElement('div');
     for(const [name] of ${JSON.stringify(attributes)}) {
       const d=Object.getOwnPropertyDescriptor(Element.prototype,name);
@@ -105,11 +114,15 @@ test('ARIA descriptors and conversions enforce Web IDL shape and receiver rules'
     el.setAttribute('aria-label',{toString(){conversions++;return 'single conversion';}});
     if(conversions!==1 || el.ariaLabel!=='single conversion')failures.push('setAttribute converted more than once');
     return failures;
-  })()`),[]);
-}));
+  })()`),
+      [],
+    );
+  }));
 
-test('ARIA reflection uses the null namespace and bypasses overridden attribute methods', async () => withPage(async page => {
-  assert.deepEqual(await page.evaluate(`(() => {
+test('ARIA reflection uses the null namespace and bypasses overridden attribute methods', async () =>
+  withPage(async (page) => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
     const el=document.createElementNS('http://www.w3.org/2000/svg','g');
     el.setAttributeNS('urn:test','aria-label','namespaced');
     const absent=el.ariaLabel;
@@ -120,11 +133,21 @@ test('ARIA reflection uses the null namespace and bypasses overridden attribute 
     for(const name of ['getAttribute','setAttribute','removeAttribute','getAttributeNS','setAttributeNS','removeAttributeNS']) el[name]=()=>{throw Error('override '+name);};
     el.ariaLabel='native'; const overridden=el.ariaLabel; el.ariaLabel=null;
     return {absent,during,after,overridden,removed:el.ariaLabel};
-  })()`),{absent:null,during:['plain','namespaced','plain'],after:[null,'namespaced',null],overridden:'native',removed:null});
-}));
+  })()`),
+      {
+        absent: null,
+        during: ['plain', 'namespaced', 'plain'],
+        after: [null, 'namespaced', null],
+        overridden: 'native',
+        removed: null,
+      },
+    );
+  }));
 
-test('ARIA reflection delivers custom-element reactions and attribute mutation records', async () => withPage(async page => {
-  assert.deepEqual(await page.evaluate(`(() => {
+test('ARIA reflection delivers custom-element reactions and attribute mutation records', async () =>
+  withPage(async (page) => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
     const reactions=[];
     customElements.define('aria-observed',class extends HTMLElement {
       static observedAttributes=['aria-label'];
@@ -138,14 +161,28 @@ test('ARIA reflection delivers custom-element reactions and attribute mutation r
     const records=observer.takeRecords().map(r=>[r.type,r.attributeName,r.attributeNamespace,r.oldValue,r.target===el]);
     observer.disconnect();
     return {reactions,records};
-  })()`),{
-    reactions:[['aria-label',null,'one',null,'one'],['aria-label','one','one',null,'one'],['aria-label','one',null,null,null],['aria-label',null,'direct',null,'direct']],
-    records:[['attributes','aria-label',null,null,true],['attributes','aria-label',null,'one',true],['attributes','aria-label',null,'one',true],['attributes','aria-label',null,null,true]],
-  });
-}));
+  })()`),
+      {
+        reactions: [
+          ['aria-label', null, 'one', null, 'one'],
+          ['aria-label', 'one', 'one', null, 'one'],
+          ['aria-label', 'one', null, null, null],
+          ['aria-label', null, 'direct', null, 'direct'],
+        ],
+        records: [
+          ['attributes', 'aria-label', null, null, true],
+          ['attributes', 'aria-label', null, 'one', true],
+          ['attributes', 'aria-label', null, 'one', true],
+          ['attributes', 'aria-label', null, null, true],
+        ],
+      },
+    );
+  }));
 
-test('ElementInternals ARIA defaults remain independent of reflected element attributes', async () => withPage(async page => {
-  assert.deepEqual(await page.evaluate(`(() => {
+test('ElementInternals ARIA defaults remain independent of reflected element attributes', async () =>
+  withPage(async (page) => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
     customElements.define('aria-internals',class extends HTMLElement {});
     const el=document.createElement('aria-internals'),other=document.createElement('aria-internals');
     const internals=el.attachInternals(),second=other.attachInternals();
@@ -168,5 +205,7 @@ test('ElementInternals ARIA defaults remain independent of reflected element att
       if(!d.enumerable || !d.configurable)failures.push(name+': descriptor');
     }
     return failures;
-  })()`),[]);
-}));
+  })()`),
+      [],
+    );
+  }));

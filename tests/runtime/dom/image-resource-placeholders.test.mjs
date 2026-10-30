@@ -1,8 +1,15 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {createSession} from '../../../bindings/node/index.js';
-import {canvasPlugin} from '../../../bindings/node/plugins.js';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createSession } from '../../../bindings/node/index.js';
+import { canvasPlugin } from '../../../bindings/node/plugins.js';
 
-for(const canvas of [false,true])test(`image resource and geometry placeholders remain core with canvas ${canvas?'enabled':'disabled'}`,async()=>{
-  const s=await createSession({plugins:canvas?[canvasPlugin()]:[]});try{const p=await s.newPage();assert.deepEqual(await p.evaluate(`(()=>{
+for (const canvas of [false, true])
+  test(`image resource and geometry placeholders remain core with canvas ${canvas ? 'enabled' : 'disabled'}`, async () => {
+    const s = await createSession({ plugins: canvas ? [canvasPlugin()] : [] });
+    try {
+      const p = await s.newPage();
+      assert.deepEqual(
+        await p.evaluate(`(()=>{
     const image=new Image(12,8),events=[];image.onload=()=>events.push('load');image.onerror=()=>events.push('error');
     image.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="40"/>';
     image.srcset='large.png 2x';image.style.cssText='position:absolute;left:30px;top:40px;width:120px;height:80px';document.body.append(image);
@@ -14,5 +21,18 @@ for(const canvas of [false,true])test(`image resource and geometry placeholders 
     clone.removeAttribute('width');clone.removeAttribute('height');const unrendered=snapshot(clone);
     image.removeAttribute('src');image.removeAttribute('srcset');
     return [result===undefined,before,after,unrendered,events,records,snapshot(image)];
-  })()`),[true,[true,'',0,0,0,0,12,8],[true,'',0,0,0,0,12,8],[true,'',0,0,0,0,0,0],[],0,[true,'',0,0,0,0,12,8]]);}finally{await s.close();}
-});
+  })()`),
+        [
+          true,
+          [true, '', 0, 0, 0, 0, 12, 8],
+          [true, '', 0, 0, 0, 0, 12, 8],
+          [true, '', 0, 0, 0, 0, 0, 0],
+          [],
+          0,
+          [true, '', 0, 0, 0, 0, 12, 8],
+        ],
+      );
+    } finally {
+      await s.close();
+    }
+  });

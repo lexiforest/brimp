@@ -15,9 +15,7 @@ from validate_wheel import PLATFORMS, find_wheel, project_version, validate
 
 def environment_without_native_sdk() -> dict[str, str]:
     environment = dict(os.environ)
-    runtime_dirs = set(
-        environment.pop("BRIMP_NATIVE_RUNTIME_DIRS", "").split(os.pathsep)
-    )
+    runtime_dirs = set(environment.pop("BRIMP_NATIVE_RUNTIME_DIRS", "").split(os.pathsep))
     for name in list(environment):
         if name.startswith("BRIMP_") or name in (
             "DYLD_LIBRARY_PATH",
@@ -27,9 +25,7 @@ def environment_without_native_sdk() -> dict[str, str]:
             environment.pop(name, None)
     if os.name == "nt":
         environment["PATH"] = os.pathsep.join(
-            entry
-            for entry in environment["PATH"].split(os.pathsep)
-            if entry not in runtime_dirs
+            entry for entry in environment["PATH"].split(os.pathsep) if entry not in runtime_dirs
         )
     return environment
 

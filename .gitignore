@@ -3,6 +3,8 @@
 /docs/.astro
 /docs/dist
 /out.png
+.ruff_cache/
+.venv/
 **/__pycache__/
 **/node_modules/
 benchmark/**/.tools/

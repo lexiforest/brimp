@@ -1,10 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/global-event-handlers.safari.json',import.meta.url),'utf8'));
-const setup=`
+const reference = JSON.parse(
+  fs.readFileSync(
+    new URL('../fixtures/global-event-handlers.safari.json', import.meta.url),
+    'utf8',
+  ),
+);
+const setup = `
   const interfaces=${JSON.stringify(reference.interfaces)};
   const make=name=>name==='Document'?document.implementation.createHTMLDocument(''):
     name==='SVGElement'?document.createElementNS('http://www.w3.org/2000/svg','g'):document.createElement('div');
@@ -13,13 +18,17 @@ const setup=`
   const lenient=['onmouseenter','onmouseleave','onreadystatechange'];
 `;
 async function evaluate(source) {
-  const session=await createSession();
-  try{return await (await session.newPage()).evaluate(source);}
-  finally{await session.close();}
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
-test('Safari handler surfaces have correct defaults, descriptors, identity and assignment conversion', async()=>{
-  assert.deepEqual(await evaluate(`(()=>{${setup}
+test('Safari handler surfaces have correct defaults, descriptors, identity and assignment conversion', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{${setup}
     const failures=[];
     for(const [name,properties]of Object.entries(interfaces)) {
       const e=make(name),other=make(name),prototype=globalThis[name].prototype;
@@ -43,11 +52,14 @@ test('Safari handler surfaces have correct defaults, descriptors, identity and a
       }
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('each supported IDL handler receives its event, target receiver and cancellation result',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{${setup}
+test('each supported IDL handler receives its event, target receiver and cancellation result', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{${setup}
     const failures=[];
     for(const [name,properties]of Object.entries(interfaces))for(const property of properties){
       const e=make(name),type=aliases[property]??property.slice(2),event=new Event(type,{cancelable:true});let calls=0;
@@ -58,11 +70,14 @@ test('each supported IDL handler receives its event, target receiver and cancell
       if(aliases[property]) {e[property]=()=>calls++;e.dispatchEvent(new Event(property.slice(2)));if(calls!==1)failures.push(name+'.'+property+': case sensitivity');}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('handler replacement retains its listener slot and clearing re-registers at the end',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{${setup}
+test('handler replacement retains its listener slot and clearing re-registers at the end', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{${setup}
     const results=[];
     for(const name of Object.keys(interfaces)) {
       const e=make(name),log=[],fire=()=>e.dispatchEvent(new Event('click'));
@@ -75,11 +90,27 @@ test('handler replacement retains its listener slot and clearing re-registers at
       results.push(log);
     }
     return results;
-  })()`),Array(3).fill(['first','initial','last','first','replacement','last','first','last','readded','first','last','readded']));
+  })()`),
+    Array(3).fill([
+      'first',
+      'initial',
+      'last',
+      'first',
+      'replacement',
+      'last',
+      'first',
+      'last',
+      'readded',
+      'first',
+      'last',
+      'readded',
+    ]),
+  );
 });
 
-test('listener mutation during dispatch honors removals, additions and immediate stopping',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{${setup}
+test('listener mutation during dispatch honors removals, additions and immediate stopping', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{${setup}
     const results=[];
     for(const name of Object.keys(interfaces)) {
       const e=make(name),log=[];
@@ -92,11 +123,14 @@ test('listener mutation during dispatch honors removals, additions and immediate
       results.push(log);
     }
     return results;
-  })()`),Array(3).fill(['first','second dispatch','new handler','stop']));
+  })()`),
+    Array(3).fill(['first', 'second dispatch', 'new handler', 'stop']),
+  );
 });
 
-test('handler state is independent of public property overrides and addEventListener overrides',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{${setup}
+test('handler state is independent of public property overrides and addEventListener overrides', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{${setup}
     const failures=[];
     for(const name of Object.keys(interfaces)) {
       const e=make(name);let called=0;
@@ -109,11 +143,14 @@ test('handler state is independent of public property overrides and addEventList
       if(called!==1)failures.push(name);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('SVG nodes inherit handler properties through creation, parsing, cloning and import',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('SVG nodes inherit handler properties through creation, parsing, cloning and import', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const host=document.createElement('div');host.innerHTML='<svg><g></g></svg>';
     const created=document.createElementNS('http://www.w3.org/2000/svg','g');
     const nodes=[created,host.firstChild,host.firstChild.firstChild,created.cloneNode(true),document.importNode(created,true)];
@@ -126,5 +163,7 @@ test('SVG nodes inherit handler properties through creation, parsing, cloning an
     xml.onclick=()=>calls++;xml.dispatchEvent(new Event('click'));
     if(xml instanceof SVGElement || calls!==0)failures.push('generic XML event expando');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

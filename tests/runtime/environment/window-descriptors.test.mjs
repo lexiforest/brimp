@@ -1,15 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../bindings/node/index.js';
+import { createSession } from '../../../bindings/node/index.js';
 
-const safariNative = name => `function ${name}() {\n    [native code]\n}`;
-const chromeNative = name => `function ${name}() { [native code] }`;
+const safariNative = (name) => `function ${name}() {\n    [native code]\n}`;
+const chromeNative = (name) => `function ${name}() { [native code] }`;
 
 test('Safari identity exposes Window members as own accessors with WebKit native sources', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
-    assert.deepEqual(await page.evaluate(`(() => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       const d = name => Object.getOwnPropertyDescriptor(window, name);
       const getter = name => d(name).get;
       const shape = name => {
@@ -74,34 +75,36 @@ test('Safari identity exposes Window members as own accessors with WebKit native
           return values;
         })(),
       };
-    })()`), {
-      shape: {
-        document: [true, false, true, false, 'undefined', 'get document', 0],
-        window: [true, false, true, false, 'undefined', 'get window', 0],
-        top: [true, false, true, false, 'undefined', 'get top', 0],
-        location: [true, false, true, false, 'function', 'get location', 0],
-        navigator: [true, false, true, true, 'undefined', 'get navigator', 0],
-        performance: [true, false, true, true, 'function', 'get performance', 0],
-        innerWidth: [true, false, true, true, 'function', 'get innerWidth', 0],
+    })()`),
+      {
+        shape: {
+          document: [true, false, true, false, 'undefined', 'get document', 0],
+          window: [true, false, true, false, 'undefined', 'get window', 0],
+          top: [true, false, true, false, 'undefined', 'get top', 0],
+          location: [true, false, true, false, 'function', 'get location', 0],
+          navigator: [true, false, true, true, 'undefined', 'get navigator', 0],
+          performance: [true, false, true, true, 'function', 'get performance', 0],
+          innerWidth: [true, false, true, true, 'function', 'get innerWidth', 0],
+        },
+        texts: [
+          safariNative('document'),
+          safariNative('innerWidth'),
+          safariNative('querySelector'),
+          safariNative('map'),
+          safariNative('toString'),
+          safariNative('fetch'),
+          'fetch',
+          false,
+          'get webdriver',
+        ],
+        chain: ['Window', 'Window', 'EventTarget', 'EventTarget', 'Object'],
+        navigatorOwn: [],
+        standalone: [false, 'get standalone'],
+        legacy: [undefined, true, true],
+        integrity: [false, true, true],
+        frame: [true, true, 0, 'get document', safariNative('document'), true],
       },
-      texts: [
-        safariNative('document'),
-        safariNative('innerWidth'),
-        safariNative('querySelector'),
-        safariNative('map'),
-        safariNative('toString'),
-        safariNative('fetch'),
-        'fetch',
-        false,
-        'get webdriver',
-      ],
-      chain: ['Window', 'Window', 'EventTarget', 'EventTarget', 'Object'],
-      navigatorOwn: [],
-      standalone: [false, 'get standalone'],
-      legacy: [undefined, true, true],
-      integrity: [false, true, true],
-      frame: [true, true, 0, 'get document', safariNative('document'), true],
-    });
+    );
   } finally {
     await session.close();
   }
@@ -116,7 +119,8 @@ test('Chromium identity switches native sources to the Blink shape', async () =>
   });
   try {
     const page = await session.newPage();
-    assert.deepEqual(await page.evaluate(`(() => [
+    assert.deepEqual(
+      await page.evaluate(`(() => [
       navigator.userAgent.includes('Chrome/150'),
       Function.prototype.toString.call(Object.getOwnPropertyDescriptor(window, 'document').get),
       Object.getOwnPropertyDescriptor(window, 'document').get.name,
@@ -128,19 +132,21 @@ test('Chromium identity switches native sources to the Blink shape', async () =>
       Function.prototype.toString.call(JSON.stringify),
       Function.prototype.toString.call(Math.max),
       Function.prototype.toString.call(Reflect.get),
-    ])()`), [
-      true,
-      `function get document() { [native code] }`,
-      'get document',
-      `function get innerWidth() { [native code] }`,
-      `function set innerWidth() { [native code] }`,
-      chromeNative('map'),
-      chromeNative('querySelector'),
-      chromeNative('fetch'),
-      chromeNative('stringify'),
-      chromeNative('max'),
-      chromeNative('get'),
-    ]);
+    ])()`),
+      [
+        true,
+        `function get document() { [native code] }`,
+        'get document',
+        `function get innerWidth() { [native code] }`,
+        `function set innerWidth() { [native code] }`,
+        chromeNative('map'),
+        chromeNative('querySelector'),
+        chromeNative('fetch'),
+        chromeNative('stringify'),
+        chromeNative('max'),
+        chromeNative('get'),
+      ],
+    );
   } finally {
     await session.close();
   }

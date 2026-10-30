@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession,canvasPlugin} from '../../../bindings/node/index.js';
+import { createSession, canvasPlugin } from '../../../bindings/node/index.js';
 
-test('canvas drawing workflow preserves state, painted pixels and configured background',async()=>{
-  const session=await createSession({plugins:[canvasPlugin({rgba:[1,2,3,4]})]});
+test('canvas drawing workflow preserves state, painted pixels and configured background', async () => {
+  const session = await createSession({ plugins: [canvasPlugin({ rgba: [1, 2, 3, 4] })] });
   try {
-    const page=await session.newPage();
-    assert.deepEqual(await page.evaluate(`(() => {
+    const page = await session.newPage();
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       const canvas=document.createElement('canvas');canvas.width=2;canvas.height=2;
       const c=canvas.getContext('2d');c.fillStyle='#ff0000';c.lineWidth=3;c.setLineDash([2,4]);
       c.save();c.translate(4,5);c.rotate(0.5);c.scale(2,2);c.fillStyle='#00ff00';
@@ -23,10 +24,25 @@ test('canvas drawing workflow preserves state, painted pixels and configured bac
       return [c.canvas===canvas,c.fillStyle,c.lineWidth,c.getLineDash(),[matrix.a,matrix.d,matrix.e,matrix.f],
         [...c.getImageData(0,0,1,1).data],c.measureText('abcd').width,c.isPointInPath(0,0),c.isPointInStroke(0,0),
         focusResult===undefined,c.getContextAttributes().alpha];
-    })()`),[true,'#ff0000',3,[2,4],[1,1,0,0],[255,255,255,255],20,false,false,true,true]);
-  } finally {await session.close();}
+    })()`),
+      [
+        true,
+        '#ff0000',
+        3,
+        [2, 4],
+        [1, 1, 0, 0],
+        [255, 255, 255, 255],
+        20,
+        false,
+        false,
+        true,
+        true,
+      ],
+    );
+  } finally {
+    await session.close();
+  }
 });
-
 
 test('full counter-clockwise arcs render', async () => {
   const session = await createSession({ plugins: [canvasPlugin()] });

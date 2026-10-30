@@ -1,3 +1,13 @@
 # Generated dependency bundles and browser-reference data.
 crates/runtime/js/vendor/*.bundle.js
 crates/runtime/js/web_apis/css_property_names.js
+assets/defuddle/0.19.3/
+**/.cache/
+**/.tools/
+**/.venv/
+**/dist/
+tests/fixtures/
+tests/results/
+benchmark/compatibility/fixtures/
+benchmark/compatibility/results/
+bindings/fixtures/xxhash-wasm/

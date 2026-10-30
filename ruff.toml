@@ -1,0 +1,4 @@
+target-version = "py311"
+line-length = 100
+include = ["*.py", "*.pyi"]
+extend-exclude = ["**/vendor/**"]

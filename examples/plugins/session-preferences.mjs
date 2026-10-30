@@ -1,4 +1,4 @@
-import {createSession, Plugin} from '../../bindings/node/index.js';
+import { createSession, Plugin } from '../../bindings/node/index.js';
 
 const preferences = Plugin.fromFile(new URL('./preferences.js', import.meta.url), {
   name: 'preferences',
@@ -13,16 +13,21 @@ const preferences = Plugin.fromFile(new URL('./preferences.js', import.meta.url)
     return {
       handlers: {
         get: (context, key) => partition(context).get(key) ?? null,
-        set: (context, key, value) => { partition(context).set(key, value); return null; },
+        set: (context, key, value) => {
+          partition(context).set(key, value);
+          return null;
+        },
       },
       dispose: () => origins.clear(),
     };
   },
 });
-const session = await createSession({plugins: [preferences]});
+const session = await createSession({ plugins: [preferences] });
 try {
   const page = await session.get(process.argv[2] ?? 'https://example.com');
   await page.evaluate('preferences.set("theme", "dark")');
   await page.get(process.argv[2] ?? 'https://example.com');
   console.log(await page.evaluate('preferences.get("theme")'));
-} finally { await session.close(); }
+} finally {
+  await session.close();
+}

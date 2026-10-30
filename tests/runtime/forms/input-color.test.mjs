@@ -1,32 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {inputColorCases as cases, measureInputColors as measure, measureColorTransitions} from '../../../scripts/coverage/input-color-cases.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  inputColorCases as cases,
+  measureInputColors as measure,
+  measureColorTransitions,
+} from '../../../scripts/coverage/input-color-cases.mjs';
 
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/input-color.safari.json',import.meta.url),'utf8'));
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/input-color.safari.json', import.meta.url), 'utf8'),
+);
 
 test('color input sRGB and Display-P3 sanitization matches installed Safari across assignment, reset, type and parser paths', async () => {
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),cases);
-  const session=await createSession();
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const session = await createSession();
   try {
-    const actual=await (await session.newPage()).evaluate(`(${measure})(${JSON.stringify(cases)})`);
-    assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference.cases[i].expected)?[]:
-      [{...c,actual:actual[i],expected:reference.cases[i].expected}]),[]);
-  } finally {await session.close();}
+    const actual = await (
+      await session.newPage()
+    ).evaluate(`(${measure})(${JSON.stringify(cases)})`);
+    assert.deepEqual(
+      cases.flatMap((c, i) =>
+        JSON.stringify(actual[i]) === JSON.stringify(reference.cases[i].expected)
+          ? []
+          : [{ ...c, actual: actual[i], expected: reference.cases[i].expected }],
+      ),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
 test('color space mutations preserve Safari dirty/pristine values through five attribute paths, reset and cloning', async () => {
-  const session=await createSession();
+  const session = await createSession();
   try {
-    assert.deepEqual(await (await session.newPage()).evaluate(`(${measureColorTransitions})()`),reference.transitions);
-  } finally {await session.close();}
+    assert.deepEqual(
+      await (await session.newPage()).evaluate(`(${measureColorTransitions})()`),
+      reference.transitions,
+    );
+  } finally {
+    await session.close();
+  }
 });
 
 test('colorSpace is a canonical case-insensitive enum reflection with Safari conversions and descriptors', async () => {
-  const session=await createSession();
+  const session = await createSession();
   try {
-    assert.deepEqual(await (await session.newPage()).evaluate(`(()=>{
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
       const failures=[],i=document.createElement('input');i.type='color';
       for(const value of [null,undefined,'','DISPLAY-P3','display-p3','limited-srgb',' display-p3','invalid',{toString(){return 'DISPLAY-P3';}}]) {
         i.colorSpace=value;const raw=String(value),expected=raw.toLowerCase()==='display-p3'?'display-p3':'limited-srgb';
@@ -49,14 +76,21 @@ test('colorSpace is a canonical case-insensitive enum reflection with Safari con
       for(const fn of [d.get,d.set])try{fn.call({},'display-p3');failures.push('brand');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
       if('__inputColor' in globalThis)failures.push('private parser leaked');
       return failures;
-    })()`),[]);
-  } finally {await session.close();}
+    })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
 test('color alpha reflection and mutations preserve dirty values, defaults and canonical access', async () => {
-  const session=await createSession();
+  const session = await createSession();
   try {
-    assert.deepEqual(await (await session.newPage()).evaluate(`(()=>{
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
       const failures=[];
       for(const dirty of [false,true]) {
         const form=document.createElement('form'),i=document.createElement('input');form.appendChild(i);
@@ -82,6 +116,10 @@ test('color alpha reflection and mutations preserve dirty values, defaults and c
       if(!descriptor.enumerable||!descriptor.configurable||descriptor.get.name!=='get alpha'||descriptor.set.name!=='set alpha')failures.push('descriptor');
       for(const fn of [descriptor.get,descriptor.set])try{fn.call({},true);failures.push('brand');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
       return failures;
-    })()`),[]);
-  } finally {await session.close();}
+    })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });

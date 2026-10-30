@@ -1,18 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {graphicsPlugin} from '../../../bindings/node/plugins.js';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import { graphicsPlugin } from '../../../bindings/node/plugins.js';
 
-const reference = JSON.parse(fs.readFileSync(new URL('../fixtures/webgl.safari.json', import.meta.url)));
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/webgl.safari.json', import.meta.url)),
+);
 async function evaluate(source) {
-  const session = await createSession({plugins: [graphicsPlugin()]});
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  const session = await createSession({ plugins: [graphicsPlugin()] });
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('WebGL constants match installed Safari values, ownership and readonly descriptors', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const expected=${JSON.stringify(reference.constants)}, failures=[];
     const context=document.createElement('canvas').getContext('webgl');
     if(!context)throw Error('WebGL context unavailable');
@@ -28,11 +34,14 @@ test('WebGL constants match installed Safari values, ownership and readonly desc
       if(context[name]!==record.value)failures.push([name,'instance']);
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('placeholder method surfaces and receiver checks match installed Safari', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const expected=${JSON.stringify(reference.placeholderMethods)}, failures=[];
     if('makeXRCompatible' in WebGLRenderingContext.prototype)failures.push(['makeXRCompatible','not exposed by reference Safari']);
     for(const [name,record] of Object.entries(expected)) {
@@ -46,11 +55,14 @@ test('placeholder method surfaces and receiver checks match installed Safari', a
       }
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('navigator.gpu exposes WGSL language features as a browser set', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const gpu = navigator.gpu;
     if (!gpu) return ['missing gpu'];
     const features = gpu.wgslLanguageFeatures;
@@ -61,5 +73,7 @@ test('navigator.gpu exposes WGSL language features as a browser set', async () =
       typeof features.values === 'function',
       gpu.getPreferredCanvasFormat(),
     ];
-  })()`), [true, true, true, true, 'bgra8unorm']);
+  })()`),
+    [true, true, true, true, 'bgra8unorm'],
+  );
 });

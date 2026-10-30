@@ -1,27 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {submitterActionCases as cases, measureSubmitterActions as measure} from '../../../scripts/coverage/submitter-action-cases.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  submitterActionCases as cases,
+  measureSubmitterActions as measure,
+} from '../../../scripts/coverage/submitter-action-cases.mjs';
 
 async function evaluate(source) {
-  const session=await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
-for (const tag of ['input','button']) {
-const interfaceName=tag==='input'?'HTMLInputElement':'HTMLButtonElement';
-test(`${tag} formAction parsing and USVString storage match 308 measured Safari cases`, async () => {
-  const reference=JSON.parse(fs.readFileSync(new URL(`../fixtures/${tag}-action.safari.json`,import.meta.url)));
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),cases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)},${JSON.stringify(tag)}))`));
-  assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference.cases[i].expected)?[]:
-    [{...c,actual:actual[i],expected:reference.cases[i].expected}]),[]);
-});
+for (const tag of ['input', 'button']) {
+  const interfaceName = tag === 'input' ? 'HTMLInputElement' : 'HTMLButtonElement';
+  test(`${tag} formAction parsing and USVString storage match 308 measured Safari cases`, async () => {
+    const reference = JSON.parse(
+      fs.readFileSync(new URL(`../fixtures/${tag}-action.safari.json`, import.meta.url)),
+    );
+    assert.deepEqual(
+      reference.cases.map(({ expected, ...c }) => c),
+      cases,
+    );
+    const actual = JSON.parse(
+      await evaluate(
+        `JSON.stringify((${measure})(${JSON.stringify(cases)},${JSON.stringify(tag)}))`,
+      ),
+    );
+    assert.deepEqual(
+      cases.flatMap((c, i) =>
+        JSON.stringify(actual[i]) === JSON.stringify(reference.cases[i].expected)
+          ? []
+          : [{ ...c, actual: actual[i], expected: reference.cases[i].expected }],
+      ),
+      [],
+    );
+  });
 
-test(`${tag} formMethod and formEnctype distinguish missing, invalid and canonical keywords`, async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  test(`${tag} formMethod and formEnctype distinguish missing, invalid and canonical keywords`, async () => {
+    assert.deepEqual(
+      await evaluate(`(() => {
     const failures=[];
     for(const [name,keywords,invalid] of [['formMethod',['get','post','dialog'],'get'],
       ['formEnctype',['application/x-www-form-urlencoded','multipart/form-data','text/plain'],'application/x-www-form-urlencoded']]) {
@@ -33,7 +55,7 @@ test(`${tag} formMethod and formEnctype distinguish missing, invalid and canonic
         input[name]=value;const raw=String(value),lower=raw.replace(/[A-Z]/g,c=>c.toLowerCase());
         const expected=keywords.includes(lower)?lower:invalid;
         if(input[name]!==expected||input.getAttribute(attribute)!==raw)failures.push([name,'conversion',raw]);
-        for(const type of ${JSON.stringify(tag==='input'?['text','submit','image','reset','checkbox','file']:['submit','reset','button'])}){input.type=type;if(input[name]!==expected)failures.push([name,type]);}
+        for(const type of ${JSON.stringify(tag === 'input' ? ['text', 'submit', 'image', 'reset', 'checkbox', 'file'] : ['submit', 'reset', 'button'])}){input.type=type;if(input[name]!==expected)failures.push([name,type]);}
       }
       input.removeAttribute(attribute);input.setAttributeNS('urn:foreign',attribute,keywords[1]);
       if(input[name]!=='')failures.push([name,'namespace']);
@@ -43,11 +65,14 @@ test(`${tag} formMethod and formEnctype distinguish missing, invalid and canonic
       input[name]=keywords[1];if(input[name]!==keywords[1])failures.push([name,'canonical']);
     }
     return failures;
-  })()`),[]);
-});
+  })()`),
+      [],
+    );
+  });
 
-test(`${tag} form override descriptors, conversion failures and mutation records follow Safari`, async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  test(`${tag} form override descriptors, conversion failures and mutation records follow Safari`, async () => {
+    assert.deepEqual(
+      await evaluate(`(() => {
     const failures=[];
     for(const name of ['formMethod','formEnctype','formAction']) {
       const i=document.createElement('${tag}'),attribute=name.toLowerCase(),d=Object.getOwnPropertyDescriptor(${interfaceName}.prototype,name);
@@ -69,11 +94,14 @@ test(`${tag} form override descriptors, conversion failures and mutation records
       if(JSON.stringify(records)!==JSON.stringify([[attribute,null,before],[attribute,null,'post'],[attribute,null,'post']]))failures.push([name,'records']);
     }
     return failures;
-  })()`),[]);
-});
+  })()`),
+      [],
+    );
+  });
 
-test(`${tag} formAction follows document ownership, live bases, namespaces and adoption`, async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  test(`${tag} formAction follows document ownership, live bases, namespaces and adoption`, async () => {
+    assert.deepEqual(
+      await evaluate(`(() => {
     const failures=[],current=document.createElement('${tag}');
     if(current.formAction!==document.URL)failures.push('current document default');
     const owner=document.implementation.createHTMLDocument(),other=document.implementation.createHTMLDocument();
@@ -99,11 +127,14 @@ test(`${tag} formAction follows document ownership, live bases, namespaces and a
     const parsed=new DOMParser().parseFromString('<${tag}>','text/html');
     if(parsed.querySelector('${tag}').formAction!==document.URL)failures.push('parsed document URL');
     return failures;
-  })()`),[]);
-});
+  })()`),
+      [],
+    );
+  });
 
-test(`${tag} formAction uses only the first eligible HTML base`, async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  test(`${tag} formAction uses only the first eligible HTML base`, async () => {
+    assert.deepEqual(
+      await evaluate(`(() => {
     const failures=[],owner=document.implementation.createHTMLDocument(),i=owner.createElement('${tag}');i.formAction='go';
     const svg=owner.createElementNS('http://www.w3.org/2000/svg','base');svg.setAttribute('href','https://svg.test/');owner.head.append(svg);
     const namespaced=owner.createElement('base');namespaced.setAttributeNS('urn:test','href','https://foreign.test/');owner.head.append(namespaced);
@@ -112,6 +143,8 @@ test(`${tag} formAction uses only the first eligible HTML base`, async () => {
     if(i.formAction!=='go')failures.push('invalid first base blocks second');
     first.remove();if(i.formAction!=='https://second.test/go')failures.push('eligible base');
     return failures;
-  })()`),[]);
-});
+  })()`),
+      [],
+    );
+  });
 }

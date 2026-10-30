@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
-  const session=await createSession();
-  try {return await (await session.newPage()).evaluate(source);}
-  finally {await session.close();}
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('input list and input type reflection follow Safari supported states', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const host=document.createElement('div');host.innerHTML='<input list="choices"><datalist id="choices"></datalist>';
     const input=host.firstChild,list=host.lastChild,failures=[];
     const supported=['text','search','tel','url','email','number','range','color'];
@@ -25,11 +29,14 @@ test('input list and input type reflection follow Safari supported states', asyn
     input.removeAttribute('type');input.setAttribute('list','');list.id='';
     if(input.type!=='text' || input.list!==null)failures.push('empty ID');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('datalist association is live, uses first matching ID and stays within its tree', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const host=document.createElement('div');host.innerHTML='<input list="x"><datalist id="x"></datalist>';
     const input=host.firstChild,list=host.lastChild,failures=[];
     if(input.list!==list)failures.push('detached tree');
@@ -51,11 +58,14 @@ test('datalist association is live, uses first matching ID and stays within its 
     const foreign=document.implementation.createHTMLDocument();foreign.body.appendChild(fragment);foreign.body.appendChild(input);
     if(input.list!==list || input.ownerDocument!==foreign)failures.push('adoption');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('input associations use canonical null-namespace attributes and ignore public overrides', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const host=document.createElement('div');host.innerHTML='<input><datalist id="x"></datalist>';
     const input=host.firstChild,list=host.lastChild,failures=[];
     input.setAttributeNS('urn:test','list','x');
@@ -71,11 +81,14 @@ test('input associations use canonical null-namespace attributes and ignore publ
     Object.defineProperty(input,'type',{get:()=> 'checkbox'});
     if(input.list!==list)failures.push('public override');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('webkitdirectory reflects boolean presence with Safari conversion and mutation records', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const input=document.createElement('input'),failures=[];
     const observer=new MutationObserver(()=>{});observer.observe(input,{attributes:true,attributeOldValue:true});
     input.webkitdirectory=true;input.webkitdirectory=true;input.webkitdirectory=false;
@@ -93,11 +106,14 @@ test('webkitdirectory reflects boolean presence with Safari conversion and mutat
     input.webkitdirectory=false;input.webkitdirectory=true;
     if(!input.webkitdirectory)failures.push('override');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('unselected webkitEntries is frozen, stable per input and unaffected by FileList assignment', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const a=document.createElement('input'),b=document.createElement('input'),entries=a.webkitEntries,failures=[];
     if(!Array.isArray(entries) || entries.length || !Object.isFrozen(entries) || entries!==a.webkitEntries || entries===b.webkitEntries)failures.push('default');
     a.type='file';a.webkitdirectory=true;
@@ -110,5 +126,7 @@ test('unselected webkitEntries is frozen, stable per input and unaffected by Fil
       try{d.get.call({});failures.push([name,'brand']);}catch(e){if(e.name!=='TypeError')failures.push([name,e.name]);}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

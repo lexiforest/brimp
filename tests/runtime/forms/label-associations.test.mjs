@@ -1,24 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {labelAssociationCases as cases,measureLabelAssociations as measure} from '../../../scripts/coverage/label-association-cases.mjs';
-async function evaluate(source){const session=await createSession();try{return await(await session.newPage()).evaluate(source);}finally{await session.close();}}
-test('label associations and live lists match 588 measured Safari sequences',async()=>{
-  const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/label-associations.safari.json',import.meta.url)));
-  assert.deepEqual(ref.cases.map(({expected,...c})=>c),cases);
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  labelAssociationCases as cases,
+  measureLabelAssociations as measure,
+} from '../../../scripts/coverage/label-association-cases.mjs';
+async function evaluate(source) {
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
+}
+test('label associations and live lists match 588 measured Safari sequences', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/label-associations.safari.json', import.meta.url)),
+  );
+  assert.deepEqual(
+    ref.cases.map(({ expected, ...c }) => c),
+    cases,
+  );
   // Each context is independent. Bound each evaluation so slower CI hosts do
   // not spend the session's entire execution deadline in one 588-case call.
-  const actual=[];
-  for(let offset=0;offset<cases.length;offset+=84) {
-    const batch=cases.slice(offset,offset+84);
-    actual.push(...JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(batch)}))`)));
+  const actual = [];
+  for (let offset = 0; offset < cases.length; offset += 84) {
+    const batch = cases.slice(offset, offset + 84);
+    actual.push(
+      ...JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(batch)}))`)),
+    );
   }
-  assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(ref.cases[i].expected)?[]:[{...c,actual:actual[i],expected:ref.cases[i].expected}]),[]);
+  assert.deepEqual(
+    cases.flatMap((c, i) =>
+      JSON.stringify(actual[i]) === JSON.stringify(ref.cases[i].expected)
+        ? []
+        : [{ ...c, actual: actual[i], expected: ref.cases[i].expected }],
+    ),
+    [],
+  );
 });
 
-test('label properties use canonical attributes, tree state and readonly Web IDL descriptors',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('label properties use canonical attributes, tree state and readonly Web IDL descriptors', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],host=document.createElement('div');document.body.append(host);
     host.innerHTML='<form><label for=target></label><input id=target></form>';
     const form=host.firstChild,label=form.firstChild,input=form.lastChild;
@@ -34,11 +59,14 @@ test('label properties use canonical attributes, tree state and readonly Web IDL
     const control=Object.getOwnPropertyDescriptor(HTMLLabelElement.prototype,'control').get;
     if(control.call(label)!==input||label.form!==form||input.labels[0]!==label)failures.push('canonical');
     host.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('Safari label-list invalidation distinguishes element, text, ID and for/type mutations',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('Safari label-list invalidation distinguishes element, text, ID and for/type mutations', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const action of ['id','for-same','for-change','type','name','title','text','append','foreign-for','foreign-type','other-type','other-document']) {
       const host=document.createElement('div');host.innerHTML='<label for=i></label><input id=i>';document.body.append(host);
@@ -54,11 +82,14 @@ test('Safari label-list invalidation distinguishes element, text, ID and for/typ
       if(list.length!==expected)failures.push([action,list.length]);host.remove();
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('form-associated custom definitions participate in label association without public form properties',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('form-associated custom definitions participate in label association without public form properties', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form');document.body.append(form);
     form.innerHTML='<label><x-label-upgrade></x-label-upgrade><input></label>';
     const label=form.firstChild,custom=label.firstChild,input=label.lastChild,list=input.labels;
@@ -73,11 +104,14 @@ test('form-associated custom definitions participate in label association withou
     class Plain extends HTMLElement{};customElements.define('x-label-plain',Plain);const plain=document.createElement('x-label-plain');
     label.removeAttribute('for');label.prepend(plain);if(label.control!==custom)failures.push('plain');
     form.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('htmlFor is canonical DOMString reflection and preserves UTF-16, namespaces and mutation records',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('htmlFor is canonical DOMString reflection and preserves UTF-16, namespaces and mutation records', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],label=document.createElement('label'),d=Object.getOwnPropertyDescriptor(HTMLLabelElement.prototype,'htmlFor');
     if(!d.enumerable||!d.configurable||d.get.name!=='get htmlFor'||d.set.name!=='set htmlFor')failures.push('descriptor');
     for(const fn of [d.get,d.set])try{fn.call({},'x');failures.push('brand');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
@@ -89,11 +123,14 @@ test('htmlFor is canonical DOMString reflection and preserves UTF-16, namespaces
     label.getAttribute=label.setAttribute=()=>{throw Error('override');};label.htmlFor='canonical';if(label.htmlFor!=='canonical'||label.getAttributeNS('urn:x','for')!=='foreign')failures.push('canonical');
     const host=document.createElement('div'),control=document.createElement('input');control.id=String.fromCharCode(0xd800);label.htmlFor=control.id;host.append(label,control);document.body.append(host);
     if(label.control!==control)failures.push('surrogate lookup');host.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('explicit labels use the first exact canonical ID and do not cross shadow boundaries',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('explicit labels use the first exact canonical ID and do not cross shadow boundaries', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const id of ['', ' spaced ', 'Case',String.fromCharCode(0xd800),String.fromCharCode(0),String.fromCharCode(0xfffd)]) {
       const host=document.createElement('div'),label=document.createElement('label'),input=document.createElement('input');
@@ -111,5 +148,7 @@ test('explicit labels use the first exact canonical ID and do not cross shadow b
     const foreign=document.createElementNS('urn:foreign','label');foreign.setAttribute('for','shadow-control');shadow.prepend(foreign);
     if(shadow.querySelector('input').labels.length!==1)failures.push('foreign label');
     outer.remove();host.remove();input.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

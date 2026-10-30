@@ -1,23 +1,57 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {inputCheckedCases,measureInputChecked} from '../../../scripts/coverage/input-checked-cases.mjs';
-import {inputActivationCases,measureInputActivation} from '../../../scripts/coverage/input-activation-cases.mjs';
-import {inputRadioGroupCases,measureInputRadioGroups} from '../../../scripts/coverage/input-radio-groups.mjs';
-async function evaluate(source){const session=await createSession();try{return await(await session.newPage()).evaluate(source);}finally{await session.close();}}
-for(const [name,cases,measure] of [['input-checked',inputCheckedCases,measureInputChecked],['input-activation',inputActivationCases,measureInputActivation],['input-radio-groups',inputRadioGroupCases,measureInputRadioGroups]]) {
-  test(`${name}: checked state and activation match measured Safari sequences`,async()=>{
-    const reference=JSON.parse(fs.readFileSync(new URL(`../fixtures/${name}.safari.json`,import.meta.url)));
-    assert.deepEqual(reference.cases.map(({expected,...c})=>c),cases);
-    const actual=JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`));
-    assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference.cases[i].expected)?[]:
-      [{...c,actual:actual[i],expected:reference.cases[i].expected}]),[]);
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  inputCheckedCases,
+  measureInputChecked,
+} from '../../../scripts/coverage/input-checked-cases.mjs';
+import {
+  inputActivationCases,
+  measureInputActivation,
+} from '../../../scripts/coverage/input-activation-cases.mjs';
+import {
+  inputRadioGroupCases,
+  measureInputRadioGroups,
+} from '../../../scripts/coverage/input-radio-groups.mjs';
+async function evaluate(source) {
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
+}
+for (const [name, cases, measure] of [
+  ['input-checked', inputCheckedCases, measureInputChecked],
+  ['input-activation', inputActivationCases, measureInputActivation],
+  ['input-radio-groups', inputRadioGroupCases, measureInputRadioGroups],
+]) {
+  test(`${name}: checked state and activation match measured Safari sequences`, async () => {
+    const reference = JSON.parse(
+      fs.readFileSync(new URL(`../fixtures/${name}.safari.json`, import.meta.url)),
+    );
+    assert.deepEqual(
+      reference.cases.map(({ expected, ...c }) => c),
+      cases,
+    );
+    const actual = JSON.parse(
+      await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`),
+    );
+    assert.deepEqual(
+      cases.flatMap((c, i) =>
+        JSON.stringify(actual[i]) === JSON.stringify(reference.cases[i].expected)
+          ? []
+          : [{ ...c, actual: actual[i], expected: reference.cases[i].expected }],
+      ),
+      [],
+    );
   });
 }
 
-test('checked and defaultChecked have independent dirty state, canonical attributes and Web IDL descriptors',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('checked and defaultChecked have independent dirty state, canonical attributes and Web IDL descriptors', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const name of ['checked','defaultChecked']) {
       const i=document.createElement('input'),d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,name);
@@ -39,11 +73,14 @@ test('checked and defaultChecked have independent dirty state, canonical attribu
       if(!i.checked)failures.push([type,'override']);i.checked=false;if(i.checked)failures.push([type,'write']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('cloning and importing preserve checkedness and dirty state independently',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('cloning and importing preserve checkedness and dirty state independently', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const type of ['checkbox','radio','text'])for(const checked of [false,true])for(const dirty of [false,true]) {
       const i=document.createElement('input');i.type=type;i.defaultChecked=checked;if(dirty)i.checked=!checked;
@@ -58,11 +95,14 @@ test('cloning and importing preserve checkedness and dirty state independently',
     const copy=form.cloneNode(true),[a,b]=copy.children;
     a.defaultChecked=false;a.defaultChecked=true;if(a.checked||!b.checked)failures.push('group cloning');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('shadow host connection updates radio form ownership and reset requires a browsing context',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('shadow host connection updates radio form ownership and reset requires a browsing context', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],host=document.createElement('div'),root=host.attachShadow({mode:'open'});
     root.innerHTML='<form id=f><input type=radio name=g checked></form><input type=radio name=g form=f checked>';
     const [a,b]=root.querySelectorAll('input');if(!a.checked||!b.checked)failures.push('detached groups');
@@ -76,5 +116,7 @@ test('shadow host connection updates radio form ownership and reset requires a b
       if(fired!==active||i.checked===active)failures.push(['reset',active,fired,i.checked]);
     }
     frame.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

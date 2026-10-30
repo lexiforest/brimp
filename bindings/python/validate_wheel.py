@@ -19,17 +19,28 @@ PLATFORMS = {
 
 REQUIRED_LIBRARIES = {
     "x86_64-unknown-linux-gnu": (
-        "libJavaScriptCore", "libcurl-impersonate", "libicudata",
-        "libicui18n", "libicuuc",
+        "libJavaScriptCore",
+        "libcurl-impersonate",
+        "libicudata",
+        "libicui18n",
+        "libicuuc",
     ),
     "aarch64-unknown-linux-gnu": (
-        "libJavaScriptCore", "libcurl-impersonate", "libicudata",
-        "libicui18n", "libicuuc",
+        "libJavaScriptCore",
+        "libcurl-impersonate",
+        "libicudata",
+        "libicui18n",
+        "libicuuc",
     ),
     "aarch64-apple-darwin": ("JavaScriptCore", "libcurl-impersonate"),
     "x86_64-pc-windows-msvc": (
-        "JavaScriptCore", "libcurl-impersonate", "icudt77", "icuin77",
-        "icuuc77", "msvcp140", "vcruntime140",
+        "JavaScriptCore",
+        "libcurl-impersonate",
+        "icudt77",
+        "icuin77",
+        "icuuc77",
+        "msvcp140",
+        "vcruntime140",
     ),
 }
 
@@ -62,9 +73,7 @@ def project_version(root: Path) -> str:
 
 def find_wheel(directory: Path, target: str, version: str) -> Path:
     platform = PLATFORMS[target]
-    expected = re.compile(
-        rf"^brimp-{re.escape(version)}-cp311-abi3-{re.escape(platform)}\.whl$"
-    )
+    expected = re.compile(rf"^brimp-{re.escape(version)}-cp311-abi3-{re.escape(platform)}\.whl$")
     wheels = [path for path in directory.glob("*.whl") if expected.match(path.name)]
     if len(wheels) != 1:
         raise RuntimeError(
@@ -81,29 +90,20 @@ def validate(wheel: Path, target: str) -> None:
         names = archive.namelist()
     extension_suffix = ".pyd" if target.endswith("windows-msvc") else ".so"
     if not any(
-        name.startswith("brimp/_brimp") and name.endswith(extension_suffix)
-        for name in names
+        name.startswith("brimp/_brimp") and name.endswith(extension_suffix) for name in names
     ):
         raise RuntimeError(f"{wheel.name} does not contain the Brimp extension")
-    if any(
-        name.lower().endswith(".pdb") or ".dsym/" in name.lower()
-        for name in names
-    ):
+    if any(name.lower().endswith(".pdb") or ".dsym/" in name.lower() for name in names):
         raise RuntimeError(f"{wheel.name} contains debug symbols")
-    native_names = [
-        name for name in names if name.startswith(NATIVE_LIBRARY_PREFIX[target])
-    ]
+    native_names = [name for name in names if name.startswith(NATIVE_LIBRARY_PREFIX[target])]
     for required in REQUIRED_LIBRARIES[target]:
         if not any(required.lower() in name.lower() for name in native_names):
-            raise RuntimeError(
-                f"{wheel.name} does not bundle {required}; found {native_names}"
-            )
+            raise RuntimeError(f"{wheel.name} does not bundle {required}; found {native_names}")
     for required in REQUIRED_LICENSES:
         if required not in names:
             raise RuntimeError(f"{wheel.name} does not bundle {required}")
     if target.endswith("linux-gnu") and not any(
-        name.startswith("brimp/bundled/licenses/native/jsc-sdk/icu/")
-        for name in names
+        name.startswith("brimp/bundled/licenses/native/jsc-sdk/icu/") for name in names
     ):
         raise RuntimeError(f"{wheel.name} does not bundle the ICU license")
 

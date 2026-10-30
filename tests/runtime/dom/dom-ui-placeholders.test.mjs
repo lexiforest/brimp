@@ -1,9 +1,9 @@
-import test from "node:test";
-import assert from "node:assert/strict";
-import { createSession } from "../../../bindings/node/index.js";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createSession } from '../../../bindings/node/index.js';
 
 // These are intentional legacy contracts, not Safari rendering conformance.
-test("ignored-result browser UI calls allow a DOM workflow to finish without UI effects", async () => {
+test('ignored-result browser UI calls allow a DOM workflow to finish without UI effects', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -27,14 +27,14 @@ test("ignored-result browser UI calls allow a DOM workflow to finish without UI 
       button.click();document.clear();
       return [button.textContent,button.dataset.saved,button.isConnected,button.hasAttribute('style'),events];
     })()`),
-      ["Saved", "true", true, false, []],
+      ['Saved', 'true', true, false, []],
     );
   } finally {
     await session.close();
   }
 });
 
-test("Element geometry answers with a zero rectangle instead of nothing", async () => {
+test('Element geometry answers with a zero rectangle instead of nothing', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -61,8 +61,8 @@ test("Element geometry answers with a zero rectangle instead of nothing", async 
         0,
         0,
         0,
-        "[object DOMRectList]",
-        ["TypeError", "TypeError", "TypeError", "TypeError"],
+        '[object DOMRectList]',
+        ['TypeError', 'TypeError', 'TypeError', 'TypeError'],
       ],
     );
   } finally {
@@ -70,7 +70,7 @@ test("Element geometry answers with a zero rectangle instead of nothing", async 
   }
 });
 
-test("DOM UI placeholders are callable on HTML, SVG and documents and reject unrelated receivers", async () => {
+test('DOM UI placeholders are callable on HTML, SVG and documents and reject unrelated receivers', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();

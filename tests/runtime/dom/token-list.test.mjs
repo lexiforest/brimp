@@ -1,28 +1,58 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {tokenListCases, relationTokens, measureTokenLists, measureTokenSupports, measureTokenShape} from '../../../scripts/coverage/token-list-cases.mjs';
-const reference = JSON.parse(fs.readFileSync(new URL('../fixtures/token-list.safari.json', import.meta.url)));
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  tokenListCases,
+  relationTokens,
+  measureTokenLists,
+  measureTokenSupports,
+  measureTokenShape,
+} from '../../../scripts/coverage/token-list-cases.mjs';
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/token-list.safari.json', import.meta.url)),
+);
 async function evaluate(source) {
-  const session=await createSession();
-  try {return await (await session.newPage()).evaluate(source);} finally {await session.close();}
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test(`DOMTokenList operations match ${tokenListCases.length} Safari conversion and mutation cases`, async () => {
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),tokenListCases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measureTokenLists})(${JSON.stringify(tokenListCases)}))`));
-  const diffs=reference.cases.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]);
-  assert.equal(diffs.length,0,JSON.stringify({total:diffs.length,first:diffs.slice(0,10)},null,2));
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    tokenListCases,
+  );
+  const actual = JSON.parse(
+    await evaluate(`JSON.stringify((${measureTokenLists})(${JSON.stringify(tokenListCases)}))`),
+  );
+  const diffs = reference.cases.flatMap((c, i) =>
+    JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+  );
+  assert.equal(
+    diffs.length,
+    0,
+    JSON.stringify({ total: diffs.length, first: diffs.slice(0, 10) }, null, 2),
+  );
 });
 
 test('DOMTokenList support metadata and interface descriptors match Safari', async () => {
-  assert.deepEqual(await evaluate(`(${measureTokenSupports})(${JSON.stringify(relationTokens)})`),reference.supports);
-  assert.deepEqual(JSON.parse(await evaluate(`JSON.stringify((${measureTokenShape})())`)),reference.shape);
+  assert.deepEqual(
+    await evaluate(`(${measureTokenSupports})(${JSON.stringify(relationTokens)})`),
+    reference.supports,
+  );
+  assert.deepEqual(
+    JSON.parse(await evaluate(`JSON.stringify((${measureTokenShape})())`)),
+    reference.shape,
+  );
 });
 
 test('token methods validate brands and arguments before conversion, while iteration remains generic', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],p=DOMTokenList.prototype;
     for(const name of ['item','contains','add','remove','toggle','replace','supports','toString']) {
       for(const receiver of [{},Object.create(p),new Proxy(document.createElement('a').relList,{})]) {
@@ -47,11 +77,14 @@ test('token methods validate brands and arguments before conversion, while itera
     p.add.call(branded,'still-branded');
     if(p.item.call(branded,0)!=='still-branded')failures.push('brand independent of prototype');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('relList forwards value assignment, preserves identity and uses canonical null-namespace attributes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],a=document.createElement('a'),list=a.relList;
     const d=Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype,'relList');
     if(!d.enumerable||!d.configurable||d.get.name!=='get relList'||d.set.name!=='set relList'||d.get.length!==0||d.set.length!==1)failures.push('descriptor');
@@ -69,11 +102,14 @@ test('relList forwards value assignment, preserves identity and uses canonical n
     const value={toString(){throw Error('must not convert before forwarding')}};d.set.call(a,value);
     if(forwarded!==value)failures.push('PutForwards');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('token indexed properties and iterators stay live without using public item or length overrides', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],a=document.createElement('a');a.rel='a b';const list=a.relList;
     if(JSON.stringify(Object.keys(list))!=='["0","1"]')failures.push('keys');
     const d=Object.getOwnPropertyDescriptor(list,'0');if(d.value!=='a'||d.writable||!d.enumerable||!d.configurable)failures.push('index descriptor');
@@ -88,11 +124,14 @@ test('token indexed properties and iterators stay live without using public item
     list.item=()=>{throw Error('item override')};Object.defineProperty(list,'length',{value:99});
     if(list[0]!=='x'||list[4]!==undefined||'4' in list||Object.getOwnPropertyDescriptor(list,'4')!==undefined)failures.push('canonical indices');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('token conversions precede validation and read live attributes after reentrant changes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const a=document.createElement('a'),list=a.relList,failures=[],log=[];
     a.rel='before';
     list.add({toString(){log.push('first');a.rel='intermediate';return 'x'}}, {toString(){log.push('second');a.rel='final';return 'y'}});
@@ -106,5 +145,7 @@ test('token conversions precede validation and read live attributes after reentr
     if(list[0]!==token||a.rel!==token+' next')failures.push('UTF-16 preservation');
     const records=observer.takeRecords();if(records.length!==2||records[1].oldValue!==token+' '+token)failures.push('UTF-16 mutation oldValue');
     observer.disconnect();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

@@ -1,4 +1,5 @@
 """Exercise an installed wheel without importing repository fixtures."""
+
 from brimp import Session, plugins
 
 

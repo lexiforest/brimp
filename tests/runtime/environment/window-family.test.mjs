@@ -1,13 +1,18 @@
-import test from "node:test";
-import assert from "node:assert/strict";
-import fs from "node:fs";
-import { createSession } from "../../../bindings/node/index.js";
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { createSession } from '../../../bindings/node/index.js';
 
-const inventory = JSON.parse(fs.readFileSync(new URL('../fixtures/environment-inventory.safari.json', import.meta.url), 'utf8'));
+const inventory = JSON.parse(
+  fs.readFileSync(
+    new URL('../fixtures/environment-inventory.safari.json', import.meta.url),
+    'utf8',
+  ),
+);
 const handlers = inventory.windowHandlers;
 const constructors = inventory.windowConstructors;
 
-test("window handler family reuses ordinary DOM dispatch and supports clearing", async () => {
+test('window handler family reuses ordinary DOM dispatch and supports clearing', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -32,7 +37,7 @@ test("window handler family reuses ordinary DOM dispatch and supports clearing",
   }
 });
 
-test("window identity and UI placeholders leave DOM and runtime state usable", async () => {
+test('window identity and UI placeholders leave DOM and runtime state usable', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
@@ -63,8 +68,8 @@ test("window identity and UI placeholders leave DOM and runtime state usable", a
         true,
         null,
         false,
-        "42",
-        "ready",
+        '42',
+        'ready',
         true,
         true,
         0,
@@ -79,8 +84,8 @@ test("window identity and UI placeholders leave DOM and runtime state usable", a
   }
 });
 
-test("window timer aliases retain realm-clock scheduling and cancellation", async () => {
-  const session = await createSession({ clock: { mode: "logical" } });
+test('window timer aliases retain realm-clock scheduling and cancellation', async () => {
+  const session = await createSession({ clock: { mode: 'logical' } });
   try {
     const page = await session.newPage();
     await page.evaluate(`globalThis.work=[];
@@ -91,11 +96,11 @@ test("window timer aliases retain realm-clock scheduling and cancellation", asyn
       requestAnimationFrame(time=>work.push(['frame',time]));
       webkitRequestAnimationFrame(time=>work.push(['webkit-frame',time]));null`);
     await page.advanceTime(20);
-    assert.deepEqual(await page.evaluate("work"), [
-      "microtask",
-      "interval",
-      ["frame", 16],
-      ["webkit-frame", 16],
+    assert.deepEqual(await page.evaluate('work'), [
+      'microtask',
+      'interval',
+      ['frame', 16],
+      ['webkit-frame', 16],
     ]);
   } finally {
     await session.close();

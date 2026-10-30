@@ -1,19 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {controlSelectionCases as cases,measureControlSelections as measure} from '../../../scripts/coverage/control-selection-cases.mjs';
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/control-selection.safari.json',import.meta.url),'utf8'));
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  controlSelectionCases as cases,
+  measureControlSelections as measure,
+} from '../../../scripts/coverage/control-selection-cases.mjs';
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/control-selection.safari.json', import.meta.url), 'utf8'),
+);
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('text-control selection and replacement match 640 measured Safari cases',async()=>{
- assert.deepEqual(reference.cases.map(({expected,...c})=>c),cases);
- const actual=await evaluate(`(${measure})(${JSON.stringify(cases)})`);
- assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(reference.cases[i].expected)?[]:[{...c,actual:actual[i],expected:reference.cases[i].expected}]),[]);
+test('text-control selection and replacement match 640 measured Safari cases', async () => {
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const actual = await evaluate(`(${measure})(${JSON.stringify(cases)})`);
+  assert.deepEqual(
+    cases.flatMap((c, i) =>
+      JSON.stringify(actual[i]) === JSON.stringify(reference.cases[i].expected)
+        ? []
+        : [{ ...c, actual: actual[i], expected: reference.cases[i].expected }],
+    ),
+    [],
+  );
 });
 
-test('selection conversions, errors, API shape and canonical state follow Safari',async()=>{
- assert.deepEqual(await evaluate(`(()=>{const failures=[];
+test('selection conversions, errors, API shape and canonical state follow Safari', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{const failures=[];
  for(const tag of ['input','textarea']){
   const i=document.createElement(tag);i.value='abcdef';i.setSelectionRange(2,4,'backward');
   for(const property of ['selectionStart','selectionEnd'])for(const value of [1n,Symbol(),{valueOf(){return 1n}}]){
@@ -42,11 +65,14 @@ test('selection conversions, errors, API shape and canonical state follow Safari
  for(const action of [()=>unsupported.setSelectionRange(1,2),()=>unsupported.selectionStart=1,()=>unsupported.setRangeText('x')]){
   try{action();failures.push('unsupported');}catch(e){if(e.name!=='InvalidStateError')failures.push(e.name);}
  }
- return failures})()`),[]);
+ return failures})()`),
+    [],
+  );
 });
 
-test('selection defaults, value assignments, reset and input type transitions follow Safari',async()=>{
- assert.deepEqual(await evaluate(String.raw`(()=>{const failures=[],snapshot=i=>[i.selectionStart,i.selectionEnd,i.selectionDirection];
+test('selection defaults, value assignments, reset and input type transitions follow Safari', async () => {
+  assert.deepEqual(
+    await evaluate(String.raw`(()=>{const failures=[],snapshot=i=>[i.selectionStart,i.selectionEnd,i.selectionDirection];
  for(const tag of ['input','textarea']){
   const i=document.createElement(tag);i.defaultValue='abcdef';if(JSON.stringify(snapshot(i))!==JSON.stringify([0,0,'none']))failures.push([tag,'initial']);
   i.setSelectionRange(1,4,'backward');i.value='abcdef';if(JSON.stringify(snapshot(i))!==JSON.stringify([1,4,'backward']))failures.push([tag,'same']);
@@ -69,31 +95,56 @@ test('selection defaults, value assignments, reset and input type transitions fo
  }
  const url=document.createElement('input');url.value='  ab  ';url.setSelectionRange(1,5,'backward');url.type='url';
  if(url.value!=='ab'||JSON.stringify(snapshot(url))!==JSON.stringify([2,2,'none']))failures.push('type sanitization');
- return failures})()`),[]);
+ return failures})()`),
+    [],
+  );
 });
 
-async function flushEvents(page){
- if(process.env.COVERAGE_BROWSER!=='safari'){await page.runPendingTasks();return;}
- await page.evaluate('(()=>{globalThis.selectionTasksReady=false;setTimeout(()=>selectionTasksReady=true,20);return null})()');
- const deadline=Date.now()+5000;
- while(!await page.evaluate('selectionTasksReady')){if(Date.now()>deadline)throw Error('Safari selection tasks did not finish');}
+async function flushEvents(page) {
+  if (process.env.COVERAGE_BROWSER !== 'safari') {
+    await page.runPendingTasks();
+    return;
+  }
+  await page.evaluate(
+    '(()=>{globalThis.selectionTasksReady=false;setTimeout(()=>selectionTasksReady=true,20);return null})()',
+  );
+  const deadline = Date.now() + 5000;
+  while (!(await page.evaluate('selectionTasksReady'))) {
+    if (Date.now() > deadline) throw Error('Safari selection tasks did not finish');
+  }
 }
 
-test('select events are queued per change and selectionchange is coalesced with Safari flags',async()=>{
- const s=await createSession();try{const p=await s.newPage();
- await p.evaluate(`(()=>{globalThis.control=document.createElement('input');control.value='abcdef';globalThis.selectionLog=[];
+test('select events are queued per change and selectionchange is coalesced with Safari flags', async () => {
+  const s = await createSession();
+  try {
+    const p = await s.newPage();
+    await p
+      .evaluate(
+        `(()=>{globalThis.control=document.createElement('input');control.value='abcdef';globalThis.selectionLog=[];
  for(const name of ['select','selectionchange'])control.addEventListener(name,e=>selectionLog.push([name,e.bubbles,e.composed,e.isTrusted]));
  control.setSelectionRange(1,3);control.setSelectionRange(1,3);control.selectionDirection='backward';
- return selectionLog.length})()`).then(count=>assert.equal(count,0));
- await flushEvents(p);
- assert.deepEqual(await p.evaluate('selectionLog'),[['select',true,false,true],['selectionchange',true,false,true],['select',true,false,true]]);
- await p.evaluate(`(()=>{selectionLog=[];control.value='xyz';const f=document.createElement('form');f.appendChild(control);f.reset();return null})()`);
- await flushEvents(p);assert.deepEqual(await p.evaluate('selectionLog'),[]);
- }finally{await s.close();}
+ return selectionLog.length})()`,
+      )
+      .then((count) => assert.equal(count, 0));
+    await flushEvents(p);
+    assert.deepEqual(await p.evaluate('selectionLog'), [
+      ['select', true, false, true],
+      ['selectionchange', true, false, true],
+      ['select', true, false, true],
+    ]);
+    await p.evaluate(
+      `(()=>{selectionLog=[];control.value='xyz';const f=document.createElement('form');f.appendChild(control);f.reset();return null})()`,
+    );
+    await flushEvents(p);
+    assert.deepEqual(await p.evaluate('selectionLog'), []);
+  } finally {
+    await s.close();
+  }
 });
 
-test('select focuses eligible connected controls and respects disabled controls and focused directions',async()=>{
- assert.deepEqual(await evaluate(`(()=>{const failures=[];
+test('select focuses eligible connected controls and respects disabled controls and focused directions', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{const failures=[];
  for(const tag of ['input','textarea'])for(const disabled of [false,true]){
  const i=document.createElement(tag);i.value='abcdef';i.disabled=disabled;document.body.appendChild(i);i.select();
  if(i.selectionStart!==0||i.selectionEnd!==6||i.selectionDirection!=='none'||(document.activeElement===i)!==!disabled)failures.push([tag,disabled,'select']);
@@ -102,5 +153,7 @@ test('select focuses eligible connected controls and respects disabled controls 
  i.remove();}
  const i=document.createElement('input');i.defaultValue='abcdef';document.body.appendChild(i);i.focus();i.setSelectionRange(3,5,'backward');i.defaultValue='xy';
  if(i.selectionStart!==0||i.selectionEnd!==0||i.selectionDirection!=='forward')failures.push('focused default');
- return failures})()`),[]);
+ return failures})()`),
+    [],
+  );
 });

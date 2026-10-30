@@ -1,10 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('button strings, booleans and type have Safari conversion and reflection semantics',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button strings, booleans and type have Safari conversion and reflection semantics', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],button=document.createElement('button');
     button.textContent='Label';
     for(const name of ['name','value','formTarget','type']){
@@ -37,11 +45,14 @@ test('button strings, booleans and type have Safari conversion and reflection se
     if(button.disabled)failures.push('own disabled only');
     if(button.textContent!=='Label')failures.push('value changed label');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button reflection descriptors, namespace identity, cloning and canonical access follow Safari',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button reflection descriptors, namespace identity, cloning and canonical access follow Safari', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const name of ['name','value','formTarget','type','disabled','formNoValidate']){
       const button=document.createElement('button'),attribute=name.toLowerCase(),boolean=['disabled','formNoValidate'].includes(name);
@@ -63,11 +74,14 @@ test('button reflection descriptors, namespace identity, cloning and canonical a
       button[name]=boolean?true:'button';if(button[name]!==(boolean?true:'button'))failures.push([name,'canonical']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button attribute mutation records and reset retain reflected values',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button attribute mutation records and reset retain reflected values', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),button=document.createElement('button');form.append(button);
     for(const name of ['name','value','formTarget','type','disabled','formNoValidate']){
       const boolean=['disabled','formNoValidate'].includes(name),attribute=name.toLowerCase();
@@ -80,11 +94,14 @@ test('button attribute mutation records and reset retain reflected values',async
       const before=button[name];HTMLFormElement.prototype.reset.call(form);if(button[name]!==before)failures.push([name,'reset']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button auto type follows command presence and direct select parent across live mutations',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button auto type follows command presence and direct select parent across live mutations', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const attribute of ['command','commandfor','popovertarget'])for(const value of ['', '--foo','x'])
     for(const type of [null,'','auto','invalid','submit','reset','button','SUBMIT','RESET','BUTTON']){
@@ -112,11 +129,14 @@ test('button auto type follows command presence and direct select parent across 
     b.setAttributeNS(null,'command','x');b.attributes.getNamedItem('command').value='';if(b.type!=='button')failures.push('Attr mutation');
     b.removeAttributeNS(null,'command');if(b.type!=='submit')failures.push('namespace removal');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('button submission eligibility uses canonical dynamic type',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('button submission eligibility uses canonical dynamic type', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),button=document.createElement('button');
     button.name='action';button.value='save';form.append(button);document.body.append(form);
     let submissions=0;form.addEventListener('submit',event=>{event.preventDefault();submissions++;if(event.submitter!==button)failures.push('submitter');});
@@ -134,5 +154,7 @@ test('button submission eligibility uses canonical dynamic type',async()=>{
     form.requestSubmit(button);if(submissions!==1)failures.push('canonical requestSubmit');
     if(new FormData(form,button).get('action')!=='save')failures.push('canonical FormData');
     form.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

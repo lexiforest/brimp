@@ -7,7 +7,9 @@ try {
   assert.equal(await page.evaluate('6 * 7'), 42);
   assert.equal(await page.evaluate("localStorage.x='installed'; localStorage.x"), 'installed');
   assert.deepEqual(
-    await page.evaluate("Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)"),
+    await page.evaluate(
+      "Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)",
+    ),
     [0, 0, 0, 0],
   );
   await page.evaluate(

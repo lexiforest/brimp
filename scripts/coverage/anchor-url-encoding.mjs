@@ -1,17 +1,18 @@
-import {createServer} from 'node:http';
+import { createServer } from 'node:http';
 export async function measureAnchorURLEncoding(page) {
   const labels = ['UTF-8', 'windows-1252', 'Big5', 'ISO-2022-JP'];
   const server = createServer((req, res) => {
     const encoding = labels[Number(req.url.slice(1))] ?? 'UTF-8';
-    res.writeHead(200, {'Content-Type': `text/html; charset=${encoding}`});
+    res.writeHead(200, { 'Content-Type': `text/html; charset=${encoding}` });
     res.end(`<!doctype html><meta charset="${encoding}"><body>`);
   });
-  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   try {
     const results = [];
     for (let i = 0; i < labels.length; ++i) {
       await page.get(`http://127.0.0.1:${server.address().port}/${i}`);
-      results.push(await page.evaluate(`(() => {
+      results.push(
+        await page.evaluate(`(() => {
         const value = 'https://example.test/é?X　☃中é🦀#é';
         const out = [];
         for (const kind of ['attribute', 'href', 'search']) {
@@ -26,8 +27,11 @@ export async function measureAnchorURLEncoding(page) {
         other.adoptNode(a);
         out.push(['adopted', a.href, a.search, a.getAttribute('href')]);
         return out;
-      })()`));
+      })()`),
+      );
     }
     return results;
-  } finally { await new Promise(resolve => server.close(resolve)); }
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 }

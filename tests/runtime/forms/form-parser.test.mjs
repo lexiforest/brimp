@@ -1,23 +1,60 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {formParserCases,measureFormParser,parserRadioCases,measureParserRadios,parserRadioMutationCases,measureParserRadioMutations} from '../../../scripts/coverage/form-parser-cases.mjs';
-async function evaluate(source){const session=await createSession();try{return await(await session.newPage()).evaluate(source);}finally{await session.close();}}
-test('parser-created form owners and mutation resets match 245 Safari sequences',async()=>{
-  const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/form-parser.safari.json',import.meta.url)));
-  assert.deepEqual(ref.cases.map(({expected,...c})=>c),formParserCases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measureFormParser})(${JSON.stringify(formParserCases)}))`));
-  assert.deepEqual(formParserCases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(ref.cases[i].expected)?[]:[{...c,actual:actual[i],expected:ref.cases[i].expected}]),[]);
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  formParserCases,
+  measureFormParser,
+  parserRadioCases,
+  measureParserRadios,
+  parserRadioMutationCases,
+  measureParserRadioMutations,
+} from '../../../scripts/coverage/form-parser-cases.mjs';
+async function evaluate(source) {
+  const session = await createSession();
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
+}
+test('parser-created form owners and mutation resets match 245 Safari sequences', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/form-parser.safari.json', import.meta.url)),
+  );
+  assert.deepEqual(
+    ref.cases.map(({ expected, ...c }) => c),
+    formParserCases,
+  );
+  const actual = JSON.parse(
+    await evaluate(`JSON.stringify((${measureFormParser})(${JSON.stringify(formParserCases)}))`),
+  );
+  assert.deepEqual(
+    formParserCases.flatMap((c, i) =>
+      JSON.stringify(actual[i]) === JSON.stringify(ref.cases[i].expected)
+        ? []
+        : [{ ...c, actual: actual[i], expected: ref.cases[i].expected }],
+    ),
+    [],
+  );
 });
-test('parser-owned radio groups stay separate after their non-ancestor form closes',async()=>{
-  const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/form-parser.safari.json',import.meta.url)));
-  assert.deepEqual(ref.radio_cases.map(c=>c.kind),parserRadioCases);
-  assert.deepEqual(await evaluate(`(${measureParserRadios})(${JSON.stringify(parserRadioCases)})`),ref.radio_cases.map(c=>c.expected));
+test('parser-owned radio groups stay separate after their non-ancestor form closes', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/form-parser.safari.json', import.meta.url)),
+  );
+  assert.deepEqual(
+    ref.radio_cases.map((c) => c.kind),
+    parserRadioCases,
+  );
+  assert.deepEqual(
+    await evaluate(`(${measureParserRadios})(${JSON.stringify(parserRadioCases)})`),
+    ref.radio_cases.map((c) => c.expected),
+  );
 });
 
-test('parser owners survive moving a common ancestor and adoption but reset when separated or cloned',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('parser owners survive moving a common ancestor and adoption but reset when separated or cloned', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const action of ['move-control','move-cell','move-table','move-form','remove-reinsert-form','adopt','form-attribute','remove-missing-form','foreign-form','remove-id','same-id']){
       const doc=new DOMParser().parseFromString('<div id=root><table><form id=f><tr><td><input id=i></table></form></div>','text/html');
@@ -45,11 +82,14 @@ test('parser owners survive moving a common ancestor and adoption but reset when
       if(root.querySelector('input').form!==null)failures.push([kind,'fragment owner']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('form properties are canonical readonly descriptors and honor exact connected form IDs',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('form properties are canonical readonly descriptors and honor exact connected form IDs', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [tag,ctor] of [['input',HTMLInputElement],['button',HTMLButtonElement],['select',HTMLSelectElement],['textarea',HTMLTextAreaElement],['output',HTMLOutputElement],['object',HTMLObjectElement],['fieldset',HTMLFieldSetElement]]){
       const host=document.createElement('div');document.body.append(host);
@@ -67,11 +107,14 @@ test('form properties are canonical readonly descriptors and honor exact connect
       control.setAttribute('form','missing');if(control.form!==form)failures.push([tag,'detached form attribute']);
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('document.write retains parser form owners across chunks and resets them on replacement',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('document.write retains parser form owners across chunks and resets them on replacement', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],doc=document.implementation.createHTMLDocument();doc.open();
     doc.write('<table><form id=f><tr><td><input type=radio name=g id=a checked>');
     const a=doc.getElementById('a'),form=doc.getElementById('f');
@@ -81,11 +124,21 @@ test('document.write retains parser form owners across chunks and resets them on
     const retained=doc.documentElement;doc.open();doc.write('<input id=fresh>');doc.close();
     if(doc.getElementById('fresh').form!==null||a.form!==form||retained.parentNode!==null)failures.push('replacement');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('radio mutations preserve Safari grouping when parser form ownership changes',async()=>{
-  const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/form-parser.safari.json',import.meta.url)));
-  assert.deepEqual(ref.radio_mutations.map(c=>c.operation),parserRadioMutationCases);
-  assert.deepEqual(await evaluate(`(${measureParserRadioMutations})(${JSON.stringify(parserRadioMutationCases)})`),ref.radio_mutations.map(c=>c.expected));
+test('radio mutations preserve Safari grouping when parser form ownership changes', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/form-parser.safari.json', import.meta.url)),
+  );
+  assert.deepEqual(
+    ref.radio_mutations.map((c) => c.operation),
+    parserRadioMutationCases,
+  );
+  assert.deepEqual(
+    await evaluate(`(${measureParserRadioMutations})(${JSON.stringify(parserRadioMutationCases)})`),
+    ref.radio_mutations.map((c) => c.expected),
+  );
 });

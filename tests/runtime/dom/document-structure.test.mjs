@@ -1,24 +1,56 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {documentStructureReadCases, documentBodyWriteCases, measureDocumentStructure} from '../../../scripts/coverage/document-structure-cases.mjs';
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/document-structure.safari.json',import.meta.url)));
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  documentStructureReadCases,
+  documentBodyWriteCases,
+  measureDocumentStructure,
+} from '../../../scripts/coverage/document-structure-cases.mjs';
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/document-structure.safari.json', import.meta.url)),
+);
 
-for(const [mode,cases] of [['read',documentStructureReadCases],['write',documentBodyWriteCases]]) {
-  test(`Document structure ${mode} matches Safari roots, namespaces, replacement, adoption and mutation records`,async()=>{
-    assert.deepEqual(reference[mode].map(({expected,...c})=>c),cases);
-    const session=await createSession();try{
-      const page=await session.newPage();
-      const actual=JSON.parse(await page.evaluate(`JSON.stringify((${measureDocumentStructure})(${JSON.stringify(cases)},${mode==='write'}))`));
-      const differences=reference[mode].flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]);
-      assert.deepEqual(differences.slice(0,6),[],`${differences.length} of ${cases.length} cases differ`);
-    }finally{await session.close()}
+for (const [mode, cases] of [
+  ['read', documentStructureReadCases],
+  ['write', documentBodyWriteCases],
+]) {
+  test(`Document structure ${mode} matches Safari roots, namespaces, replacement, adoption and mutation records`, async () => {
+    assert.deepEqual(
+      reference[mode].map(({ expected, ...c }) => c),
+      cases,
+    );
+    const session = await createSession();
+    try {
+      const page = await session.newPage();
+      const actual = JSON.parse(
+        await page.evaluate(
+          `JSON.stringify((${measureDocumentStructure})(${JSON.stringify(cases)},${mode === 'write'}))`,
+        ),
+      );
+      const differences = reference[mode].flatMap((c, i) =>
+        JSON.stringify(c.expected) === JSON.stringify(actual[i])
+          ? []
+          : [{ ...c, actual: actual[i] }],
+      );
+      assert.deepEqual(
+        differences.slice(0, 6),
+        [],
+        `${differences.length} of ${cases.length} cases differ`,
+      );
+    } finally {
+      await session.close();
+    }
   });
 }
 
-test('Document structure descriptors and receiver checks use native document and element identities',async()=>{
-  const session=await createSession();try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('Document structure descriptors and receiver checks use native document and element identities', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[];
     for(const name of ['documentElement','head','body']){
       const p=Object.getOwnPropertyDescriptor(Document.prototype,name),writable=name==='body';
@@ -37,11 +69,21 @@ test('Document structure descriptors and receiver checks use native document and
       try{set.call(d,value);failures.push('forged body')}catch(e){if(e.name!=='TypeError')failures.push(e.name)}
     }
     return failures;
-  })()`),[])}finally{await session.close()}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('Document structure stays live across root replacement, cloning, import and adoption',async()=>{
-  const session=await createSession();try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('Document structure stays live across root replacement, cloning, import and adoption', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const failures=[],d=document.implementation.createHTMLDocument(),root=d.documentElement,head=d.head,body=d.body;
     d.insertBefore(d.createComment('before'),root);
     if(d.documentElement!==root)failures.push('comment');
@@ -54,11 +96,21 @@ test('Document structure stays live across root replacement, cloning, import and
     const adopted=empty.adoptNode(root);empty.appendChild(adopted);if(d.documentElement!==null||empty.head!==head||empty.body!==body||body.ownerDocument!==empty)failures.push('adopted');
     d.appendChild(d.importNode(root,true));if(d.head===head||d.head.localName!=='head'||d.body.ownerDocument!==d)failures.push('imported');
     return failures;
-  })()`),[])}finally{await session.close()}
+  })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('Document body writes ignore public selectors and replacement methods and update live ranges',async()=>{
-  const session=await createSession();try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('Document body writes ignore public selectors and replacement methods and update live ranges', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const d=document.implementation.createHTMLDocument(),root=d.documentElement,old=d.body,incoming=d.createElement('body');old.textContent='old';
     const range=d.createRange();range.setStart(old.firstChild,1);range.collapse(true);
     const observer=new MutationObserver(()=>{});observer.observe(root,{childList:true});
@@ -69,11 +121,21 @@ test('Document body writes ignore public selectors and replacement methods and u
     set.call(d,incoming);
     const records=observer.takeRecords();observer.disconnect();
     return [get.call(d)===incoming,range.startContainer===root,range.startOffset,records.length,records[0]?.addedNodes[0]===incoming,records[0]?.removedNodes[0]===old];
-  })()`),[true,true,1,1,true,true])}finally{await session.close()}
+  })()`),
+      [true, true, 1, 1, true, true],
+    );
+  } finally {
+    await session.close();
+  }
 });
 
-test('Document body replacement runs custom-element disconnection, adoption and connection reactions',async()=>{
-  const session=await createSession();try{assert.deepEqual(await(await session.newPage()).evaluate(`(()=>{
+test('Document body replacement runs custom-element disconnection, adoption and connection reactions', async () => {
+  const session = await createSession();
+  try {
+    assert.deepEqual(
+      await (
+        await session.newPage()
+      ).evaluate(`(()=>{
     const log=[],a=document.implementation.createHTMLDocument(),b=document.implementation.createHTMLDocument();
     const owner=d=>d===document?'main':d===a?'a':'b';
     customElements.define('body-lifecycle',class extends HTMLElement{
@@ -86,5 +148,25 @@ test('Document body replacement runs custom-element disconnection, adoption and 
     log.length=0;document.body=incoming;const first=log.splice(0);
     a.body=incoming;const second=log.splice(0);b.body=incoming;const third=log.splice(0);document.body=old;
     return [first,second,third];
-  })()`),[[['disconnected','old','main'],['connected','new','main']],[['disconnected','new','a'],['adopted','new','main','a'],['connected','new','a']],[['disconnected','new','b'],['adopted','new','a','b'],['connected','new','b']]])}finally{await session.close()}
+  })()`),
+      [
+        [
+          ['disconnected', 'old', 'main'],
+          ['connected', 'new', 'main'],
+        ],
+        [
+          ['disconnected', 'new', 'a'],
+          ['adopted', 'new', 'main', 'a'],
+          ['connected', 'new', 'a'],
+        ],
+        [
+          ['disconnected', 'new', 'b'],
+          ['adopted', 'new', 'a', 'b'],
+          ['connected', 'new', 'b'],
+        ],
+      ],
+    );
+  } finally {
+    await session.close();
+  }
 });

@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 test('DOM text preserves UTF-16 through creation, replacement, cloning and mutation records', async () => {
   const session = await createSession();
   try {
     const page = await session.newPage();
-    assert.deepEqual(await page.evaluate(`(() => {
+    assert.deepEqual(
+      await page.evaluate(`(() => {
       const failures = [], parent = document.createElement('a');
       let value = '';
       for (let unit = 0; unit <= 0xffff; ++unit) value += String.fromCharCode(unit) + 'x';
@@ -36,6 +37,10 @@ test('DOM text preserves UTF-16 through creation, replacement, cloning and mutat
       if (parent.text !== value) failures.push('element textContent');
       observer.disconnect();
       return failures;
-    })()`), []);
-  } finally { await session.close(); }
+    })()`),
+      [],
+    );
+  } finally {
+    await session.close();
+  }
 });

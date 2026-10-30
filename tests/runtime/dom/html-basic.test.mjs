@@ -1,22 +1,52 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {basicInterfaces,basicReflections,basicAttributeCases,measureBasicAttributes} from '../../../scripts/coverage/html-basic-cases.mjs';
-import {measureControlIdentity} from '../../../scripts/coverage/control-identity-cases.mjs';
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/html-basic.safari.json',import.meta.url)));
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  basicInterfaces,
+  basicReflections,
+  basicAttributeCases,
+  measureBasicAttributes,
+} from '../../../scripts/coverage/html-basic-cases.mjs';
+import { measureControlIdentity } from '../../../scripts/coverage/control-identity-cases.mjs';
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/html-basic.safari.json', import.meta.url)),
+);
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('basic HTML attributes match Safari conversions, integer parsing and mutation records',async()=>{
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),basicAttributeCases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measureBasicAttributes})(${JSON.stringify(basicAttributeCases)}))`));
-  assert.deepEqual(reference.cases.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test('basic HTML attributes match Safari conversions, integer parsing and mutation records', async () => {
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    basicAttributeCases,
+  );
+  const actual = JSON.parse(
+    await evaluate(
+      `JSON.stringify((${measureBasicAttributes})(${JSON.stringify(basicAttributeCases)}))`,
+    ),
+  );
+  assert.deepEqual(
+    reference.cases.flatMap((c, i) =>
+      JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test('basic HTML interfaces have Safari identity, descriptors and construction policy',async()=>{
-  assert.deepEqual(reference.interfaces,basicInterfaces);
-  assert.deepEqual(await evaluate(`(${measureControlIdentity})(${JSON.stringify(basicInterfaces)})`),reference.identity);
-  assert.deepEqual(await evaluate(`(()=>{
+test('basic HTML interfaces have Safari identity, descriptors and construction policy', async () => {
+  assert.deepEqual(reference.interfaces, basicInterfaces);
+  assert.deepEqual(
+    await evaluate(`(${measureControlIdentity})(${JSON.stringify(basicInterfaces)})`),
+    reference.identity,
+  );
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
     for(const [tag,name] of ${JSON.stringify(basicInterfaces)}){
       const C=globalThis[name],element=document.createElement(tag);
@@ -27,13 +57,16 @@ test('basic HTML interfaces have Safari identity, descriptors and construction p
       if(tag==='span'&&Object.getPrototypeOf(root.content.firstChild)!==C.prototype)failures.push('parsed span');
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('basic HTML reflections are branded, canonical and live through cloning and adoption',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('basic HTML reflections are branded, canonical and live through cloning and adoption', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
-    for(const [tag,property,attribute] of ${JSON.stringify([...basicReflections,['li','value','value']])}){
+    for(const [tag,property,attribute] of ${JSON.stringify([...basicReflections, ['li', 'value', 'value']])}){
       const e=document.createElement(tag),d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),property),integer=property==='value';
       if(e[property]!== (integer?0:''))failures.push(property+' default');
       if(!d.enumerable||!d.configurable||d.get.name!=='get '+property||d.set.name!=='set '+property||d.get.length!==0||d.set.length!==1)failures.push(property+' descriptor');
@@ -51,11 +84,14 @@ test('basic HTML reflections are branded, canonical and live through cloning and
       e[property]=value;if(e[property]!==value)failures.push('canonical');
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('title text reads direct text children and canonically replaces children',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('title text reads direct text children and canonically replaces children', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],title=document.createElement('title'),span=document.createElement('span');span.textContent='nested';
     title.append('first',span,document.createComment('ignored'),'last');
     if(title.text!=='firstlast')failures.push('direct text');
@@ -75,11 +111,14 @@ test('title text reads direct text children and canonically replaces children',a
       try{d.get.call(receiver);failures.push('getter receiver')}catch(e){if(e.name!=='TypeError')failures.push(e.name)}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('title text stays live and conversion precedes canonical replacement',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('title text stays live and conversion precedes canonical replacement', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],title=document.createElement('title');
     title.text='before';title.firstChild.data='changed';if(title.text!=='changed')failures.push('live text');
     const observer=new MutationObserver(()=>{});observer.observe(title,{childList:true,subtree:true});
@@ -95,5 +134,7 @@ test('title text stays live and conversion precedes canonical replacement',async
     const clone=title.cloneNode(true);document.implementation.createHTMLDocument().adoptNode(clone);
     title.text='changed';if(clone.text!==value)failures.push('clone/adopt UTF-16');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

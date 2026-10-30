@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession, rtcPlugin, pluginCatalog} from '../../../bindings/node/index.js';
+import { createSession, rtcPlugin, pluginCatalog } from '../../../bindings/node/index.js';
 
 async function evaluate(source, plugins = [rtcPlugin()]) {
-  const session = await createSession({plugins});
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  const session = await createSession({ plugins });
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('RTC local peer/channel workflow exposes defaults and explicit legacy no-ops', async () => {
-  assert.deepEqual(await evaluate(`(async () => {
+  assert.deepEqual(
+    await evaluate(`(async () => {
     const p = new RTCPeerConnection(), c = p.createDataChannel('workload');
     const defaults = [p.connectionState,p.iceConnectionState,p.iceGatheringState,p.signalingState,
       p.canTrickleIceCandidates,p.currentLocalDescription,p.currentRemoteDescription,p.localDescription,
@@ -27,12 +31,52 @@ test('RTC local peer/channel workflow exposes defaults and explicit legacy no-op
       p.connectionState,c.readyState,c.binaryType,c.bufferedAmountLowThreshold,
       ['addStream','createDTMFSender','getLocalStreams','getRemoteStreams','onaddstream','onremovestream','removeStream'].every(n=>!(n in p)),
       !('reliable' in c)&&!('maxRetransmitTime' in c),p instanceof EventTarget,c instanceof EventTarget];
-  })()`), [['new','new','new','stable',null,null,null,null,null,null,null,null,
-    'workload','arraybuffer',0,0,null,null,false,true,'','connecting'],true,false,true,true,{iceServers:[]},'new','connecting','blob',32,true,true,true,true]);
+  })()`),
+    [
+      [
+        'new',
+        'new',
+        'new',
+        'stable',
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        'workload',
+        'arraybuffer',
+        0,
+        0,
+        null,
+        null,
+        false,
+        true,
+        '',
+        'connecting',
+      ],
+      true,
+      false,
+      true,
+      true,
+      { iceServers: [] },
+      'new',
+      'connecting',
+      'blob',
+      32,
+      true,
+      true,
+      true,
+      true,
+    ],
+  );
 });
 
 test('RTC payload serialization and manual event dispatch work without a transport', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const candidate = new RTCIceCandidate({candidate:'opaque candidate',sdpMid:'audio',sdpMLineIndex:0,usernameFragment:'user'});
     const description = new RTCSessionDescription({type:'offer',sdp:'opaque SDP'});
     description.type = 'answer';
@@ -46,12 +90,34 @@ test('RTC payload serialization and manual event dispatch work without a transpo
       ['address','component','foundation','port','priority','protocol','relatedAddress','relatedPort','tcpType','type'].every(n=>candidate[n]===null),
       ['maxChannels','maxMessageSize','state','transport'].every(n=>typeof Object.getOwnPropertyDescriptor(RTCSctpTransport.prototype,n).get==='function'),
       Object.prototype.toString.call(c)];
-  })()`), [{candidate:'opaque candidate',sdpMid:'audio',sdpMLineIndex:0,usernameFragment:'user'},
-    {type:'answer',sdp:'opaque SDP'},2,null,true,true,'[object RTCDataChannel]']);
+  })()`),
+    [
+      {
+        candidate: 'opaque candidate',
+        sdpMid: 'audio',
+        sdpMLineIndex: 0,
+        usernameFragment: 'user',
+      },
+      { type: 'answer', sdp: 'opaque SDP' },
+      2,
+      null,
+      true,
+      true,
+      '[object RTCDataChannel]',
+    ],
+  );
 });
 
 test('RTC is separately opt-in and exposes only constructible entry points', async () => {
-  assert.deepEqual(await evaluate('[typeof RTCPeerConnection,typeof RTCIceCandidate,typeof RTCDataChannel]', []),Array(3).fill('undefined'));
-  assert.deepEqual(await evaluate(`[RTCDataChannel,RTCSctpTransport].map(C=>{try{new C();return false;}catch(e){return e instanceof TypeError;}})`),[true,true]);
-  assert.equal(pluginCatalog().rtc.installers.node,'rtcPlugin');
+  assert.deepEqual(
+    await evaluate('[typeof RTCPeerConnection,typeof RTCIceCandidate,typeof RTCDataChannel]', []),
+    Array(3).fill('undefined'),
+  );
+  assert.deepEqual(
+    await evaluate(
+      `[RTCDataChannel,RTCSctpTransport].map(C=>{try{new C();return false;}catch(e){return e instanceof TypeError;}})`,
+    ),
+    [true, true],
+  );
+  assert.equal(pluginCatalog().rtc.installers.node, 'rtcPlugin');
 });

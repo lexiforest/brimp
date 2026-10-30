@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('input default modes reflect attributes and distinguish missing from empty values', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[];
     for(const type of ['hidden','submit','image','reset','button','checkbox','radio']) {
       const i=document.createElement('input');i.type=type;
@@ -24,11 +28,14 @@ test('input default modes reflect attributes and distinguish missing from empty 
       i.value=undefined;if(i.value!=='undefined')failures.push([type,'undefined']);
       try{i.value=Symbol();failures.push([type,'symbol']);}catch(e){if(e.name!=='TypeError')failures.push([type,e.name]);}
     }return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('text input sanitization follows Safari whitespace, conversion and dirty-value rules', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[];
     for(const type of ['text','search','tel','password','email','url','month','week','unknown']) {
       const i=document.createElement('input');i.type=type;
@@ -46,11 +53,14 @@ test('text input sanitization follows Safari whitespace, conversion and dirty-va
     if(i.value!=='a@b,c@d')failures.push(['multiple mutation',i.value]);
     i.value='\u00a0a@b\u00a0';if(i.value!=='\u00a0a@b\u00a0')failures.push('non-ASCII whitespace');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('value-mode transitions preserve Safari dirty state across all attribute entry points', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[],defaults=['hidden','checkbox','radio','button','submit','reset','image'];
     const setters=[(i,t)=>i.type=t,(i,t)=>i.setAttribute('TYPE',t),(i,t)=>i.setAttributeNS(null,'type',t),
       (i,t)=>{const a=document.createAttribute('type');a.value=t;i.setAttributeNode(a);},
@@ -80,11 +90,14 @@ test('value-mode transitions preserve Safari dirty state across all attribute en
     for(const type of defaults){const i=document.createElement('input');i.value='';i.type=type;
       if(i.hasAttribute('value'))failures.push([type,'empty attribute']);}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('file value clearing and type changes retain text state but discard selected files', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[],i=document.createElement('input');i.value='edited';i.type='file';
     const transfer=new DataTransfer();transfer.items.add(new File(['data'],'sample.txt'));i.files=transfer.files;
     if(i.value!=='C:\\fakepath\\sample.txt')failures.push(['filename',i.value]);
@@ -95,11 +108,14 @@ test('file value clearing and type changes retain text state but discard selecte
     i.files=transfer.files;i.type='text';if(i.value!=='edited'||i.files!==null)failures.push('text restoration');
     i.type='file';if(i.files.length)failures.push('files restoration');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('input value operations use canonical attributes and form reset clears dirty state', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const failures=[],form=document.createElement('form');form.innerHTML='<input value="original">';
     const i=form.firstChild;i.value='edited';form.reset();i.defaultValue='reset';if(i.value!=='reset')failures.push('reset');
     i.setAttributeNS('urn:test','type','checkbox');i.value='dirty';if(i.getAttribute('value')!=='reset')failures.push('foreign type');
@@ -107,11 +123,14 @@ test('input value operations use canonical attributes and form reset clears dirt
     i.getAttribute=i.setAttribute=i.removeAttribute=()=>{throw Error('public override');};
     i.value=' a\nb ';if(i.value!==' ab ')failures.push('override');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
 test('defaultValue is a canonical DOMString reflection with Safari descriptors and mutation records', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const i=document.createElement('input'),failures=[];
     const observer=new MutationObserver(()=>{});observer.observe(i,{attributes:true,attributeOldValue:true});
     i.defaultValue=null;i.defaultValue=undefined;i.defaultValue='';
@@ -126,5 +145,7 @@ test('defaultValue is a canonical DOMString reflection with Safari descriptors a
       if(!d.enumerable||!d.configurable||d.get.name!=='get '+name||d.set.name!=='set '+name)failures.push([name,'descriptor']);
       for(const fn of [d.get,d.set]){try{fn.call({},'x');failures.push([name,'brand']);}catch(e){if(e.name!=='TypeError')failures.push([name,e.name]);}}}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

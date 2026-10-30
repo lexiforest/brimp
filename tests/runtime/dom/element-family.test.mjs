@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../bindings/node/index.js';
+import { createSession } from '../../../bindings/node/index.js';
 
 async function evaluate(source, plugins = []) {
-  const session = await createSession({plugins});
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  const session = await createSession({ plugins });
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('Element attribute, fragment and collection workflows retain canonical DOM state', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const el=document.createElement('section');document.body.append(el);
     el.id='root';el.className='first';el.classList.add('second');el.dataset.task='value';
     el.setAttribute('data-a','a');el.setAttributeNS('urn:test','x:value','namespaced');
@@ -26,12 +30,32 @@ test('Element attribute, fragment and collection workflows retain canonical DOM 
     const toggle=[el.toggleAttribute('hidden'),el.toggleAttribute('hidden')];
     el.replaceChildren('middle');el.prepend('before');el.append('after');
     return [attrs,children,toggle,el.textContent,attribute.ownerElement,live.length];
-  })()`),[[true,'local',true,'namespaced',true,'namespaced',true,true,true],
-    [2,1,1,'section','http://www.w3.org/1999/xhtml',null,'SECTION','root','first second','value'],[true,false],'beforemiddleafter',null,0]);
+  })()`),
+    [
+      [true, 'local', true, 'namespaced', true, 'namespaced', true, true, true],
+      [
+        2,
+        1,
+        1,
+        'section',
+        'http://www.w3.org/1999/xhtml',
+        null,
+        'SECTION',
+        'root',
+        'first second',
+        'value',
+      ],
+      [true, false],
+      'beforemiddleafter',
+      null,
+      0,
+    ],
+  );
 });
 
 test('HTML editability, nonce, text replacement and focus/click state remain local DOM behavior', async () => {
-  assert.deepEqual(await evaluate(String.raw`(() => {
+  assert.deepEqual(
+    await evaluate(String.raw`(() => {
     const parent=document.createElement('div'),el=document.createElement('span');parent.append(el);document.body.append(parent);
     const edit=[el.isContentEditable];parent.contentEditable='true';edit.push(el.isContentEditable);
     el.contentEditable='false';edit.push(el.isContentEditable);el.contentEditable='inherit';edit.push(el.isContentEditable);
@@ -41,11 +65,14 @@ test('HTML editability, nonce, text replacement and focus/click state remain loc
     button.focus();const focused=document.activeElement===button;button.click();button.blur();
     return [edit,clone.nonce,clone.getAttribute('nonce'),read,parent.innerHTML.startsWith('first<br>second'),el.parentNode,
       focused,clicks,document.activeElement!==button];
-  })()`),[[false,true,false,true,true],'token','token','before',true,null,true,1,true]);
+  })()`),
+    [[false, true, false, true, true], 'token', 'token', 'before', true, null, true, 1, true],
+  );
 });
 
 test('SVG namespace relationships and reflection work while geometry remains explicit placeholders', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),group=document.createElementNS(ns,'g'),
       rect=document.createElementNS(ns,'rect'),title=document.createElementNS(ns,'title');
     svg.append(group);group.append(rect,title);document.body.append(svg);
@@ -61,12 +88,41 @@ test('SVG namespace relationships and reflection work while geometry remains exp
       [rect.getCTM().a,rect.getCTM().b,rect.getCTM().c,rect.getCTM().d,rect.getCTM().e,rect.getCTM().f],
       Object.prototype.toString.call(rect.getScreenCTM()),
       !('nearestViewportElement' in rect),!('farthestViewportElement' in rect)];
-  })()`),[true,true,true,true,true,true,true,null,true,'shape selected','shape selected','[object SVGAnimatedString]',
-    true,3,'svg-token','rect','red','','','','[object DOMRect]',[0,0],[1,0,0,1,0,0],'[object DOMMatrix]',true,true]);
+  })()`),
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      'shape selected',
+      'shape selected',
+      '[object SVGAnimatedString]',
+      true,
+      3,
+      'svg-token',
+      'rect',
+      'red',
+      '',
+      '',
+      '',
+      '[object DOMRect]',
+      [0, 0],
+      [1, 0, 0, 1, 0, 0],
+      '[object DOMMatrix]',
+      true,
+      true,
+    ],
+  );
 });
 
 test('SVG element classes follow the shape hierarchy and expose non-rendering geometry', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg'),rect=document.createElementNS(ns,'rect'),
       group=document.createElementNS(ns,'g'),path=document.createElementNS(ns,'path'),text=document.createElementNS(ns,'text');
     svg.append(group,rect,path,text);
@@ -81,16 +137,41 @@ test('SVG element classes follow the shape hierarchy and expose non-rendering ge
       [rect.getBBox().x,rect.getBBox().y,rect.getBBox().width,rect.getBBox().height],
       rect.isPointInFill(point),rect.isPointInStroke(point),rect.getTotalLength(),
       Object.prototype.toString.call(path.getPointAtLength(3)),Object.prototype.toString.call(svg.createSVGRect())];
-  })()`),[true,true,true,false,false,false,true,[5,6,0,1],'[object SVGPoint]',[15,26],'[object DOMMatrix]',
-    [0,0,0,0],false,false,0,'[object SVGPoint]','[object DOMRect]']);
+  })()`),
+    [
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      [5, 6, 0, 1],
+      '[object SVGPoint]',
+      [15, 26],
+      '[object DOMMatrix]',
+      [0, 0, 0, 0],
+      false,
+      false,
+      0,
+      '[object SVGPoint]',
+      '[object DOMRect]',
+    ],
+  );
 });
 
 test('Element geometry and computed-style placeholders do not alter styles or emit scroll events', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(
+      `(() => {
     const el=document.createElement('div');el.style.width='100px';document.body.append(el);let events=0;el.onscroll=()=>events++;
     el.scrollTop=12;el.scrollLeft=7;
     const map=el.attributeStyleMap;map.set('height',CSS.px(5));
     return [['clientHeight','clientWidth','clientTop','clientLeft','scrollHeight','scrollWidth'].map(n=>el[n]),
       el.scrollTop,el.scrollLeft,events,el.computedStyleMap()===undefined,el.style.width,map===el.attributeStyleMap,el.style.height];
-  })()`,[]),[[0,0,0,0,0,0],12,7,0,true,'100px',true,'5px']);
+  })()`,
+      [],
+    ),
+    [[0, 0, 0, 0, 0, 0], 12, 7, 0, true, '100px', true, '5px'],
+  );
 });

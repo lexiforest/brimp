@@ -13,134 +13,161 @@
  * edits it and never treats surface presence as behavioral evidence.
  */
 import fs from 'node:fs';
-import {createRequire} from 'node:module';
-import {fileURLToPath} from 'node:url';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(new URL('../../docs/package.json', import.meta.url));
 const YAML = require('yaml');
 const args = process.argv.slice(2);
-const flag = name => args.includes(name);
-const value = name => {
-    const index = args.indexOf(name);
-    return index < 0 ? undefined : args[index + 1];
+const flag = (name) => args.includes(name);
+const value = (name) => {
+  const index = args.indexOf(name);
+  return index < 0 ? undefined : args[index + 1];
 };
-const known = new Set(['--write', '--check', '--json', '--not-planned', '--placeholders', '--family']);
+const known = new Set([
+  '--write',
+  '--check',
+  '--json',
+  '--not-planned',
+  '--placeholders',
+  '--family',
+]);
 for (let index = 0; index < args.length; index++) {
-    if (!known.has(args[index])) throw Error(`unknown argument: ${args[index]}`);
-    if (args[index] === '--family') index++;
+  if (!known.has(args[index])) throw Error(`unknown argument: ${args[index]}`);
+  if (args[index] === '--family') index++;
 }
 
 const coverage = YAML.parse(fs.readFileSync(`${root}COVERAGE.yaml`, 'utf8'));
 const fields = coverage.fields;
 
 function family(source) {
-    if (!source) return '(none)';
-    const parts = source.replace(/^node-env\//, '').split(':')[0].split('/');
-    return parts.length > 1 && !parts[1].includes('.') ? `${parts[0]}/${parts[1]}` : parts[0];
+  if (!source) return '(none)';
+  const parts = source
+    .replace(/^node-env\//, '')
+    .split(':')[0]
+    .split('/');
+  return parts.length > 1 && !parts[1].includes('.') ? `${parts[0]}/${parts[1]}` : parts[0];
 }
 
 const placeholder = /placeholder|no-op|no op|ignored-result|legacy/i;
 const groups = new Map();
 for (const [id, field] of Object.entries(fields)) {
-    const name = family(field.legacy?.sources?.[0]);
-    const record = groups.get(name) ?? {
-        family: name, fields: 0, done: 0, notPlanned: 0, other: 0,
-        placeholders: [], notPlannedFields: [],
-    };
-    record.fields++;
-    const status = field.progress?.status ?? '(none)';
-    if (status === 'done') record.done++;
-    else if (status === 'not_planned') record.notPlanned++;
-    else record.other++;
-    if (status === 'done' && placeholder.test(field.progress?.contract ?? '')) record.placeholders.push(id);
-    if (status === 'not_planned') record.notPlannedFields.push(id);
-    groups.set(name, record);
+  const name = family(field.legacy?.sources?.[0]);
+  const record = groups.get(name) ?? {
+    family: name,
+    fields: 0,
+    done: 0,
+    notPlanned: 0,
+    other: 0,
+    placeholders: [],
+    notPlannedFields: [],
+  };
+  record.fields++;
+  const status = field.progress?.status ?? '(none)';
+  if (status === 'done') record.done++;
+  else if (status === 'not_planned') record.notPlanned++;
+  else record.other++;
+  if (status === 'done' && placeholder.test(field.progress?.contract ?? ''))
+    record.placeholders.push(id);
+  if (status === 'not_planned') record.notPlannedFields.push(id);
+  groups.set(name, record);
 }
-const records = [...groups.values()].sort((a, b) => b.fields - a.fields || a.family.localeCompare(b.family));
+const records = [...groups.values()].sort(
+  (a, b) => b.fields - a.fields || a.family.localeCompare(b.family),
+);
 const total = {
-    fields: records.reduce((sum, record) => sum + record.fields, 0),
-    done: records.reduce((sum, record) => sum + record.done, 0),
-    notPlanned: records.reduce((sum, record) => sum + record.notPlanned, 0),
-    other: records.reduce((sum, record) => sum + record.other, 0),
-    placeholders: records.reduce((sum, record) => sum + record.placeholders.length, 0),
+  fields: records.reduce((sum, record) => sum + record.fields, 0),
+  done: records.reduce((sum, record) => sum + record.done, 0),
+  notPlanned: records.reduce((sum, record) => sum + record.notPlanned, 0),
+  other: records.reduce((sum, record) => sum + record.other, 0),
+  placeholders: records.reduce((sum, record) => sum + record.placeholders.length, 0),
 };
 
 if (flag('--json')) {
-    console.log(JSON.stringify({total, families: records}, null, 2));
-    process.exit(0);
+  console.log(JSON.stringify({ total, families: records }, null, 2));
+  process.exit(0);
 }
 
 if (flag('--not-planned')) {
-    for (const record of records.filter(record => record.notPlannedFields.length)) {
-        console.log(`\n## ${record.family} (${record.notPlannedFields.length})\n`);
-        console.log(record.notPlannedFields.join(', '));
-    }
-    process.exit(0);
+  for (const record of records.filter((record) => record.notPlannedFields.length)) {
+    console.log(`\n## ${record.family} (${record.notPlannedFields.length})\n`);
+    console.log(record.notPlannedFields.join(', '));
+  }
+  process.exit(0);
 }
 
 if (flag('--placeholders')) {
-    const wanted = value('--family');
-    for (const record of records) {
-        if (wanted && record.family !== wanted) continue;
-        if (!record.placeholders.length) continue;
-        console.log(`\n## ${record.family} (${record.placeholders.length})\n`);
-        console.log(record.placeholders.join(', '));
-    }
-    process.exit(0);
+  const wanted = value('--family');
+  for (const record of records) {
+    if (wanted && record.family !== wanted) continue;
+    if (!record.placeholders.length) continue;
+    console.log(`\n## ${record.family} (${record.placeholders.length})\n`);
+    console.log(record.placeholders.join(', '));
+  }
+  process.exit(0);
 }
 
 function render() {
-    const lines = [
-        '# Generated environment parity inventory',
-        '',
-        '<!-- Generated by scripts/coverage/env-parity.mjs from COVERAGE.yaml. Do not edit. -->',
-        '',
-        `Fields: ${total.fields}; done: ${total.done}; not planned: ${total.notPlanned}; other: ${total.other}.`,
-        `Done fields whose contract is an explicit placeholder/no-op/legacy value: ${total.placeholders}.`,
-        '',
-        'This inventory proves field presence and recorded contracts only. It does not',
-        'prove browser-like values or behavior; those contracts live in ENV-PARITY.md.',
-        '',
-        '## Families',
-        '',
-        '| Family | Fields | Done | Not planned | Other | Placeholder contracts |',
-        '| --- | ---: | ---: | ---: | ---: | ---: |',
-        ...records.map(record => `| \`${record.family}\` | ${record.fields} | ${record.done} | ${record.notPlanned} | ${record.other} | ${record.placeholders.length} |`),
-        '',
-        'Drill down:',
-        '',
-        '```sh',
-        'node scripts/coverage/env-parity.mjs --placeholders --family BOM',
-        'node scripts/coverage/env-parity.mjs --not-planned',
-        '```',
-        '',
-        '## Not-planned fields',
-        '',
-        'These fields have an explicit decision not to implement the legacy surface.',
-        'A profile or product change must update the decision in COVERAGE.yaml first.',
-        '',
-    ];
-    for (const record of records.filter(record => record.notPlannedFields.length)) {
-        lines.push(`### ${record.family} (${record.notPlannedFields.length})`, '');
-        lines.push(record.notPlannedFields.join(', '), '');
-    }
-    return lines.join('\n');
+  const lines = [
+    '# Generated environment parity inventory',
+    '',
+    '<!-- Generated by scripts/coverage/env-parity.mjs from COVERAGE.yaml. Do not edit. -->',
+    '',
+    `Fields: ${total.fields}; done: ${total.done}; not planned: ${total.notPlanned}; other: ${total.other}.`,
+    `Done fields whose contract is an explicit placeholder/no-op/legacy value: ${total.placeholders}.`,
+    '',
+    'This inventory proves field presence and recorded contracts only. It does not',
+    'prove browser-like values or behavior; those contracts live in ENV-PARITY.md.',
+    '',
+    '## Families',
+    '',
+    '| Family | Fields | Done | Not planned | Other | Placeholder contracts |',
+    '| --- | ---: | ---: | ---: | ---: | ---: |',
+    ...records.map(
+      (record) =>
+        `| \`${record.family}\` | ${record.fields} | ${record.done} | ${record.notPlanned} | ${record.other} | ${record.placeholders.length} |`,
+    ),
+    '',
+    'Drill down:',
+    '',
+    '```sh',
+    'node scripts/coverage/env-parity.mjs --placeholders --family BOM',
+    'node scripts/coverage/env-parity.mjs --not-planned',
+    '```',
+    '',
+    '## Not-planned fields',
+    '',
+    'These fields have an explicit decision not to implement the legacy surface.',
+    'A profile or product change must update the decision in COVERAGE.yaml first.',
+    '',
+  ];
+  for (const record of records.filter((record) => record.notPlannedFields.length)) {
+    lines.push(`### ${record.family} (${record.notPlannedFields.length})`, '');
+    lines.push(record.notPlannedFields.join(', '), '');
+  }
+  return lines.join('\n');
 }
 
 if (flag('--write')) {
-    fs.writeFileSync(`${root}ENV-PARITY.generated.md`, render());
-    console.log('wrote ENV-PARITY.generated.md');
+  fs.writeFileSync(`${root}ENV-PARITY.generated.md`, render());
+  console.log('wrote ENV-PARITY.generated.md');
 } else if (flag('--check')) {
-    const path = `${root}ENV-PARITY.generated.md`;
-    const current = fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : '';
-    if (current !== render()) {
-        console.error('ENV-PARITY.generated.md is stale; run node scripts/coverage/env-parity.mjs --write');
-        process.exit(1);
-    }
+  const path = `${root}ENV-PARITY.generated.md`;
+  const current = fs.existsSync(path) ? fs.readFileSync(path, 'utf8') : '';
+  if (current !== render()) {
+    console.error(
+      'ENV-PARITY.generated.md is stale; run node scripts/coverage/env-parity.mjs --write',
+    );
+    process.exit(1);
+  }
 } else {
-    console.log(`Families: ${records.length}; fields: ${total.fields}; done: ${total.done}; not planned: ${total.notPlanned}; placeholder contracts: ${total.placeholders}`);
-    for (const record of records) {
-        console.log(`${String(record.fields).padStart(5)}  ${String(record.done).padStart(5)}  ${String(record.notPlanned).padStart(4)}  ${String(record.placeholders.length).padStart(4)}  ${record.family}`);
-    }
+  console.log(
+    `Families: ${records.length}; fields: ${total.fields}; done: ${total.done}; not planned: ${total.notPlanned}; placeholder contracts: ${total.placeholders}`,
+  );
+  for (const record of records) {
+    console.log(
+      `${String(record.fields).padStart(5)}  ${String(record.done).padStart(5)}  ${String(record.notPlanned).padStart(4)}  ${String(record.placeholders.length).padStart(4)}  ${record.family}`,
+    );
+  }
 }

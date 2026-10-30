@@ -1,19 +1,35 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {bodyWindowEventTypes,measureBodyHandlers} from '../../../scripts/coverage/body-handler-cases.mjs';
-const forwardingTypes=[...bodyWindowEventTypes,'error','beforeunload'];
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  bodyWindowEventTypes,
+  measureBodyHandlers,
+} from '../../../scripts/coverage/body-handler-cases.mjs';
+const forwardingTypes = [...bodyWindowEventTypes, 'error', 'beforeunload'];
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('body and frameset handlers match Safari forwarding, conversion, descriptors and dispatch',async()=>{
-  const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/body-handlers.safari.json',import.meta.url)));
-  assert.deepEqual(ref.types,bodyWindowEventTypes);
-  assert.deepEqual(await evaluate(`(${measureBodyHandlers})(${JSON.stringify(bodyWindowEventTypes)})`),ref.cases);
+test('body and frameset handlers match Safari forwarding, conversion, descriptors and dispatch', async () => {
+  const ref = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/body-handlers.safari.json', import.meta.url)),
+  );
+  assert.deepEqual(ref.types, bodyWindowEventTypes);
+  assert.deepEqual(
+    await evaluate(`(${measureBodyHandlers})(${JSON.stringify(bodyWindowEventTypes)})`),
+    ref.cases,
+  );
 });
 
-test('forwarded handlers follow owner-document windows across detachment, adoption and cloning',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('forwarded handlers follow owner-document windows across detachment, adoption and cloning', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
     for(const tag of ['body','frameset'])for(const type of ${JSON.stringify(forwardingTypes)}){
       const property='on'+type,prior=window[property],e=document.createElement(tag),inert=document.implementation.createHTMLDocument();
@@ -36,11 +52,14 @@ test('forwarded handlers follow owner-document windows across detachment, adopti
       }finally{window[property]=prior;}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('forwarded handlers retain window listener order and obey cancellation and propagation',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('forwarded handlers retain window listener order and obey cancellation and propagation', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
     for(const tag of ['body','frameset']){
       const e=document.createElement(tag),log=[],first=()=>log.push('first'),last=()=>log.push('last'),prior=window.onafterprint;
@@ -52,11 +71,14 @@ test('forwarded handlers retain window listener order and obey cancellation and 
       window.removeEventListener('afterprint',first);window.removeEventListener('afterprint',last);window.onafterprint=prior;
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('forwarded handlers use the owning iframe window and change targets on adoption',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('forwarded handlers use the owning iframe window and change targets on adoption', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],frame=document.createElement('iframe');document.body.append(frame);
     const child=frame.contentWindow;
     try{
@@ -75,11 +97,14 @@ test('forwarded handlers use the owning iframe window and change targets on adop
       }
     }finally{frame.remove();}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('forwarding uses canonical targets and checks body/frameset receiver brands',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('forwarding uses canonical targets and checks body/frameset receiver brands', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[];
     for(const tag of ['body','frameset'])for(const type of ${JSON.stringify(forwardingTypes)}){
       const property='on'+type,e=document.createElement(tag),d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),property);
@@ -100,5 +125,7 @@ test('forwarding uses canonical targets and checks body/frameset receiver brands
       }
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

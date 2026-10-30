@@ -1,15 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createSession} from '../../../scripts/coverage/session.mjs';
+import { createSession } from '../../../scripts/coverage/session.mjs';
 
 async function evaluate(source) {
   const session = await createSession();
-  try { return await (await session.newPage()).evaluate(source); }
-  finally { await session.close(); }
+  try {
+    return await (await session.newPage()).evaluate(source);
+  } finally {
+    await session.close();
+  }
 }
 
 test('parsed doctypes expose canonical names and identifiers through stable DocumentType nodes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const cases=[
       ['',null], ['<div>x</div>',null], ['<!--x--><!DoCtYpE HTML>', ['html','','']],
       ['<!doctype potato>', ['potato','','']], ['<!doctype>', ['','','']],
@@ -32,11 +36,14 @@ test('parsed doctypes expose canonical names and identifiers through stable Docu
       if(clone===t || clone.parentNode!==null || clone.ownerDocument!==d || !(clone instanceof DocumentType) || JSON.stringify([clone.name,clone.publicId,clone.systemId])!==JSON.stringify(expected))failures.push([html,'clone']);
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('document doctype stays live across removal, replacement, adoption and import', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const a=new DOMParser().parseFromString('<!doctype html PUBLIC "A" "B">','text/html');
     const b=new DOMParser().parseFromString('<!doctype other>','text/html');
     const t=a.doctype, failures=[];
@@ -60,11 +67,14 @@ test('document doctype stays live across removal, replacement, adoption and impo
       try{mutate();failures.push('missing hierarchy rejection');}catch(e){if(e.name!=='HierarchyRequestError')failures.push(e.name);}
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('DocumentType shape and readonly document metadata match Safari', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     try{new DocumentType();failures.push('constructor');}catch(e){if(e.name!=='TypeError')failures.push(e.name);}
     for(const [C,names] of [[Document,['doctype','compatMode']],[DocumentType,['name','publicId','systemId']]]) {
@@ -81,11 +91,14 @@ test('DocumentType shape and readonly document metadata match Safari', async () 
       if(!d.enumerable || !d.writable || !d.configurable || d.value.name!==name || d.value.length!==0 || u[name]!==true)failures.push([name,'method']);
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('full HTML document parsing selects and retains quirks, limited-quirks and standards modes', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const cases=[
       ['<html><body>x</body></html>','BackCompat'],
       ['<!--x--><html><body>x</body></html>','BackCompat'],
@@ -104,11 +117,14 @@ test('full HTML document parsing selects and retains quirks, limited-quirks and 
       if(d.compatMode!==mode)failures.push([html,'changed after mutation']);
     }
     return failures;
-  })()`), []);
+  })()`),
+    [],
+  );
 });
 
 test('document.write resets parser mode and exposes the replacement doctype', async () => {
-  assert.deepEqual(await evaluate(`(() => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const d=document.implementation.createHTMLDocument(),failure=[];
     const inputs=[['<p>quirks</p>','BackCompat',null],['<!doctype html><p>standards</p>','CSS1Compat','html'],['<!doctype potato><p>quirks</p>','BackCompat','potato'],['<!--x--><!doctype html><p>standards</p>','CSS1Compat','html']];
     for(const [html,mode,name] of inputs) {
@@ -118,5 +134,7 @@ test('document.write resets parser mode and exposes the replacement doctype', as
       if(d.compatMode!==mode || (d.doctype?.name??null)!==name || (previous&&previous.parentNode!==null))failure.push([html,d.compatMode,d.doctype?.name]);
     }
     return failure;
-  })()`), []);
+  })()`),
+    [],
+  );
 });

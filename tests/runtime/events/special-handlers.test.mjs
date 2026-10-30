@@ -1,25 +1,51 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {isDeepStrictEqual} from 'node:util';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {specialHandlerCases,measureSpecialHandlers} from '../../../scripts/coverage/special-handler-cases.mjs';
-import {measureBodyHandlers} from '../../../scripts/coverage/body-handler-cases.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
-const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/special-handlers.safari.json',import.meta.url)));
+import { isDeepStrictEqual } from 'node:util';
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  specialHandlerCases,
+  measureSpecialHandlers,
+} from '../../../scripts/coverage/special-handler-cases.mjs';
+import { measureBodyHandlers } from '../../../scripts/coverage/body-handler-cases.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
+const reference = JSON.parse(
+  fs.readFileSync(new URL('../fixtures/special-handlers.safari.json', import.meta.url)),
+);
 
-test('error and beforeunload callbacks match Safari arguments, return conversion and cancellation',async()=>{
-  assert.deepEqual(reference.cases.map(({expected,...c})=>c),specialHandlerCases);
-  const actual=await evaluate(`(${measureSpecialHandlers})(${JSON.stringify(specialHandlerCases)})`);
-  assert.deepEqual(reference.cases.flatMap((c,i)=>isDeepStrictEqual(c.expected,actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test('error and beforeunload callbacks match Safari arguments, return conversion and cancellation', async () => {
+  assert.deepEqual(
+    reference.cases.map(({ expected, ...c }) => c),
+    specialHandlerCases,
+  );
+  const actual = await evaluate(
+    `(${measureSpecialHandlers})(${JSON.stringify(specialHandlerCases)})`,
+  );
+  assert.deepEqual(
+    reference.cases.flatMap((c, i) =>
+      isDeepStrictEqual(c.expected, actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test('special body/frameset handlers use Safari descriptors and shared window registration',async()=>{
-  assert.deepEqual(await evaluate(`(${measureBodyHandlers})(['error','beforeunload'])`),reference.forwarding);
+test('special body/frameset handlers use Safari descriptors and shared window registration', async () => {
+  assert.deepEqual(
+    await evaluate(`(${measureBodyHandlers})(['error','beforeunload'])`),
+    reference.forwarding,
+  );
 });
 
-test('ErrorEvent payloads are readonly, branded, canonical and converted in Web IDL order',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('ErrorEvent payloads are readonly, branded, canonical and converted in Web IDL order', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],order=[],value={};
     const options={};for(const name of ['bubbles','cancelable','colno','composed','error','filename','lineno','message'])Object.defineProperty(options,name,{get(){order.push(name);return ({bubbles:true,cancelable:true,colno:-1,composed:true,error:value,filename:'file',lineno:4294967297,message:'text'})[name]}});
     const event=new ErrorEvent({toString(){order.push('type');return 'error'}},options);
@@ -41,11 +67,14 @@ test('ErrorEvent payloads are readonly, branded, canonical and converted in Web 
     if(defaults.message!==''||defaults.filename!==''||defaults.lineno!==0||defaults.colno!==0||defaults.error!==undefined)failures.push('defaults');
     for(const create of [()=>new ErrorEvent(),()=>new ErrorEvent(Symbol()),()=>new ErrorEvent('error',1),()=>new ErrorEvent('error',{lineno:1n}),()=>new ErrorEvent('error',{message:Symbol()})])try{create();failures.push('conversion accepted')}catch(e){if(e.name!=='TypeError')failures.push(e.name)}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('BeforeUnloadEvent returnValue persists across initialization and uses canonical state in handlers',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('BeforeUnloadEvent returnValue persists across initialization and uses canonical state in handlers', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],event=document.createEvent('BeforeUnloadEvent'),d=Object.getOwnPropertyDescriptor(BeforeUnloadEvent.prototype,'returnValue');
     if(!(event instanceof Event)||!(event instanceof BeforeUnloadEvent)||event.type!==''||event.returnValue!==''||event.cancelable)failures.push('creation');
     try{window.dispatchEvent(event);failures.push('uninitialized dispatch')}catch(e){if(e.name!=='InvalidStateError')failures.push(e.name)}
@@ -67,11 +96,14 @@ test('BeforeUnloadEvent returnValue persists across initialization and uses cano
       if(d.get.call(event)!=='preset'||!event.defaultPrevented)failures.push('preserve existing value');
     }finally{window.onbeforeunload=prior}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('special callbacks preserve Safari strict this binding and bypass public cancellation methods',async()=>{
-  assert.deepEqual(await evaluate(`(()=>{
+test('special callbacks preserve Safari strict this binding and bypass public cancellation methods', async () => {
+  assert.deepEqual(
+    await evaluate(`(()=>{
     const failures=[],frame=document.createElement('iframe');document.body.append(frame);
     const priorError=window.onerror,priorUnload=window.onbeforeunload;
     try{
@@ -90,5 +122,7 @@ test('special callbacks preserve Safari strict this binding and bypass public ca
       if(args?.length!==5||args[0]!=='bubble'||!bubbling.defaultPrevented)failures.push('bubbling error');
     }finally{frame.remove();window.onerror=priorError;window.onbeforeunload=priorUnload;}
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

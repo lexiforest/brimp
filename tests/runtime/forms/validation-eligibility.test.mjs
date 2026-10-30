@@ -1,33 +1,71 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {createSession} from '../../../scripts/coverage/session.mjs';
-import {validationEligibilityCases as cases,measureValidationEligibility as measure} from '../../../scripts/coverage/validation-eligibility-cases.mjs';
-import {validationEligibilityMutationCases,measureValidationEligibilityMutations} from '../../../scripts/coverage/validation-eligibility-cases.mjs';
-async function evaluate(source){const s=await createSession();try{return await(await s.newPage()).evaluate(source);}finally{await s.close();}}
+import { createSession } from '../../../scripts/coverage/session.mjs';
+import {
+  validationEligibilityCases as cases,
+  measureValidationEligibility as measure,
+} from '../../../scripts/coverage/validation-eligibility-cases.mjs';
+import {
+  validationEligibilityMutationCases,
+  measureValidationEligibilityMutations,
+} from '../../../scripts/coverage/validation-eligibility-cases.mjs';
+async function evaluate(source) {
+  const s = await createSession();
+  try {
+    return await (await s.newPage()).evaluate(source);
+  } finally {
+    await s.close();
+  }
+}
 
-test('eligibility mutation sequences preserve Safari ancestor-disabled state and clone/adoption behavior',async()=>{
-  const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/validation-eligibility.safari.json',import.meta.url))).mutation_cases;
-  assert.deepEqual(reference.map(({expected,...c})=>c),validationEligibilityMutationCases);
-  const actual=await evaluate(`(${measureValidationEligibilityMutations})(${JSON.stringify(validationEligibilityMutationCases)})`);
-  assert.deepEqual(reference.flatMap((c,i)=>JSON.stringify(c.expected)===JSON.stringify(actual[i])?[]:[{...c,actual:actual[i]}]),[]);
+test('eligibility mutation sequences preserve Safari ancestor-disabled state and clone/adoption behavior', async () => {
+  const reference = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/validation-eligibility.safari.json', import.meta.url)),
+  ).mutation_cases;
+  assert.deepEqual(
+    reference.map(({ expected, ...c }) => c),
+    validationEligibilityMutationCases,
+  );
+  const actual = await evaluate(
+    `(${measureValidationEligibilityMutations})(${JSON.stringify(validationEligibilityMutationCases)})`,
+  );
+  assert.deepEqual(
+    reference.flatMap((c, i) =>
+      JSON.stringify(c.expected) === JSON.stringify(actual[i]) ? [] : [{ ...c, actual: actual[i] }],
+    ),
+    [],
+  );
 });
 
-test(`validation eligibility matches ${cases.length} Safari cases`,async()=>{
-  const reference=JSON.parse(fs.readFileSync(new URL('../fixtures/validation-eligibility.safari.json',import.meta.url))).cases;
-  assert.deepEqual(reference.map(({expected,...c})=>c),cases);
-  const differences=[];
+test(`validation eligibility matches ${cases.length} Safari cases`, async () => {
+  const reference = JSON.parse(
+    fs.readFileSync(new URL('../fixtures/validation-eligibility.safari.json', import.meta.url)),
+  ).cases;
+  assert.deepEqual(
+    reference.map(({ expected, ...c }) => c),
+    cases,
+  );
+  const differences = [];
   // These are independent cases. Fresh realms keep unrelated retained shadow
   // roots from turning a value contract into a cumulative mutation benchmark.
-  for(let start=0;start<cases.length;start+=210){
-    const batch=cases.slice(start,start+210),actual=await evaluate(`(${measure})(${JSON.stringify(batch)})`);
-    for(let i=0;i<batch.length;i++)if(actual[i]!==reference[start+i].expected)differences.push({...batch[i],actual:actual[i],expected:reference[start+i].expected});
+  for (let start = 0; start < cases.length; start += 210) {
+    const batch = cases.slice(start, start + 210),
+      actual = await evaluate(`(${measure})(${JSON.stringify(batch)})`);
+    for (let i = 0; i < batch.length; i++)
+      if (actual[i] !== reference[start + i].expected)
+        differences.push({
+          ...batch[i],
+          actual: actual[i],
+          expected: reference[start + i].expected,
+        });
   }
-  assert.deepEqual(differences,[]);
+  assert.deepEqual(differences, []);
 });
 
-test('willValidate is readonly, branded and independent of public-property overrides',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('willValidate is readonly, branded and independent of public-property overrides', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const [tag,ctor] of [['input',HTMLInputElement],['button',HTMLButtonElement],['select',HTMLSelectElement],
       ['textarea',HTMLTextAreaElement],['fieldset',HTMLFieldSetElement],['output',HTMLOutputElement],['object',HTMLObjectElement]]){
@@ -47,11 +85,14 @@ test('willValidate is readonly, branded and independent of public-property overr
       if(tag==='input'){control.setAttribute('type','image');if(control.willValidate)failures.push('canonical image');}
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('eligibility follows live legends, nearest disabled fieldsets and datalist reparenting',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('eligibility follows live legends, nearest disabled fieldsets and datalist reparenting', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[];
     for(const tag of ['input','button','textarea','select']){
       const outer=document.createElement('fieldset'),inner=document.createElement('fieldset'),legend=document.createElement('legend'),control=document.createElement(tag);
@@ -71,11 +112,14 @@ test('eligibility follows live legends, nearest disabled fieldsets and datalist 
     if(!input.willValidate)failures.push('canonical legend');
     input.setAttributeNS(null,'disabled','');if(input.willValidate)failures.push('canonical own disabled');
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('eligibility is unaffected by invalid values or novalidate, and reads emit no events or mutations',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('eligibility is unaffected by invalid values or novalidate, and reads emit no events or mutations', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),input=document.createElement('input');form.append(input);
     input.required=true;input.setCustomValidity('custom');form.noValidate=true;input.formNoValidate=true;
     if(!input.willValidate)failures.push('constraints do not bar validation');
@@ -89,11 +133,14 @@ test('eligibility is unaffected by invalid values or novalidate, and reads emit 
       if(input.willValidate)failures.push('empty readonly');input.removeAttributeNS(null,'readonly');if(!input.willValidate)failures.push('readonly removed');
     }
     return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });
 
-test('disabled fieldset eligibility agrees with script click and form-data exclusion',async()=>{
-  assert.deepEqual(await evaluate(`(() => {
+test('disabled fieldset eligibility agrees with script click and form-data exclusion', async () => {
+  assert.deepEqual(
+    await evaluate(`(() => {
     const failures=[],form=document.createElement('form'),outer=document.createElement('fieldset'),inner=document.createElement('fieldset'),legend=document.createElement('legend'),input=document.createElement('input');
     input.type='checkbox';input.name='check';input.value='yes';form.append(outer);outer.append(inner);inner.append(legend);legend.append(input);
     document.body.append(form);outer.disabled=inner.disabled=true;
@@ -104,5 +151,7 @@ test('disabled fieldset eligibility agrees with script click and form-data exclu
     Object.defineProperty(outer,'disabled',{value:false});Object.defineProperty(input,'disabled',{value:false});
     input.click();if(!input.checked||input.willValidate||new FormData(form).has('check'))failures.push('canonical disabled');
     form.remove();return failures;
-  })()`),[]);
+  })()`),
+    [],
+  );
 });

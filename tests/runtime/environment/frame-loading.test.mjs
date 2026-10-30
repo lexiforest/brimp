@@ -23,7 +23,10 @@ async function fixtures() {
     if (request.url === '/child-extra.js')
       return send('text/javascript', `parent.postMessage({ hello: 'child external' }, '*');`);
     const target = request.url === '/cross' ? `http://127.0.0.1:${port + 1}/child` : '/child';
-    send('text/html', `<!doctype html><html><body><iframe id="f" src="${target}"></iframe></body></html>`);
+    send(
+      'text/html',
+      `<!doctype html><html><body><iframe id="f" src="${target}"></iframe></body></html>`,
+    );
   });
   const port = await new Promise((resolve) => {
     server.listen(0, '127.0.0.1', () => resolve(server.address().port));
@@ -98,7 +101,8 @@ test('frame load and posted messages dispatch on the visible frame window', asyn
   const session = await createSession();
   try {
     const page = await session.newPage();
-    assert.deepEqual(await page.evaluate(`(async () => {
+    assert.deepEqual(
+      await page.evaluate(`(async () => {
       const frame = document.createElement('iframe');
       document.body.append(frame);
       const child = frame.contentWindow;
@@ -114,7 +118,9 @@ test('frame load and posted messages dispatch on the visible frame window', asyn
       });
       child.postMessage('round trip', '*');
       return [loaded, await received];
-    })()`), [true, ['round trip', true, true]]);
+    })()`),
+      [true, ['round trip', true, true]],
+    );
   } finally {
     await session.close();
   }

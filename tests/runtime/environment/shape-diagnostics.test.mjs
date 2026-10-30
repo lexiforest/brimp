@@ -27,20 +27,16 @@ test('diagnostics expose reflection shape metadata and leak warnings', async () 
     assert.ok(
       report.shapeDifferences.some(
         (difference) =>
-          difference.kind === 'descriptorMismatch' &&
-          difference.property === 'plugins',
+          difference.kind === 'descriptorMismatch' && difference.property === 'plugins',
       ),
     );
     assert.ok(report.coverage.limitations.some((text) => text.includes('reflection')));
     const batch = await page.takeDiagnostics();
-    const toString = batch.records.find(
-      (record) => record.path === 'Function.prototype.toString',
-    );
+    const toString = batch.records.find((record) => record.path === 'Function.prototype.toString');
     assert.equal(typeof toString.details.native, 'boolean');
     const descriptor = batch.records.find(
       (record) =>
-        record.path === 'Object.getOwnPropertyDescriptor' &&
-        record.details.property === 'plugins',
+        record.path === 'Object.getOwnPropertyDescriptor' && record.details.property === 'plugins',
     );
     assert.equal(descriptor.details.target, 'Navigator.prototype');
     assert.equal(descriptor.details.descriptor.hasGet, true);
