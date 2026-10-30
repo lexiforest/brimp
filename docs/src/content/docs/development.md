@@ -118,12 +118,12 @@ for fixtures, reports, and updating expectations.
 
 ## Continuous integration
 
-The Test workflow runs the same **Runtime and bindings** job on macOS arm64,
-Linux x64 and Windows x64. Each downloads the pinned JSC and curl SDKs, builds
+The Test workflow runs the same **Testing** job on macOS arm64,
+Linux x64, Linux arm64 and Windows x64. Each downloads the pinned JSC and curl SDKs, builds
 the CLI and both bindings, runs all workspace tests (including JSC ownership and
 asynchronous WebAssembly), checks the Python/Node APIs, CLI and tutorials, runs
 the runtime environment and browser workloads, and tests installed packages.
-Clippy and the runtime dependency boundary run on all three platforms.
+Clippy and the runtime dependency boundary run on all four targets.
 
 Linux installs the native font and packaging tools. Windows development setup
 copies SDK DLLs beside the Python and Node extensions; use the environment

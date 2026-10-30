@@ -5,17 +5,24 @@ import {createSession} from '../../../scripts/coverage/session.mjs';
 import {anchorURLFields, anchorURLReadCases, anchorURLWriteCases, measureAnchorURLs} from '../../../scripts/coverage/anchor-url-cases.mjs';
 
 for (const [name, cases] of [['reads', anchorURLReadCases], ['writes', anchorURLWriteCases]]) {
-  test(`anchor URL ${name} match ${cases.length} Safari cases`, async () => {
+  test(`anchor URL ${name} match ${cases.length} Safari cases`, async (t) => {
     const ref = JSON.parse(fs.readFileSync(new URL('../fixtures/anchor-urls.safari.json', import.meta.url)))[name];
     assert.deepEqual(ref.map(({expected, ...c}) => c), cases);
     const session = await createSession();
     try {
-      const page = await session.newPage(), differences = [];
+      const differences = [];
       for (let i = 0; i < cases.length; i += 400) {
         const batch = cases.slice(i, i + 400);
-        const actual = JSON.parse(await page.evaluate(`JSON.stringify((${measureAnchorURLs})(${JSON.stringify(batch)},${name === 'writes'}))`));
-        for (let j = 0; j < batch.length; ++j) if (JSON.stringify(actual[j]) !== JSON.stringify(ref[i + j].expected))
-          differences.push({...ref[i + j], actual: actual[j]});
+        await t.test(`cases ${i + 1}-${i + batch.length}`, async () => {
+          // Detached documents and their wrappers live until page teardown.
+          // Independent cases must not accumulate all 4,568 documents in one realm.
+          const page = await session.newPage();
+          try {
+            const actual = JSON.parse(await page.evaluate(`JSON.stringify((${measureAnchorURLs})(${JSON.stringify(batch)},${name === 'writes'}))`));
+            for (let j = 0; j < batch.length; ++j) if (JSON.stringify(actual[j]) !== JSON.stringify(ref[i + j].expected))
+              differences.push({...ref[i + j], actual: actual[j]});
+          } finally { await page.close(); }
+        });
       }
       assert.equal(differences.length, 0, JSON.stringify({total: differences.length, first: differences.slice(0, 12)}, null, 2));
     } finally { await session.close(); }
