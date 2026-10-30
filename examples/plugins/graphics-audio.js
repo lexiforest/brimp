@@ -1,6 +1,6 @@
 // Illustrative deterministic mocks, installed only when explicitly supplied as Plugin source.
 // No shader execution, rendering, rasterization, audio processing, or device access.
-({ global, host }) => {
+function installGraphicsAudio({ global, host }) {
   class MockGraphics {
     constructor(width = 300, height = 150) {
       this.width = width;
@@ -52,4 +52,4 @@
   }
   // Deliberately distinct names: these are illustrative APIs, not browser-complete WebGL/WebGPU/WebAudio.
   Object.assign(global, { MockWebGL: MockGraphics, MockWebGPU: MockGraphics, MockAudioContext });
-};
+}

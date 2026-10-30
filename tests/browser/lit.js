@@ -9,13 +9,9 @@ class CorpusCounter extends LitElement {
     this.count = 0;
   }
   render() {
-    return html`<button
-      @click=${() => {
-        this.count++;
-      }}
-    >
-      Count: ${this.count}
-    </button>`;
+    return html`<button @click=${() => {
+      this.count++;
+    }}>Count: ${this.count}</button>`;
   }
 }
 customElements.define('corpus-counter', CorpusCounter);

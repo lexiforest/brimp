@@ -39,6 +39,26 @@ const storage = await build({
       name: 'session-indexeddb-backend',
       setup(builder) {
         builder.onLoad(
+          { filter: /[/\\]fake-indexeddb[/\\]build[/\\]esm[/\\]lib[/\\]scheduling\.js$/ },
+          async ({ path }) => {
+            const source = await readFile(path, 'utf8');
+            const original =
+              'const schedulerPostTask = typeof scheduler !== "undefined" && (fn => scheduler.postTask(fn));';
+            if (source.split(original).length !== 2)
+              throw Error(`Review pinned IndexedDB scheduling adapter: ${path}`);
+            return {
+              // Safari identities remove the scheduler global after initialization.
+              // Retain the scheduler object for later IndexedDB transactions.
+              contents: source.replace(
+                original,
+                'const schedulerHandle = typeof scheduler !== "undefined" ? scheduler : undefined;\n' +
+                  'const schedulerPostTask = schedulerHandle && (fn => schedulerHandle.postTask(fn));',
+              ),
+              loader: 'js',
+            };
+          },
+        );
+        builder.onLoad(
           {
             filter: /[/\\]fake-indexeddb[/\\]build[/\\]esm[/\\]FDB(Factory|Transaction)\.js$/,
           },

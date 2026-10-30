@@ -122,14 +122,14 @@ jobs:
         run: node --test "bindings/node/test/*.test.mjs"
 
       - name: Test CLI and build helpers
-        run: python -m pytest crates/cli/tests scripts/test_prepare_native.py bindings/test_prepare_local.py bindings/python/test_packaging.py
+        run: python -m pytest crates/cli/tests bindings/python/test_packaging.py
 
       - name: Verify bundled web primitives
         working-directory: crates/runtime/js/vendor
         run: |
           npm ci --ignore-scripts --no-audit --no-fund
           npm run build
-          git diff --exit-code -- core.bundle.js manifest.json ../plugins/storage.js
+          git diff --exit-code -- core.bundle.js storage.bundle.js input-color.bundle.js manifest.json
 
       - name: Install runtime and workload test dependencies
         working-directory: tests

@@ -54,9 +54,6 @@ var __BrimpStorage = (() => {
       return void 0;
     }
   }
-  // Patched for Brimp: keep a local reference to the scheduler. The global is
-  // removed for WebKit identities, and a closure that resolves `scheduler` at
-  // call time would throw once it is gone.
   var schedulerHandle = typeof scheduler !== "undefined" ? scheduler : void 0;
   var schedulerPostTask = schedulerHandle && ((fn) => schedulerHandle.postTask(fn));
   var doSetTimeout = (fn) => setTimeout(fn, 0);

@@ -5,6 +5,21 @@ import { writeFile, mkdtemp, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
+test('realm library example receives options without exposing its installer', async () => {
+  const plugin = Plugin.fromFile(
+    new URL('../../../examples/plugins/realm-library.js', import.meta.url),
+    { name: 'realm-library', options: { form: 'NFKC' } },
+  );
+  const session = await createSession({ plugins: [plugin] });
+  try {
+    const page = await session.newPage();
+    assert.equal(await page.evaluate('textTools.normalize("Ａ")'), 'A');
+    assert.equal(await page.evaluate('typeof installRealmLibrary'), 'undefined');
+  } finally {
+    await session.close();
+  }
+});
+
 test('file plugins receive options and trusted session identity', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'brimp-plugin-'));
   const path = join(directory, 'plugin.js');

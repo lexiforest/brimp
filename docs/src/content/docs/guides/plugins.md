@@ -410,7 +410,9 @@ and WebRTC remain outside core; use explicit host plugins where needed.
 Node: `Plugin.fromFile(pathOrURL, {name, options, handlers, setup})`.
 Python: `Plugin.from_file(path, name=..., options=..., handlers=..., setup=...)`.
 The file must evaluate to an installer; bundle module dependencies into that
-installer first (for example with esbuild). Original file URLs are retained in
+installer first (for example with esbuild). Use a named function declaration for
+file-based installers so formatting keeps them valid when the loader evaluates
+them as function expressions. Original file URLs are retained in
 host-side installation diagnostics; evaluated installers use a neutral `web-api`
 source label (the engine may omit it from stacks). Options
 are serialized into each realm. [realm-library.js](https://github.com/lexiforest/brimp/blob/main/examples/plugins/realm-library.js)

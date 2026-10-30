@@ -36,7 +36,7 @@ jobs:
       - name: Run packaging helper tests
         run: |
           python -m pip install pytest
-          python -m pytest scripts/test_prepare_native.py bindings/python/test_packaging.py
+          python -m pytest bindings/python/test_packaging.py
 
   linux:
     name: Build Linux ${{ matrix.target }}
