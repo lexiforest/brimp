@@ -1,4 +1,5 @@
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use brimp_runtime::{
     network::{NetworkError, ResourceLoader, ResourceRequest, ResourceResponse},
@@ -100,9 +101,17 @@ fn page_shadowing_cannot_replace_script_controls_or_module_compiler() {
         const script = document.createElement('script');
         script.type = 'module';
         script.textContent = 'globalThis.privateModuleWorked = 42';
+        script.onload = () => { script.id = 'private-module-loaded'; };
         document.head.appendChild(script);
         null;
     "#).unwrap();
+    // Evaluation returns before a dynamically inserted module necessarily runs.
+    page.wait_for_selector(
+        "#private-module-loaded",
+        Duration::from_secs(30),
+        Default::default(),
+    )
+    .unwrap();
     assert_eq!(page.evaluate("privateModuleWorked").unwrap(), 42);
 }
 

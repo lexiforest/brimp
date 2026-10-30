@@ -216,6 +216,8 @@ impl ResourceLoader for ResponseLoader {
 
 #[test]
 fn navigation_returns_raw_and_rendered_responses_without_raising_for_http_status() {
+    // This checks response behavior; navigation includes rebuilding the JS realm.
+    let timeout = Duration::from_secs(30);
     let browser =
         Session::with_resource_loader(Default::default(), Arc::new(ResponseLoader)).unwrap();
     let page = browser
@@ -223,10 +225,7 @@ fn navigation_returns_raw_and_rendered_responses_without_raising_for_http_status
         .unwrap();
 
     let missing = page
-        .navigate(
-            "https://response.test/missing?q=rust",
-            Duration::from_secs(1),
-        )
+        .navigate("https://response.test/missing?q=rust", timeout)
         .unwrap();
     assert_eq!(missing.status_code, 404);
     assert_eq!(missing.reason, "Not Found");
@@ -239,12 +238,12 @@ fn navigation_returns_raw_and_rendered_responses_without_raising_for_http_status
     assert_eq!(missing.cookies, vec![("session".into(), "ready".into())]);
 
     let next = page
-        .navigate("https://response.test/next", Duration::from_secs(1))
+        .navigate("https://response.test/next", timeout)
         .unwrap();
     assert!(next.html.unwrap().contains(">undefined<"));
 
     let data = page
-        .navigate("https://response.test/data", Duration::from_secs(1))
+        .navigate("https://response.test/data", timeout)
         .unwrap();
     assert_eq!(data.content, br#"{"answer":42}"#);
     assert_eq!(data.html, None);

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { cp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { workloads } from './catalog.mjs';
@@ -33,7 +33,10 @@ for (const [name, source] of Object.entries(sources)) {
   const destination = join(root, '.cache', name);
   await rm(destination, { recursive: true, force: true });
   await mkdir(destination, { recursive: true });
-  execFileSync('tar', ['-xzf', archivePath, '--strip-components=1', '-C', destination]);
+  // GNU tar interprets the colon in a Windows drive path as a remote host.
+  execFileSync('tar', ['-xzf', '-', '--strip-components=1', '-C', destination], {
+    input: archive,
+  });
   const notices = join(staging, 'notices', name);
   await mkdir(notices, { recursive: true });
   for (const file of await readdir(destination)) {
@@ -116,7 +119,7 @@ async function hashes(directory) {
   )) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) Object.assign(result, await hashes(path));
-    else result[relative(staging, path)] = sha256(await readFile(path));
+    else result[relative(staging, path).split(sep).join('/')] = sha256(await readFile(path));
   }
   return result;
 }
