@@ -1,33 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import YAML from "yaml";
 import { createSession } from "../../../bindings/node/index.js";
 
-const fields = Object.values(
-  YAML.parse(
-    fs.readFileSync(new URL("../../../COVERAGE.yaml", import.meta.url), "utf8"),
-  ).fields,
-);
-const handlers = fields
-  .filter(
-    (f) =>
-      f.target === "window" &&
-      f.name.startsWith("on") &&
-      f.safari.presence === "present",
-  )
-  .map((f) => f.name);
-// Only constructors the ledger records for Safari: the scheduling API is
-// Chromium-only and is removed for WebKit identities.
-const constructors = fields
-  .filter(
-    (f) =>
-      f.target === "window" &&
-      f.legacy.kinds.includes("constructor") &&
-      f.brimp.core.presence === "present" &&
-      f.safari.presence === "present",
-  )
-  .map((f) => f.name);
+const inventory = JSON.parse(fs.readFileSync(new URL('../fixtures/environment-inventory.safari.json', import.meta.url), 'utf8'));
+const handlers = inventory.windowHandlers;
+const constructors = inventory.windowConstructors;
 
 test("window handler family reuses ordinary DOM dispatch and supports clearing", async () => {
   const session = await createSession();

@@ -214,6 +214,8 @@ jobs:
     name: Documentation
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    env:
+      RUSTUP_TOOLCHAIN: "1.99.1"
 
     steps:
       - name: Check out source

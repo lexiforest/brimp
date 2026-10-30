@@ -2,17 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import YAML from 'yaml';
 import {createSession} from '../../../bindings/node/index.js';
 
-const coverage=YAML.parse(fs.readFileSync(new URL('../../../COVERAGE.yaml',import.meta.url),'utf8'));
-const fields=Object.values(coverage.fields).filter(f=>f.target==='CSSStyleDeclaration.instance');
+const inventory=JSON.parse(fs.readFileSync(new URL('../fixtures/environment-inventory.safari.json',import.meta.url),'utf8'));
 const names=fs.readFileSync(new URL('../../../crates/runtime/js/web_apis/css_property_names.js',import.meta.url),'utf8');
 const placeholders=vm.runInNewContext(names+'; Array.from(__cssPlaceholderPropertyNames)');
 async function evaluate(source){const session=await createSession();try{return await(await session.newPage()).evaluate(source);}finally{await session.close();}}
 
 test('CSS property inventory exposes saved Safari names and defaults as one shared surface',async()=>{
-  const expected=fields.map(f=>[f.name,f.safari.presence==='present']);
+  const expected=inventory.css;
   assert.deepEqual(await evaluate(`(() => {
     const style=document.createElement('div').style,failures=[];
     for(const [name,present]of ${JSON.stringify(expected)}) {

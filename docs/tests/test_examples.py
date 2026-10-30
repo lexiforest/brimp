@@ -84,7 +84,8 @@ def test_cli_tutorial(server, tmp_path):
     for source in re.findall(r'```sh\n(.*?)\n```', (DOCS / 'examples/cli.md').read_text(), re.S):
         source = source.replace('http://127.0.0.1:8765', server)
         source = re.sub(r'\bbrimp(?= (doctor|fetch|run))', shlex.quote(executable.as_posix()), source)
-        result = subprocess.run(['sh', '-eu', '-c', source], cwd=tmp_path, text=True, capture_output=True, timeout=30)
+        result = subprocess.run(['sh', '-eu', '-c', source], cwd=tmp_path, env=dict(os.environ, MSYS2_ARG_CONV_EXCL='*'),
+                                text=True, capture_output=True, timeout=30)
         assert result.returncode == 0, result.stderr
         if 'document.querySelector(' in source:
             assert 'Hello from JavaScript' in result.stdout
@@ -113,7 +114,8 @@ def test_cli_workflows(server, tmp_path):
             (tmp_path / filename).write_text(code)
         elif language == 'sh':
             code = re.sub(r'\bbrimp(?= (fetch|run|plugins))', shlex.quote(executable.as_posix()), code)
-            result = subprocess.run(['sh', '-eu', '-c', code], cwd=tmp_path, text=True, capture_output=True, timeout=30)
+            result = subprocess.run(['sh', '-eu', '-c', code], cwd=tmp_path, env=dict(os.environ, MSYS2_ARG_CONV_EXCL='*'),
+                                text=True, capture_output=True, timeout=30)
             assert result.returncode == 0, result.stderr
             if '--actions' in code:
                 assert 'Hello, Ada' in result.stdout

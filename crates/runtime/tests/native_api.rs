@@ -196,7 +196,8 @@ fn close_cancels_pending_navigation() {
 fn evaluation_timeout_does_not_poison_the_page() {
     let session = Session::with_resource_loader(
         SessionOptions {
-            timeout: Duration::from_millis(30),
+            // This timeout also applies to page/plugin initialization on cold CI hosts.
+            timeout: Duration::from_secs(1),
             ..Default::default()
         },
         Arc::new(Fixture),

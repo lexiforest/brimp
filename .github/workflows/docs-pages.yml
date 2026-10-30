@@ -23,6 +23,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Reference generation needs Cargo, not the optional components in rust-toolchain.toml.
+      RUSTUP_TOOLCHAIN: "1.99.1"
     steps:
       - name: Check out repository
         uses: actions/checkout@v7

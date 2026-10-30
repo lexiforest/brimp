@@ -735,9 +735,6 @@ function __frameOverrides(context) {
     console: window.console,
     customElements: window.customElements,
     visualViewport: window.visualViewport,
-    addEventListener: eventTarget.addEventListener.bind(eventTarget),
-    removeEventListener: eventTarget.removeEventListener.bind(eventTarget),
-    dispatchEvent: eventTarget.dispatchEvent.bind(eventTarget),
     postMessage: eventTarget.postMessage,
     setTimeout: window.setTimeout,
     clearTimeout: window.clearTimeout,
@@ -777,6 +774,14 @@ function __frameOverrides(context) {
 // accessors on the realm's global rather than copied values.
 function __installFrameWindow(context, frameWindow) {
   const eventTarget = context.eventTarget;
+  __windowEventTargets.add(frameWindow);
+  __eventTargets.add(frameWindow);
+  for (const name of ['addEventListener', 'removeEventListener', 'dispatchEvent'])
+    frameWindow[name] = EventTarget.prototype[name].bind(frameWindow);
+  const navigatorPrototype = Object.getPrototypeOf(window.navigator);
+  frameWindow.navigator = Object.create(
+    Object.create(navigatorPrototype, Object.getOwnPropertyDescriptors(navigatorPrototype)),
+  );
   // The shared parent constructors close over the parent's document. Allocate
   // constructor-created nodes in the frame's current document, even after navigation.
   for (const [name, create] of [
@@ -790,12 +795,15 @@ function __installFrameWindow(context, frameWindow) {
       },
     });
   }
-  const define = (name, descriptor) =>
+  const define = (name, descriptor) => {
+    if (descriptor.get) __markWebBuiltin(descriptor.get, name, 'get');
+    if (descriptor.set) __markWebBuiltin(descriptor.set, name, 'set');
     Object.defineProperty(frameWindow, name, {
       configurable: true,
       enumerable: true,
       ...descriptor,
     });
+  };
   define('document', { get: () => context.document });
   define('location', {
     get: () => context.frameLocation,
@@ -805,15 +813,7 @@ function __installFrameWindow(context, frameWindow) {
   define('top', { get: () => __frameParentView(context) });
   define('frameElement', { get: () => context.frame });
   define('origin', { get: () => eventTarget.location.origin });
-  for (const name of Object.getOwnPropertyNames(eventTarget)) {
-    if (!name.startsWith('on')) continue;
-    define(name, {
-      get: () => eventTarget[name],
-      set: (value) => {
-        eventTarget[name] = value;
-      },
-    });
-  }
+  __defineEventHandlers(frameWindow, __bodyWindowEventTypes);
 }
 
 async function __runChildDocumentScripts(context) {
@@ -852,7 +852,7 @@ function __finishChildDocument(context) {
   const document = context.document;
   document.dispatchEvent(new Event('readystatechange'));
   document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true }));
-  context.eventTarget.dispatchEvent(new Event('load'));
+  EventTarget.prototype.dispatchEvent.call(context.window, new Event('load'));
   document.dispatchEvent(new Event('load'));
 }
 
@@ -950,7 +950,7 @@ class HTMLIFrameElement extends HTMLElement {
             source: context.window,
           });
           __markTrustedEvent(event);
-          eventTarget.dispatchEvent(event);
+          EventTarget.prototype.dispatchEvent.call(context.window, event);
         }, 0);
       };
       const [realmId, frameWindow] = __callHost('frameRealmCreate', __frameOverrides(context));

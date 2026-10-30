@@ -93,3 +93,29 @@ test('a frame whose source cannot be fetched keeps an empty document and still l
     close();
   }
 });
+
+test('frame load and posted messages dispatch on the visible frame window', async () => {
+  const session = await createSession();
+  try {
+    const page = await session.newPage();
+    assert.deepEqual(await page.evaluate(`(async () => {
+      const frame = document.createElement('iframe');
+      document.body.append(frame);
+      const child = frame.contentWindow;
+      let loaded = false;
+      child.onload = function(event) {
+        loaded = this === child && event.currentTarget === child;
+      };
+      child.location.href = 'data:text/html,<body>new document</body>';
+      const received = new Promise(resolve => {
+        child.addEventListener('message', function(event) {
+          resolve([event.data, this === child, event.currentTarget === child]);
+        }, {once: true});
+      });
+      child.postMessage('round trip', '*');
+      return [loaded, await received];
+    })()`), [true, ['round trip', true, true]]);
+  } finally {
+    await session.close();
+  }
+});

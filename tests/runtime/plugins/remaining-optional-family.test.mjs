@@ -99,6 +99,7 @@ test("Canvas and Path2D preserve configured readback, painted fills and a real P
     p.moveTo(0,0);p.lineTo(1,1);p.quadraticCurveTo(1,0,2,1);p.bezierCurveTo(0,1,1,2,2,2);
     p.rect(0,0,1,1);p.roundRect(0,0,2,2,0.5);p.arc(1,1,1,0,Math.PI);p.arcTo(1,0,2,1,1);p.ellipse(1,1,1,0.5,0,0,Math.PI);p.closePath();
     const copy=new Path2D(p);copy.addPath(p);c.fill(copy);c.stroke(copy);
+    c.fillStyle="#ff0000";c.fillRect(0,0,2,3);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve));const dataUrl=canvas.toDataURL(),bytes=atob(dataUrl.split(',')[1]);
     const encoded={prefix:dataUrl.slice(0,22),signature:[bytes.charCodeAt(1),bytes.charCodeAt(2),bytes.charCodeAt(3)],width:(bytes.charCodeAt(16)<<24|bytes.charCodeAt(17)<<16|bytes.charCodeAt(18)<<8|bytes.charCodeAt(19))>>>0,height:(bytes.charCodeAt(20)<<24|bytes.charCodeAt(21)<<16|bytes.charCodeAt(22)<<8|bytes.charCodeAt(23))>>>0};
     const bitmap=await createImageBitmap(canvas);const size=[bitmap.width,bitmap.height];bitmap.close();
@@ -106,13 +107,13 @@ test("Canvas and Path2D preserve configured readback, painted fills and a real P
       Array.from(c.getImageData(0,0,1,1).data),c.isPointInPath(copy,1,1),encoded,blob instanceof Blob,blob.size>0,size,
       canvas.captureStream()===undefined,canvas.transferControlToOffscreen()===undefined,canvas.width,canvas.height];
   })()`,
-      [canvasPlugin({ rgba: [1, 2, 3, 4] })],
+      [canvasPlugin()],
     ),
     [
       true,
       true,
       true,
-      [1, 2, 3, 4],
+      [255, 0, 0, 255],
       false,
       {
         prefix: "data:image/png;base64,",

@@ -337,7 +337,8 @@ function __normalizeWebIdlShape() {
         next.writable = false;
         next.configurable = false;
       } else if (descriptor.get || descriptor.set) {
-        next.enumerable = true;
+        // Preserve explicitly non-enumerable legacy event handler attributes.
+        if (!key.startsWith('on')) next.enumerable = true;
       }
       if (
         next.enumerable !== descriptor.enumerable ||
