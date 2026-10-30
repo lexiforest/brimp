@@ -218,8 +218,11 @@ function installDiagnostics(stackEnabled, installRecursive) {
     'screen',
     'scheduler',
   ]) {
-    const d = descriptor(globalThis, key);
-    if (d && d.value && typeof d.value === 'object') instrument(d.value, key);
+    // These known browser roots now live behind Window IDL accessors. Read them
+    // during installation, before page scripts, rather than losing their labels.
+    // instrument() still inspects descriptors without invoking member getters.
+    const object = globalThis[key];
+    if (object && typeof object === 'object') instrument(object, key);
   }
   // Explicit reflection instrumentation; no global-object Proxy and no raw values in logs.
   for (const [object, name, keys] of [

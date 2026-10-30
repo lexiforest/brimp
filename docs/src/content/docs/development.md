@@ -116,6 +116,22 @@ directory or a browser installation. See the
 [regression guide](https://github.com/lexiforest/brimp/blob/main/tests/README.md)
 for fixtures, reports, and updating expectations.
 
+## Continuous integration
+
+The Test workflow runs the same **Runtime and bindings** job on macOS arm64,
+Linux x64 and Windows x64. Each downloads the pinned JSC and curl SDKs, builds
+the CLI and both bindings, runs all workspace tests (including JSC ownership and
+asynchronous WebAssembly), checks the Python/Node APIs, CLI and tutorials, runs
+the runtime environment and browser workloads, and tests installed packages.
+Clippy and the runtime dependency boundary run on all three platforms.
+
+Linux installs the native font and packaging tools. Windows development setup
+copies SDK DLLs beside the Python and Node extensions; use the environment
+emitted by `prepare_native.py` before running `prepare_local.py`. POSIX signal
+tests retain their platform guard. The SDK-free Lexbor ASan/UBSan job runs once
+on Linux, as do the standalone JavaScript formatting and documentation checks.
+The separate JSC-only job is no longer needed.
+
 ## 4. Check the boundaries and style
 
 ```sh

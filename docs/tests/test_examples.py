@@ -76,14 +76,14 @@ def test_tutorial(language, code, expected, server, tmp_path):
 
 
 def test_cli_tutorial(server, tmp_path):
-    executable = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug/brimp')).resolve()
+    executable = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug' / ('brimp.exe' if os.name == 'nt' else 'brimp'))).resolve()
     assert executable.is_file(), 'Build brimp-cli before testing tutorials'
     # Live browser capture is verified separately; provide its partial document here.
     (tmp_path / 'browser-profile.json').write_text('{"format":"brimp-profile","version":1,"values":{}}')
     # Run the shell blocks exactly as printed; use a temporary output directory.
     for source in re.findall(r'```sh\n(.*?)\n```', (DOCS / 'examples/cli.md').read_text(), re.S):
         source = source.replace('http://127.0.0.1:8765', server)
-        source = re.sub(r'\bbrimp(?= (doctor|fetch|run))', shlex.quote(str(executable)), source)
+        source = re.sub(r'\bbrimp(?= (doctor|fetch|run))', shlex.quote(executable.as_posix()), source)
         result = subprocess.run(['sh', '-eu', '-c', source], cwd=tmp_path, text=True, capture_output=True, timeout=30)
         assert result.returncode == 0, result.stderr
         if 'document.querySelector(' in source:
@@ -105,14 +105,14 @@ def test_native_exception_stubs():
 
 
 def test_cli_workflows(server, tmp_path):
-    executable = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug/brimp')).resolve()
+    executable = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug' / ('brimp.exe' if os.name == 'nt' else 'brimp'))).resolve()
     guide = (DOCS / 'examples/cli-workflows.md').read_text()
     for language, filename, code in re.findall(r'```(\w+)(?: title="([^"]+)")?\n(.*?)\n```', guide, re.S):
         code = code.replace('http://127.0.0.1:8765', server)
         if filename:
             (tmp_path / filename).write_text(code)
         elif language == 'sh':
-            code = re.sub(r'\bbrimp(?= (fetch|run|plugins))', shlex.quote(str(executable)), code)
+            code = re.sub(r'\bbrimp(?= (fetch|run|plugins))', shlex.quote(executable.as_posix()), code)
             result = subprocess.run(['sh', '-eu', '-c', code], cwd=tmp_path, text=True, capture_output=True, timeout=30)
             assert result.returncode == 0, result.stderr
             if '--actions' in code:

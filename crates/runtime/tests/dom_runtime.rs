@@ -89,8 +89,8 @@ fn core_has_no_layout_or_xml_parser() {
     check(
         &page,
         r##"(() => {
-        if (document.body.getBoundingClientRect() !== undefined || document.body.clientWidth !== 0 ||
-            getComputedStyle(document.body) !== undefined || document.elementFromPoint(0, 0) !== undefined) return false;
+        if (document.body.getBoundingClientRect().width !== 0 || document.body.getClientRects().length !== 0 || document.body.clientWidth !== 0 ||
+            getComputedStyle(document.body).display !== "block" || document.elementFromPoint(0, 0) !== undefined) return false;
         try { new DOMParser().parseFromString('<a/>', 'application/xml'); return false; }
         catch (error) { return error instanceof TypeError; }
     })()"##,

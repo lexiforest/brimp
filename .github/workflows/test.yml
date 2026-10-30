@@ -42,22 +42,41 @@ jobs:
         run: python3 scripts/test_lexbor_boundary.py
 
   test:
-    name: Runtime and bindings
-    runs-on: macos-26
+    name: Runtime and bindings (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-26
+            target: aarch64-apple-darwin
+            deployment_target: "11.0"
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            deployment_target: ""
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            deployment_target: ""
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 120
+    defaults:
+      run:
+        shell: bash
     env:
-      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+      PYTHONUTF8: "1"
 
     steps:
       - name: Check out source
         uses: actions/checkout@v6
 
       - name: Install Rust
+        id: rust
         uses: dtolnay/rust-toolchain@1.99.1
         with:
           components: clippy
 
       - name: Set up Python
+        id: python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -67,46 +86,65 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Check out curl-impersonate SDK source
-        uses: actions/checkout@v6
-        with:
-          repository: lexiforest/curl-impersonate
-          path: .native/curl-source
+      - name: Install Linux native build tools
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev libfreetype6-dev pkg-config patchelf ninja-build clang
 
-      - name: Build curl SDK with shared BoringSSL WebCrypto
-        run: |
-          cmake -S .native/curl-source -B .native/curl-build -DCMAKE_INSTALL_PREFIX="$PWD/.native/curl-sdk"
-          cmake --build .native/curl-build --parallel 4
-          make -C .native/curl-source checkbuild BUILD_DIR="$PWD/.native/curl-build"
-          cmake --install .native/curl-build
-
-      - name: Prepare native SDKs
+      - name: Prepare pinned native SDKs
         run: >-
           python scripts/prepare_native.py
-          --target aarch64-apple-darwin
-          --output .native/aarch64-apple-darwin
-          --curl-sdk .native/curl-sdk
+          --target "${{ matrix.target }}"
+          --output .native/test
+          --curl-release
+
+      - name: Install test and packaging tools
+        run: python -m pip install pytest 'maturin>=1.9,<2'
+
+      - name: Restore native build cache
+        id: native-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/debug
+            !target/debug/incremental
+          key: native-build-v1-${{ runner.os }}-${{ matrix.target }}-${{ steps.rust.outputs.cachekey }}-python-${{ steps.python.outputs.python-version }}-${{ hashFiles('Cargo.lock', '**/Cargo.toml', 'scripts/prepare_native.py') }}
 
       - name: Build native bindings
         run: cargo build --locked -p brimp-cli -p brimp-python -p brimp-node
+
+      # Save immediately so later test failures do not discard a successful build.
+      - name: Save native build cache
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target/debug
+            !target/debug/incremental
+          key: ${{ steps.native-cache.outputs.cache-primary-key }}
 
       - name: Run workspace tests
         run: cargo test --locked --workspace
 
       - name: Check runtime dependency boundary
-        run: python3 scripts/check_runtime_dependencies.py
+        run: python scripts/check_runtime_dependencies.py
 
-      - name: Test Python and Node bindings
-        run: |
-          python -m pip install pytest
-          python3 bindings/prepare_local.py
-          PYTHONPATH=bindings/python/python python3 -m pytest bindings/python/tests
-          node --test bindings/node/test/*.test.mjs
-          PYTHONPATH=bindings/python/python python3 -m pytest docs/tests/test_examples.py scripts/test_prepare_native.py
-          python3 -m pytest .native/curl-source/tests/test_webcrypto.py --install-dir .native/curl-sdk
+      - name: Prepare local bindings
+        run: python bindings/prepare_local.py
 
-      - name: Sanitize Lexbor boundary
-        run: python3 scripts/test_lexbor_boundary.py
+      - name: Test Python bindings and tutorials
+        env:
+          PYTHONPATH: bindings/python/python
+        run: python -m pytest bindings/python/tests docs/tests/test_examples.py
+
+      - name: Test Node bindings
+        run: node --test "bindings/node/test/*.test.mjs"
+
+      - name: Test CLI and build helpers
+        run: python -m pytest crates/cli/tests scripts/test_prepare_native.py bindings/test_prepare_local.py bindings/python/test_packaging.py
 
       - name: Verify bundled web primitives
         working-directory: crates/runtime/js/vendor
@@ -135,59 +173,42 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-regression-report
+          name: browser-regression-report-${{ matrix.target }}
           path: tests/results/
           if-no-files-found: ignore
 
-      - name: Build and smoke-test native packages
+      - name: Build Python wheel
         run: |
-          python -m pip install 'maturin>=1.9,<2'
-          mkdir -p "$RUNNER_TEMP/brimp-packages"
-          maturin build --locked --manifest-path bindings/python/Cargo.toml --out "$RUNNER_TEMP/brimp-packages"
-          python -m pip install --no-deps "$RUNNER_TEMP"/brimp-packages/*.whl
+          maturin build --locked --auditwheel repair --compatibility pypi \
+            --manifest-path bindings/python/Cargo.toml --out dist/raw
+          mkdir -p dist/wheels
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            python bindings/python/bundle_windows_runtime.py --wheel dist/raw/*.whl --out dist/wheels
+          else
+            cp dist/raw/*.whl dist/wheels/
+          fi
+
+      - name: Test installed Python wheel
+        run: |
+          python -m pip install --no-deps dist/wheels/*.whl
           python -m pytest bindings/python/tests
-          npm pack ./bindings/node --pack-destination "$RUNNER_TEMP/brimp-packages"
-          npm install --prefix "$RUNNER_TEMP/brimp-installed" --ignore-scripts --no-audit --no-fund --omit=optional "$RUNNER_TEMP"/brimp-packages/*.tgz
-          node --input-type=module <<'JS'
-          import assert from 'node:assert/strict';
-          import {pathToFileURL} from 'node:url';
-          const api = await import(pathToFileURL(`${process.env.RUNNER_TEMP}/brimp-installed/node_modules/@brimp/brimp/index.js`));
-          const session = await api.createSession({plugins: [api.canvasPlugin(), api.extractionPlugin()]});
-          try {
-            const page = await session.newPage();
-            assert.equal(await page.evaluate('6 * 7'), 42);
-            assert.equal(await page.evaluate("localStorage.x='installed'; localStorage.x"), 'installed');
-            assert.deepEqual(await page.evaluate("Array.from(document.createElement('canvas').getContext('2d').getImageData(0,0,1,1).data)"), [0,0,0,0]);
-            await page.evaluate("document.body.innerHTML='<article><h1>Package check</h1><p>Extracted from the installed package.</p></article>'; null");
-            assert.match((await page.extract({contentSelector: 'article'})).content, /installed package/);
-          } finally { await session.close(); }
-          JS
+
+      - name: Build and validate Node packages
+        run: |
+          python bindings/package_node.py \
+            --jsc-sdk "$BRIMP_JSC_SDK" --curl-sdk "$BRIMP_CURL_SDK" \
+            --package --main --out dist/node
+          python bindings/package_node.py --validate --out dist/node
+
+      - name: Test installed Node packages
+        run: |
+          npm install --offline --prefix "$RUNNER_TEMP/brimp-installed" --ignore-scripts --no-audit --no-fund --omit=optional dist/node/*.tgz
+          cp bindings/node/smoke.mjs "$RUNNER_TEMP/brimp-installed/"
+          cd "$RUNNER_TEMP/brimp-installed"
+          node smoke.mjs
 
       - name: Run Clippy
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
-
-  engine:
-    name: JSC deferred work (${{ matrix.target }})
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-24.04
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-      - name: Download pinned JSC SDK
-        run: python scripts/prepare_native.py --target ${{ matrix.target }} --output .native/${{ matrix.target }}
-      - name: Test engine ownership and asynchronous WASM
-        run: cargo test --locked -p brimp-jsc --test runtime
 
   docs:
     name: Documentation

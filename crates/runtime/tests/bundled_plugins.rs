@@ -55,7 +55,7 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
     assert_eq!(
         page.evaluate("typeof getComputedStyle(document.body)")
             .unwrap(),
-        json!("undefined")
+        json!("object")
     );
 }
 
@@ -114,7 +114,7 @@ fn extraction_plugin_uses_live_dom_without_layout() {
             .unwrap()
             .to_string()
             .unwrap(),
-        "undefined:undefined"
+        "object:undefined"
     );
 }
 

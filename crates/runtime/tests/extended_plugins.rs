@@ -1,6 +1,6 @@
 use brimp_runtime::runtime::{
     clock::{ClockOptions, TimeMode},
-    native::{Session, SessionOptions},
+    native::{IdentityOptions, Session, SessionOptions},
     plugins::bundled,
 };
 use serde_json::json;
@@ -36,14 +36,27 @@ fn rtc_installer_provides_local_shapes_without_transport() {
 fn geometry_and_inline_css_are_functional_without_layout() {
     let s = session();
     let p = s.new_page().unwrap();
-    assert_eq!(p.evaluate("const m=new DOMMatrix().translate(10,20).scale(2); const v=m.transformPoint(new DOMPoint(3,4)); const r=DOMQuad.fromRect({x:5,y:6,width:-3,height:2}).getBounds(); [v.x,v.y,m.inverse().transformPoint(v).x,r.left,r.right,typeof getComputedStyle(document.body)]").unwrap(),json!([16,28,3,2,5,"undefined"]));
+    assert_eq!(p.evaluate("const m=new DOMMatrix().translate(10,20).scale(2); const v=m.transformPoint(new DOMPoint(3,4)); const r=DOMQuad.fromRect({x:5,y:6,width:-3,height:2}).getBounds(); [v.x,v.y,m.inverse().transformPoint(v).x,r.left,r.right,typeof getComputedStyle(document.body)]").unwrap(),json!([16,28,3,2,5,"object"]));
     assert_eq!(p.evaluate("const el=document.createElement('div'); el.attributeStyleMap.set('width',CSS.cm(2.54).to('px')); [el.style.width,el.attributeStyleMap.get('width').value,CSS.s(2).to('ms').value,CSS.px(2).add(CSS.in(1)).value,new DOMMatrix(new DOMMatrix().toFloat64Array()).isIdentity]").unwrap(),json!(["96px",96,2000,98,true]));
     assert!(p.evaluate("CSS.px(1).to('s')").is_err());
     assert!(p.evaluate("new DOMMatrix().translate(0,0,1)").is_err());
 }
 #[test]
 fn scheduling_priority_cancellation_and_logical_audio() {
-    let s = session();
+    // Scheduler and TaskController are installed for Chromium identities.
+    let s = Session::new(SessionOptions {
+        identity: IdentityOptions {
+            user_agent: Some("Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36".into()),
+            ..Default::default()
+        },
+        clock: ClockOptions {
+            mode: TimeMode::Logical,
+            epoch_ms: None,
+        },
+        plugins: vec![bundled::audio(json!({}))],
+        ..Default::default()
+    })
+    .unwrap();
     let p = s.new_page().unwrap();
     assert_eq!(p.evaluate("globalThis.order=[]; Promise.all([scheduler.postTask(()=>order.push('background'),{priority:'background'}),scheduler.postTask(()=>order.push('high'),{priority:'user-blocking'}),scheduler.postTask(()=>order.push('normal'))]).then(()=>order)").unwrap(),json!(["high","normal","background"]));
     assert_eq!(p.evaluate("const control=new TaskController({priority:'background'});const task=scheduler.postTask(()=>99,{signal:control.signal,delay:100});control.abort('cancelled');task.catch(e=>e)").unwrap(),json!("cancelled"));

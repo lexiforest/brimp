@@ -44,7 +44,8 @@ test('core browser storage can persist through the Node session option', async (
         await page.get('https://storage.test/');
         if(first) await page.evaluate("localStorage.value='saved';null");
         assert.equal(await page.evaluate('localStorage.value'), 'saved');
-        assert.equal(await page.evaluate('navigator.storage.persisted()'), true);
+        // Disk persistence is independent of the browser-profile answer.
+        assert.equal(await page.evaluate('navigator.storage.persisted()'), false);
       } finally {await session.close();}
     }
   } finally {await rm(directory,{recursive:true,force:true});}

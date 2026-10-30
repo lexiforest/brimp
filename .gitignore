@@ -14,6 +14,8 @@ benchmark/**/results/
 /bindings/node/*.node
 /bindings/node/*.tgz
 *.pyd
+/bindings/node/*.dll
+/bindings/python/python/brimp/*.dll
 
 /bindings/python/python/brimp/bundled/
 /bindings/node/bundled/

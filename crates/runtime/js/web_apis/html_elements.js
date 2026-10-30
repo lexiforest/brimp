@@ -777,6 +777,19 @@ function __frameOverrides(context) {
 // accessors on the realm's global rather than copied values.
 function __installFrameWindow(context, frameWindow) {
   const eventTarget = context.eventTarget;
+  // The shared parent constructors close over the parent's document. Allocate
+  // constructor-created nodes in the frame's current document, even after navigation.
+  for (const [name, create] of [
+    ['Text', (data = '') => context.document.createTextNode(String(data))],
+    ['Comment', (data = '') => context.document.createComment(String(data))],
+    ['DocumentFragment', () => context.document.createDocumentFragment()],
+  ]) {
+    frameWindow[name] = new Proxy(window[name], {
+      construct(_target, args) {
+        return create(...args);
+      },
+    });
+  }
   const define = (name, descriptor) =>
     Object.defineProperty(frameWindow, name, {
       configurable: true,

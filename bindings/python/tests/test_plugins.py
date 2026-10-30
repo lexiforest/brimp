@@ -150,11 +150,12 @@ def test_environment_navigator_override_options_are_preserved():
     ('devices', 'navigator.bluetooth.getAvailability()', {'bluetooth_available': True}, True),
     ('media', "[typeof MediaStream, typeof MediaEncryptedEvent, typeof navigator.mediaDevices]", {'media_devices_enabled': False}, ['function', 'function', 'undefined']),
     ('workers', "new Worker('ignored').terminate() === undefined", {}, True),
-    ('trusted_types', 'trustedTypes.createPolicy() === undefined', {}, True),
+    ('trusted_types', "trustedTypes.createPolicy('ci', {createHTML: value => value}).createHTML('safe')", {}, 'safe'),
 ])
 def test_subsystem_installers(name, expression, options, expected):
     from brimp import plugins
-    with Session(plugins=[getattr(plugins, name)(**options)]) as session:
+    with Session(user_agent="Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36",
+                 plugins=[getattr(plugins, name)(**options)]) as session:
         with session.new_page() as page:
             assert page.evaluate(expression) == expected
 

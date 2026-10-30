@@ -54,4 +54,5 @@ def test_core_storage_path_option_survives_session_reopen(tmp_path):
             if first:
                 page.evaluate("localStorage.value='saved';null")
             assert page.evaluate("localStorage.value") == "saved"
-            assert page.evaluate("navigator.storage.persisted()") is True
+            # Disk persistence is independent of the browser-profile answer.
+            assert page.evaluate("navigator.storage.persisted()") is False

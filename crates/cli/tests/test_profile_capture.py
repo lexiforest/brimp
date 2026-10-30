@@ -2,14 +2,15 @@
 import json
 import os
 from pathlib import Path
-import selectors
+import queue
+import threading
 import subprocess
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[3]
-CLI = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug/brimp'))
+CLI = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug' / ('brimp.exe' if os.name == 'nt' else 'brimp')))
 
 
 def test_export_only_contains_capture_code(tmp_path):
@@ -40,10 +41,14 @@ def test_local_capture_validates_then_saves_and_reloads(tmp_path):
                                 '--no-plugins', '--timeout', '20s'],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
-        with selectors.DefaultSelector() as selector:
-            selector.register(process.stdout, selectors.EVENT_READ)
-            assert selector.select(timeout=12), 'capture server did not start'
-        line = process.stdout.readline()
+        # Windows selectors support sockets, not subprocess pipes.
+        lines = queue.Queue()
+        reader = threading.Thread(target=lambda: lines.put(process.stdout.readline()), daemon=True)
+        reader.start()
+        try:
+            line = lines.get(timeout=12)
+        except queue.Empty:
+            raise AssertionError('capture server did not start') from None
         assert line.startswith('Open '), (line, process.poll())
         url = line.removeprefix('Open ').strip()
         parsed = urlsplit(url)
@@ -81,4 +86,5 @@ def test_local_capture_validates_then_saves_and_reloads(tmp_path):
     finally:
         if process.poll() is None:
             process.terminate()
+        reader.join(timeout=5)
         process.communicate(timeout=5)

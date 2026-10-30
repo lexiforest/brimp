@@ -109,8 +109,8 @@ fn installs_the_window_chain_and_enforces_web_idl_invocation_shape() {
             const userAgent = Object.getOwnPropertyDescriptor(Navigator.prototype, "userAgent").get;
             return querySelector.name === "querySelector" && querySelector.length === 1 &&
                 userAgent.name === "get userAgent" && userAgent.length === 0 &&
-                Function.prototype.toString.call(querySelector) === "function querySelector() { [native code] }" &&
-                Function.prototype.toString.call(userAgent) === "function get userAgent() { [native code] }";
+                Function.prototype.toString.call(querySelector) === "function querySelector() {\n    [native code]\n}" &&
+                Function.prototype.toString.call(userAgent) === "function userAgent() {\n    [native code]\n}";
         })()"#,
     );
 }
@@ -1188,6 +1188,14 @@ fn executes_data_iframes_and_delivers_window_messages() {
             document.body.appendChild(frame);
             const childComment = new frame.contentWindow.Comment("child");
             if (frame.contentDocument !== childComment.ownerDocument) return false;
+            const childText = new frame.contentWindow.Text("text");
+            const childFragment = new frame.contentWindow.DocumentFragment();
+            if (childText.ownerDocument !== frame.contentDocument || childText.data !== "text" ||
+                childFragment.ownerDocument !== frame.contentDocument ||
+                !(childText instanceof frame.contentWindow.Text) ||
+                !(childComment instanceof frame.contentWindow.Comment) ||
+                !(childFragment instanceof frame.contentWindow.DocumentFragment)) return false;
+            const CommentConstructor = frame.contentWindow.Comment;
 
             addEventListener("message", event => { globalThis.__iframeMessage = event.data; });
             const form = document.createElement("form");
@@ -1202,7 +1210,9 @@ fn executes_data_iframes_and_delivers_window_messages() {
             form.appendChild(input);
             document.body.appendChild(form);
             form.submit();
-            return frame.contentWindow.location.protocol === "data:";
+            return frame.contentWindow.location.protocol === "data:" &&
+                new CommentConstructor("after navigation").ownerDocument === frame.contentDocument &&
+                childComment.ownerDocument !== frame.contentDocument;
         })()"#,
     );
     page.run_pending_tasks().unwrap();
@@ -1521,7 +1531,7 @@ fn exposes_import_focus_crypto_and_resize_observer() {
             if (crypto.getRandomValues(bytes) !== bytes || !bytes.some(value => value !== 0)) return false;
             if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(crypto.randomUUID())) return false;
 
-            return typeof ResizeObserver === "undefined" && getComputedStyle(document.body) === undefined;
+            return typeof ResizeObserver === "undefined" && getComputedStyle(document.body).display === "block";
         })()"#,
     );
 }

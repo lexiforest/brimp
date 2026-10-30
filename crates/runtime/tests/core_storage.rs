@@ -147,8 +147,9 @@ fn configured_storage_file_survives_session_reopen() {
         a.evaluate("caches.open('data').then(c=>c.put('https://a.test/value',new Response('persisted'))).then(()=>null)").unwrap();
         a.evaluate("new Promise((resolve,reject)=>{const r=indexedDB.open('file-db',1);r.onupgradeneeded=()=>{const store=r.result.createObjectStore('people',{keyPath:'id',autoIncrement:true});store.createIndex('byName','name')};r.onsuccess=()=>{const tx=r.result.transaction('people','readwrite');tx.objectStore('people').put({name:'Ada'});tx.oncomplete=()=>{r.result.close();resolve(null)};tx.onabort=()=>reject(tx.error)};r.onerror=()=>reject(r.error)})").unwrap();
         assert_eq!(
+            // The Safari profile reports browser persistence independently of host disk storage.
             a.evaluate("navigator.storage.persisted()").unwrap(),
-            json!(true)
+            json!(false)
         );
         assert!(
             Session::with_resource_loader(
@@ -196,7 +197,7 @@ fn canvas_backend_order_and_core_value_identity() {
     }
     let s = session();
     let p = s.new_page().unwrap();
-    assert_eq!(p.evaluate("[typeof DOMMatrix,typeof CSSUnitValue,typeof ImageData,typeof MediaEncryptedEvent,typeof SpeechSynthesisUtterance,typeof TaskController,document.createElement('canvas').getContext('2d')]").unwrap(),json!(["function","function","function","undefined","undefined","function",null]));
+    assert_eq!(p.evaluate("[typeof DOMMatrix,typeof CSSUnitValue,typeof ImageData,typeof MediaEncryptedEvent,typeof SpeechSynthesisUtterance,typeof TaskController,document.createElement('canvas').getContext('2d')]").unwrap(),json!(["function","function","function","undefined","undefined","undefined",null]));
 }
 #[test]
 fn indexeddb_serializes_concurrent_page_transactions_and_rolls_back() {

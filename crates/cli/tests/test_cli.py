@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
-CLI = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug/brimp'))
+CLI = Path(os.environ.get('BRIMP_CLI', ROOT / 'target/debug' / ('brimp.exe' if os.name == 'nt' else 'brimp')))
 
 
 def run(*args, input=None, code=0):
@@ -407,7 +407,8 @@ def test_sigterm_during_navigation(site):
 
 
 def test_subsystem_plugins_and_options():
-    result = run('run', '-', '--plugin', 'environment', '--plugin', 'permissions',
+    # NetworkInformation is exposed for Chromium identities.
+    result = run('run', '-', '--user-agent', 'Mozilla/5.0 Chrome/130.0.0.0 Safari/537.36', '--plugin', 'environment', '--plugin', 'permissions',
                  '--plugin', 'devices', '--plugin', 'media', '--plugin', 'workers',
                  '--plugin', 'trusted-types',
                  '--plugin-options', 'environment={"connection_rtt_ms":7}',
@@ -417,7 +418,7 @@ def test_subsystem_plugins_and_options():
                  input=b'''Promise.all([navigator.connection.rtt, Notification.requestPermission(),
                     navigator.bluetooth.getAvailability(), typeof MediaEncryptedEvent,
                     typeof navigator.mediaDevices, new Worker('ignored').terminate() === undefined,
-                    trustedTypes.createPolicy() === undefined])''')
+                    String(trustedTypes.createPolicy('ci', {createHTML: value => value}).createHTML('safe')) === 'safe'])''')
     assert json.loads(result.stdout) == [7, 'denied', True, 'function', 'undefined', True, True]
 
 

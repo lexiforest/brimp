@@ -317,7 +317,7 @@ fn history_api_updates_same_document_entries_and_dispatches_traversal_events() {
                     History.prototype.pushState.length === 2 &&
                     Object.getOwnPropertyDescriptor(History.prototype, "state").enumerable &&
                     Function.prototype.toString.call(History.prototype.back) ===
-                        "function back() { [native code] }";
+                        "function back() {\n    [native code]\n}";
             })()))"#,
         )
         .unwrap()

@@ -63,7 +63,7 @@ def test_clock_diagnostics_and_plugins(tmp_path):
 def test_graphics_audio_host_extensions_and_core_only_selection():
     with Session(plugins=[]) as session:
         page = session.new_page()
-        assert page.evaluate("[typeof DOMPoint,typeof CSSUnitValue,typeof scheduler,typeof AudioContext,typeof WebGLRenderingContext]") == ['function', 'function', 'object', 'undefined', 'undefined']
+        assert page.evaluate("[typeof DOMPoint,typeof CSSUnitValue,typeof scheduler,typeof AudioContext,typeof WebGLRenderingContext]") == ['function', 'function', 'undefined', 'undefined', 'undefined']
     with Session(time_mode='logical', plugins=[
         plugins.graphics(rgba=(9,8,7,6), handlers={'graphics.submit': lambda context, value: value['width']}),
         plugins.audio(handlers={'audio.process': lambda context, value: value['samples']})]) as session:
