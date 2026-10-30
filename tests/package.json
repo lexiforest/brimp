@@ -8,7 +8,7 @@
   "scripts": {
     "prepare:fixtures": "node prepare.mjs",
     "test": "npm run test:runtime && npm run test:workloads",
-    "test:runtime": "node --test \"runtime/**/*.test.mjs\"",
+    "test:runtime": "node --test --test-reporter=tap \"runtime/**/*.test.mjs\"",
     "test:workloads": "node --test test/*.test.mjs"
   },
   "dependencies": {

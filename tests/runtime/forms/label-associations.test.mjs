@@ -7,7 +7,13 @@ async function evaluate(source){const session=await createSession();try{return a
 test('label associations and live lists match 588 measured Safari sequences',async()=>{
   const ref=JSON.parse(fs.readFileSync(new URL('../fixtures/label-associations.safari.json',import.meta.url)));
   assert.deepEqual(ref.cases.map(({expected,...c})=>c),cases);
-  const actual=JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(cases)}))`));
+  // Each context is independent. Bound each evaluation so slower CI hosts do
+  // not spend the session's entire execution deadline in one 588-case call.
+  const actual=[];
+  for(let offset=0;offset<cases.length;offset+=84) {
+    const batch=cases.slice(offset,offset+84);
+    actual.push(...JSON.parse(await evaluate(`JSON.stringify((${measure})(${JSON.stringify(batch)}))`)));
+  }
   assert.deepEqual(cases.flatMap((c,i)=>JSON.stringify(actual[i])===JSON.stringify(ref.cases[i].expected)?[]:[{...c,actual:actual[i],expected:ref.cases[i].expected}]),[]);
 });
 

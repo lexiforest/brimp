@@ -16,7 +16,7 @@ npm run format:runtime:check
 The configuration lives in `crates/runtime/js/.prettierrc.json`. Generated bundles
 and the generated CSS property table are excluded. After editing vendor adapters,
 regenerate their bundles with `npm run build --prefix crates/runtime/js/vendor`.
-CI checks formatting independently of the native SDK builds.
+Run the formatting check locally before committing runtime JavaScript changes.
 
 ## 1. Find the owning crate
 
@@ -128,9 +128,11 @@ Clippy and the runtime dependency boundary run on all three platforms.
 Linux installs the native font and packaging tools. Windows development setup
 copies SDK DLLs beside the Python and Node extensions; use the environment
 emitted by `prepare_native.py` before running `prepare_local.py`. POSIX signal
-tests retain their platform guard. The SDK-free Lexbor ASan/UBSan job runs once
-on Linux, as do the standalone JavaScript formatting and documentation checks.
-The separate JSC-only job is no longer needed.
+tests retain their platform guard. Lexbor and JSC tests run within the shared
+workspace suite. The Documentation workflow builds and validates the site on
+Linux for pull requests and relevant pushes to `main`; deployment runs only
+from `main`.
+The Lexbor ASan/UBSan script remains available for local checks.
 
 ## 4. Check the boundaries and style
 

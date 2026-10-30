@@ -9,19 +9,19 @@ on:
       - bindings/node/index.d.ts
       - crates/cli/src/args.rs
       - .github/workflows/docs-pages.yml
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
+    name: Build and validate documentation
     runs-on: ubuntu-latest
     env:
       # Reference generation needs Cargo, not the optional components in rust-toolchain.toml.
@@ -45,7 +45,11 @@ jobs:
         run: python -m pytest docs/tests/test_site.py
 
   deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -1,0 +1,2 @@
+# The vendor manifest hashes this file's bytes on every platform.
+/crates/runtime/js/vendor/package-lock.json text eol=lf
