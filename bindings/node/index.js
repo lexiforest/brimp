@@ -86,6 +86,14 @@ export class StaleHandle extends RuntimeError {}
 export class Closed extends RuntimeError {}
 export class Timeout extends RuntimeError {}
 export class Reentry extends RuntimeError {}
+export class HTTPError extends RuntimeError {
+  constructor(page) {
+    super(`HTTP ${page.statusCode} ${page.reason} for url: ${page.url}`, 'http_status');
+    this.page = page;
+    this.statusCode = page.statusCode;
+    this.url = page.url;
+  }
+}
 function nativeError(error) {
   const code = error.message.split(':', 1)[0];
   const Type =
@@ -228,6 +236,14 @@ export class Session extends Requests {
   }
 }
 export class Page extends Requests {
+  #response = null;
+
+  #httpResponse() {
+    if (this.#response === null)
+      throw new RuntimeError('page has no HTTP response', 'invalid_input');
+    return this.#response;
+  }
+
   advanceTime(milliseconds, { maxTasks = 10000 } = {}) {
     return invoke(() => this._inner.advanceTime(milliseconds, maxTasks), this._pageId);
   }
@@ -258,7 +274,6 @@ export class Page extends Requests {
     this._inner = inner;
     this._session = session;
     this._pageId = inner.id;
-    this.response = null;
     this._subscriptions = new Set();
     this._routes = new Set();
   }
@@ -430,29 +445,59 @@ export class Page extends Requests {
           ),
         this._pageId,
       );
-      this.response = new Response(result);
+      this.#response = new ResponseSnapshot(result);
       return this;
     } finally {
       signal?.removeEventListener('abort', abort);
     }
   }
   get statusCode() {
-    return this.response.statusCode;
+    return this.#httpResponse().statusCode;
+  }
+  get reason() {
+    return this.#httpResponse().reason;
   }
   get content() {
-    return this.response.content;
+    return this.#httpResponse().content;
   }
   get text() {
-    return this.response.text;
+    return this.#httpResponse().text;
   }
   get url() {
-    return this.response.url;
+    return this.#httpResponse().url;
   }
   get headers() {
-    return this.response.headers;
+    return this.#httpResponse().headers;
+  }
+  get cookies() {
+    return this.#httpResponse().cookies;
+  }
+  get history() {
+    return this.#httpResponse().history;
+  }
+  get requestInfo() {
+    return this.#httpResponse().request;
+  }
+  get elapsed() {
+    return this.#httpResponse().elapsed;
+  }
+  get httpVersion() {
+    return this.#httpResponse().httpVersion;
+  }
+  get downloadedBytes() {
+    return this.#httpResponse().downloadedBytes;
+  }
+  get uploadedBytes() {
+    return this.#httpResponse().uploadedBytes;
+  }
+  get headerBytes() {
+    return this.#httpResponse().headerBytes;
   }
   json() {
-    return this.response.json();
+    return this.#httpResponse().json();
+  }
+  raiseForStatus() {
+    if (this.statusCode >= 400 && this.statusCode < 600) throw new HTTPError(this);
   }
   async evaluate(source) {
     return decode(JSON.parse(await invoke(() => this._inner.evaluate(source), this._pageId)));
@@ -510,14 +555,14 @@ export class Page extends Requests {
   }
   async loadHtml(html, url = 'about:blank') {
     const result = await invoke(() => this._inner.loadHtml(html, url), this._pageId);
-    this.response = null;
+    this.#response = null;
     return result;
   }
   close() {
     return invoke(() => this._inner.close(), this._pageId);
   }
 }
-export class Response {
+class ResponseSnapshot {
   constructor({ metadata, content }) {
     this.statusCode = metadata.status_code;
     this.reason = metadata.reason;

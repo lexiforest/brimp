@@ -47,6 +47,24 @@ def _headers(value):
     return list(value.items()) if hasattr(value, "items") else list(value or ())
 
 
+class HTTPError(RuntimeError):
+    """An HTTP 4xx/5xx status, raised explicitly by Page.raise_for_status.
+
+    page retains access to the body and live DOM. status_code and url record
+    the failed response even if that page subsequently navigates again.
+    """
+
+    page: "Page"
+    status_code: int
+    url: str
+
+    def __init__(self, page):
+        self.page = page
+        self.status_code = page.status_code
+        self.url = page.url
+        super().__init__(f"HTTP {self.status_code} {page.reason} for url: {self.url}")
+
+
 class _Requests:
     def get(self, url, **kwargs):
         return self.request("GET", url, **kwargs)
@@ -183,10 +201,14 @@ class Session(_Requests):
 
 
 class Page(_Requests):
-    """A reusable page with a response snapshot and a live browser realm.
+    """An HTTP result and its live DOM and JavaScript environment.
 
     Obtain pages from Session. Navigation replaces the realm and invalidates
-    old handles. Closing a page cancels its work; the session also owns cleanup.
+    old handles, and a successful request replaces the HTTP metadata. text and
+    content contain the original response; html() serializes the current DOM.
+    HTTP properties require a response: new_page() and load_html() have none.
+    Headers and response cookies are lists of pairs. elapsed is seconds.
+    Closing a page cancels its work; the session also owns cleanup.
     """
 
     def advance_time(self, milliseconds, *, max_tasks=10000):
@@ -224,7 +246,7 @@ class Page(_Requests):
     def __init__(self, inner, session):
         self._inner = inner
         self._session = session
-        self.response = None
+        self._response = None
         self._subscriptions = set()
         self._routes = set()
 
@@ -264,7 +286,7 @@ class Page(_Requests):
         fetched. Init scripts still run.
         """
         result = self._inner.load_html(html, url)
-        self.response = None
+        self._response = None
         return result
 
     def set_identity(self, *, user_agent=None, languages=None, platform=None):
@@ -366,31 +388,92 @@ class Page(_Requests):
         result = self._inner.request(
             method, url, pairs, body, timeout, allow_redirects, max_redirects
         )
-        self.response = Response(result)
+        self._response = _Response(result)
         return self
+
+    def _http_response(self):
+        if self._response is None:
+            raise InvalidInput("page has no HTTP response")
+        return self._response
 
     @property
     def status_code(self):
-        return self.response.status_code
+        return self._http_response().status_code
+
+    @property
+    def reason(self):
+        return self._http_response().reason
 
     @property
     def content(self):
-        return self.response.content
+        return self._http_response().content
 
     @property
     def text(self):
-        return self.response.text
+        return self._http_response().text
 
     @property
     def url(self):
-        return self.response.url
+        return self._http_response().url
 
     @property
     def headers(self):
-        return self.response.headers
+        return self._http_response().headers
+
+    @property
+    def cookies(self):
+        return self._http_response().cookies
+
+    @property
+    def history(self):
+        return self._http_response().history
+
+    @property
+    def request_info(self):
+        """The original HTTP request record; request() navigates the page."""
+        return self._http_response().request
+
+    @property
+    def elapsed(self):
+        return self._http_response().elapsed
+
+    @property
+    def http_version(self):
+        return self._http_response().http_version
+
+    @property
+    def downloaded_bytes(self):
+        return self._http_response().downloaded_bytes
+
+    @property
+    def uploaded_bytes(self):
+        return self._http_response().uploaded_bytes
+
+    @property
+    def header_bytes(self):
+        return self._http_response().header_bytes
+
+    @property
+    def encoding(self):
+        """Encoding used by text; override it to change response decoding."""
+        return self._http_response().encoding
+
+    @encoding.setter
+    def encoding(self, value):
+        self._http_response().encoding = value
 
     def json(self):
-        return self.response.json()
+        """Decode the original HTTP response body as JSON."""
+        return self._http_response().json()
+
+    def raise_for_status(self):
+        """Raise HTTPError for a 4xx/5xx response; otherwise return None.
+
+        HTTP statuses do not raise automatically during navigation. A page
+        without an HTTP response raises InvalidInput.
+        """
+        if 400 <= self.status_code < 600:
+            raise HTTPError(self)
 
     def evaluate(self, source):
         """Evaluate browser JavaScript, await Promises, and copy rich bridge values."""
@@ -464,15 +547,9 @@ class Page(_Requests):
         self.close()
 
 
-class Response:
-    """Original HTTP response bytes and metadata; created by page navigation.
+class _Response:
+    """Private HTTP snapshot, replaced after each successful page request."""
 
-    headers and cookies are lists of pairs, not mutable session configuration.
-    elapsed is seconds. text decodes content using encoding. html is the optional
-    navigation-time HTML snapshot; use Page.html() for subsequent DOM edits.
-    """
-
-    html: str | None
     status_code: int
     reason: str
     url: str

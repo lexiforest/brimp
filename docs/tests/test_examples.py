@@ -33,14 +33,16 @@ EXPECTED = {
         "Request cancelled",
         "experiment=rendered",
     ],
-    "examples/fetch.md": ["Edited article", "Hello from JavaScript", "route", "53248", ""],
+    "examples/fetch.md": ["Edited article", "Edited article", "route", "53248", ""],
+    "guides/automation.md": ["Hello from JavaScript", "theme=dark", "GET", "route"],
+    "guides/plugins.md": ["Hello from JavaScript", "Hello from JavaScript", "A", "dark", "42"],
     "architecture/javascript-runtime.md": [
         "Hello from JavaScript",
         "Hello from JavaScript",
         "The previous realm is gone",
         "42",
     ],
-    "architecture/subsystems.md": ["32", "host-storage", "42"],
+    "examples/plugins.md": ["32", "Hello from JavaScript", "42"],
 }
 
 
@@ -92,6 +94,11 @@ def server():
 @pytest.mark.parametrize("language,code,expected", list(examples()))
 def test_tutorial(language, code, expected, server, tmp_path):
     code = code.replace("http://127.0.0.1:8765", server)
+    # This guide loads an installer from the source checkout.
+    code = code.replace(
+        "examples/plugins/realm-library.js",
+        (ROOT / "examples/plugins/realm-library.js").as_posix(),
+    )
     env = dict(os.environ, PYTHONPATH=str(ROOT / "bindings/python/python"))
     if language == "python":
         command = [sys.executable, "-c", code]

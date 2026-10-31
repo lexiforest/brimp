@@ -90,10 +90,38 @@ Validate an artifact set:
 python bindings/package_node.py --validate --all --out dist/node
 ```
 
+## Standalone CLI archives
+
+The CLI and Node package use `bindings/native_runtime.py` to bundle and relocate
+the same runtime libraries. The CLI archive contains its executable, native
+libraries, dependency licenses, and a manifest with file hashes. Linux and macOS
+use tar.gz archives; Windows uses a ZIP with the DLLs beside `brimp.exe`.
+
+Build and package the CLI using the SDK environment from [Build from source](/development/build-from-source/):
+
+```sh
+cargo build --release --locked -p brimp-cli
+python bindings/package_cli.py \
+  --target aarch64-apple-darwin \
+  --jsc-sdk .native/release/jsc --curl-sdk .native/release/curl \
+  --licenses .native/release/licenses --out dist/cli
+python bindings/package_cli.py --validate --out dist/cli
+```
+
+Each archive has a `.sha256` sidecar. To test an archive, set `BRIMP_CLI_ARCHIVE`
+to its path and run `python -m pytest bindings/test_cli_distribution.py`. The
+tests unpack it into a temporary directory and hide the build SDKs while checking
+runtime initialization, JavaScript, networking, and article extraction.
+
+The release matrix builds the CLI alongside the bindings to reuse their compiled
+dependencies. The publish job requires all four CLI archives and verifies their
+manifests before uploading them. The installer at `https://brimp.ai/install.sh`
+downloads the matching archive and checksum from the GitHub release.
+
 ## Release workflow
 
 `.github/workflows/release.yml` runs on `v*` tags. It builds the four wheels and
-the four platform packages, installs and smoke-tests them, verifies the tag
+the four platform packages and four CLI archives, installs and smoke-tests them, verifies the tag
 matches the workspace version, writes `SHA256SUMS`, publishes wheels to PyPI
 with trusted publishing, publishes npm packages with provenance, and creates a
 GitHub release.

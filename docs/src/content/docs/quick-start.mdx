@@ -9,12 +9,18 @@ Brimp, then extract the article as Markdown.
 
 ## 1. Start the example site
 
-Complete [installation](/install/), then run this from the repository root in a
-separate terminal:
+[Install Brimp](/install/) for your chosen interface. The examples below use a
+small local website so their output is reproducible. The package does not include
+that website; get it from the repository in a separate terminal:
 
 ```sh
+git clone https://github.com/lexiforest/brimp.git
+cd brimp
 python3 docs/fixtures/server.py
 ```
+
+On Windows, use `python` if `python3` is not available. The server uses only the
+Python standard library; it does not need Brimp installed.
 
 Keep it running at `http://127.0.0.1:8765`. The examples use this local site so
 that you can reproduce the results without relying on a public website.
@@ -25,12 +31,13 @@ Pick one interface. All three use the same runtime.
 
 ### Python
 
-Save this as `first_page.py`, then run `python first_page.py`:
+In the environment where you installed Brimp, save this as `first_page.py`,
+then run `python first_page.py`:
 
 ```python
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.get("http://127.0.0.1:8765/")
     print(page.status_code)
     print(page.evaluate("document.querySelector('h1').textContent"))
@@ -38,7 +45,8 @@ with Session() as session:
 
 ### Node.js
 
-Save this as `first-page.mjs`, then run `node first-page.mjs`:
+In the application directory where you installed `@brimp/brimp`, save this as
+`first-page.mjs`, then run `node first-page.mjs`:
 
 ```js
 import { createSession } from '@brimp/brimp';
@@ -74,10 +82,9 @@ The CLI writes the evaluated value as JSON: `"Hello from JavaScript"`.
 brimp fetch http://127.0.0.1:8765/ --format markdown
 ```
 
-The output contains **Hello from JavaScript** and the article text. Markdown and
-extraction JSON output automatically select the bundled Defuddle plugin.
-Python and Node sessions select it explicitly; try the
-[extraction tutorial](/examples/fetch/).
+The output contains **Hello from JavaScript** and the article text. The CLI loads
+its article-extraction plugin for Markdown and extraction JSON output. To extract
+from Python or Node.js, follow the [extraction tutorial](/examples/fetch/).
 
 ## What you just used
 

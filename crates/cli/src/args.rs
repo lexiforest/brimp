@@ -5,7 +5,7 @@ use std::{path::PathBuf, time::Duration};
 #[command(
     name = "brimp",
     version,
-    about = "A JavaScript runtime for JavaScript from the browser"
+    about = "Scalable browser runtime for agents."
 )]
 pub struct Cli {
     #[command(subcommand)]

@@ -64,6 +64,10 @@ core Typed OM and geometry APIs, without document measurement or rendering.
 
 ## Geometry and UI methods
 
+Geometry supports points, rectangles, quads and affine 2D matrices without layout.
+Typed OM supports unit values and inline attributeStyleMap edits, without cascade
+or general compound-unit algebra.
+
 Dimensions are zero placeholders; scroll offsets can store local values without
 scrolling. Animation, fullscreen, hit-testing and editing calls do not create UI
 effects, promises or geometry results.

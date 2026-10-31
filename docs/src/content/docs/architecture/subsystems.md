@@ -1,142 +1,85 @@
 ---
-title: Core APIs and plugins
+title: Subsystem responsibilities
+description: Decide where browser behavior and native resources belong in Brimp.
 ---
 
-Brimp combines JavaScriptCore, a canonical Lexbor DOM, and curl-impersonate.
-DOM APIs and shared infrastructure live in core. Browser subsystem plugins are
-installed by default, including their placeholders and synthetic behavior. An
-explicit plugin list replaces the defaults; an empty list selects core only. CLI
-Markdown/JSON extraction also selects Defuddle.
+This page is for contributors changing the runtime. To select or write a plugin
+for an application, start with the [plugin tutorial](/examples/plugins/) and
+[usage guide](/guides/plugins/). For API coverage, use [Browser support](/web-platform/).
 
-In this walkthrough, you will use core crypto, inspect plugin options and add a
-host-backed lookup function to page JavaScript.
+## Core runtime and plugins
 
-## 1. Use a core API without a plugin
+Core provides the document and infrastructure used by every page. Plugins provide
+browser subsystems that a session can select or replace.
 
-```python
-from brimp import Session
+| Core | Plugins |
+| --- | --- |
+| DOM parsing, mutation, events and shared lifecycle | Audio, graphics, RTC, device services and other browser subsystems |
+| Script loading, scheduling, Fetch and shared storage | Subsystem constructors, state, placeholders and backend integration |
+| Page and realm ownership | Per-realm installers and cleanup; optional host handlers |
 
-with Session() as session:
-    page = session.new_page()
-    length = page.evaluate("""
-      crypto.subtle.digest('SHA-256', new TextEncoder().encode('hello'))
-        .then(buffer => buffer.byteLength)
-    """)
-    print(length)
-```
+Core versus plugin is independent of Rust versus JavaScript. Both layers can
+use JavaScript implementations backed by native code.
 
-Expect `32`. WebCrypto belongs in core; it does not need an installer.
+Keep ownership, default activation, and backend capability separate. A plugin
+can be enabled by default even when it supplies synthetic behavior rather than
+a device backend. Core currently owns geometry, Typed OM, ImageData, navigator
+identity, Web Locks, and browser storage. MediaEncryptedEvent belongs to media;
+SpeechSynthesisUtterance belongs to audio. Canvas context selection is core,
+while plugins register the contexts they implement.
 
-## 2. Choose a bundled plugin
+## Preserve the calls browser scripts depend on
 
-Inspect capabilities without creating a page:
+External page scripts may call an API and discard its result. A placeholder can
+therefore be required for the script to continue. Replacing a harmless call with
+a throw or rejection can break a workload even if the new result resembles a
+stricter interpretation of the standard.
 
-```python
-from brimp import plugins
-print(plugins.catalog())
-```
+Keep each browser subsystem's constructors, state, placeholders and backend
+integration together. Assess changes to return values, callbacks, Promise
+behavior, and exposure against the scripts that use them. A missing backend
+alone is not a reason to remove a callable API.
 
-Browser storage is a core API. For optional application-specific storage, use
-`plugins.host_storage()` with a backend. Its [contract](/guides/plugins/) includes
-a SQLite example. Core localStorage, CacheStorage and IndexedDB share origin state
-within a session; `storage_path` optionally persists their committed contents.
+Plugins should reuse the runtime's DOM, scheduling, and lifecycle. Avoid a second
+implementation of infrastructure already shared by pages.
 
-## 3. Connect page code to a host handler
+## Rust and JavaScript responsibilities
 
-```python
-from brimp import Session, Plugin
+JavaScript implements browser-facing objects, properties, coercion, callbacks,
+and object identity. Rust connects these objects to native resources, owns their
+lifetime and authoritative state, and enforces rules that page code must not
+bypass.
 
-lookup = Plugin(
-    name="lookup",
-    source="""({global, host}) => {
-      global.lookup = value => host.call('lookup', value);
-      return () => { delete global.lookup; };
-    }""",
-    handlers={"lookup": lambda context, value: {"answer": value + 1}},
-)
-with Session(plugins=[lookup]) as session:
-    page = session.new_page()
-    print(page.evaluate("lookup(41)"))
-```
-
-Expect `{'answer': 42}`. The installer runs before document scripts and may return
-a disposer. `host.call()` returns a Promise; Python's synchronous handler receives
-a trusted `HostContext` and copied arguments. Node handlers may be asynchronous.
-
-![Page JavaScript, DOM and queued work remain on the owner thread; a plugin host handler receives copied values and returns its result through the task queue.](/diagrams/page-lifecycle.png)
-
-Host handlers can use realm-bound references; lifecycle/evaluation reentry and
-recursive host calls from callback handle operations are rejected. Navigation cancels pending realm
-calls and runs cleanup. For storage, partition by `context.origin`, not an origin
-supplied by page code.
-
-## 4. Check the boundary before adding a plugin
-
-Core owns DOM APIs and shared runtime infrastructure. Browser subsystems such as
-audio, graphics, RTC and device services belong in plugins, including their
-placeholders and synthetic behavior. A real backend is not required for a plugin
-to provide useful compatibility. Which plugins the default environment installs
-is a separate decision from ownership.
-
-The tables below describe current coverage. Constructor presence is not evidence
-of a full graphics, audio or worker implementation, but those callable surfaces
-can still be required by browser scripts. See the [ownership policy](/guides/plugins/#core-runtime-and-plugins)
-before changing placement or exposure.
-
-## Core coverage
-
-| Area | Supported behavior | Limits |
+| Area | JavaScript | Rust and native libraries |
 | --- | --- | --- |
-| DOM | HTML/fragment parsing, selectors, mutation, serialization, collections, forms, traversal, XPath, MutationObserver and Shadow DOM | No rendering/layout; XPath iterator mutation invalidation and some Shadow DOM features are unsupported |
-| Lifecycle and ranges | readyState/readystatechange, DOMContentLoaded/load, live Range boundaries, clone/extract/delete/insert/surround contents and contextual fragments | No range geometry |
-| Files and values | Blob/File, asynchronous FileReader, URL/text encoding, structuredClone and message channels | No XML parsing, XMLSerializer or CryptoKey cloning |
-| Scripts and events | Classic/module scripts, parser suspension, timers, microtasks, DOM events and direct-node input | No coordinate hit-testing or browser Worker execution |
-| Network | Fetch/XHR, cookies, redirects, proxies, auth, WebSocket, EventSource, routes and native streaming bodies | No WebTransport; response interception buffers at most 32 MiB |
-| Streams | Readable/Writable/Transform streams, BYOB readers, closure, cancellation and backpressure via web-streams-polyfill | Unread fetch data has a 256 KiB native queue; an unread tee/clone branch can accumulate data |
-| CSS/SVG | Lexbor inline declarations, style/media/supports rule editing, style/link sheets, constructed/adopted sheets and generic SVG elements | Partial CSS grammar; no cascade, computed style or specialized SVG interfaces |
+| DOM | Classes, properties, collections and browser behavior | Lexbor tree, parsing and mutations |
+| Events and forms | Propagation, listeners, validation and control behavior | DOM access and host actions |
+| Fetch and WebSocket | Browser objects, Promises and streams | Network I/O, cookies, cancellation and buffering |
+| Timers | Public methods, callbacks and arguments | Clock, deadlines, scheduling and callback lifetime |
+| WebCrypto | Validation, binary conversion and Promise interfaces | Key ownership, policy enforcement and BoringSSL operations |
 
-DOM wrappers retain node identity, including detached nodes, until realm teardown.
-Navigation invalidates external handles. Each page owns its JavaScript realm and
-DOM arena on one owner thread.
+For example, a CryptoKey wrapper holds a reference to a native key. Changing the
+wrapper cannot grant permission to export a non-extractable key.
 
-## Core WebCrypto
+When adding behavior:
 
-The BoringSSL instance embedded in curl-impersonate serves both Python and Node. CryptoKey material and
-usage/extractability policy live in native realm state; JavaScript wrappers hold
-opaque handles. SubtleCrypto operations return Promises and copy binary inputs.
+1. Keep authoritative state with its existing owner.
+2. Put native access, lifetime management and trusted enforcement in Rust.
+3. Use JavaScript for browser object behavior that can call those operations.
+4. Reuse existing dependencies, and measure before moving work across the boundary.
 
-| Algorithms | Operations |
-| --- | --- |
-| SHA-1/256/384/512 | Digest |
-| HMAC | Key generation/import/export, signing and verification |
-| AES-GCM/CBC/CTR | 128/192/256-bit keys, encryption/decryption and key wrapping |
-| AES-KW | Key wrapping/unwrapping |
-| RSASSA-PKCS1-v1_5, RSA-PSS | Key generation/import/export, signing and verification |
-| RSA-OAEP | Encryption/decryption and key wrapping, including labels |
-| ECDSA | P-256/P-384/P-521 signatures |
-| ECDH | Shared-secret and key derivation on matching curves |
-| HKDF, PBKDF2 | Bit and key derivation |
+## API exposure and private state
 
-RSA/EC keys support SPKI, PKCS8 and JWK; EC public keys also support raw points.
-Symmetric keys support raw and JWK formats; HKDF/PBKDF2 base keys use raw import.
-Ed25519/X25519 and CryptoKey structured cloning are unsupported. Expensive native
-operations occupy the page owner thread. The complete algorithm and parameter
-contract is in [core web coverage](/web-platform/).
+Before page scripts run, core and plugin APIs receive the runtime's built-in
+function-source representation. Initialization preserves property flags and
+object identity and does not invoke getters. Page scripts can still replace
+mutable methods and add globals afterward.
 
-## Bundled plugins
+Keep runtime controls in native-held functions or private state. The private
+`__brimp*` properties must not be exposed to external page scripts. Plugin file
+URLs and raw host exception details belong in host diagnostics. Plugins remain
+trusted code and must deliberately choose what they expose.
 
-| Plugin | Behavior and limits |
-| --- | --- |
-| Host storage | Async hostStorage with atomic origin-partitioned batches; session memory by default, configurable backend for durability |
-| Defuddle | DOM/attribute/inline-style extraction required by page.extract() |
-| Canvas | State, solid rectangle/putImageData painting and real PNG encoding; paths, images and text do not rasterize |
-| Environment / Permissions / Devices | Navigator configuration, synthetic permissions and device-service placeholders |
-| Media / Workers / Trusted Types | Media objects, worker shapes and policy placeholders; no media/worker execution or policy enforcement |
-| Graphics | WebGL state/constants with profile vendor, renderer and extensions; legacy callable placeholders; optional WebGPU buffers; no shader execution or GPU rendering |
-| Audio | AudioBuffer and graph/lifecycle state; no processing, decoding or output |
-
-See the [generated Python plugin API](/reference/python/plugins/) and
-[Node API](/reference/node/) for installer signatures. The
-[plugin contract](/guides/plugins/)
-covers file loading, notification subscriptions, per-session setup/disposal,
-cancellation and storage backends.
+For the observed page boundary, see [Window and environment](/web-platform/environment/#page-and-host-boundary).
+For the files implementing these responsibilities, see
+[Follow a page through the runtime](/architecture/javascript-runtime/#follow-the-implementation).

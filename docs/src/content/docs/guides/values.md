@@ -3,10 +3,15 @@ title: Values and handles
 description: Copy values, retain JavaScript references, and load WebAssembly.
 ---
 
-Python and Node use the same runtime bridge for evaluation, handles and plugins.
-Python methods are synchronous; Node methods return Promises. Evaluation and
-function calls await page Promises while engine work, timers, host completions
-and networking continue on the page owner thread.
+Use `evaluate()` when you want a result copied into Python or Node.js. Use a
+**handle** when you want to keep a JavaScript object in the page and work with it
+later. A handle keeps that object alive until you dispose it, navigate the page,
+or close the page.
+
+The page's JavaScript environment is called a **realm**. Handles belong to that
+realm; they cannot be reused after navigation or in another page. Python calls
+are synchronous, while Node.js calls return Promises. Both wait for Promises
+returned by page code.
 
 | Page value | Python | Node |
 | --- | --- | --- |
@@ -18,27 +23,26 @@ and networking continue on the page owner thread.
 | Arrays and plain objects | copied lists and string-keyed dicts | copied arrays and objects |
 | Functions, DOM nodes, cyclic objects, class instances | explicit JSHandle | explicit JSHandle |
 
-Python integers outside ±(2^53−1) become BigInt; use `BigInt(1)` to request a
+Python integers outside ±(2^53−1) become BigInt; use `brimp.BigInt(1)` to request a
 small BigInt explicitly. Binary values copy only their visible byte range;
 typed-array element types, backing-buffer identity and shared memory are not
 transferred. Host bytes become a Uint8Array in the page. This is a copied-data
 bridge, not a structured-clone or shared-memory interface. Unsupported copied
 values raise errors; use references for identity and non-copyable values.
 
-`evaluate` copies values. `evaluate_handle` / `evaluateHandle` retains a rooted
-value. `value()` copies through the bridge; `json_value()` / `jsonValue()` explicitly
-uses JSON.stringify semantics. Dispose handles or close their page. Navigation
-invalidates references from the previous realm; foreign-realm references fail.
-Containers passed to calls may contain handles at any depth.
+`evaluate_handle()` / `evaluateHandle()` creates a handle. `value()` copies the
+held value; `json_value()` / `jsonValue()` converts it using `JSON.stringify`.
+Use the latter when you want JSON's conversion rules. You can pass handles inside
+arrays and objects when calling a page function.
 
 ```python
-from brimp import Session, BigInt
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.new_page()
     with page.evaluate_handle("function (n) { return this.base + n; }") as fn:
         with page.evaluate_handle("({base: 40n})") as receiver:
-            with fn.invoke(BigInt(2), this=receiver) as result:
+            with fn.invoke(brimp.BigInt(2), this=receiver) as result:
                 assert result.value() == 42
             receiver.set_property("self", receiver)
             assert receiver.delete_property("self")

@@ -6,7 +6,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'Brimp',
-      description: 'A JavaScript runtime for JavaScript from the browser.',
+      description: 'Scalable browser runtime for agents.',
       customCss: ['./src/styles/custom.css'],
       editLink: {
         baseUrl: 'https://github.com/lexiforest/brimp/edit/main/docs/',
@@ -30,6 +30,7 @@ export default defineConfig({
             { label: 'Node.js', slug: 'examples/node' },
             { label: 'CLI', slug: 'examples/cli' },
             { label: 'Extract, intercept and stream', slug: 'examples/fetch' },
+            { label: 'Add a plugin to a page', slug: 'examples/plugins' },
             { label: 'CLI workflows', slug: 'examples/cli-workflows' },
             { label: 'Debug page scripts', slug: 'examples/debugging' },
           ],
@@ -55,6 +56,7 @@ export default defineConfig({
             { label: 'CSS, SVG and geometry', slug: 'web-platform/css-svg' },
             { label: 'Network, files and streams', slug: 'web-platform/network-files' },
             { label: 'Cryptography', slug: 'web-platform/crypto' },
+            { label: 'Browser plugins', slug: 'web-platform/plugins' },
           ],
         },
         {
@@ -70,12 +72,13 @@ export default defineConfig({
           label: 'Architecture',
           items: [
             { label: 'Follow a page', slug: 'architecture/javascript-runtime' },
-            { label: 'Core APIs and plugins', slug: 'architecture/subsystems' },
+            { label: 'Subsystem responsibilities', slug: 'architecture/subsystems' },
           ],
         },
         {
           label: 'Development',
           items: [
+            { label: 'Build from source', slug: 'development/build-from-source' },
             { label: 'Build and test', slug: 'development' },
             { label: 'Package native bindings', slug: 'development/packaging' },
             { label: 'Network transport', slug: 'development/network' },

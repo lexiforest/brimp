@@ -12,7 +12,7 @@ Then pick the workflow you need:
 | [Node.js](/examples/node/) | Use async sessions, DOM handles, cancellation and identity options |
 | [CLI](/examples/cli/) | Evaluate JavaScript, save content and load a profile |
 | [Extract, intercept and stream](/examples/fetch/) | Extract Markdown, provide API responses and stream downloads |
-| [Core APIs and plugins](/architecture/subsystems/) | Choose a bundled plugin and connect a custom host handler |
+| [Add a plugin to a page](/examples/plugins/) | Choose a bundled plugin and connect a custom host handler |
 | [CLI workflows](/examples/cli-workflows/) | Configure actions, routes, plugin files, diagnostics and logical time |
 | [Debug page scripts](/examples/debugging/) | Retain callable functions and inspect observed API dependencies |
 

@@ -23,6 +23,7 @@ are selected explicitly. An explicit plugin list replaces the defaults.
 | [CSS, SVG and geometry](/web-platform/css-svg/) | Inline declarations, editable stylesheets, SVG DOM and attribute reflection | No computed style, layout, SVG renderer or animation engine |
 | [Network, files and streams](/web-platform/network-files/) | Fetch/XHR, Blob/File/FileReader, streams, structured cloning and message channels | Partial browser policies and body formats; cloning can buffer data |
 | [Cryptography](/web-platform/crypto/) | Random values, UUIDs and the documented WebCrypto algorithms | No Ed25519/X25519 or CryptoKey cloning |
+| [Browser plugins](/web-platform/plugins/) | Configured browser services, canvas state, graphics/audio objects and RTC payloads | Subsystem-specific placeholders; no GPU rendering, audio processing or worker execution |
 
 For JavaScript values crossing into Python or Node, see [Values and handles](/guides/values/).
 That host bridge has a different contract from page-side `structuredClone`.

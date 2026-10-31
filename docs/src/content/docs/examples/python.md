@@ -6,18 +6,17 @@ description: Read live HTML, send requests, keep cookies, edit the DOM and confi
 **You'll build:** a small script that requests a page, changes its DOM and saves
 the result. Each example is a complete program.
 
-**Before you start:** install the [Python binding](/install/#2-build-an-interface)
+**Before you start:** install the [Python package](/install/#python)
 and start the [local tutorial server](/quick-start/#1-start-the-example-site).
 
 ## 1. Compare the response with the live page
 
 ```python
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.get("http://127.0.0.1:8765/")
-    if page.status_code >= 400:
-        raise RuntimeError(f"HTTP {page.status_code}")
+    page.raise_for_status()
     print("Waiting for JavaScript" in page.text)
     print(page.evaluate("document.querySelector('h1').textContent"))
 ```
@@ -32,10 +31,10 @@ session constructor or the individual request.
 
 ```python
 from urllib.parse import urlencode
-from brimp import Session
+import brimp
 
 query = urlencode({"q": "browser", "tag": ["agents", "javascript"]}, doseq=True)
-with Session(headers={"X-Client": "brimp-example"}) as session:
+with brimp.Session(headers={"X-Client": "brimp-example"}) as session:
     page = session.get(
         f"http://127.0.0.1:8765/echo?{query}",
         headers={"X-Request-ID": "example-1"},
@@ -49,9 +48,9 @@ not the DOM.
 ## 3. Submit a form body
 
 ```python
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.post("http://127.0.0.1:8765/echo", data={"name": "Ada"})
     print(page.json())
 ```
@@ -62,9 +61,9 @@ bytes; don't pass `body` and `data` together.
 ## 4. Keep cookies between requests
 
 ```python
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     session.set_cookie("http://127.0.0.1:8765/", "experiment", "rendered")
     session.get("http://127.0.0.1:8765/")
     second = session.get("http://127.0.0.1:8765/echo")
@@ -80,9 +79,9 @@ requests in one session does not persist them to disk.
 
 ```python
 from pathlib import Path
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.get("http://127.0.0.1:8765/")
     page.fill("#name", "Ada")
     page.click("button[type=submit]")
@@ -101,16 +100,16 @@ stale. Input targets DOM elements without coordinate hit-testing.
 ## 6. Set browser identity and request timeouts
 
 ```python
-from brimp import Session
+import brimp
 
-with Session(languages=["en-US", "en"], timeout=10.0) as session:
+with brimp.Session(languages=["en-US", "en"], timeout=10.0) as session:
     page = session.get("http://127.0.0.1:8765/", timeout=5.0)
     print(page.evaluate("navigator.languages"))
 ```
 
 Expect `['en-US', 'en']`. Identity options are `user_agent`, `languages` and
 `platform`; arbitrary request headers cannot override profile-owned identity
-headers. Pass a [captured or partial profile](/guides/profiles/) with `Session(profile=...)`.
+headers. Pass a [captured or partial profile](/guides/profiles/) with `brimp.Session(profile=...)`.
 
 Next: [extract and stream content](/examples/fetch/), or browse the
 [generated Python API](/reference/python/).

@@ -78,6 +78,14 @@ export class StaleHandle extends RuntimeError {}
 export class Closed extends RuntimeError {}
 export class Timeout extends RuntimeError {}
 export class Reentry extends RuntimeError {}
+/** An HTTP 4xx/5xx status, raised explicitly by Page.raiseForStatus(). */
+export class HTTPError extends RuntimeError {
+  constructor(page: Page);
+  readonly page: Page;
+  /** Status and URL at the time of the error, retained across later navigation. */
+  readonly statusCode: number;
+  readonly url: string;
+}
 /** Create an in-process browser session. Close it to release all owned pages. */
 export function createSession(options?: SessionOptions): Promise<Session>;
 declare class Requests {
@@ -122,6 +130,9 @@ export interface ProfileReport {
   defaultsUsed: string[];
   capture: unknown;
 }
+/** An HTTP result and its live DOM. A successful request replaces its HTTP metadata.
+ * HTTP properties require a response; newPage() and loadHtml() have none.
+ */
 export class Page extends Requests {
   profileContract(): Promise<ProfileContract>;
   /** Registered runtime API shape claims, used to generate a browser capture plugin. */
@@ -138,13 +149,28 @@ export class Page extends Requests {
 
   stream(method: string, url: string, options?: RequestOptions): Promise<StreamingResponse>;
   private constructor();
-  readonly response: Response | null;
   readonly statusCode: number;
+  readonly reason: string;
   readonly content: Buffer;
+  /** Original HTTP response text. Use html() for the live DOM. */
   readonly text: string;
   readonly url: string;
   readonly headers: [string, string][];
+  readonly cookies: [string, string][];
+  readonly history: Redirect[];
+  /** Original HTTP request record; request() navigates the page. */
+  readonly requestInfo: RequestRecord;
+  /** Milliseconds. */
+  readonly elapsed: number;
+  readonly httpVersion: string | null;
+  readonly downloadedBytes: number;
+  readonly uploadedBytes: number;
+  readonly headerBytes: number;
   json(): JSONValue;
+  /** Throw HTTPError for a 4xx/5xx response. Other HTTP statuses return normally.
+   * A page without an HTTP response throws RuntimeError with code invalid_input.
+   */
+  raiseForStatus(): void;
   /** Evaluate browser JavaScript, await Promises, and copy rich values, including bigint and binary buffers. */
   evaluate(source: string): Promise<CopiedValue>;
   evaluateHandle(source: string): Promise<JSHandle>;
@@ -168,26 +194,6 @@ export class Page extends Requests {
   /** Load HTML at `url` without page scripts or subresources; `url` defaults to about:blank. */
   loadHtml(html: string, url?: string): Promise<void>;
   close(): Promise<void>;
-}
-/** Original HTTP response bytes and metadata. Use Page.html() for the live DOM. */
-export class Response {
-  private constructor();
-  readonly statusCode: number;
-  readonly reason: string;
-  readonly url: string;
-  readonly headers: [string, string][];
-  readonly cookies: [string, string][];
-  readonly history: Redirect[];
-  readonly request: RequestRecord;
-  /** Milliseconds. */
-  readonly elapsed: number;
-  readonly httpVersion: string | null;
-  readonly downloadedBytes: number;
-  readonly uploadedBytes: number;
-  readonly headerBytes: number;
-  readonly content: Buffer;
-  readonly text: string;
-  json(): JSONValue;
 }
 /** Rooted JavaScript value. Dispose it when finished; navigation makes it stale. */
 export class JSHandle {

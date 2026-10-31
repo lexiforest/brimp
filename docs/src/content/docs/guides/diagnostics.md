@@ -15,8 +15,8 @@ page scripts, after plugins, and remain active across navigation. This is a
 tracing facility; it does not provide interactive debugger stepping.
 
 ```python
-from brimp import Session
-with Session(diagnostics={"path": "trace.jsonl", "include": ["Navigator.prototype", "Reflect"],
+import brimp
+with brimp.Session(diagnostics={"path": "trace.jsonl", "include": ["Navigator.prototype", "Reflect"],
                           "capacity": 4096, "stack": True}) as session:
     page = session.new_page()
     page.evaluate("navigator.userAgent; Reflect.has(navigator, 'webdriver'); null")
@@ -170,7 +170,7 @@ const summary = await page.summarizeDiagnostics();
 await session.close();
 ```
 
-Python accepts `Session(diagnostics={"mode": "recursive"})`. Rust exposes
+Python accepts `brimp.Session(diagnostics={"mode": "recursive"})`. Rust exposes
 `DiagnosticsOptions { mode: TraceMode::Recursive, ..Default::default() }`.
 
 Recursive mode follows configurable browser/plugin roots and the `window`,
@@ -235,8 +235,8 @@ behavior independently of whether their calls are traced.
 ## Logical time
 
 ```python
-from brimp import Session, plugins
-with Session(time_mode="logical", time_origin=1700000000000,
+import brimp
+with brimp.Session(time_mode="logical", time_origin=1700000000000,
              diagnostics={"path": "trace.jsonl", "include": ["Document.prototype"]}) as session:
     page = session.new_page()
     page.evaluate("globalThis.times=[]; setTimeout(()=>times.push(Date.now()), 50); null")

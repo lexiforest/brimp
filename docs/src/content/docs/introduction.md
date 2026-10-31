@@ -1,67 +1,52 @@
 ---
 title: Introduction
+description: Use browser JavaScript from a request-and-response workflow.
 ---
 
-**A JavaScript runtime for JavaScript from the browser.**
+Brimp fetches web pages, runs their JavaScript, and gives you the updated HTML.
+Use it from Python, Node.js, or the command line to extract content or automate
+small DOM workflows.
 
-Brimp combines JavaScriptCore,
-Lexbor, and curl-impersonate behind an in-process CLI, synchronous Python APIs
-and asynchronous Node APIs.
-It runs page scripts and maintains a live DOM without rendering or layout.
+## When an HTTP response is not enough
 
-## Common web in core, specialized APIs in plugins
+A site may return an HTML shell and use JavaScript to add its useful content.
+An HTTP client retrieves the shell. Brimp also executes the page's scripts, so
+you can query the document they create, follow links, fill forms, and extract text.
 
-Common web APIs belong in core: DOM parsing and mutation, forms, non-rendering stylesheet editing, events, script loading,
-Fetch/XHR, Web Streams, FileReader, structured cloning, and WebCrypto. Pages run
-in independent JavaScript realms, with handles and typed events exposed to the host.
+You keep a familiar request-and-response workflow: open a session, request a
+page, inspect the result, then close the session. The [quick start](/quick-start/)
+shows a heading changing from `Waiting for JavaScript` to `Hello from JavaScript`.
 
-Plugins add capabilities for specific workloads. Install bundled plugins or
-provide your own JavaScript installer and host handlers. Storage lifetimes and
-mock behavior are explicit. Default sessions install browser subsystem plugins, including their synthetic
-compatibility behavior. An explicit plugin list replaces that set. The CLI also
-installs extraction for Markdown/JSON output.
+## The objects you work with
 
-Start with the [quick start](/quick-start/), [API](/api/), and
-[plugin support](/architecture/subsystems/).
+- A **session** owns pages and shares cookies, connections, and request defaults.
+- A **page** holds the HTTP response and the current document. Its JavaScript can
+  change that document after the response arrives.
+- The **DOM** is the document tree you query and edit. `page.text` reads the
+  original response; `page.html()` serializes the current DOM.
 
-## Why Brimp
+Python operations are synchronous. Node.js operations return Promises. The CLI
+provides the same runtime for shell workflows. All three run Brimp in process;
+they do not launch Chromium or a CDP server.
 
-Many sites return an HTML shell and rely on JavaScript to produce the useful
-content. A request library retrieves the shell but does not execute the page.
-Chromium solves that problem, but its process model and resource footprint are
-often excessive for extraction agents and bounded automation jobs.
+## Choose Brimp or a full browser
 
-Brimp keeps a request/response workflow while adding the browser layers those
-pages need:
+Brimp suits JavaScript-updated HTML, article extraction, shared-cookie requests,
+and DOM interaction that does not depend on visual layout. It includes a
+JavaScript engine, HTML parser, and network stack: JavaScriptCore, Lexbor, and
+curl-impersonate. Browser profiles configure identity and other browser values.
 
-- JavaScript execution and DOM mutation;
-- inline styles and non-rendering stylesheet editing;
-- navigation, subresources, cookies, timers, events, and `fetch()`;
-- curl-impersonate transport profiles for HTTP/TLS behavior; and
-- coherent, configurable browser profiles.
+Use a full browser through Playwright when you need screenshots, layout-based
+interaction, media playback, browser workers, extensions, or CDP. Some browser
+APIs in Brimp are placeholders so scripts can call them without stopping; check
+the [browser support reference](/web-platform/) before relying on their results.
 
-## One runtime, 3 interfaces
+## Start with one workflow
 
-The CLI, Python binding, Node binding all delegate to the same
-`brimp-runtime` automation boundary. They do not contain separate browser
-implementations.
+1. [Install the Python or Node.js package](/install/), or build the CLI.
+2. [Read your first live page](/quick-start/).
+3. Continue with the [Python](/examples/python/), [Node.js](/examples/node/), or
+   [CLI](/examples/cli/) tutorial.
 
-![The CLI, Python and Node interfaces share brimp-runtime, which composes brimp-jsc and JavaScriptCore, brimp-lexbor and Lexbor, and brimp-net and curl-impersonate.](/diagrams/runtime-layers.png)
-
-All three interfaces run the runtime in process. Each page owns its JavaScript
-realm and DOM; a session shares cookies, connections and plugin configuration.
-
-## When to use Brimp
-
-Brimp is a good fit when you need JavaScript-rendered HTML, structured
-evaluation, cookies shared across requests, or a small DOM automation
-workflow without launching Chromium.
-
-Brimp is not a complete replacement for every browser automation workload. It
-implements a deliberate subset of web APIs. It does not expose a visual
-browser UI, layout, screenshots, browser worker processes, Chrome extensions,
-or a CDP server. Choose a full browser such as Chromium through Playwright
-when your task needs those capabilities.
-
-See the [API overview](/api/) for the exact public interfaces and their current
-limits.
+For how the engine, DOM, networking, and plugins fit together, see
+[Architecture](/architecture/javascript-runtime/).

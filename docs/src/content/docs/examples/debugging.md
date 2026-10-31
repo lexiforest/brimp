@@ -165,4 +165,4 @@ Logical time controls Date, performance and scheduled timers. It does not seed
 Math.random or crypto randomness, serialize live network races, or control host
 completion order. Use explicit routes and plugin fixtures for reproducible inputs;
 real operation deadlines remain active. Specialized canvas, graphics and device
-behavior still follows each [plugin's documented limits](/architecture/subsystems/).
+behavior still follows each [plugin's documented limits](/web-platform/plugins/).

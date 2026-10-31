@@ -1,7 +1,7 @@
 {
   "name": "@brimp/brimp",
   "version": "0.1.2",
-  "description": "In-process browser JavaScript runtime with JavaScriptCore, Lexbor and curl-impersonate",
+  "description": "Scalable browser runtime for agents.",
   "license": "MIT",
   "repository": {
     "type": "git",

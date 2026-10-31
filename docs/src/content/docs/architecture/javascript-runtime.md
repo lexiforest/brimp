@@ -11,8 +11,86 @@ second navigation. Start the [local tutorial server](/quick-start/#1-start-the-e
 ![Python, Node and the CLI submit commands to a page owner thread. Its JSC realm and Lexbor DOM stay together; transport and host callbacks return copied results through the task queue.](/diagrams/page-lifecycle.png)
 
 The host API sends typed commands with owned values to the page's owner thread.
-That thread owns the JavaScriptCore realm, protected JS values, Lexbor DOM arena
-and task queue. Native pointers stay on the owner thread.
+That thread owns the page's JavaScript environment (its realm), DOM tree, and
+queued tasks. Native objects stay on that thread; host calls exchange values
+and handles with it.
+
+## 2. Observe page script execution
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    print("Waiting for JavaScript" in page.text)
+    print(page.evaluate("document.querySelector('h1').textContent"))
+```
+
+Expect `True` and `Hello from JavaScript`. The HTML parser pauses for a blocking
+script, executes it against the same DOM tree, then resumes. Deferred, async and
+module scripts use the runtime's scheduling and cancellation rules.
+
+## 3. Keep a detached node alive
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    heading = page.query_selector("h1")
+    if heading is not None:
+        with heading:
+            heading.remove()
+            print(heading.text_content())
+```
+
+The detached handle still prints `Hello from JavaScript`. A handle keeps its
+JavaScript value alive; removing its DOM node does not invalidate that identity.
+
+## 4. Navigate to a new realm
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    heading = page.query_selector("h1")
+    if heading is not None:
+        page.get("http://127.0.0.1:8765/article")
+        try:
+            heading.text_content()
+        except brimp.StaleHandle:
+            print("The previous realm is gone")
+```
+
+Navigation invalidates old realm tokens, releases roots and cancels pending
+realm work. Query the new page again to obtain fresh handles.
+
+## 5. Await a Promise while work continues
+
+```python
+import brimp
+
+with brimp.Session(time_mode="logical") as session:
+    page = session.new_page()
+    print(page.evaluate("new Promise(resolve => setTimeout(() => resolve(42), 50))"))
+```
+
+Expect `42`. Evaluation pumps timers, networking and host completions while it
+awaits a Promise. Logical mode can advance to the next timer automatically.
+Promise callbacks, `queueMicrotask` and MutationObserver delivery share the
+engine's microtask queue. Network and cancellation deadlines still use real time.
+
+## Follow the implementation
+
+| Responsibility | Crate |
+| --- | --- |
+| Browser policy, sessions, plugins and task scheduling | `brimp-runtime` |
+| Engine bindings and protected values | `brimp-jsc` |
+| Safe DOM arena; private C/FFI boundary | `brimp-lexbor` |
+| HTTP and WebSocket transport | [`brimp-net`](/development/network/) |
+
+### Runtime source files
 
 The Rust implementation keeps `Page` state, construction, realm reset and
 destruction together in `crates/runtime/src/runtime/page.rs`. Its child modules
@@ -28,12 +106,7 @@ extend the same `Page` type:
 | `options.rs` | Page configuration and its builder |
 | `scripts.rs` | Script discovery, loading and execution order |
 
-These are private implementation modules. Public types remain available through
-`brimp_runtime::runtime`; moving a method into a child module does not introduce
-a separate page object or change its resource ownership.
-
-The host API is organized separately under `runtime/native/`. Its parent
-`native.rs` exposes the public types at their existing paths:
+Host operations are implemented under `runtime/native/`:
 
 | Module under `runtime/native/` | Responsibility |
 | --- | --- |
@@ -54,79 +127,4 @@ policy to callback-driven Fetch and EventSource streams inside the page. The hos
 streaming API lives in `native/streaming.rs`, where consumers pull response chunks
 through `BodyStream`; it shares the request policy helpers.
 
-## 2. Observe page script execution
-
-```python
-from brimp import Session
-
-with Session() as session:
-    page = session.get("http://127.0.0.1:8765/")
-    print("Waiting for JavaScript" in page.text)
-    print(page.evaluate("document.querySelector('h1').textContent"))
-```
-
-Expect `True` and `Hello from JavaScript`. The HTML parser pauses for a blocking
-script, executes it against the same DOM tree, then resumes. Deferred, async and
-module scripts use the runtime's scheduling and cancellation rules.
-
-## 3. Keep a detached node alive
-
-```python
-from brimp import Session
-
-with Session() as session:
-    page = session.get("http://127.0.0.1:8765/")
-    heading = page.query_selector("h1")
-    if heading is not None:
-        with heading:
-            heading.remove()
-            print(heading.text_content())
-```
-
-The detached handle still prints `Hello from JavaScript`. A handle keeps a rooted
-JS value; removing its DOM node does not invalidate that identity.
-
-## 4. Navigate to a new realm
-
-```python
-from brimp import Session, StaleHandle
-
-with Session() as session:
-    page = session.get("http://127.0.0.1:8765/")
-    heading = page.query_selector("h1")
-    if heading is not None:
-        page.get("http://127.0.0.1:8765/article")
-        try:
-            heading.text_content()
-        except StaleHandle:
-            print("The previous realm is gone")
-```
-
-Navigation invalidates old realm tokens, releases roots and cancels pending
-realm work. Query the new page again to obtain fresh handles.
-
-## 5. Await a Promise while work continues
-
-```python
-from brimp import Session
-
-with Session(time_mode="logical") as session:
-    page = session.new_page()
-    print(page.evaluate("new Promise(resolve => setTimeout(() => resolve(42), 50))"))
-```
-
-Expect `42`. Evaluation pumps timers, networking and host completions while it
-awaits a Promise. Logical mode can advance to the next timer automatically.
-Promise callbacks, `queueMicrotask` and MutationObserver delivery share the
-engine's microtask queue. Network and cancellation deadlines still use real time.
-
-## Follow the implementation
-
-| Responsibility | Crate |
-| --- | --- |
-| Browser policy, sessions, plugins and task scheduling | `brimp-runtime` |
-| Engine bindings and protected values | `brimp-jsc` |
-| Safe DOM arena; private C/FFI boundary | `brimp-lexbor` |
-| HTTP and WebSocket transport | [`brimp-net`](/development/network/) |
-
-Next: [choose core APIs or a plugin](/architecture/subsystems/).
+Next: [subsystem responsibilities](/architecture/subsystems/).

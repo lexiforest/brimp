@@ -7,8 +7,6 @@ Use [the Python tutorial](/examples/python/) for runnable examples. Timeouts use
 
 ::: brimp.Page
 
-::: brimp.Response
-
 ::: brimp.JSHandle
 
 ::: brimp.ElementHandle

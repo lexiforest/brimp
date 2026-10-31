@@ -3,9 +3,13 @@ title: Capture browser profiles
 description: Measure values in a live browser and supply them to installed runtime interfaces.
 ---
 
-A profile supplies values to core DOM/browser interfaces and selected subsystem
-plugins. Each interface owns its defaults, validation rules and browser capture
-recipe. There is no separate complete schema to fill in by hand.
+A browser profile configures values such as user agent, language, screen size,
+and audio sample rate. Capture a profile from a real browser when you want Brimp
+to use its measured values, or supply a partial profile to change a few settings.
+Unspecified settings use defaults.
+
+Capturing a value does not add a missing browser capability. For example, a
+screen size configures what page scripts read; it does not create a layout engine.
 
 ## Capture from your browser
 
@@ -66,10 +70,10 @@ try {
 ```python
 import json
 from pathlib import Path
-from brimp import Session
+import brimp
 
 profile = json.loads(Path('browser-profile.json').read_text())
-with Session(profile=profile) as session:
+with brimp.Session(profile=profile) as session:
     page = session.new_page()
     print(page.profile_report())
     print(page.profile_contract())

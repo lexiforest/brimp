@@ -4,7 +4,7 @@ import threading
 import json
 from pathlib import Path
 import pytest
-from brimp import Session, JavaScriptError, StaleHandle, Closed
+from brimp import Session, JavaScriptError, StaleHandle, Closed, HTTPError, InvalidInput
 
 
 HTML = b"""<!doctype html><main><b>old</b></main><script>
@@ -16,6 +16,13 @@ document.querySelector('b').textContent = 'script';</script><p id="later">later<
 def server():
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
+            if self.path.startswith("/status/"):
+                self.send_response(int(self.path.rsplit("/", 1)[1]))
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Set-Cookie", "status=seen; Path=/")
+                self.end_headers()
+                self.wfile.write(HTML)
+                return
             if (
                 self.path == "/auth-challenge"
                 and self.headers.get("Authorization") != "Basic dXNlcjpwYXNz"
@@ -78,7 +85,16 @@ def test_request_script_dom_and_handles(server):
         with session.get(server + "/redirect") as page:
             assert page.status_code == 200
             assert page.content == HTML
-            assert len(page.response.history) == 1
+            assert len(page.history) == 1
+            assert page.history[0]["status_code"] == 302
+            assert page.request_info["method"] == "GET"
+            assert page.request_info["url"] == page.url == server + "/"
+            assert page.reason == "OK"
+            assert page.elapsed >= 0
+            assert page.downloaded_bytes == len(HTML)
+            assert page.uploaded_bytes == 0
+            assert page.header_bytes > 0
+            assert page.http_version.startswith("HTTP/")
             assert page.evaluate("beforeLater") is True
             with page.query_selector("main") as root:
                 node = root.query_selector("b")
@@ -104,10 +120,59 @@ def test_promises_bytes_and_errors(server):
     with Session() as session:
         page = session.post(server, body=b"\x00\xffhello")
         assert page.content == b"\x00\xffhello"
+        assert page.request_info["body"] == b"\x00\xffhello"
+        assert page.request_info["method"] == "POST"
         assert page.evaluate("new Promise(resolve => setTimeout(() => resolve(42), 5))") == 42
         with pytest.raises(JavaScriptError, match="boom"):
             page.evaluate("Promise.reject(new Error('boom'))")
         assert page.evaluate("42") == 42
+
+
+@pytest.mark.parametrize("status", [200, 302, 399, 400, 404, 499, 500, 599, 600])
+def test_raise_for_status_preserves_http_result_and_live_dom(server, status):
+    with Session() as session:
+        page = session.get(f"{server}/status/{status}", allow_redirects=False)
+        assert page.status_code == status
+        assert page.cookies == [["status", "seen"]]
+        assert page.content == HTML
+        assert page.evaluate("document.querySelector('b').textContent") == "script"
+        if 400 <= status < 600:
+            with pytest.raises(HTTPError) as caught:
+                page.raise_for_status()
+            error = caught.value
+            assert error.page is page
+            assert error.status_code == status
+            assert error.url == f"{server}/status/{status}"
+            assert str(status) in str(error) and error.url in str(error)
+            assert page.get(server) is page
+            assert page.raise_for_status() is None
+            assert page.history == []
+            assert error.status_code == status
+            assert error.url.endswith(f"/status/{status}")
+        else:
+            assert page.raise_for_status() is None
+
+
+def test_http_metadata_requires_navigation_and_resets_after_load_html(server):
+    with Session() as session:
+        page = session.new_page()
+        for read in (lambda: page.status_code, page.json, page.raise_for_status):
+            with pytest.raises(InvalidInput, match="no HTTP response"):
+                read()
+        page.get(server)
+        original = page.content
+        page.evaluate('document.body.innerHTML = "<h1>edited</h1>"')
+        assert "edited" in page.html()
+        assert page.content == original
+        page.encoding = "latin-1"
+        assert page.encoding == "latin-1"
+        page.get(server)
+        assert page.encoding == "utf-8"
+        page.load_html("<h1>local</h1>")
+        assert page.evaluate("document.querySelector('h1').textContent") == "local"
+        for read in (lambda: page.headers, lambda: page.request_info, page.raise_for_status):
+            with pytest.raises(InvalidInput, match="no HTTP response"):
+                read()
 
 
 def test_concurrent_pages_cookie_isolation_and_reuse(server):

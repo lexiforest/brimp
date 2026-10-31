@@ -2,12 +2,20 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
-import { createSession, StaleHandle, JavaScriptError, Closed } from '../index.js';
+import { createSession, StaleHandle, JavaScriptError, Closed, HTTPError } from '../index.js';
 const html =
   '<!doctype html><main><b>old</b></main><script>globalThis.beforeLater = !document.querySelector("#later"); document.querySelector("b").textContent = "script";</script><p id="later">later</p>';
 let server, url;
 before(async () => {
   server = createServer(async (request, response) => {
+    if (request.url.startsWith('/status/')) {
+      response.writeHead(Number(request.url.split('/').at(-1)), {
+        'content-type': 'text/html',
+        'set-cookie': 'status=seen; Path=/',
+      });
+      response.end(html);
+      return;
+    }
     if (request.url === '/large') {
       response.end(Buffer.from(Array.from({ length: 2 * 1024 * 1024 }, (_, i) => i % 251)));
       return;
@@ -50,7 +58,16 @@ test('request, script execution, DOM edits, detached and stale handles', async (
     const page = await session.get(url + '/redirect');
     assert.equal(page.statusCode, 200);
     assert.equal(page.text, html);
-    assert.equal(page.response.history.length, 1);
+    assert.equal(page.history.length, 1);
+    assert.equal(page.history[0].statusCode, 302);
+    assert.equal(page.requestInfo.method, 'GET');
+    assert.equal(page.requestInfo.url, page.url);
+    assert.equal(page.reason, 'OK');
+    assert.ok(page.elapsed >= 0);
+    assert.equal(page.downloadedBytes, Buffer.byteLength(html));
+    assert.equal(page.uploadedBytes, 0);
+    assert.ok(page.headerBytes > 0);
+    assert.ok(page.httpVersion.startsWith('HTTP/'));
     assert.equal(await page.evaluate('beforeLater'), true);
     const root = await page.querySelector('main'),
       node = await root.querySelector('b');
@@ -80,6 +97,8 @@ test('Promises keep the event loop running, binary bodies, errors, and abort', a
     const data = Buffer.from([0, 255, 42]);
     const page = await session.post(url, { body: data });
     assert.deepEqual(page.content, data);
+    assert.deepEqual(page.requestInfo.body, data);
+    assert.equal(page.requestInfo.method, 'POST');
     let ticked = false;
     const timer = setTimeout(() => {
       ticked = true;
@@ -95,6 +114,64 @@ test('Promises keep the event loop running, binary bodies, errors, and abort', a
     const abort = new AbortController();
     setTimeout(() => abort.abort(), 20);
     await assert.rejects(page.get(url + '/slow', { signal: abort.signal }), /cancelled/);
+  } finally {
+    await session.close();
+  }
+});
+test('HTTP status checks preserve the response body and live DOM', async () => {
+  const session = await createSession();
+  try {
+    const page = await session.newPage();
+    for (const status of [200, 302, 399, 400, 404, 499, 500, 599, 600]) {
+      assert.equal(await page.get(`${url}/status/${status}`, { allowRedirects: false }), page);
+      assert.equal(page.statusCode, status);
+      assert.deepEqual(page.cookies, [['status', 'seen']]);
+      assert.equal(page.text, html);
+      assert.equal(await page.evaluate('document.querySelector("b").textContent'), 'script');
+      if (status >= 400 && status < 600) {
+        let caught;
+        assert.throws(
+          () => page.raiseForStatus(),
+          (error) => {
+            assert.ok(error instanceof HTTPError);
+            assert.equal(error.code, 'http_status');
+            assert.equal(error.page, page);
+            assert.equal(error.statusCode, status);
+            assert.equal(error.url, `${url}/status/${status}`);
+            assert.ok(error.message.includes(String(status)) && error.message.includes(error.url));
+            caught = error;
+            return true;
+          },
+        );
+        await page.get(url);
+        assert.equal(page.raiseForStatus(), undefined);
+        assert.deepEqual(page.history, []);
+        assert.equal(caught.statusCode, status);
+        assert.equal(caught.url, `${url}/status/${status}`);
+      } else {
+        assert.equal(page.raiseForStatus(), undefined);
+      }
+    }
+  } finally {
+    await session.close();
+  }
+});
+test('HTTP metadata requires navigation and resets after loading HTML', async () => {
+  const session = await createSession();
+  try {
+    const page = await session.newPage();
+    for (const read of [() => page.statusCode, () => page.json(), () => page.raiseForStatus()]) {
+      assert.throws(read, { code: 'invalid_input', message: 'page has no HTTP response' });
+    }
+    await page.get(url);
+    await page.evaluate('document.body.innerHTML = "<h1>edited</h1>"');
+    assert.ok((await page.html()).includes('edited'));
+    assert.equal(page.text, html);
+    await page.loadHtml('<h1>local</h1>');
+    assert.equal(await page.evaluate('document.querySelector("h1").textContent'), 'local');
+    for (const read of [() => page.headers, () => page.requestInfo, () => page.raiseForStatus()]) {
+      assert.throws(read, { code: 'invalid_input', message: 'page has no HTTP response' });
+    }
   } finally {
     await session.close();
   }

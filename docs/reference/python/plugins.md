@@ -1,6 +1,6 @@
 # Plugins
 
-Generated from the plugin implementations. Follow [the plugin tutorial](/architecture/subsystems/)
+Generated from the plugin implementations. Follow [the plugin tutorial](/examples/plugins/)
 to install a bundled plugin or connect page JavaScript to a host callback.
 
 ::: brimp.plugins

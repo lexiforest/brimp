@@ -12,11 +12,11 @@ npm ci --ignore-scripts
 python -m pip install -r requirements-dev.txt
 git config core.hooksPath .githooks
 make format
-make format-check
+make check
 ```
 
 `make format` runs Prettier for JavaScript, Ruff for Python, and rustfmt for the
-Rust workspace and standalone CLI reference tool. `make format-check` checks the
+Rust workspace and standalone CLI reference tool. `make check` checks the
 same files without rewriting them and runs in the pre-commit hook.
 
 Configuration lives in `.prettierrc.json` and `ruff.toml`; Ruff targets Python 3.11.
@@ -56,26 +56,9 @@ cargo test -p brimp-net
 
 ## Native prerequisites
 
-The repository pins Rust `1.99.1` in `rust-toolchain.toml`.
-
-The repository helper downloads the pinned JavaScriptCore SDK and
-curl-impersonate release, then prints the environment required to link them:
-
-```sh
-python3 scripts/prepare_native.py --target aarch64-apple-darwin --output .native/release --curl-release
-```
-
-Select the appropriate target for your platform. Outside GitHub Actions, export
-the environment variables printed by the script before building or testing. Omit
-`--curl-release` for standalone JSC tests, or pass `--curl-sdk` the installation
-prefix of a source-built curl-impersonate SDK. Inspect the available targets
-with:
-
-```sh
-python3 scripts/prepare_native.py --help
-```
-
-See [installation](/install/#build-from-source) for the full source workflow.
+Follow [Build from source](/development/build-from-source/) to install the
+pinned toolchain, download the JavaScriptCore and curl SDKs, and export their
+build and runtime paths. Use the same environment for the checks below.
 
 On macOS, local defaults are the adjacent `WebKit/WebKitBuild/Release` directory
 and `/usr/local/lib` for curl. When using that WebKit build, run:

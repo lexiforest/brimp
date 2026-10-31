@@ -12,10 +12,9 @@ Install Defuddle explicitly in the session, change the heading, then extract the
 current document:
 
 ```python
-from brimp import Session
-from brimp.plugins import extraction
+import brimp
 
-with Session(plugins=[extraction()]) as session:
+with brimp.Session(plugins=[brimp.plugins.extraction()]) as session:
     page = session.get("http://127.0.0.1:8765/")
     heading = page.query_selector("h1")
     if heading is not None:
@@ -36,6 +35,14 @@ import { createSession, extractionPlugin } from '@brimp/brimp';
 const session = await createSession({plugins: [extractionPlugin()]});
 try {
   const page = await session.get('http://127.0.0.1:8765/');
+  const heading = await page.querySelector('h1');
+  if (heading) {
+    try {
+      await heading.setTextContent('Edited article');
+    } finally {
+      await heading.dispose();
+    }
+  }
   console.log((await page.extract()).contentMarkdown);
 } finally {
   await session.close();
@@ -72,9 +79,9 @@ aborts the request. Callbacks cannot reenter their own page.
 
 ```python
 from pathlib import Path
-from brimp import Session
+import brimp
 
-with Session() as session:
+with brimp.Session() as session:
     page = session.new_page()
     with page.stream("GET", "http://127.0.0.1:8765/download") as response:
         with Path("download.bin").open("wb") as output:
@@ -106,5 +113,5 @@ try {
 Native streaming uses a bounded queue and backpressure. Response interception
 has a separate 32 MiB buffered limit; it is not a streaming route handler.
 
-Next: [add a custom plugin](/architecture/subsystems/#3-connect-page-code-to-a-host-handler)
+Next: [add a custom plugin](/examples/plugins/#3-connect-page-code-to-a-host-handler)
 or explore the [generated API references](/api/).

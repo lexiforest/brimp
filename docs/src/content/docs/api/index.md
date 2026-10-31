@@ -1,21 +1,20 @@
 ---
 title: API reference
-description: References generated from Python source, TypeScript declarations and Clap commands.
+description: Look up Python and Node.js methods or CLI commands and options.
 ---
 
 Choose your interface:
 
-| Reference | Generated from |
+| Reference | What you'll find |
 | --- | --- |
-| [Python package](/reference/python/) | Python source signatures, properties and docstrings, via mkdocstrings |
+| [Python package](/reference/python/) | Session, Page, handles, response data and exceptions |
 | [Python plugins](/reference/python/plugins/) | Plugin installers, factories and host context |
-| [Node package](/reference/node/) | `bindings/node/index.d.ts`, via TypeDoc |
-| [CLI](/api/cli/) | The executable's Clap command definitions |
+| [Node package](/reference/node/) | Session and page methods, options, event records and TypeScript types |
+| [CLI](/api/cli/) | Commands, flags, defaults and accepted values |
 
-These references regenerate when the documentation builds. They are not copied
-signature lists. For step-by-step examples, start with the [tutorials](/examples/).
+For a complete program and its expected output, start with the [tutorials](/examples/).
 
-## Choose the right boundary
+## Find the object you need
 
 | You want to work with | Use |
 | --- | --- |
@@ -23,13 +22,12 @@ signature lists. For step-by-step examples, start with the [tutorials](/examples
 | Navigation, evaluation, input and routes | Page |
 | Original HTTP bytes and metadata | Page's response snapshot |
 | Current serialized DOM | `page.html()`; await it in Node |
-| Rooted DOM/JavaScript objects | ElementHandle / JSHandle; dispose when finished |
-| Browser subsystems | Default browser plugins or an explicit replacement set |
-| Extraction and custom host callbacks | Explicit plugins |
+| A DOM node or JavaScript object kept for later use | ElementHandle / JSHandle; dispose when finished |
+| Browser subsystems and their limits | [Browser support](/web-platform/) |
+| Extraction and custom host callbacks | [Plugins](/guides/plugins/) |
 
 Python timeouts are seconds; Node timeouts are milliseconds. A session owns its
 pages. Navigation invalidates the previous realm's handles.
 
-See [core APIs and plugins](/architecture/subsystems/) for browser API coverage
-and limits. These host references describe the automation interfaces, not the
-entire web platform.
+See [browser support](/web-platform/) for the JavaScript APIs available inside a
+page. The references above describe the Python, Node.js and CLI interfaces.

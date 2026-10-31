@@ -10,7 +10,7 @@ This reference is generated from the executable's command definitions at every d
 ## `brimp`
 
 ```text
-A JavaScript runtime for JavaScript from the browser
+Scalable browser runtime for agents.
 
 Usage: brimp <COMMAND>
 
@@ -38,7 +38,7 @@ Capture a profile from a live browser on localhost
 Usage: brimp profile <COMMAND>
 
 Commands:
-  capture  
+  capture
 
 Options:
   -h, --help
@@ -530,8 +530,8 @@ Inspect available plugins without creating a page
 Usage: brimp plugins <COMMAND>
 
 Commands:
-  list  
-  show  
+  list
+  show
 
 Options:
   -h, --help

@@ -30,18 +30,60 @@ follow the same rule.
 
 ## Storage and shared state
 
-Storage APIs are core. Same-origin pages in a session share localStorage,
-IndexedDB, caches and locks. sessionStorage stays with its page. These stores
-survive navigation; an optional session storage file persists localStorage,
-IndexedDB and caches across sessions. CookieStore uses the session cookie jar.
-See [storage lifetimes and limits](/guides/plugins/#bundled-behavior) for the
-configuration and current IndexedDB/CacheStorage subset.
+Pages in one session share origin-based storage. Choose a storage lifetime
+before relying on it across navigation or a later run:
 
-ImageData remains a core DOM value object. MediaEncryptedEvent belongs to the
-media plugin and SpeechSynthesisUtterance to audio. These payloads do not require
-a playback or speech backend. Navigator identity, plugin/MIME collections,
-speech voices, media decoding answers, storage estimates and captured
-`CSS.supports` declarations come from the profile.
+| Store | Shared with | Lifetime |
+| --- | --- | --- |
+| localStorage, IndexedDB and CacheStorage | Same-origin pages in the session | Until the session closes, or persisted with a storage file |
+| sessionStorage | The same page and origin | Survives navigation in that page; ends when it closes |
+| Cookies and CookieStore | The session cookie jar | Not included in the storage file |
+| Storage on blank or opaque-origin pages | The current JavaScript environment only | Discarded on navigation or close |
+
+Use Python `brimp.Session(storage_path='/path/storage.json')` or Node.js
+`createSession({storagePath: '/path/storage.json'})` to keep committed storage
+across sessions. The parent directory must exist, and only one session may open
+a storage file at a time.
+
+<details>
+<summary>Storage behavior and limits</summary>
+
+Browser storage is available without plugins. `localStorage`, CacheStorage and
+IndexedDB are partitioned by origin and shared by pages in one session. They survive
+navigation. `sessionStorage` is partitioned by origin and page and survives that
+page's navigation. Blank and opaque-origin pages instead use isolated realm-local
+storage, as described below. Local storage changes
+notify other same-origin pages through `storage` events.
+
+Memory is the default. Node `createSession({storagePath: '/path/storage.json'})`
+and Python `brimp.Session(storage_path='/path/storage.json')` persist localStorage,
+CacheStorage and committed IndexedDB records. The parent directory must exist;
+only one session may open a storage file at a time. Session storage and cookies are
+not written to this file. `navigator.storage.persisted()` reports this configuration.
+Blank and opaque-origin pages use isolated, in-memory storage for the current realm,
+including IndexedDB and caches. It is discarded on navigation or close and never
+written to the storage file. Their cookie reads are empty and cookie writes are
+harmless no-ops. There is no OPFS backend or quota policy.
+
+IndexedDB uses pinned `fake-indexeddb` for requests, cursors, indexes, structured
+values and transactional rollback. The native backend serializes transactions
+across pages and retains committed records. Version-change and blocked events are
+implemented within a realm; cross-page version-change notifications are not yet
+implemented. A transaction from a stale schema connection aborts with VersionError.
+CacheStorage retains empty caches and response body bytes. CookieStore reads and
+writes the session cookie jar, excluding HttpOnly cookies; automatic cookie change
+events are not implemented. Incomplete cookie mutations and invalid cookie name/value
+separators settle as no-ops; reads return null or an empty array when no cookie
+matches. Real backend failures still reject. SQLTransaction retains its synthetic success-callback payload without executing SQL;
+`openDatabase` remains an explicit undefined property.
+
+Web Locks coordinate same-origin pages in the session. Native ownership releases
+locks on navigation or close; JS handles callbacks, aborts and returned promises.
+Callbacks run asynchronously through the runtime task queue. Abort signals can be
+combined with ifAvailable or steal and release pending or held requests. Cancelling
+a held request settles its request promise; it cannot stop already-running JS.
+
+</details>
 
 ## Window and navigation
 
@@ -116,6 +158,10 @@ they do not download fonts, shape text or perform layout. Canvas text metrics
 use the canvas plugin’s profile data; that plugin is enabled by default.
 
 ## Performance and timers
+
+For Chromium identities, prioritized tasks share the native task queue
+with timers; idle callbacks run behind ready tasks with a zero time budget. There
+is no rendering-idle prediction or inherited continuation priority.
 
 Timers and performance entries use the realm clock. Legacy navigation timing
 is a stable profile-derived snapshot, not measured DNS, connection, rendering or

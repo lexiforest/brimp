@@ -1,33 +1,80 @@
 ---
 title: Install
-description: Install the Python and Node.js bindings or build the CLI from source.
+description: Install a Python or Node.js package, or the standalone CLI.
 ---
 
-Brimp provides self-contained wheels for **Python 3.11+** and platform packages
-for **Node.js 22.19+**:
+Install a Python or Node.js package for your application, or the standalone CLI.
+All three include the native runtime; no Rust toolchain or separate SDK download
+is needed.
 
-| Platform | Python | Node.js |
-| --- | --- | --- |
-| macOS arm64 (11+) | `pip install brimp` | `npm install @brimp/brimp` |
-| Linux x86_64 (glibc 2.34+) | `pip install brimp` | `npm install @brimp/brimp` |
-| Linux arm64 (glibc 2.34+) | `pip install brimp` | `npm install @brimp/brimp` |
-| Windows x64 | `pip install brimp` | `npm install @brimp/brimp` |
+| Platform | Minimum system |
+| --- | --- |
+| macOS Apple silicon | macOS 11 |
+| Linux x86_64 or arm64 | glibc 2.34 |
+| Windows x64 | The package includes the required Visual C++ runtime DLLs |
 
-The packages bundle JavaScriptCore, ICU, curl-impersonate and the Visual C++
-runtime DLLs required by the Windows SDK. Intel macOS and Windows arm64 are not
-published.
+Intel macOS and Windows arm64 packages are not provided.
+
+## Python
+
+Use Python 3.11 or newer. Create a virtual environment, activate it, and install
+Brimp from PyPI:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install brimp
+```
+
+On Windows PowerShell, create the environment with `python -m venv .venv`, then
+run `.venv\Scripts\Activate.ps1` before the install command.
+
+## Node.js
+
+Use Node.js 22.19 or newer. In your application's directory:
+
+```sh
+npm install @brimp/brimp
+```
+
+If you are starting a new project, run `npm init -y` first. Save examples as
+`.mjs` files so Node.js treats them as ES modules.
+
+## CLI
+
+On Linux x64/ARM64 or macOS Apple silicon:
+
+```sh
+curl -fsSL https://brimp.ai/install.sh | sh
+```
+
+The installer verifies the release checksum and installs `brimp` in
+`$HOME/.local/bin`. If that directory is outside your `PATH`, it prints the line
+to add to your shell profile. Check the installation with `brimp doctor`.
+
+To choose a version or install directory:
+
+```sh
+curl -fsSL https://brimp.ai/install.sh | sh -s -- --version v0.1.2 --prefix "$HOME/.local"
+```
+
+On Windows x64, download the CLI ZIP from [GitHub Releases](https://github.com/lexiforest/brimp/releases/latest).
+Extract it and run `.\brimp.exe doctor` in PowerShell. Keep the executable and
+its DLLs together; add that directory to your `PATH` to use it from other folders.
 
 ## Verify the runtime
 
-```python
-from brimp import Session
+Python:
 
-with Session() as session:
+```python
+import brimp
+
+with brimp.Session() as session:
     page = session.new_page()
     print(page.evaluate("typeof document.querySelector"))
 ```
 
-Expect `function`. The same check for Node.js:
+Node.js, saved as `verify.mjs` and run with `node verify.mjs`:
 
 ```js
 import { createSession } from '@brimp/brimp';
@@ -41,77 +88,10 @@ try {
 }
 ```
 
-Browser subsystem plugins are enabled by default. An explicit `plugins` list
-replaces them; use `plugins=[]` (Python) or `plugins: []` (Node.js) for core
-execution only.
+Both print `function`. Continue to the [quick start](/quick-start/) to fetch a
+page and read the document after its JavaScript runs.
 
-## Build from source
+## Build or customize Brimp
 
-Use this path for the CLI or when changing the runtime. You need Rust/Cargo and
-the native SDK build tools. Lexbor is vendored; WebCrypto uses the BoringSSL
-instance in curl-impersonate.
-
-### 1. Prepare the native SDKs
-
-`scripts/prepare_native.py` downloads the pinned JavaScriptCore and
-curl-impersonate releases and prints the environment required to link them:
-
-```sh
-git clone https://github.com/lexiforest/brimp.git
-cd brimp
-python3 scripts/prepare_native.py \
-  --target aarch64-apple-darwin \
-  --output .native/release \
-  --curl-release
-```
-
-Use `x86_64-unknown-linux-gnu`, `aarch64-unknown-linux-gnu` or
-`x86_64-pc-windows-msvc` as appropriate. The script writes
-`BRIMP_JSC_LIB_DIR`, `BRIMP_CURL_LIB_DIR`, `BRIMP_LICENSE_DIR` and the loader
-paths to `$GITHUB_ENV` when running in GitHub Actions, and prints them otherwise.
-
-To link a source-built curl SDK instead, pass `--curl-sdk /path/to/prefix` and
-omit `--curl-release`.
-
-### 2. Build an interface
-
-CLI:
-
-```sh
-cargo install --path crates/cli --locked
-brimp doctor
-```
-
-Expect JSON with `javascriptCore`, `lexbor`, `libcurlImpersonate` and `crypto`
-set to `ok`. The executable still needs the SDK libraries at runtime.
-
-Python, into a virtual environment:
-
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install maturin
-maturin develop --manifest-path bindings/python/Cargo.toml
-```
-
-Node.js, from the checkout:
-
-```sh
-cargo build -p brimp-python -p brimp-node
-python3 bindings/prepare_local.py
-npm install ./bindings/node
-```
-
-On Windows, activate the virtual environment with
-`.venv\Scripts\Activate.ps1` in PowerShell.
-
-## Fetch your first page
-
-Continue to the [quick start](/quick-start/) to run a local site and read its
-JavaScript-updated HTML.
-
-## Release packages
-
-Module maintainers build and validate release artifacts with `maturin`,
-`bindings/package_node.py` and the tag-triggered release workflow. See
-[package assembly](/development/packaging/).
+To change the runtime or compile it yourself, follow [Build from source](/development/build-from-source/).
+Package users do not need those steps.

@@ -1,14 +1,19 @@
 ---
 title: Node API
-description: Generated reference for @brimp/brimp.
+description: Find Node.js methods, options, events and TypeScript types.
 ---
 
 [Open the generated Node API reference →](/reference/node/)
 
-TypeDoc reads `bindings/node/index.d.ts` on each documentation build. Browse
-session options, request options, page methods, event records, routes and plugins.
+Browse session options, request options, page methods, event records, routes and
+plugins. The reference includes TypeScript types for each interface.
 
 For runnable ESM examples, follow the [Node tutorial](/examples/node/).
+
+Request methods return `Page`, which provides HTTP metadata, the original
+response body, and live DOM/JavaScript operations. Call `page.raiseForStatus()`
+to throw `HTTPError` for a 4xx/5xx status. See
+[sessions, pages and requests](/guides/automation/) for response lifetimes.
 
 Evaluation supports bigint, undefined, special numbers and binary buffers.
 JSHandle supports nested reference arguments, property mutation and invocation

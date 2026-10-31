@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from brimp import Session
+import brimp
 
 
 def fixture(route):
@@ -17,7 +17,9 @@ def fixture(route):
 
 
 source = Path(__file__).with_name("page.js").read_text()
-with Session(time_mode="logical", time_origin=1000, diagnostics={"capacity": 4096}) as session:
+with brimp.Session(
+    time_mode="logical", time_origin=1000, diagnostics={"capacity": 4096}
+) as session:
     page = session.new_page()
     page.route("*", fixture)
     with page.evaluate_handle(source + "\n;compute") as fn:

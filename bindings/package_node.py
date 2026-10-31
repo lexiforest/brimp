@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import hashlib
 import json
 import os
 import platform
@@ -13,9 +12,9 @@ import shutil
 import subprocess
 import sys
 import tarfile
-import tempfile
 from pathlib import Path
 
+from native_runtime import bundle_native, sha
 
 ROOT = Path(__file__).resolve().parents[1]
 MAIN_FILES = (
@@ -35,30 +34,6 @@ PLATFORMS = {
     ("win32", "AMD64"): ("@brimp/brimp-win32-x64", "win32", "x64", "win32-x64"),
     ("win32", "x86_64"): ("@brimp/brimp-win32-x64", "win32", "x64", "win32-x64"),
 }
-
-SYSTEM_LIBRARIES = {
-    "libc.so.6",
-    "libm.so.6",
-    "libdl.so.2",
-    "librt.so.1",
-    "libpthread.so.0",
-    "libstdc++.so.6",
-    "libgcc_s.so.1",
-    "libatomic.so.1",
-}
-WINDOWS_RUNTIME = ("msvcp140.dll", "msvcp140_2.dll", "vcruntime140.dll", "vcruntime140_1.dll")
-
-
-def run(*args, **kwargs):
-    return subprocess.check_output([str(arg) for arg in args], text=True, **kwargs)
-
-
-def sha(path: Path) -> str:
-    value = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            value.update(chunk)
-    return value.hexdigest()
 
 
 def npm_archive(package: Path, output: Path) -> None:
@@ -109,161 +84,6 @@ def replace_platform_files(package: dict, os_name: str | None) -> dict:
     return package
 
 
-def dependencies(path: Path) -> list[str]:
-    return [
-        line.strip().split(" (compatibility")[0]
-        for line in run("otool", "-L", path).splitlines()[1:]
-    ]
-
-
-def macos_library(dep: str) -> str | None:
-    if "JavaScriptCore" in dep:
-        return "libJavaScriptCore.dylib"
-    if "libcurl-impersonate" in dep:
-        return "libcurl-impersonate.dylib"
-    return None
-
-
-def relocate_macos(binary: Path, libraries: dict[str, str], *, extension: bool) -> None:
-    identifiers = run("otool", "-D", binary).splitlines()[1:]
-    prefix = "@loader_path/native/" if extension else "@rpath/"
-    for dep in dependencies(binary):
-        if dep in identifiers:
-            continue
-        name = macos_library(dep)
-        if name:
-            subprocess.run(
-                ["install_name_tool", "-change", dep, prefix + name, str(binary)],
-                check=True,
-                capture_output=True,
-            )
-        elif not dep.startswith(("/usr/lib/", "/System/Library/")):
-            raise RuntimeError(f"unbundled macOS dependency in {binary.name}: {dep}")
-    if not extension:
-        subprocess.run(
-            ["install_name_tool", "-id", "@rpath/" + binary.name, str(binary)],
-            check=True,
-            capture_output=True,
-        )
-    subprocess.run(
-        ["codesign", "--force", "--sign", "-", "--timestamp=none", str(binary)],
-        check=True,
-        capture_output=True,
-    )
-
-
-def package_macos(source: Path, jsc: Path, curl: Path, package: Path) -> None:
-    native = package / "native"
-    native.mkdir()
-    jsc_binary = jsc / "lib/JavaScriptCore.framework/JavaScriptCore"
-    curl_binary = curl / "lib/libcurl-impersonate.dylib"
-    shutil.copyfile(jsc_binary.resolve(), native / "libJavaScriptCore.dylib")
-    shutil.copyfile(curl_binary.resolve(), native / "libcurl-impersonate.dylib")
-    shutil.copyfile(source / "brimp.node", package / "brimp.node")
-    libraries = {
-        "libJavaScriptCore.dylib": str(native / "libJavaScriptCore.dylib"),
-        "libcurl-impersonate.dylib": str(native / "libcurl-impersonate.dylib"),
-    }
-    for path in [native / "libJavaScriptCore.dylib", native / "libcurl-impersonate.dylib"]:
-        relocate_macos(path, libraries, extension=False)
-    relocate_macos(package / "brimp.node", libraries, extension=True)
-
-
-def soname(path: Path) -> str:
-    name = run("patchelf", "--print-soname", path).strip()
-    return name or path.name
-
-
-def needed(path: Path) -> list[str]:
-    return [line for line in run("patchelf", "--print-needed", path).splitlines() if line]
-
-
-def linux_candidates(jsc: Path, curl: Path) -> dict[str, Path]:
-    candidates = {}
-    for directory in (jsc / "lib", curl / "lib"):
-        for path in sorted(directory.iterdir()):
-            if ".so" not in path.name:
-                continue
-            resolved = path.resolve()
-            if not resolved.is_file():
-                continue
-            name = soname(resolved)
-            candidates[name] = resolved
-    return candidates
-
-
-def ldconfig_map() -> dict[str, Path]:
-    executable = shutil.which("ldconfig") or "/sbin/ldconfig"
-    try:
-        output = run(executable, "-p")
-    except (OSError, subprocess.CalledProcessError):
-        output = ""
-    libraries = {}
-    for line in output.splitlines():
-        if "=>" not in line:
-            continue
-        name, path = line.split("=>", 1)
-        name = name.split("(", 1)[0].strip()
-        path = path.strip()
-        if name and Path(path).is_file():
-            libraries.setdefault(name, Path(path))
-    if not libraries:
-        for directory in ("/usr/lib64", "/usr/lib", "/lib64", "/lib"):
-            root = Path(directory)
-            if root.is_dir():
-                for path in root.glob("*.so*"):
-                    if path.is_file():
-                        libraries.setdefault(path.name, path)
-    return libraries
-
-
-def package_linux(source: Path, jsc: Path, curl: Path, package: Path) -> None:
-    if shutil.which("patchelf") is None:
-        raise RuntimeError("patchelf is required to assemble Linux Node packages")
-    shutil.copyfile(source / "brimp.node", package / "brimp.node")
-    native = package / "native"
-    native.mkdir()
-    candidates = linux_candidates(jsc, curl)
-    system = ldconfig_map()
-    pending = list(needed(package / "brimp.node"))
-    copied = {}
-    while pending:
-        name = pending.pop()
-        if name in copied or name in SYSTEM_LIBRARIES or name.startswith("ld-linux-"):
-            continue
-        source = candidates.get(name) or system.get(name)
-        if source is None:
-            raise RuntimeError(f"unbundled Linux dependency in brimp.node: {name}")
-        destination = native / name
-        shutil.copyfile(source.resolve(), destination)
-        destination.chmod(0o755)
-        copied[name] = destination
-        pending.extend(needed(destination))
-    subprocess.run(
-        ["patchelf", "--set-rpath", "$ORIGIN/native", str(package / "brimp.node")],
-        check=True,
-        capture_output=True,
-    )
-    for destination in copied.values():
-        subprocess.run(
-            ["patchelf", "--set-rpath", "$ORIGIN", str(destination)],
-            check=True,
-            capture_output=True,
-        )
-
-
-def package_windows(source: Path, jsc: Path, curl: Path, package: Path, runtime: Path) -> None:
-    shutil.copyfile(source / "brimp.node", package / "brimp.node")
-    for name in ("JavaScriptCore.dll", "icudt77.dll", "icuin77.dll", "icuuc77.dll"):
-        shutil.copyfile(jsc / "bin" / name, package / name)
-    shutil.copyfile(curl / "lib/libcurl-impersonate.dll", package / "libcurl-impersonate.dll")
-    for name in WINDOWS_RUNTIME:
-        path = runtime / name
-        if not path.is_file():
-            raise RuntimeError(f"Visual C++ runtime DLL is missing: {path}")
-        shutil.copyfile(path, package / name)
-
-
 def package_main(source: Path, output: Path) -> Path:
     package = output / "main"
     if package.exists():
@@ -297,12 +117,7 @@ def package_platform(source: Path, jsc: Path, curl: Path, output: Path, runtime:
         shutil.rmtree(package)
     package.mkdir()
     copy_licenses(source, package)
-    if os_name == "darwin":
-        package_macos(source, jsc, curl, package)
-    elif os_name == "linux":
-        package_linux(source, jsc, curl, package)
-    else:
-        package_windows(source, jsc, curl, package, runtime)
+    bundle_native(source / "brimp.node", jsc, curl, package, vc_runtime_dir=runtime)
     manifest = package_json(json.loads((source / "package.json").read_text()), name, os_name, cpu)
     manifest = replace_platform_files(manifest, os_name)
     (package / "package.json").write_text(json.dumps(manifest, indent=2) + "\n")

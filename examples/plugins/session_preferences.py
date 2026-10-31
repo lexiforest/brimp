@@ -1,7 +1,6 @@
 from pathlib import Path
 import sys
-from brimp import Session
-from brimp.plugins import Plugin
+import brimp
 
 
 def setup():
@@ -21,11 +20,11 @@ def setup():
     }
 
 
-plugin = Plugin.from_file(
+plugin = brimp.Plugin.from_file(
     Path(__file__).with_name("preferences.js"), name="preferences", setup=setup
 )
 url = sys.argv[1] if len(sys.argv) > 1 else "https://example.com"
-with Session(plugins=[plugin]) as session:
+with brimp.Session(plugins=[plugin]) as session:
     page = session.get(url)
     page.evaluate('preferences.set("theme", "dark")')
     page.get(url)

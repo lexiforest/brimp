@@ -49,26 +49,30 @@ def test_internal_links():
 
 def test_python_reference_has_public_members():
     reference = (SITE / "reference/python/index.html").read_text()
+    errors = (SITE / "reference/python/errors/index.html").read_text()
+    public_api = reference + errors
     tree = ast.parse((ROOT / "bindings/python/python/brimp/__init__.py").read_text())
     for node in tree.body:
         if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
-            assert f'id="brimp.{node.name}"' in reference
+            assert f'id="brimp.{node.name}"' in public_api
             for child in node.body:
                 if isinstance(child, ast.FunctionDef) and not child.name.startswith("_"):
-                    assert f'id="brimp.{node.name}.{child.name}"' in reference
+                    assert f'id="brimp.{node.name}.{child.name}"' in public_api
     # Inherited verbs and dynamically assigned response metadata need explicit coverage.
     for symbol in [
         "Session.get",
         "Page.post",
-        "Response.status_code",
-        "Response.html",
+        "Page.status_code",
+        "Page.request_info",
+        "Page.history",
+        "Page.raise_for_status",
         "Route.stage",
     ]:
         assert f'id="brimp.{symbol}"' in reference
     plugins = (SITE / "reference/python/plugins/index.html").read_text()
     assert "brimp.plugins.host_storage" in plugins
-    errors = (SITE / "reference/python/errors/index.html").read_text()
-    assert "StaleHandle" in errors and "TransportError" in errors
+    assert "StaleHandle" in errors and "TransportError" in errors and "HTTPError" in errors
+    assert 'id="brimp.Response"' not in reference
 
 
 def test_node_and_cli_references():
@@ -84,8 +88,13 @@ def test_node_and_cli_references():
         "configureNetwork",
         "peekDiagnostics",
         "summarizeDiagnostics",
+        "raiseForStatus",
+        "history",
+        "requestInfo",
     ]:
         assert f'id="{member.lower()}"' in page or f'id="{member}"' in page
+    assert (node / "classes/HTTPError.html").is_file()
+    assert not (node / "classes/Response.html").exists()
     cli = (SITE / "api/cli/index.html").read_text()
     for flag in [
         "--actions",

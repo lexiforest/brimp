@@ -79,7 +79,7 @@ jobs:
           --curl-release
 
       - name: Install build tools
-        run: python -m pip install 'maturin>=1.9,<2'
+        run: python -m pip install pytest 'maturin>=1.9,<2'
 
       - name: Build and repair wheel
         run: |
@@ -96,9 +96,9 @@ jobs:
           python bindings/python/test_wheel.py \
             --target "${{ matrix.target }}" --directory dist/wheels
 
-      - name: Build Node binding
+      - name: Build CLI and Node binding
         run: |
-          cargo build --release --locked -p brimp-node
+          cargo build --release --locked -p brimp-cli -p brimp-node
           python bindings/prepare_local.py --release --only node
 
       - name: Package Node modules
@@ -126,6 +126,26 @@ jobs:
 
       - name: Validate Node packages
         run: python bindings/package_node.py --validate --out dist/node
+
+      - name: Package and test CLI
+        run: |
+          python bindings/package_cli.py \
+            --target "${{ matrix.target }}" \
+            --jsc-sdk "$BRIMP_JSC_SDK" --curl-sdk "$BRIMP_CURL_SDK" \
+            --licenses "$BRIMP_LICENSE_DIR" --out dist/cli
+          python bindings/package_cli.py --validate --out dist/cli
+          for archive in dist/cli/*.tar.gz dist/cli/*.zip; do
+            if [ -f "$archive" ]; then
+              BRIMP_CLI_ARCHIVE="$archive" python -m pytest bindings/test_cli_distribution.py
+            fi
+          done
+
+      - name: Upload CLI archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.target }}
+          path: dist/cli/*
+          if-no-files-found: error
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
@@ -181,7 +201,7 @@ jobs:
           --curl-release
 
       - name: Install build tools
-        run: python -m pip install 'maturin>=1.9,<2'
+        run: python -m pip install pytest 'maturin>=1.9,<2'
 
       - name: Build and repair wheel
         run: |
@@ -203,9 +223,9 @@ jobs:
           python bindings/python/test_wheel.py \
             --target "${{ matrix.target }}" --directory dist/wheels
 
-      - name: Build Node binding
+      - name: Build CLI and Node binding
         run: |
-          cargo build --release --locked -p brimp-node
+          cargo build --release --locked -p brimp-cli -p brimp-node
           python bindings/prepare_local.py --release --only node
 
       - name: Package Node modules
@@ -231,6 +251,26 @@ jobs:
 
       - name: Validate Node packages
         run: python bindings/package_node.py --validate --out dist/node
+
+      - name: Package and test CLI
+        run: |
+          python bindings/package_cli.py \
+            --target "${{ matrix.target }}" \
+            --jsc-sdk "$BRIMP_JSC_SDK" --curl-sdk "$BRIMP_CURL_SDK" \
+            --licenses "$BRIMP_LICENSE_DIR" --out dist/cli
+          python bindings/package_cli.py --validate --out dist/cli
+          for archive in dist/cli/*.tar.gz dist/cli/*.zip; do
+            if [ -f "$archive" ]; then
+              BRIMP_CLI_ARCHIVE="$archive" python -m pytest bindings/test_cli_distribution.py
+            fi
+          done
+
+      - name: Upload CLI archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.target }}
+          path: dist/cli/*
+          if-no-files-found: error
 
       - name: Upload wheel
         uses: actions/upload-artifact@v4
@@ -285,6 +325,13 @@ jobs:
           path: dist/node
           merge-multiple: true
 
+      - name: Download CLI archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cli-*
+          path: dist/cli
+          merge-multiple: true
+
       - name: Validate release artifacts
         run: |
           for target in \
@@ -299,12 +346,13 @@ jobs:
           done
           test "$(find dist/wheels -maxdepth 1 -name '*.whl' | wc -l)" -eq 4
           python bindings/package_node.py --validate --all --out dist/node
+          python bindings/package_cli.py --validate --all --out dist/cli
           python scripts/check_versions.py --tag "$GITHUB_REF_NAME"
 
       - name: Write checksums
         run: |
           cd dist
-          sha256sum wheels/*.whl node/*.tgz > SHA256SUMS
+          sha256sum wheels/*.whl node/*.tgz cli/*.tar.gz cli/*.zip > SHA256SUMS
           cat SHA256SUMS
 
       - name: Publish wheels to PyPI
@@ -335,6 +383,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: |
+            dist/cli/*
             dist/wheels/*.whl
             dist/node/*.tgz
             dist/SHA256SUMS

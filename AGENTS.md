@@ -26,6 +26,8 @@ Choose the simplest implementation that fully meets the current requirements.
 
 ## Files
 
+- For requests to install or use Brimp, read [SKILL.md](SKILL.md). It covers
+  published packages and installation verification; source builds are for development.
 - Use TODO.md to track the implementation progress and interact with the user.
 - Follow but DO NOT EDIT HUMAN.md, it's for the maintainer to edit manually.
 - Read README.md and ./docs for the architecture fo this project
@@ -34,7 +36,8 @@ Choose the simplest implementation that fully meets the current requirements.
 
 - Use pytest for python testing
 - Prefer playwright over puppeteer in examples and docs
-- Do NOT update the README.md without asking for permission
+- Use `import brimp` and qualified names such as `brimp.Session` in Python docs and examples.
+- Do NOT update the root ./README.md without asking for permission
 
 ## Arch & Implementation
 

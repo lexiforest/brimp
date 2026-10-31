@@ -1,17 +1,21 @@
 ---
 title: Python API
-description: Source-generated Python signatures, properties and plugin APIs.
+description: Find Python methods, response properties, handles and plugin APIs.
 ---
 
 [Open the generated Python API reference →](/reference/python/)
 
-The reference is built from `bindings/python/python/brimp` with mkdocstrings.
-It includes inherited request methods and the plugin module, without importing
-the native extension during the documentation build.
+Use it to look up request methods, response properties, handles, exceptions and
+plugin configuration.
 
 For a runnable introduction, follow the [Python tutorial](/examples/python/).
 
-Evaluation now copies undefined/null, BigInt, special numbers and binary buffers.
+Request methods return `brimp.Page`, which provides HTTP metadata, the original
+response body, and live DOM/JavaScript operations. Call `page.raise_for_status()`
+to raise `brimp.HTTPError` for a 4xx/5xx status. See
+[sessions, pages and requests](/guides/automation/) for response lifetimes.
+
+Evaluation copies undefined/null, BigInt, special numbers and binary buffers.
 Use JSHandle for identity, functions and cyclic values. The
 [value bridge guide](/guides/values/)
 covers reference calls, plugin callbacks, ownership and WebAssembly loading.
