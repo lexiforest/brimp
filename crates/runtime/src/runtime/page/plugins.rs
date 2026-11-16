@@ -42,6 +42,7 @@ impl Page {
                     return Err(JsException::from_message("plugin installation timed out"));
                 }
                 if !self.run_one_task()? && !self.advance_to_next_timer() {
+                    self.pump_engine_jobs();
                     std::thread::sleep(Duration::from_millis(1));
                 }
             }

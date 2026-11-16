@@ -1,6 +1,7 @@
 pub mod bridge;
 mod cancellation;
 mod canvas;
+pub(crate) mod text;
 pub mod clock;
 pub mod diagnostics;
 mod error;

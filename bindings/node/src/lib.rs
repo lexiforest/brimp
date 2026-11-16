@@ -93,9 +93,11 @@ pub fn create_native_session(
         timeout: duration(timeout)?,
         ..Default::default()
     };
-    options.network.proxy = proxy
-        .map(brimp_runtime::network::Proxy::parse)
-        .transpose()
+    options.network.proxy_options.proxy = proxy;
+    options
+        .network
+        .proxy_options
+        .validate()
         .map_err(|e| Error::from_reason(e.to_string()))?;
     Ok(AsyncTask::new(plugins::CreateSession(options)))
 }
@@ -285,6 +287,7 @@ impl NativePageBinding {
             allow_redirects,
             max_redirects: max_redirects as usize,
             cancellation: cancellation.inner.clone(),
+            proxy_options: Default::default(),
         };
         let response = blocking(move || page.request(&method, &url, options)).await?;
         let mut metadata =
@@ -315,6 +318,7 @@ impl NativePageBinding {
             allow_redirects,
             max_redirects: max_redirects as usize,
             cancellation: cancellation.inner.clone(),
+            proxy_options: Default::default(),
         };
         let page = self.inner.clone();
         blocking(move || {

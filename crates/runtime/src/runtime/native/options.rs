@@ -60,6 +60,7 @@ pub struct SessionOptions {
     pub diagnostics: Option<crate::runtime::diagnostics::DiagnosticsOptions>,
     pub identity: IdentityOptions,
     pub headers: Vec<(String, String)>,
+    /// Operation deadline; zero disables it.
     pub timeout: Duration,
     pub network: CurlConfig,
     pub plugins: Vec<crate::runtime::plugins::Plugin>,
@@ -88,9 +89,11 @@ impl Default for SessionOptions {
 pub struct RequestOptions {
     pub headers: Vec<(String, String)>,
     pub body: Option<Vec<u8>>,
+    /// None inherits the session deadline; zero disables it.
     pub timeout: Option<Duration>,
     pub allow_redirects: bool,
     pub max_redirects: usize,
+    pub proxy_options: crate::network::ProxyOptions,
     pub cancellation: CancellationToken,
 }
 
@@ -102,6 +105,7 @@ impl Default for RequestOptions {
             timeout: None,
             allow_redirects: true,
             max_redirects: 20,
+            proxy_options: Default::default(),
             cancellation: CancellationToken::new(),
         }
     }
@@ -116,13 +120,4 @@ pub struct FileUpload {
     pub mime_type: String,
     #[serde(default)]
     pub last_modified: u64,
-}
-
-pub(super) fn validate_timeout(timeout: Duration) -> Result<(), AutomationError> {
-    if timeout.is_zero() {
-        return Err(AutomationError::InvalidInput(
-            "timeout must be positive".into(),
-        ));
-    }
-    Ok(())
 }

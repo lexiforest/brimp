@@ -180,7 +180,7 @@ pub(crate) unsafe fn setopt<T>(
     if result == CURLE_OK {
         Ok(())
     } else {
-        Err(Error::Network(curl_error(handle, result)))
+        Err(transfer_error(handle, result))
     }
 }
 
@@ -194,7 +194,27 @@ pub(crate) unsafe fn getinfo<T>(
     if result == CURLE_OK {
         Ok(())
     } else {
-        Err(Error::Network(curl_error(handle, result)))
+        Err(transfer_error(handle, result))
+    }
+}
+
+/// Capture the CURLcode, CONNECT status and TLS verification before handle reset.
+pub(crate) fn transfer_error(handle: *mut Curl, code: CurlCode) -> Error {
+    let mut connect_status: c_long = 0;
+    // CURLINFO_HTTP_CONNECTCODE is a long result (0x200000 + 22).
+    let info = unsafe { curl_easy_getinfo(handle, 0x200016 as CurlInfo, &mut connect_status) };
+    let certificate_verify = [0x20000d, 0x20002f].into_iter().any(|field| {
+        let mut result: c_long = 0;
+        // CURLINFO_SSL_VERIFYRESULT and CURLINFO_PROXY_SSL_VERIFYRESULT.
+        unsafe {
+            curl_easy_getinfo(handle, field as CurlInfo, &mut result) == CURLE_OK && result > 0
+        }
+    });
+    Error::Transfer {
+        code,
+        message: curl_error(handle, code),
+        proxy_connect: info == CURLE_OK && connect_status >= 300,
+        certificate_verify,
     }
 }
 
@@ -222,6 +242,7 @@ pub(crate) fn curl_multi_error(code: CurlMCode) -> String {
 }
 
 pub(crate) const CURLOPT_CAINFO: CurlOption = CURLOPTTYPE_OBJECTPOINT + 65;
+pub(crate) const CURLOPT_PROXY_CAINFO: CurlOption = CURLOPTTYPE_OBJECTPOINT + 246;
 pub(crate) const CURLOPT_USERNAME: CurlOption = CURLOPTTYPE_OBJECTPOINT + 173;
 pub(crate) const CURLOPT_PASSWORD: CurlOption = CURLOPTTYPE_OBJECTPOINT + 174;
 pub(crate) const CURLOPT_PROXYUSERNAME: CurlOption = CURLOPTTYPE_OBJECTPOINT + 175;
@@ -265,3 +286,21 @@ unsafe extern "C" {
         flags: u32,
     ) -> CurlCode;
 }
+
+// libcurl stable option number (CURLOPTTYPE_OBJECTPOINT + 177).
+pub(crate) const CURLOPT_NOPROXY: CurlOption = 10177;
+
+pub(crate) const CURLOPT_HTTP3_PSEUDO_HEADERS_ORDER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1025;
+pub(crate) const CURLOPT_HTTP3_SETTINGS: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1026;
+pub(crate) const CURLOPT_QUIC_TRANSPORT_PARAMETERS: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1027;
+pub(crate) const CURLOPT_HTTP3_TLS_EXTENSION_ORDER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1029;
+pub(crate) const CURLOPT_HTTP3_HTTPHEADER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1031;
+pub(crate) const CURLOPT_HTTP3_HTTPHEADER_ORDER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1032;
+pub(crate) const CURLOPT_HTTP3_SSL_EC_CURVES: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1033;
+pub(crate) const CURLOPT_WS_HTTPHEADER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1034;
+pub(crate) const CURLOPT_WS_HTTPHEADER_ORDER: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1035;
+pub(crate) const CURLOPT_WS_SSL_DISABLE_TICKET: CurlOption = CURLOPTTYPE_LONG + 1036;
+pub(crate) const CURLOPT_WS_SSL_CERT_COMPRESSION: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1037;
+pub(crate) const CURLOPT_QUIC_CID_LENGTH: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1038;
+pub(crate) const CURLOPT_TLS_TRUST_ANCHORS: CurlOption = CURLOPTTYPE_OBJECTPOINT + 1040;
+pub(crate) const CURLOPT_QUIC_INITIAL_PACKET_NUMBER: CurlOption = CURLOPTTYPE_LONG + 1041;

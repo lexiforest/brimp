@@ -221,6 +221,8 @@ function defineCoreProfile(profile) {
   const fonts = profile.values(
     'fonts',
     {
+      // The family an unstyled page reports for `getComputedStyle().fontFamily`.
+      default_family: '-apple-system',
       families: [
         'Helvetica',
         'Arial',
@@ -245,6 +247,9 @@ function defineCoreProfile(profile) {
     {
       version: 1,
       fields: {
+        default_family: {
+          type: 'string',
+        },
         families: {
           items: {
             type: 'string',
@@ -276,6 +281,7 @@ function defineCoreProfile(profile) {
             baselines.some((b, i) => width(`${JSON.stringify(f)},${b}`) !== baselineWidths[i]),
         );
         return {
+          default_family: read(() => getComputedStyle(document.body).fontFamily),
           families: read(() => families),
           metrics: read(() =>
             Object.fromEntries(
@@ -312,11 +318,13 @@ function defineCoreProfile(profile) {
       accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       accept_encoding: 'gzip, deflate, br',
       impersonation: 'safari270',
+      fingerprint: null,
     },
     {
       version: 1,
       notes:
         'HTTP Accept/Accept-Encoding and TLS impersonation cannot be read reliably from page JavaScript; defaults are explicitly reported, not captured.',
+      fields: { fingerprint: { type: 'object', nullable: true, additionalProperties: true } },
     },
   );
   const storage = profile.values(

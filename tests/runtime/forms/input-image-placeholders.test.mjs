@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createSession } from '../../../bindings/node/index.js';
-// The JavaScript dimension contract has no CSS layout or image decoder.
-test('image input dimensions use attributes while intrinsic and styled sizing remain no-layout placeholders', async () => {
+// Attributes drive the IDL/decoded dimensions; the box follows the declared
+// CSS size, and there is still no image decoder.
+test('image input dimensions use attributes while the box follows its declared size', async () => {
   const s = await createSession();
   try {
     const p = await s.newPage();
@@ -12,7 +13,7 @@ test('image input dimensions use attributes while intrinsic and styled sizing re
  i.style.cssText='width:120px;height:80px';document.body.append(i);
  const unset=[i.width,i.height];i.width=12;i.height=8;return [unset,[i.width,i.height],i.offsetWidth,i.offsetHeight];
  })()`),
-      [[0, 0], [12, 8], 0, 0],
+      [[0, 0], [12, 8], 120, 80],
     );
   } finally {
     await s.close();

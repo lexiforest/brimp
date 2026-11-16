@@ -123,7 +123,7 @@ fn navigation_timeout_is_deterministic_and_close_remains_safe() {
         .unwrap();
     assert!(matches!(
         page.navigate("https://example.test/", Duration::from_millis(20)),
-        Err(AutomationError::Timeout(_))
+        Err(AutomationError::Network(NetworkError::Timeout))
     ));
     page.close();
 }

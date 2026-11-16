@@ -98,7 +98,7 @@
 
   const fetchStreams = new Map();
   const cancelledFetchStreams = new Set();
-  globalThis.fetch = (input, init = {}) => {
+  const fetchResource = (input, init = {}, resourceType = 'fetch') => {
     let request;
     try {
       request = new Request(input, init);
@@ -112,6 +112,7 @@
       JSON.stringify([...request.headers]),
       request.__bodyBytes === null ? null : JSON.stringify(Array.from(request.__bodyBytes)),
       request.referrer === 'about:client' ? null : request.referrer,
+      resourceType,
     ).then(
       (serialized) => {
         const payload = JSON.parse(serialized);
@@ -148,6 +149,9 @@
       },
     );
   };
+  globalThis.fetch = (input, init = {}) => fetchResource(input, init);
+  globalThis.__brimpSetResourceFetch(fetchResource);
+  delete globalThis.__brimpSetResourceFetch;
 
   function deliverFetchEvent(state, event) {
     if (state.cancelled) return;
@@ -250,7 +254,7 @@
       this.onmessage = null;
       this.onerror = null;
       this.__closed = false;
-      fetch(this.url, { headers: { Accept: 'text/event-stream' } })
+      fetchResource(this.url, { headers: { Accept: 'text/event-stream' } }, 'eventsource')
         .then(async (response) => {
           if (this.__closed) return;
           this.readyState = EventSource.OPEN;

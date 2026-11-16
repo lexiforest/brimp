@@ -83,10 +83,7 @@ pub(crate) async fn fetch_with_redirects(
             });
         }
         if redirects == options.limit {
-            return Err(NetworkError::Transport(format!(
-                "redirect limit of {} exceeded",
-                options.limit
-            )));
+            return Err(NetworkError::TooManyRedirects(options.limit));
         }
         let Some(location) = response.headers.get(http::header::LOCATION) else {
             response.effective_url = requested_url;
@@ -104,9 +101,9 @@ pub(crate) async fn fetch_with_redirects(
         });
         let location = location
             .to_str()
-            .map_err(|_| NetworkError::InvalidRequest("redirect Location is not ASCII".into()))?;
+            .map_err(|_| NetworkError::InvalidUrl("redirect Location is not ASCII".into()))?;
         let base = url::Url::parse(&requested_url)
-            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+            .map_err(|error| NetworkError::InvalidUrl(error.to_string()))?;
         let target = redirect_target(&base, location)?;
         let rewrite_to_get = ((response.status == http::StatusCode::MOVED_PERMANENTLY
             || response.status == http::StatusCode::FOUND)
@@ -145,7 +142,7 @@ pub(crate) fn refresh_cookie_header(
     };
     if let Some(cookies) = cookies {
         let value = http::HeaderValue::from_str(&cookies)
-            .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+            .map_err(|error| NetworkError::InvalidHeader(error.to_string()))?;
         request.headers.insert(http::header::COOKIE, value);
     }
     Ok(())
@@ -162,7 +159,7 @@ pub(crate) fn supplied_cookie(request: &ResourceRequest) -> Option<String> {
 fn redirect_target(base: &url::Url, location: &str) -> Result<url::Url, NetworkError> {
     let mut target = base
         .join(location)
-        .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+        .map_err(|error| NetworkError::InvalidUrl(error.to_string()))?;
     // HTTP redirects inherit the current fragment when Location omits one.
     // An explicit empty fragment is distinct and must remain empty.
     if target.fragment().is_none() {
@@ -229,19 +226,17 @@ impl RedirectTask {
                 return Ok(Some(response));
             }
             if self.redirects == REDIRECT_LIMIT {
-                return Err(NetworkError::Transport(format!(
-                    "redirect limit of {REDIRECT_LIMIT} exceeded"
-                )));
+                return Err(NetworkError::TooManyRedirects(REDIRECT_LIMIT));
             }
             let Some(location) = response.headers.get(http::header::LOCATION) else {
                 response.effective_url = requested_url;
                 return Ok(Some(response));
             };
-            let location = location.to_str().map_err(|_| {
-                NetworkError::InvalidRequest("redirect Location is not ASCII".into())
-            })?;
+            let location = location
+                .to_str()
+                .map_err(|_| NetworkError::InvalidUrl("redirect Location is not ASCII".into()))?;
             let base = url::Url::parse(&requested_url)
-                .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
+                .map_err(|error| NetworkError::InvalidUrl(error.to_string()))?;
             let target = redirect_target(&base, location)?;
             let rewrite = ((response.status == http::StatusCode::MOVED_PERMANENTLY
                 || response.status == http::StatusCode::FOUND)
@@ -308,10 +303,10 @@ pub(crate) fn redirect_request(
         .to_str()
         .map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
     let base =
-        url::Url::parse(&request.url).map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
+        url::Url::parse(&request.url).map_err(|e| NetworkError::InvalidUrl(e.to_string()))?;
     let target = redirect_target(&base, location)?;
     if !["http", "https"].contains(&target.scheme()) {
-        return Err(NetworkError::InvalidRequest(
+        return Err(NetworkError::InvalidSchema(
             "redirect requires HTTP(S)".into(),
         ));
     }

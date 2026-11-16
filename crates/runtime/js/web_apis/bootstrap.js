@@ -25,6 +25,9 @@ function __callHost(operation, ...args) {
   const updateRanges = __domMutations.has(operation)
     ? __rangeMutationBefore(operation, args)
     : null;
+  // Geometry is read synchronously after a mutation, so the layout pass is
+  // invalidated here rather than waiting for the observer's microtask.
+  if (__domMutations.has(operation)) __layoutMutationBefore();
   const updateSheets = __domMutations.has(operation)
     ? __styleMutationBefore(operation, args)
     : null;
@@ -663,6 +666,9 @@ function __finalizeWebIdlInterfaces() {
     '__brimpCanvasBackends',
     '__brimpObjectUrls',
     '__brimpProfile',
+    '__brimpInstallLayout',
+    '__brimpTakeLayout',
+    '__brimpInstallComputedStyleSource',
     '__brimpInstallWindowEnvironment',
     '__brimpInstallIntlProfile',
     '__brimpInstallMediaQueries',

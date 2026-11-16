@@ -1,6 +1,5 @@
 //! Host session construction and managed page creation.
 
-use super::options::validate_timeout;
 use super::{NativePage, SessionOptions};
 use crate::network::{CurlConfig, ResourceLoader};
 use crate::runtime::{AutomationError, PageOptions, SessionCookies};
@@ -10,6 +9,7 @@ use std::sync::atomic::AtomicBool;
 /// Owns pages and a cookie jar. Cloning a page does not extend the session lifetime.
 pub struct Session {
     pub(in crate::runtime) id: u64,
+    pub(in crate::runtime) routes: crate::runtime::routes::Routes,
     pub(in crate::runtime) loader: Arc<dyn ResourceLoader>,
     pub(in crate::runtime) profile: Option<crate::profile::BrowserProfile>,
     pub(in crate::runtime) closed: AtomicBool,
@@ -23,7 +23,7 @@ pub struct Session {
 
 impl Session {
     pub fn new(options: SessionOptions) -> Result<Self, AutomationError> {
-        validate_timeout(options.timeout)?;
+        crate::runtime::routes::parse_headers(options.headers.clone())?;
         let mut profile = options.profile.clone().unwrap_or_default();
         options.identity.apply(&mut profile)?;
         Self::create(options, Some(profile), None)
@@ -33,7 +33,7 @@ impl Session {
         options: SessionOptions,
         loader: Arc<dyn ResourceLoader>,
     ) -> Result<Self, AutomationError> {
-        validate_timeout(options.timeout)?;
+        crate::runtime::routes::parse_headers(options.headers.clone())?;
         let mut profile = options.profile.clone().unwrap_or_default();
         options.identity.apply(&mut profile)?;
         Self::create(options, Some(profile), Some(loader))
@@ -46,6 +46,7 @@ impl Session {
             events.clone(),
             self.network_executor.handle(),
             self.websocket_connector(),
+            self.routes.child(),
         ));
         let page = self.new_page_with_loader(
             PageOptions::builder()
@@ -68,6 +69,18 @@ impl Session {
             events,
             timeout: self.options.timeout,
         })
+    }
+
+    pub fn route(
+        &self,
+        pattern: &str,
+        stage: crate::runtime::routes::RouteStage,
+        handler: crate::runtime::routes::RouteHandler,
+    ) -> Result<crate::runtime::routes::RouteRegistration, AutomationError> {
+        if self.is_closed() {
+            return Err(AutomationError::Closed);
+        }
+        self.routes.register(pattern, stage, handler)
     }
 
     pub fn cookies(&self) -> SessionCookies {

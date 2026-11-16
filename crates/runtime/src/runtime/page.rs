@@ -41,6 +41,7 @@ pub struct Page {
     pub(super) operation_deadline: Option<Instant>,
     pub(super) cancellation: super::CancellationToken,
     wait_until: NavigationWait,
+    pub(super) navigation_fetch_pending: bool,
     pending_navigation_scripts: std::cell::Cell<usize>,
     navigation_jobs: RefCell<Vec<tokio::task::AbortHandle>>,
     clock_options: super::clock::ClockOptions,
@@ -81,6 +82,7 @@ pub struct Page {
     fetch_streams: RefCell<HashMap<u64, crate::network::ResourceStreamHandle>>,
     fetch_buffered: RefCell<HashMap<u64, Arc<AtomicUsize>>>,
     script_execution_deadline: Option<Instant>,
+    script_execution_unlimited: bool,
 }
 
 #[derive(Clone)]
@@ -178,6 +180,7 @@ impl Page {
             operation_deadline: options.operation_deadline,
             cancellation: options.cancellation,
             wait_until: options.wait_until,
+            navigation_fetch_pending: false,
             pending_navigation_scripts: std::cell::Cell::new(0),
             navigation_jobs: RefCell::new(Vec::new()),
             realm_id,
@@ -214,6 +217,7 @@ impl Page {
             fetch_streams: RefCell::new(HashMap::new()),
             fetch_buffered: RefCell::new(HashMap::new()),
             script_execution_deadline: None,
+            script_execution_unlimited: false,
         };
         page.install_console_events()?;
         page.js.eval(include_str!("../../js/web_apis/console.js"))?;
@@ -643,7 +647,8 @@ fn install_interrupt(
     shutdown: Arc<AtomicBool>,
 ) {
     js.set_interrupt_handler(Arc::new(move || {
-        cancellation.is_cancelled()
+        super::CancellationToken::current().is_cancelled()
+            || cancellation.is_cancelled()
             || shutdown.load(Ordering::Acquire)
             || deadline.is_some_and(|deadline| Instant::now() >= deadline)
     }));

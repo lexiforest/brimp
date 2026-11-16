@@ -71,7 +71,7 @@ impl Page {
             )));
         }
         let mut request = request;
-        request.resource_type = Some("Document".into());
+        request.resource_type = Some("document".into());
         self.add_navigation_headers(&mut request);
         self.close_plugins();
         if let Some(network) = &self.network {
@@ -85,7 +85,8 @@ impl Page {
             });
         let started = Instant::now();
         self.load_state = LoadState::Loading;
-        let fetched = match crate::runtime::request::fetch_with_redirects(
+        self.navigation_fetch_pending = true;
+        let fetched = crate::runtime::request::fetch_with_redirects(
             self.network_scope.loader.as_ref(),
             &self.browsing_context,
             request,
@@ -95,8 +96,9 @@ impl Page {
                 limit: max_redirects,
             },
         )
-        .await
-        {
+        .await;
+        self.navigation_fetch_pending = false;
+        let fetched = match fetched {
             Ok(response) => response,
             Err(error) => {
                 self.load_state = LoadState::Failed;

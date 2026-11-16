@@ -50,7 +50,9 @@ they start as empty strings and store assigned JavaScript values on the style
 object. Those values do not enter cssText, getPropertyValue, length, serialized
 stylesheet rules or cloned DOM attributes; CSS.supports continues to report parser support.
 The 42 inventoried names absent in Safari remain absent on a fresh style object.
-This adds no layout, cascade or computed-style engine. Regenerate the name table
+Computed style and box layout are separate from this declaration surface: the
+cascade reads author rules, `@media` groups and inline declarations, and layout
+places block and inline content with shaped text. Regenerate the name table
 with `node scripts/coverage/css-properties.mjs` after changing the reference
 inventory or vendored property registry.
 

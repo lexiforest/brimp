@@ -198,6 +198,7 @@ dependencies = [
 name = "brimp-cli"
 version = "0.1.2"
 dependencies = [
+ "brimp-net",
  "brimp-runtime",
  "clap",
  "glob",

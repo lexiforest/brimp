@@ -22,7 +22,8 @@ impl Page {
         &self,
         url: &str,
     ) -> Result<crate::network::ResourceResponse, NavigationError> {
-        let request = self.resource_request(url)?;
+        let mut request = self.resource_request(url)?;
+        request.resource_type = Some("script".into());
         let response = crate::runtime::request::fetch(
             self.network_scope.loader.as_ref(),
             &self.browsing_context,
@@ -238,9 +239,11 @@ impl Page {
                     let mut headers = HeaderList::new();
                     self.browsing_context.apply_request_identity(&mut headers);
                     let sender = self.task_sender();
+                    let mut request = ResourceRequest::get(url);
+                    request.resource_type = Some("websocket".into());
+                    request.headers = headers;
                     let handle = self.network_scope.sockets.open_websocket(
-                        url,
-                        headers,
+                        request,
                         Box::new(move |event| {
                             let event = match event {
                                 crate::network::WebSocketEvent::HandshakeRequest{..} | crate::network::WebSocketEvent::HandshakeResponse{..} | crate::network::WebSocketEvent::FrameSent{..} => return,
@@ -340,7 +343,7 @@ impl Page {
             return Err(format!("{method} request cannot have a body"));
         }
         let mut request = ResourceRequest::new(method, url.as_str());
-        request.resource_type = Some("Fetch".into());
+        request.resource_type = Some(pending.resource_type);
         let headers = serde_json::from_str::<Vec<(String, String)>>(&pending.headers_json)
             .map_err(|error| error.to_string())?;
         for (name, value) in headers {

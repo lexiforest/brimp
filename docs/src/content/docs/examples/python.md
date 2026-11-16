@@ -45,7 +45,7 @@ with brimp.Session(headers={"X-Client": "brimp-example"}) as session:
 The server returns `q` and both `tag` values. `page.json()` reads the HTTP response,
 not the DOM.
 
-## 3. Submit a form body
+## 3. Send forms, JSON or raw bytes
 
 ```python
 import brimp
@@ -55,8 +55,40 @@ with brimp.Session() as session:
     print(page.json())
 ```
 
-Expect `{'method': 'POST', 'body': 'name=Ada'}`. Use `body=` for raw strings or
-bytes; don't pass `body` and `data` together.
+Expect `{'method': 'POST', 'body': 'name=Ada'}`. Use `json=` for JSON and
+`content=` or string/bytes `data=` for a raw payload:
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.post(
+        "http://127.0.0.1:8765/echo", json={"name": "Ada", "active": True}
+    )
+    print(page.json()["body"])
+    page.post("http://127.0.0.1:8765/echo", content=b"raw bytes")
+    print(page.json()["body"])
+    page.post("http://127.0.0.1:8765/echo", data="already=encoded")
+    print(page.json()["body"])
+```
+
+The output is compact JSON, `raw bytes`, then `already=encoded`. Brimp chooses
+`application/json`, `application/octet-stream`, or
+`application/x-www-form-urlencoded` for the corresponding input. An explicit
+session or request `Content-Type` takes precedence.
+
+For forms, use pairs such as `data=[("tag", "a"), ("tag", "b")]` for repeated
+fields. Mapping values use `urlencode` without expanding lists, matching curl_cffi.
+Strings are UTF-8 encoded; byte payloads are preserved, including embedded zeros.
+
+Non-`None` `json` takes precedence over `content`, then `data`. `json=None` omits
+the JSON body. The existing `body=` option accepts raw strings/bytes and cannot
+be combined with the other body arguments. File-like objects, upload iterators,
+`files=` and `multipart=` remain unsupported. GET/HEAD navigation still rejects
+request bodies.
+
+These body arguments also work with module helpers, `brimp.AsyncSession`, and
+`page.stream()`. Response streaming buffers the upload body before sending it.
 
 ## 4. Keep cookies between requests
 

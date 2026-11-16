@@ -5,8 +5,9 @@ description: Supported browser APIs, partial implementations, and known limits.
 
 Brimp runs browser JavaScript with a DOM and network stack. It can execute scripts,
 update a document, submit supported requests, and return the resulting content.
-It does not render the page: there is no layout, CSS cascade, paint engine or
-browser user interface.
+It does not render the page: there is no paint engine, compositor or browser user
+interface. Box layout and computed style are provided so script-visible geometry
+is measured rather than defaulted.
 
 The core APIs below are available through Python, Node and the CLI. Browser subsystem
 [plugins](/guides/plugins/) are enabled by default; extraction and host storage
@@ -16,11 +17,11 @@ are selected explicitly. An explicit plugin list replaces the defaults.
 
 | Area | What works | Main limits |
 | --- | --- | --- |
-| [DOM and documents](/web-platform/dom/) | HTML parsing, selectors, mutation, live collections, ranges, XPath, Shadow DOM and autonomous custom elements | No XML parser; partial Shadow DOM and custom-element behavior |
+| [DOM and documents](/web-platform/dom/) | HTML parsing, selectors, mutation, live collections, ranges, XPath, Shadow DOM, autonomous custom elements and measured element geometry | No XML parser; partial Shadow DOM and custom-element behavior |
 | [Forms and input](/web-platform/forms/) | Values, checkedness, form association, validation, selection, numeric/date stepping and direct input | GET form submission; no pickers, validation UI or layout-based input |
 | [Events](/web-platform/events/) | Dispatch, propagation, cancellation, handlers, observers and event payloads | Many device/UI events can only be dispatched manually |
 | [Window and environment](/web-platform/environment/) | Navigation, history state, timers, profile identity, media queries and font metadata | Profile values are configured; no browser UI, media playback or worker engine |
-| [CSS, SVG and geometry](/web-platform/css-svg/) | Inline declarations, editable stylesheets, SVG DOM and attribute reflection | No computed style, layout, SVG renderer or animation engine |
+| [CSS, SVG and geometry](/web-platform/css-svg/) | Inline declarations, editable stylesheets, a cascade with specificity and `@media`, block/inline box layout, computed style, SVG DOM and attribute reflection | No floats, flex/grid, SVG renderer or animation engine |
 | [Network, files and streams](/web-platform/network-files/) | Fetch/XHR, Blob/File/FileReader, streams, structured cloning and message channels | Partial browser policies and body formats; cloning can buffer data |
 | [Cryptography](/web-platform/crypto/) | Random values, UUIDs and the documented WebCrypto algorithms | No Ed25519/X25519 or CryptoKey cloning |
 | [Browser plugins](/web-platform/plugins/) | Configured browser services, canvas state, graphics/audio objects and RTC payloads | Subsystem-specific placeholders; no GPU rendering, audio processing or worker execution |
@@ -39,7 +40,8 @@ That host bridge has a different contract from page-side `structuredClone`.
 - **Unavailable:** the interface or capability is absent or rejects the operation.
 
 Check behavior as well as presence. For example, `element.scrollIntoView()` is a
-no-op, `getComputedStyle()` returns `undefined`, and media `play()` rejects.
+no-op, `getComputedStyle()` reports cascaded values but no painted pixels, and
+media `play()` rejects.
 These methods cannot be used as evidence of rendering or playback support.
 
 ## Examples and detailed contracts

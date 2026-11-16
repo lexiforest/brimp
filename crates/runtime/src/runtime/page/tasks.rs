@@ -8,7 +8,9 @@ use std::time::{Duration, Instant};
 
 impl Page {
     pub(crate) fn check_operation(&self) -> Result<(), crate::runtime::AutomationError> {
-        if self.cancellation.is_cancelled() {
+        if super::super::CancellationToken::current().is_cancelled()
+            || self.cancellation.is_cancelled()
+        {
             return Err(crate::runtime::AutomationError::Cancellation);
         }
         if self.shutdown.load(Ordering::Acquire) {
@@ -24,7 +26,12 @@ impl Page {
     }
 
     pub(crate) fn set_script_execution_deadline(&mut self, timeout: Duration) {
-        self.script_execution_deadline = Instant::now().checked_add(timeout);
+        self.script_execution_unlimited = timeout.is_zero();
+        self.script_execution_deadline = if timeout.is_zero() {
+            None
+        } else {
+            Instant::now().checked_add(timeout)
+        };
         if let Some(deadline) = self.script_execution_deadline {
             self.js
                 .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
@@ -34,6 +41,7 @@ impl Page {
     pub(crate) fn clear_script_execution_deadline(&mut self) {
         self.js.clear_execution_time_limit();
         self.script_execution_deadline = None;
+        self.script_execution_unlimited = false;
     }
 
     pub fn tasks(&mut self) -> &mut TaskQueue {
@@ -151,13 +159,22 @@ impl Page {
         )
     }
 
-    pub fn run_one_task(&mut self) -> Result<bool, JsException> {
-        let deadline = self
-            .script_execution_deadline
-            .unwrap_or_else(|| Instant::now() + self.plugin_timeout);
-        self.js
-            .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+    /// Service engine work that is only reachable through its event loop.
+    /// Callers invoke this when nothing else is runnable, so deferred jobs
+    /// cannot interleave with page tasks that are already queued.
+    pub fn pump_engine_jobs(&mut self) {
         self.js.pump_jobs();
+    }
+
+    pub fn run_one_task(&mut self) -> Result<bool, JsException> {
+        let deadline = self.script_execution_deadline.or_else(|| {
+            (!self.script_execution_unlimited && !self.plugin_timeout.is_zero())
+                .then(|| Instant::now() + self.plugin_timeout)
+        });
+        if let Some(deadline) = deadline {
+            self.js
+                .set_execution_time_limit(deadline.saturating_duration_since(Instant::now()));
+        }
         let bridge_progress = self.bridge.pump(&self.js);
         if let Some(deadline) = self.script_execution_deadline {
             self.js
@@ -223,6 +240,7 @@ impl Page {
                 return Ok(false);
             }
             if !progressed {
+                self.pump_engine_jobs();
                 std::thread::sleep(Duration::from_millis(1));
             }
         }

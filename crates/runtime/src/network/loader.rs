@@ -7,7 +7,8 @@ use async_trait::async_trait;
 use bytes::Bytes;
 use http::{HeaderValue, Method, StatusCode};
 use http_body_util::{BodyExt, Full};
-use std::sync::Arc;
+use std::collections::VecDeque;
+use std::sync::{Arc, Mutex};
 
 /// Browser resource adapter over the standard HTTP transport in brimp-net.
 #[derive(Clone)]
@@ -16,7 +17,7 @@ pub struct CurlResourceLoader {
     config: CurlConfig,
 }
 struct Executor {
-    client: brimp_net::Client,
+    clients: Mutex<VecDeque<(super::ProxySelection, brimp_net::Client)>>,
     runtime: Option<tokio::runtime::Runtime>,
     handle: tokio::runtime::Handle,
 }
@@ -39,7 +40,7 @@ impl CurlResourceLoader {
                 "queue and response limits must be positive".into(),
             ));
         }
-        let client = brimp_net::Client::new(transport_config(&config));
+        config.proxy_options.validate()?;
         let runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(1)
             .enable_time()
@@ -49,7 +50,7 @@ impl CurlResourceLoader {
         let handle = runtime.handle().clone();
         Ok(Self {
             executor: Arc::new(Executor {
-                client,
+                clients: Mutex::new(VecDeque::new()),
                 runtime: Some(runtime),
                 handle,
             }),
@@ -65,19 +66,46 @@ impl CurlResourceLoader {
                 "queue and response limits must be positive".into(),
             ));
         }
+        config.proxy_options.validate()?;
         Ok(Self {
             executor: Arc::new(Executor {
-                client: brimp_net::Client::new(transport_config(&config)),
+                clients: Mutex::new(VecDeque::new()),
                 runtime: None,
                 handle,
             }),
             config,
         })
     }
+    fn client(&self, request: &ResourceRequest) -> Result<brimp_net::Client, NetworkError> {
+        let selected = match &request.resolved_proxy {
+            Some(selected) => selected.as_ref().clone(),
+            None => request
+                .proxy_options
+                .resolve(&request.url, &self.config.proxy_options)?,
+        };
+        let mut clients = self.executor.clients.lock().unwrap();
+        if let Some(index) = clients.iter().position(|(key, _)| key == &selected) {
+            let entry = clients.remove(index).unwrap();
+            let client = entry.1.clone();
+            clients.push_back(entry);
+            return Ok(client);
+        }
+        let mut config = transport_config(&self.config);
+        config.proxy = selected.proxy.clone();
+        config.trust_env = false;
+        config.no_proxy = Some(selected.no_proxy.clone());
+        let client = brimp_net::Client::new(config);
+        if clients.len() == 32 {
+            clients.pop_front();
+        }
+        clients.push_back((selected, client.clone()));
+        Ok(client)
+    }
     pub fn check_profile(config: &CurlConfig) -> Result<(), NetworkError> {
+        config.proxy_options.validate()?;
         brimp_net::Client::new(transport_config(config))
             .check_profile()
-            .map_err(net_error)
+            .map_err(NetworkError::from)
     }
 }
 impl Default for CurlResourceLoader {
@@ -88,23 +116,17 @@ impl Default for CurlResourceLoader {
 pub(crate) fn transport_config(config: &CurlConfig) -> brimp_net::Config {
     brimp_net::Config {
         impersonation_target: config.impersonation_profile.clone(),
+        fingerprint: config.fingerprint.clone(),
         default_headers: config.default_headers,
         prefer_http3: config.prefer_http3,
         ca_bundle: config.ca_bundle.clone(),
         queue_capacity: config.queue_capacity,
         connect_timeout: config.connect_timeout,
         request_timeout: config.request_timeout,
-        proxy: config
-            .proxy
-            .as_ref()
-            .map(|p| brimp_net::Proxy::parse(p.url()).expect("validated proxy")),
+        proxy: None,
+        trust_env: config.proxy_options.trust_env.unwrap_or(true),
+        no_proxy: None,
         redirect_policy: brimp_net::RedirectPolicy::None,
-    }
-}
-fn net_error(error: brimp_net::Error) -> NetworkError {
-    match error {
-        brimp_net::Error::InvalidRequest(message) => NetworkError::InvalidRequest(message),
-        other => NetworkError::Transport(other.to_string()),
     }
 }
 fn http_request(request: &ResourceRequest) -> Result<http::Request<Full<Bytes>>, NetworkError> {
@@ -154,7 +176,7 @@ async fn collect(
     let response = client
         .send(http_request(&request)?)
         .await
-        .map_err(net_error)?;
+        .map_err(NetworkError::from)?;
     let info = response
         .extensions()
         .get::<brimp_net::TransferInfo>()
@@ -163,7 +185,7 @@ async fn collect(
     let (parts, mut stream) = response.into_parts();
     let mut body = Vec::new();
     while let Some(frame) = stream.frame().await {
-        let frame = frame.map_err(net_error)?;
+        let frame = frame.map_err(NetworkError::from)?;
         if let Some(bytes) = frame.data_ref() {
             if body.len().saturating_add(bytes.len()) > maximum {
                 return Err(NetworkError::ResponseTooLarge { limit: maximum });
@@ -195,11 +217,19 @@ impl Drop for Callback {
 }
 #[async_trait]
 impl ResourceLoader for CurlResourceLoader {
+    fn prepare_request(&self, request: &mut ResourceRequest) -> Result<(), NetworkError> {
+        request.resolved_proxy = Some(Arc::new(
+            request
+                .proxy_options
+                .resolve(&request.url, &self.config.proxy_options)?,
+        ));
+        Ok(())
+    }
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
         if let Some(response) = data_url_response(&request) {
             return response;
         }
-        collect(&self.executor.client, request, &self.config).await
+        collect(&self.client(&request)?, request, &self.config).await
     }
     fn fetch_callback(
         &self,
@@ -210,7 +240,7 @@ impl ResourceLoader for CurlResourceLoader {
             callback(response);
             return Ok(());
         }
-        let client = self.executor.client.clone();
+        let client = self.client(&request)?;
         let config = self.config.clone();
         let mut callback = Callback(Some(callback));
         self.executor.handle.spawn(async move {
@@ -238,7 +268,7 @@ impl ResourceLoader for CurlResourceLoader {
             }
             return Ok(handle);
         }
-        let client = self.executor.client.clone();
+        let client = self.client(&request)?;
         let config = self.config.clone();
         self.executor.handle.spawn(async move {
             let result=tokio::select!{biased; ()=control.cancelled()=>Err(NetworkError::Cancelled), result=stream(&client,request,&config,&control,&mut callback)=>result};
@@ -278,7 +308,7 @@ async fn stream(
     let response = client
         .send(http_request(&request)?)
         .await
-        .map_err(net_error)?;
+        .map_err(NetworkError::from)?;
     let (parts, mut body) = response.into_parts();
     if !deliver(
         ResourceStreamEvent::Headers {
@@ -295,7 +325,7 @@ async fn stream(
     }
     let mut received = 0usize;
     while let Some(frame) = body.frame().await {
-        let frame = frame.map_err(net_error)?;
+        let frame = frame.map_err(NetworkError::from)?;
         if let Some(bytes) = frame.data_ref() {
             received = received.saturating_add(bytes.len());
             if received > maximum {
@@ -382,6 +412,31 @@ mod tests {
             "text/javascript;charset=utf-8"
         );
         assert_eq!(response.metadata.downloaded_bytes, 17);
+    }
+
+    #[test]
+    fn transport_cache_is_bounded_and_separates_proxy_credentials() {
+        let _guard = EXECUTOR_TEST_LOCK.lock().unwrap();
+        let loader = CurlResourceLoader::default();
+        let mut request = ResourceRequest::get("https://example.test/");
+        request.proxy_options.proxy = Some("http://proxy.test:8080".into());
+        for i in 0..40 {
+            request.proxy_options.proxy_auth = Some((format!("user{i}"), "secret".into()));
+            loader.client(&request).unwrap();
+        }
+        let selected = request
+            .proxy_options
+            .resolve(&request.url, &loader.config.proxy_options)
+            .unwrap();
+        {
+            let clients = loader.executor.clients.lock().unwrap();
+            assert_eq!(clients.len(), 32);
+            assert_eq!(clients.back().unwrap().0, selected);
+        }
+        // Reusing a proxy identity must not allocate another transport entry.
+        loader.client(&request).unwrap();
+        assert_eq!(loader.executor.clients.lock().unwrap().len(), 32);
+        assert!(!format!("{request:?}").contains("secret"));
     }
 
     #[test]

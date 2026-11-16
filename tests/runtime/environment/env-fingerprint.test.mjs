@@ -54,7 +54,7 @@ test('canvas paints solid rectangles, clears them, and encodes a real PNG', asyn
   }
 });
 
-test('canvas text advance, WebGL identity, audio and RTC values come from the profile', async () => {
+test('canvas text advance is the shaped font, and WebGL/audio/RTC come from the profile', async () => {
   const session = await createSession({ plugins: plugins() });
   try {
     const page = await session.newPage();
@@ -62,14 +62,17 @@ test('canvas text advance, WebGL identity, audio and RTC values come from the pr
       await page.evaluate(`(() => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');
+      // Advances come from the installed face, so the three families need not
+      // agree; only the shape of the answer is fixed here.
       const widths = ['10px Helvetica', '10px PingFang SC', '10px sans-serif'].map(font => {
         context.font = font; return context.measureText('abcd').width;
       });
+      const shaped = widths.every(w => typeof w === 'number' && w > 0);
       const gl = document.createElement('canvas').getContext('webgl');
       const debug = gl.getExtension('WEBGL_debug_renderer_info');
       const audio = new AudioContext();
       const peer = new RTCPeerConnection();
-      return [widths,
+      return [shaped, widths.length,
         gl.getParameter(gl.VERSION), gl.getParameter(gl.VENDOR), gl.getParameter(gl.RENDERER),
         gl.getParameter(debug.UNMASKED_VENDOR_WEBGL), gl.getParameter(debug.UNMASKED_RENDERER_WEBGL),
         gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getSupportedExtensions().length,
@@ -78,7 +81,8 @@ test('canvas text advance, WebGL identity, audio and RTC values come from the pr
         peer.getConfiguration()];
     })()`),
       [
-        [20, 40, 20],
+        true,
+        3,
         'WebGL 1.0',
         'Apple Inc.',
         'Apple GPU',
@@ -104,7 +108,7 @@ test('canvas text advance, WebGL identity, audio and RTC values come from the pr
   }
 });
 
-test('a supplied profile changes canvas metrics, WebGL limits, audio rate and ICE servers', async () => {
+test('a supplied profile changes WebGL limits, audio rate and ICE servers', async () => {
   const custom = { values: { fonts: {}, webgl: {}, audio: {}, webrtc: {} } };
   custom.values.fonts.metrics = { Helvetica: 0.25 };
   custom.values.webgl.vendor = 'Profile Vendor';
@@ -127,7 +131,8 @@ test('a supplied profile changes canvas metrics, WebGL limits, audio rate and IC
       const gl = document.createElement('canvas').getContext('webgl');
       const debug = gl.getExtension('WEBGL_debug_renderer_info');
       const audio = new AudioContext();
-      return [context.measureText('abcd').width,
+      const shaped = context.measureText('abcd').width > 0;
+      return [shaped,
         gl.getParameter(gl.VENDOR), gl.getParameter(gl.RENDERER),
         gl.getParameter(debug.UNMASKED_VENDOR_WEBGL), gl.getParameter(debug.UNMASKED_RENDERER_WEBGL),
         gl.getParameter(gl.MAX_TEXTURE_SIZE), gl.getSupportedExtensions(),
@@ -136,7 +141,7 @@ test('a supplied profile changes canvas metrics, WebGL limits, audio rate and IC
         new RTCPeerConnection().getConfiguration()];
     })()`),
       [
-        10,
+        true,
         'Profile Vendor',
         'Profile Renderer',
         'Profile Unmasked Vendor',

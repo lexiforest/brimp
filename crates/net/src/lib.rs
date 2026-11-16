@@ -67,7 +67,8 @@ mod client;
 mod config;
 mod error;
 mod ffi;
-mod fingerprint;
+/// Editable transport fingerprint data.
+pub mod fingerprint;
 mod headers;
 mod multi;
 mod pool;

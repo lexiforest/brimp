@@ -59,6 +59,7 @@ impl Default for NetworkOptions {
 }
 struct Record {
     request: ResourceRequest,
+    cacheable: bool,
     response: Option<ResourceResponse>,
     body: Option<Vec<u8>>,
     bytes: usize,
@@ -105,8 +106,8 @@ impl NetworkRuntime {
         events: EventHub,
         executor: tokio::runtime::Handle,
         sockets: Arc<dyn WebSocketConnector>,
+        routes: Routes,
     ) -> Self {
-        let routes = Routes::default();
         Self {
             sockets,
             streams: Arc::new(Mutex::new(Streams::default())),
@@ -222,12 +223,19 @@ impl NetworkRuntime {
     fn begin(
         &self,
         mut request: ResourceRequest,
-    ) -> (
-        u64,
-        ResourceRequest,
-        NetworkOptions,
-        Option<ResourceResponse>,
-    ) {
+    ) -> Result<
+        (
+            u64,
+            ResourceRequest,
+            NetworkOptions,
+            Option<ResourceResponse>,
+        ),
+        NetworkError,
+    > {
+        let cacheable = !self.routes.matches(&request.url);
+        if cacheable {
+            self.inner.prepare_request(&mut request)?;
+        }
         let mut state = self.state.lock().unwrap();
         for (name, value) in state.extra_headers.iter() {
             request.headers.insert(name.clone(), value.clone());
@@ -236,7 +244,7 @@ impl NetworkRuntime {
         state.next += 1;
         request.request_id = Some(id);
         let cache = if !state.options.bypass_cache
-            && !self.routes.matches(&request.url)
+            && cacheable
             && request.method == http::Method::GET
             && !request.headers.contains_key(http::header::CACHE_CONTROL)
         {
@@ -268,6 +276,7 @@ impl NetworkRuntime {
             id,
             Record {
                 request: kept,
+                cacheable,
                 response: None,
                 body: Some(Vec::new()),
                 bytes: 0,
@@ -285,7 +294,7 @@ impl NetworkRuntime {
         let options = state.options.clone();
         drop(state);
         self.events.emit(event);
-        (id, request, options, cache)
+        Ok((id, request, options, cache))
     }
     fn response(&self, id: u64, response: &ResourceResponse, cached: bool) {
         let mut metadata = response.clone();
@@ -358,6 +367,10 @@ impl NetworkRuntime {
         if let Some((request, response)) = cache
             && !state.options.bypass_cache
             && request.method == http::Method::GET
+            && state
+                .records
+                .get(&id)
+                .is_some_and(|record| record.cacheable)
             && response.status == http::StatusCode::OK
             && !response.headers.contains_key(http::header::SET_COOKIE)
             && !response.headers.contains_key(http::header::VARY)
@@ -434,7 +447,16 @@ fn trim(state: &mut State) {
     }
 }
 fn cache_key(request: &ResourceRequest) -> String {
-    format!("{}\n{:?}", request.url, headers(&request.headers))
+    format!(
+        "{}\n{:?}\n{}",
+        request.url,
+        headers(&request.headers),
+        request
+            .resolved_proxy
+            .as_ref()
+            .map(|proxy| proxy.cache_key())
+            .unwrap_or_default()
+    )
 }
 struct CompletionGuard(NetworkRuntime, u64);
 impl Drop for CompletionGuard {
@@ -457,7 +479,7 @@ async fn stream_ready(handle: &ResourceStreamHandle, directive: ResourceStreamDi
 #[async_trait]
 impl ResourceLoader for NetworkRuntime {
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
-        let (id, request, options, cache) = self.begin(request);
+        let (id, request, options, cache) = self.begin(request)?;
         let _guard = CompletionGuard(self.clone(), id);
         let result = if options.offline {
             Err(NetworkError::Transport("network is offline".into()))
@@ -497,7 +519,7 @@ impl ResourceLoader for NetworkRuntime {
         request: ResourceRequest,
         mut callback: ResourceStreamCallback,
     ) -> Result<ResourceStreamHandle, NetworkError> {
-        let (id, request, options, cache) = self.begin(request);
+        let (id, request, options, cache) = self.begin(request)?;
         let proxy = ResourceStreamHandle::proxy();
         let control = proxy.clone();
         let loader = self.clone();
@@ -629,8 +651,7 @@ impl ResourceLoader for NetworkRuntime {
 impl WebSocketConnector for NetworkRuntime {
     fn open_websocket(
         &self,
-        url: String,
-        mut headers: HeaderList,
+        mut request: ResourceRequest,
         callback: Box<dyn Fn(WebSocketEvent) + Send>,
     ) -> Result<WebSocketHandle, NetworkError> {
         let mut state = self.state.lock().unwrap();
@@ -638,16 +659,45 @@ impl WebSocketConnector for NetworkRuntime {
             return Err(NetworkError::Transport("network is offline".into()));
         }
         for (name, value) in state.extra_headers.iter() {
-            headers.insert(name.clone(), value.clone());
+            request.headers.insert(name.clone(), value.clone());
         }
         let id = state.next;
         state.next += 1;
         drop(state);
         let events = self.events.clone();
-        let event_url = url.clone();
+        request.request_id = Some(id);
+        let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+        self.routes.intercept(
+            request,
+            Box::new(move |decision| {
+                let _ = sender.send(decision);
+            }),
+        );
+        let request = loop {
+            match receiver.recv_timeout(Duration::from_millis(10)) {
+                Ok(ResourceInterception::Continue(request)) => break request,
+                Ok(ResourceInterception::Fail(error)) => return Err(error),
+                Ok(ResourceInterception::Fulfill(_)) => {
+                    return Err(NetworkError::InvalidRequest(
+                        "WebSocket routes support continue or fail, not fulfill".into(),
+                    ));
+                }
+                Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                    return Err(NetworkError::Closed);
+                }
+                Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+                    if super::CancellationToken::current().is_cancelled()
+                        || self.streams.lock().unwrap().closed
+                    {
+                        self.routes.cancel_request(id);
+                        return Err(NetworkError::Cancelled);
+                    }
+                }
+            }
+        };
+        let event_url = request.url.clone();
         self.sockets.open_websocket(
-            url,
-            headers,
+            request,
             Box::new(move |event| {
                 let (kind, data, message) = match &event {
                     WebSocketEvent::Open => ("open", vec![], None),

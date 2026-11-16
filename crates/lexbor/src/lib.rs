@@ -689,8 +689,9 @@ impl Drop for Parser {
 
 pub type Declaration = (String, String, bool);
 pub fn declarations(css: &str) -> Result<Vec<Declaration>, Error> {
+    let expanded = expand_font_shorthand(css);
     // Lexbor's declaration-list entry point expects the first declaration token.
-    let css = css.trim_start_matches([' ', '\t', '\n', '\r', '\x0c']);
+    let css = expanded.trim_start_matches([' ', '\t', '\n', '\r', '\x0c']);
     let mut output = Vec::<Declaration>::new();
     // SAFETY: callback/context match and are valid throughout this synchronous call.
     status(unsafe {
@@ -781,6 +782,8 @@ pub struct CssRule {
     pub declarations: String,
 }
 pub fn stylesheet(css: &str) -> Result<Vec<CssRule>, Error> {
+    let expanded = expand_font_shorthand(css);
+    let css = expanded.as_str();
     let mut rules = Vec::<CssRule>::new();
     // SAFETY: callback copies parser-owned data synchronously into the live vector.
     status(unsafe {
@@ -859,5 +862,254 @@ impl HtmlWriter {
     }
     pub fn take_mutations(&mut self) -> Result<Vec<ParserMutation>, Error> {
         self.parser.take_mutations()
+    }
+}
+
+/// Lexbor's property table has no `font` shorthand, so a declaration that uses
+/// one is dropped entirely and the page's font values disappear. Expand it into
+/// the longhands it stands for before parsing. Text outside a well-formed `font`
+/// declaration is copied through unchanged.
+pub fn expand_font_shorthand(css: &str) -> String {
+    let bytes = css.as_bytes();
+    let mut out = String::with_capacity(css.len() + 32);
+    let mut index = 0;
+    while index < bytes.len() {
+        // A declaration starts at the beginning, after `;`, or after `{`.
+        let starts_declaration = index == 0
+            || matches!(out.trim_end().as_bytes().last(), Some(b';') | Some(b'{'))
+            || matches!(bytes[index], b';' | b'{');
+        let name_start = index;
+        if starts_declaration {
+            let separator = matches!(bytes.get(index), Some(b';') | Some(b'{'));
+            if separator {
+                out.push(bytes[index] as char);
+                index += 1;
+                if index >= bytes.len() {
+                    break;
+                }
+            }
+            // Read the property name up to `:` while it looks like one.
+            let mut cursor = index;
+            while cursor < bytes.len() && (bytes[cursor].is_ascii_alphanumeric() || bytes[cursor] == b'-') {
+                cursor += 1;
+            }
+            let name = &css[index..cursor];
+            let mut after = cursor;
+            while after < bytes.len() && bytes[after] == b' ' {
+                after += 1;
+            }
+            if name.eq_ignore_ascii_case("font") && bytes.get(after) == Some(&b':') {
+                let value_start = after + 1;
+                let mut end = value_start;
+                let mut depth = 0i32;
+                let mut quote: Option<u8> = None;
+                while end < bytes.len() {
+                    let byte = bytes[end];
+                    match quote {
+                        Some(active) => {
+                            if byte == active {
+                                quote = None;
+                            }
+                        }
+                        None => match byte {
+                            b'"' | b'\'' => quote = Some(byte),
+                            b'(' => depth += 1,
+                            b')' => depth -= 1,
+                            b';' | b'}' if depth <= 0 => break,
+                            _ => {}
+                        },
+                    }
+                    end += 1;
+                }
+                let value = css[value_start..end].trim();
+                match expand_font_value(value) {
+                    Some(longhands) => {
+                        out.push_str(&longhands);
+                        // The expansion ends with its own terminator, so a source
+                        // `;` would otherwise leave an empty declaration behind.
+                        index = if bytes.get(end) == Some(&b';') { end + 1 } else { end };
+                    }
+                    None => {
+                        out.push_str(&css[name_start + if separator { 1 } else { 0 }..end]);
+                        index = end;
+                    }
+                }
+                continue;
+            }
+        }
+        // Copy whole characters: the input is UTF-8 and declarations may quote
+        // non-ASCII family names.
+        match css[index..].chars().next() {
+            Some(character) => {
+                out.push(character);
+                index += character.len_utf8();
+            }
+            None => break,
+        }
+    }
+    out
+}
+
+/// `[style || variant || weight || stretch]? size[/line-height]? family`
+fn expand_font_value(value: &str) -> Option<String> {
+    let tokens = split_font_tokens(value)?;
+    if tokens.is_empty() {
+        return None;
+    }
+    let mut style = None;
+    let mut variant = None;
+    let mut weight = None;
+    let mut size_index = None;
+    for (position, token) in tokens.iter().enumerate() {
+        let lower = token.to_ascii_lowercase();
+        match lower.as_str() {
+            "italic" | "oblique" => style = Some(lower),
+            "small-caps" => variant = Some(lower),
+            "bold" | "bolder" | "lighter" => weight = Some(lower),
+            _ if lower.chars().all(|c| c.is_ascii_digit()) && lower.len() == 3 => weight = Some(lower),
+            _ if is_font_size(&lower) => {
+                size_index = Some(position);
+                break;
+            }
+            _ => return None,
+        }
+    }
+    let size_index = size_index?;
+    let size = tokens[size_index].to_ascii_lowercase();
+    let mut rest = size_index + 1;
+    let mut line_height = "normal".to_string();
+    if tokens.get(size_index).map(|t| t.contains('/')).unwrap_or(false) {
+        // `16px/20px` arrives as one token.
+        let (size_part, line_part) = tokens[size_index].split_once('/')?;
+        if !is_font_size(&size_part.to_ascii_lowercase()) {
+            return None;
+        }
+        let size = size_part.to_ascii_lowercase();
+        let line = line_part.trim().to_string();
+        let family = tokens[rest..].join(" ");
+        return finish_font(style.as_deref(), variant.as_deref(), weight.as_deref(), &size, &line, &family);
+    }
+    if tokens.get(rest).map(|t| t == "/").unwrap_or(false) {
+        line_height = tokens.get(rest + 1)?.to_string();
+        rest += 2;
+    }
+    let family = tokens[rest..].join(" ");
+    finish_font(style.as_deref(), variant.as_deref(), weight.as_deref(), &size, &line_height, &family)
+}
+
+fn finish_font(
+    style: Option<&str>,
+    variant: Option<&str>,
+    weight: Option<&str>,
+    size: &str,
+    line_height: &str,
+    family: &str,
+) -> Option<String> {
+    if family.trim().is_empty() {
+        return None;
+    }
+    let mut out = String::new();
+    if let Some(style) = style {
+        out.push_str(&format!("font-style: {style}; "));
+    }
+    if let Some(variant) = variant {
+        out.push_str(&format!("font-variant: {variant}; "));
+    }
+    if let Some(weight) = weight {
+        out.push_str(&format!("font-weight: {weight}; "));
+    }
+    out.push_str(&format!("font-size: {size}; line-height: {line_height}; font-family: {family};"));
+    Some(out)
+}
+
+fn is_font_size(token: &str) -> bool {
+    let size = token.split('/').next().unwrap_or(token);
+    if matches!(
+        size,
+        "xx-small" | "x-small" | "small" | "medium" | "large" | "x-large" | "xx-large" | "xxx-large"
+            | "larger" | "smaller"
+    ) {
+        return true;
+    }
+    let digits = size.trim_end_matches(|c: char| c.is_ascii_alphabetic() || c == '%');
+    !digits.is_empty()
+        && digits.parse::<f64>().is_ok()
+        && size[digits.len()..]
+            .chars()
+            .all(|c| c.is_ascii_alphabetic() || c == '%')
+}
+
+/// Split a font value into tokens, keeping `size/line-height` and quoted family
+/// names intact.
+fn split_font_tokens(value: &str) -> Option<Vec<String>> {
+    let mut tokens = Vec::new();
+    let mut current = String::new();
+    let mut quote: Option<char> = None;
+    for character in value.chars() {
+        match quote {
+            Some(active) => {
+                current.push(character);
+                if character == active {
+                    quote = None;
+                }
+            }
+            None => match character {
+                '"' | '\'' => {
+                    quote = Some(character);
+                    current.push(character);
+                }
+                ' ' | '\t' | '\n' => {
+                    if !current.is_empty() {
+                        tokens.push(std::mem::take(&mut current));
+                    }
+                }
+                _ => current.push(character),
+            },
+        }
+    }
+    if quote.is_some() {
+        return None;
+    }
+    if !current.is_empty() {
+        tokens.push(current);
+    }
+    Some(tokens)
+}
+
+#[cfg(test)]
+mod font_shorthand_tests {
+    use super::expand_font_shorthand;
+
+    #[test]
+    fn expands_font_declarations_and_leaves_other_text_alone() {
+        assert_eq!(
+            expand_font_shorthand("font: 16px/20px Georgia"),
+            "font-size: 16px; line-height: 20px; font-family: Georgia;"
+        );
+        assert_eq!(
+            expand_font_shorthand("color: red; font: bold 12px Arial"),
+            "color: red; font-weight: bold; font-size: 12px; line-height: normal; font-family: Arial;"
+        );
+        assert_eq!(expand_font_shorthand("font-family: Georgia"), "font-family: Georgia");
+    }
+
+    #[test]
+    fn survives_sheets_with_media_blocks_and_trailing_braces() {
+        let sheet = "p { margin-top: 20px; color: red }.lead { margin-top: 30px }#first { margin-top: 40px; width: 50% }@media (min-width: 600px) { .lead { color: blue } }";
+        let expanded = expand_font_shorthand(sheet);
+        assert_eq!(expanded, sheet);
+        let trailing = "a{font:italic 700 18px/24px Georgia}";
+        assert!(expand_font_shorthand(trailing).contains("font-family: Georgia;"));
+    }
+
+    #[test]
+    fn handles_empty_and_unterminated_values() {
+        assert_eq!(expand_font_shorthand("font:"), "font:");
+        assert_eq!(expand_font_shorthand("font"), "font");
+        assert_eq!(expand_font_shorthand(""), "");
+        assert_eq!(expand_font_shorthand("a{font:"), "a{font:");
+        // A declaration block that ends with a separator must not index past it.
+        assert_eq!(expand_font_shorthand("color: red;"), "color: red;");
+        assert_eq!(expand_font_shorthand("font: 16px Ünïcode;"), "font-size: 16px; line-height: normal; font-family: Ünïcode;");
     }
 }

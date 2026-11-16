@@ -50,7 +50,9 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
     })()"#).unwrap();
     assert_eq!(
         value,
-        json!({"width":2,"height":3,"length":24,"pixel":[255,0,0,255],"encoded":{"prefix":"data:image/png;base64,","signature":[80,78,71],"width":2,"height":3},"fill":"#ff0000","transform":0,"textWidth":20,"hit":false})
+        // `textWidth` is the platform font's advance for "abcd" at the canvas's
+        // default 10px sans-serif, not a fixed ratio of the font size.
+        json!({"width":2,"height":3,"length":24,"pixel":[255,0,0,255],"encoded":{"prefix":"data:image/png;base64,","signature":[80,78,71],"width":2,"height":3},"fill":"#ff0000","transform":0,"textWidth":21.6845703125,"hit":false})
     );
     assert_eq!(
         page.evaluate("typeof getComputedStyle(document.body)")

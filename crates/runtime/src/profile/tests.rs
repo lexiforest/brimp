@@ -23,8 +23,11 @@ fn partial_profiles_drive_native_headers_and_invalidate_resolved_cache() {
     )
     .unwrap();
     let headers = profile.request_headers();
-    assert_eq!(headers[0], ("user-agent", "Custom/1".to_owned()));
-    assert_eq!(headers[2], ("accept-language", "fr-CA,fr;q=0.9".to_owned()));
+    assert_eq!(headers[0], ("user-agent".to_owned(), "Custom/1".to_owned()));
+    assert_eq!(
+        headers[2],
+        ("accept-language".to_owned(), "fr-CA,fr;q=0.9".to_owned())
+    );
     profile.set("identity", "user_agent", json!("Custom/2"));
     profile.validate().unwrap();
     assert_eq!(profile.request_headers()[0].1, "Custom/2");

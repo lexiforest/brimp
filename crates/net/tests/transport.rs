@@ -347,62 +347,32 @@ fn blocking_collection_remains_available() {
 }
 
 #[tokio::test]
-async fn catalog_resolution_is_shared_by_clones() {
-    // Change process environment only in a dedicated child; the parallel test
-    // suite must never race with a process-wide set_var call.
-    if std::env::var_os("BRIMP_NET_CATALOG_TEST_CHILD").is_none() {
-        let directory =
-            std::env::temp_dir().join(format!("brimp-net-catalog-{}", std::process::id()));
-        std::fs::create_dir_all(&directory).unwrap();
-        let status = std::process::Command::new(std::env::current_exe().unwrap())
-            .args([
-                "--exact",
-                "catalog_resolution_is_shared_by_clones",
-                "--nocapture",
-            ])
-            .env("BRIMP_NET_CATALOG_TEST_CHILD", "1")
-            .env("IMPERSONATE_CONFIG_DIR", &directory)
-            .status()
-            .unwrap();
-        std::fs::remove_dir_all(directory).unwrap();
-        assert!(status.success());
-        return;
-    }
+async fn inline_fingerprint_is_shared_by_clones() {
     let (url, task) = server(2, |mut stream| {
-        head(&mut stream);
+        let headers = head(&mut stream);
+        assert!(
+            headers
+                .to_ascii_lowercase()
+                .contains("x-fingerprint: explicit")
+        );
         reply(&mut stream, b"ok");
     });
+    let mut fingerprint = brimp_net::fingerprint::Fingerprint::default();
+    fingerprint
+        .headers
+        .insert("X-Fingerprint".into(), "explicit".into());
     let client = Client::new(Config {
-        impersonation_target: "chrome136".into(),
+        fingerprint: Some(fingerprint),
+        default_headers: true,
         ..Config::default()
     });
-    client
-        .send(request(&url))
-        .await
-        .unwrap()
-        .into_body()
-        .collect()
-        .await
-        .unwrap();
-    let path = std::path::PathBuf::from(std::env::var_os("IMPERSONATE_CONFIG_DIR").unwrap())
-        .join("fingerprints.json");
-    std::fs::write(path, b"invalid catalog").unwrap();
-    // Existing clones retain their resolution. New clients see the changed file.
-    client
-        .clone()
-        .send(request(&url))
-        .await
-        .unwrap()
-        .into_body()
-        .collect()
-        .await
-        .unwrap();
-    assert!(
-        Client::new(Config::default())
-            .send(request(&url))
-            .await
-            .is_err()
-    );
+    for client in [client.clone(), client] {
+        let response = client.send(request(&url)).await.unwrap();
+        assert_eq!(
+            response.into_body().collect().await.unwrap().to_bytes(),
+            "ok"
+        );
+    }
     task.join().unwrap();
 }
 

@@ -47,6 +47,9 @@ impl InterceptingResourceLoader {
 
 #[async_trait]
 impl ResourceLoader for InterceptingResourceLoader {
+    fn prepare_request(&self, request: &mut ResourceRequest) -> Result<(), NetworkError> {
+        self.inner.prepare_request(request)
+    }
     async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
         let (sender, receiver) = tokio::sync::oneshot::channel();
         self.interceptor.intercept(

@@ -6,8 +6,8 @@
 use super::plugins::{BridgeValue, HostHandler, HostInvocation};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use skia_safe::{
-    AlphaType, BlendMode, ClipOp, Color, ColorType, EncodedImageFormat, Font, FontMgr, FontStyle,
-    ImageInfo, Matrix, Paint, PaintStyle, Path, PathBuilder, PathFillType, Rect, Surface,
+    AlphaType, BlendMode, ClipOp, Color, ColorType, EncodedImageFormat, ImageInfo, Matrix, Paint,
+    PaintStyle, Path, PathBuilder, PathFillType, Rect, Surface,
 };
 use std::{cell::RefCell, collections::HashMap, sync::Arc};
 
@@ -68,6 +68,7 @@ pub(crate) fn dispatch(args: &[BridgeValue]) -> Result<BridgeValue, String> {
         "canvas2dDrawPath" => draw_path(id, args),
         "canvas2dClip" => clip(id, args),
         "canvas2dDrawText" => draw_text(id, args),
+        "canvas2dMeasureText" => measure_text(id, args),
         "canvas2dPutImageData" => put_image_data(id, args),
         "canvas2dGetImageData" => get_image_data(id, args),
         "canvasEncode" => encode(id, args),
@@ -469,19 +470,11 @@ fn draw_text(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
     let transform = matrix_from(args, 13)?;
     let composite = string_arg(args, 20).unwrap_or_else(|_| "source-over".into());
     with_canvas(id, |canvas| {
-        let family = match family.as_str() {
-            "proportional" | "sans-serif" | "system-ui" => "Helvetica",
-            "monospace" | "ui-monospace" => "Menlo",
-            "emoji" => "Apple Color Emoji",
-            other => other,
-        };
-        let manager = FontMgr::new();
-        let typeface = manager
-            .match_family_style(family, FontStyle::normal())
-            .or_else(|| manager.match_family_style("Helvetica", FontStyle::normal()))
-            .or_else(|| manager.legacy_make_typeface(None, FontStyle::normal()))
+        // One resolver with `canvas2dMeasureText`, so drawn and measured text
+        // always use the same face.
+        let family = crate::runtime::text::first_family(&family);
+        let font = crate::runtime::text::font(&family, size, false, false)
             .ok_or_else(|| "no system typeface".to_string())?;
-        let font = Font::new(typeface, size.max(0.1));
         let canvas2d = canvas.surface.canvas();
         let mut paint = paint(
             &style,
@@ -502,6 +495,29 @@ fn draw_text(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
         Ok(())
     })?;
     Ok(BridgeValue::Undefined)
+}
+
+fn measure_text(_id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {
+    // The canvas layer owns style parsing; this returns what the shaped font
+    // actually measures.
+    let text = string_arg(args, 2)?;
+    let size = number_arg(args, 3)? as f32;
+    let family = string_arg(args, 4).unwrap_or_else(|_| "Helvetica".into());
+    let metrics = crate::runtime::text::measure(&text, &family, size, false, false)
+        .ok_or_else(|| "no system typeface".to_string())?;
+    let width = metrics.width;
+    Ok(BridgeValue::String(
+        serde_json::json!([
+            width,
+            0.0,
+            width,
+            metrics.ascent,
+            metrics.descent,
+            metrics.ascent,
+            metrics.descent,
+        ])
+        .to_string(),
+    ))
 }
 
 fn put_image_data(id: u64, args: &[BridgeValue]) -> Result<BridgeValue, String> {

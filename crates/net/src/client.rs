@@ -1,5 +1,5 @@
 use std::fmt::Display;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 
 use bytes::Bytes;
 use http::{Request, Response};
@@ -26,7 +26,6 @@ pub struct Client {
     config: Config,
     handle_pool: Arc<CurlHandlePool>,
     multi: Arc<MultiExecutor>,
-    fingerprint: Arc<OnceLock<Result<Option<crate::fingerprint::Fingerprint>, Error>>>,
 }
 
 impl Client {
@@ -36,7 +35,6 @@ impl Client {
             multi: Arc::new(MultiExecutor::new(config.queue_capacity)),
             config,
             handle_pool: Arc::new(CurlHandlePool::default()),
-            fingerprint: Arc::new(OnceLock::new()),
         }
     }
 
@@ -50,7 +48,7 @@ impl Client {
             request,
             self.config.clone(),
             self.handle_pool.clone(),
-            self.resolved_fingerprint()?,
+            self.config.fingerprint.as_ref(),
         )
         .map(|_| ())
     }
@@ -78,7 +76,7 @@ impl Client {
             request,
             self.config.clone(),
             Arc::clone(&self.handle_pool),
-            self.resolved_fingerprint()?,
+            self.config.fingerprint.as_ref(),
         )?);
         let (response_sender, response_receiver) = oneshot::channel();
         let (body_sender, body_receiver) = mpsc::channel(BODY_CHANNEL_CAPACITY);
@@ -113,17 +111,9 @@ impl Client {
             request,
             self.config.clone(),
             Arc::clone(&self.handle_pool),
-            self.resolved_fingerprint()?,
+            self.config.fingerprint.as_ref(),
         )?
         .perform_collect()
-    }
-
-    fn resolved_fingerprint(&self) -> Result<Option<&crate::fingerprint::Fingerprint>, Error> {
-        self.fingerprint
-            .get_or_init(|| crate::fingerprint::load_named(&self.config.impersonation_target))
-            .as_ref()
-            .map(Option::as_ref)
-            .map_err(Clone::clone)
     }
 }
 

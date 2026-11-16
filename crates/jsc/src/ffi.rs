@@ -233,16 +233,79 @@ unsafe extern "C" {
     pub fn JSStringRelease(string: JSStringRef);
 }
 
-// The pinned SDK exposes WTF's single nonblocking event-loop iteration on
-// every platform, including macOS (which uses the generic loop, not CFRunLoop).
-// Its scalar C++ ABI is the same as an extern C call.
-#[cfg_attr(target_os = "macos", link(name = "JavaScriptCore", kind = "framework"))]
-#[cfg_attr(not(target_os = "macos"), link(name = "JavaScriptCore"))]
-unsafe extern "C" {
-    #[cfg_attr(
-        target_env = "msvc",
-        link_name = "?cycle@RunLoop@WTF@@SA?AW4CycleResult@12@I@Z"
-    )]
-    #[cfg_attr(not(target_env = "msvc"), link_name = "_ZN3WTF7RunLoop5cycleEj")]
-    pub fn run_loop_cycle(mode: c_uint) -> c_int;
+// WTF exposes one nonblocking event-loop iteration, but its mode argument is a
+// `CFStringRef` in a Cocoa build and an unsigned index otherwise, so the symbol
+// is resolved at runtime and the mode is supplied in the shape that build has.
+// Linking one mangled name directly fails on a build with the other signature.
+pub fn run_loop_cycle() -> c_int {
+    type CycleUnsigned = unsafe extern "C" fn(c_uint) -> c_int;
+    static RESOLVED: std::sync::OnceLock<Option<usize>> = std::sync::OnceLock::new();
+    let resolved = *RESOLVED.get_or_init(|| {
+        // SAFETY: dlsym is called with a NUL-terminated symbol name and the
+        // default search handle; the result is only ever called with a shape
+        // that matches the symbol's own declaration.
+        unsafe {
+            for (symbol, cocoa) in [
+                (c"_ZN3WTF7RunLoop5cycleEj".as_ptr(), false),
+                (c"_ZN3WTF7RunLoop5cycleEPK10__CFString".as_ptr(), true),
+            ] {
+                let address = dlsym(RTLD_DEFAULT, symbol);
+                if !address.is_null() {
+                    // Remember which ABI the symbol was found under by marking
+                    // the high bit; function pointers are at least aligned.
+                    return Some(address as usize | if cocoa { 1 } else { 0 });
+                }
+            }
+            None
+        }
+    });
+    let Some(resolved) = resolved else {
+        // No engine loop to service: nothing is waiting on this thread.
+        return 0;
+    };
+    let cocoa = resolved & 1 == 1;
+    let address = (resolved & !1) as *mut c_void;
+    if cocoa {
+        // The Cocoa build's own `cycle` waits up to 50 ms in the run loop. Run
+        // the same loop once with a zero timeout: it services the engine's
+        // deferred work without blocking the owner thread.
+        let _ = address;
+        return run_loop_once(default_run_loop_mode());
+    }
+    // SAFETY: the address came from dlsym for this symbol and the argument
+    // matches the signature that symbol was declared with.
+    unsafe {
+        let cycle: CycleUnsigned = std::mem::transmute(address);
+        cycle(0)
+    }
 }
+
+
+#[cfg(target_os = "macos")]
+#[link(name = "CoreFoundation", kind = "framework")]
+unsafe extern "C" {
+    static kCFRunLoopDefaultMode: *const c_void;
+    fn CFRunLoopRunInMode(mode: *const c_void, seconds: c_double, return_after_source: bool) -> i32;
+}
+#[cfg(target_os = "macos")]
+fn default_run_loop_mode() -> *const c_void {
+    // SAFETY: CoreFoundation exports this constant for the process lifetime.
+    unsafe { kCFRunLoopDefaultMode }
+}
+#[cfg(target_os = "macos")]
+fn run_loop_once(mode: *const c_void) -> c_int {
+    // SAFETY: the run loop is thread-bound and the mode is the process default.
+    unsafe { CFRunLoopRunInMode(mode, 0.0, true) }
+}
+#[cfg(not(target_os = "macos"))]
+fn default_run_loop_mode() -> *const c_void {
+    std::ptr::null()
+}
+#[cfg(not(target_os = "macos"))]
+fn run_loop_once(_mode: *const c_void) -> c_int {
+    0
+}
+unsafe extern "C" {
+    fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
+}
+const RTLD_DEFAULT: *mut c_void = -2isize as *mut c_void;

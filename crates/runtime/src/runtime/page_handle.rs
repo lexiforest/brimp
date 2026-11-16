@@ -65,9 +65,19 @@ impl PageHandle {
         let owner_closed = closed.clone();
         let interrupt = Arc::new(AtomicU64::new(0));
         let owner_interrupt = interrupt.clone();
+        let startup_cancellation = CancellationToken::current();
         let worker = std::thread::Builder::new()
             .name("brimp-page-owner".into())
-            .spawn(move || run_page(setup, receiver, ready_sender, owner_closed, owner_interrupt))
+            .spawn(move || {
+                run_page(
+                    setup,
+                    receiver,
+                    ready_sender,
+                    owner_closed,
+                    owner_interrupt,
+                    startup_cancellation,
+                )
+            })
             .map_err(|error| AutomationError::Internal(error.to_string()))?;
         let id = ready_receiver
             .recv()
@@ -105,7 +115,17 @@ impl PageHandle {
         cancellation: CancellationToken,
         headers: Vec<(String, String)>,
     ) -> Result<NavigationResponse, AutomationError> {
-        self.navigate_request("GET", url, timeout, cancellation, headers, None, true, 20)
+        self.navigate_request(
+            "GET",
+            url,
+            timeout,
+            cancellation,
+            headers,
+            None,
+            true,
+            20,
+            Default::default(),
+        )
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -119,25 +139,12 @@ impl PageHandle {
         body: Option<Vec<u8>>,
         allow_redirects: bool,
         max_redirects: usize,
+        proxy_options: crate::network::ProxyOptions,
     ) -> Result<NavigationResponse, AutomationError> {
-        if timeout.is_zero() {
-            return Err(AutomationError::InvalidInput(
-                "timeout must be positive".into(),
-            ));
-        }
         let method = http::Method::from_bytes(method.as_ref().as_bytes()).map_err(|error| {
             AutomationError::InvalidInput(format!("invalid HTTP method: {error}"))
         })?;
-        let mut request_headers = HeaderList::new();
-        for (name, value) in headers {
-            let name = name.parse::<http::HeaderName>().map_err(|error| {
-                AutomationError::InvalidInput(format!("invalid header name: {error}"))
-            })?;
-            let value = value.parse::<http::HeaderValue>().map_err(|error| {
-                AutomationError::InvalidInput(format!("invalid header value: {error}"))
-            })?;
-            request_headers.append(name, value);
-        }
+        let request_headers = super::routes::parse_headers(headers)?;
         self.request(|response| {
             // Serialize the interrupt with command submission, so a concurrent
             // evaluation cannot capture the new epoch ahead of this navigation.
@@ -151,6 +158,7 @@ impl PageHandle {
                 body,
                 allow_redirects,
                 max_redirects,
+                proxy_options,
                 response,
             }
         })?
@@ -339,7 +347,7 @@ impl PageHandle {
         commands
             .as_ref()
             .ok_or(AutomationError::Closed)?
-            .send(command(sender))
+            .send((command(sender), CancellationToken::current()))
             .map_err(|_| AutomationError::Closed)?;
         drop(commands);
         self.control.wake.unpark();
@@ -358,7 +366,7 @@ pub(super) struct PageControl {
     wake: std::thread::Thread,
     id: u64,
     interrupt: Arc<AtomicU64>,
-    commands: Mutex<Option<mpsc::Sender<Command>>>,
+    commands: Mutex<Option<mpsc::Sender<(Command, CancellationToken)>>>,
     worker: Mutex<Option<JoinHandle<()>>>,
     pub(super) closed: Arc<AtomicBool>,
 }
@@ -374,7 +382,7 @@ impl PageControl {
             .take()
         {
             let (done, receiver) = mpsc::sync_channel(1);
-            let _ = sender.send(Command::Close(done));
+            let _ = sender.send((Command::Close(done), CancellationToken::new()));
             self.wake.unpark();
             let _ = receiver.recv();
         }
@@ -419,6 +427,7 @@ enum Command {
         body: Option<Vec<u8>>,
         allow_redirects: bool,
         max_redirects: usize,
+        proxy_options: crate::network::ProxyOptions,
         response: mpsc::SyncSender<Result<NavigationResponse, AutomationError>>,
     },
 
@@ -471,16 +480,20 @@ enum Command {
 
 fn run_page(
     setup: PageSetup,
-    commands: mpsc::Receiver<Command>,
+    commands: mpsc::Receiver<(Command, CancellationToken)>,
     ready: mpsc::SyncSender<Result<u64, AutomationError>>,
     closed: Arc<AtomicBool>,
     interrupt: Arc<AtomicU64>,
+    startup_cancellation: CancellationToken,
 ) {
-    let mut page = match setup.create() {
-        Ok(page) => page,
-        Err(error) => {
-            let _ = ready.send(Err(error));
-            return;
+    let mut page = {
+        let _scope = startup_cancellation.enter();
+        match setup.create() {
+            Ok(page) => page,
+            Err(error) => {
+                let _ = ready.send(Err(error));
+                return;
+            }
         }
     };
     let runtime = match tokio::runtime::Builder::new_current_thread()
@@ -495,7 +508,7 @@ fn run_page(
     };
     let _ = ready.send(Ok(page.id()));
     loop {
-        let command = match commands.try_recv() {
+        let (command, cancellation) = match commands.try_recv() {
             Ok(command) => command,
             Err(mpsc::TryRecvError::Empty) => {
                 let _ = page.run_pending_tasks();
@@ -508,6 +521,7 @@ fn run_page(
             }
             Err(mpsc::TryRecvError::Disconnected) => break,
         };
+        let _scope = cancellation.enter();
         match command {
             Command::Identity { identity, response } => {
                 let _ = response.send(page.set_identity(identity));
@@ -527,7 +541,7 @@ fn run_page(
                 });
                 page.clear_script_execution_deadline();
                 let result = page.check_operation().and_then(|()| {
-                    if started.elapsed() >= timeout {
+                    if !timeout.is_zero() && started.elapsed() >= timeout {
                         Err(AutomationError::Timeout(timeout))
                     } else {
                         result
@@ -557,27 +571,32 @@ fn run_page(
                 body,
                 allow_redirects,
                 max_redirects,
+                proxy_options,
                 response,
             } => {
                 let mut request = ResourceRequest::new(method, url);
                 request.headers = headers;
                 request.body = body;
+                request.proxy_options = proxy_options;
                 let started = Instant::now();
                 page.set_script_execution_deadline(timeout);
                 let session_cancel = page.cancellation.clone();
                 let session_deadline = page.operation_deadline;
+                let operation_cancel = CancellationToken::current();
                 let mut result = runtime.block_on(async {
                     tokio::select! {
                         biased;
                         error = wait_for_operation(session_cancel, session_deadline) => Err(error),
                         () = wait_for_close(&closed) => Err(AutomationError::Closed),
+                        () = wait_for_cancellation(operation_cancel) => Err(AutomationError::Cancellation),
                         () = wait_for_cancellation(cancellation) => Err(AutomationError::Cancellation),
-                        () = tokio::time::sleep(timeout) => Err(AutomationError::Timeout(timeout)),
+                        () = tokio::time::sleep(timeout), if !timeout.is_zero() => Err(AutomationError::Timeout(timeout)),
                         result = page.goto_request(request, allow_redirects, max_redirects) => result.map_err(AutomationError::from),
                     }
                 });
                 page.clear_script_execution_deadline();
-                if started.elapsed() >= timeout
+                if !timeout.is_zero()
+                    && started.elapsed() >= timeout
                     && !matches!(
                         result,
                         Err(AutomationError::Cancellation | AutomationError::Closed)
@@ -585,7 +604,15 @@ fn run_page(
                 {
                     result = Err(AutomationError::Timeout(timeout));
                 }
-                let result = page.check_operation().and(result);
+                let mut result = page.check_operation().and(result);
+                if page.navigation_fetch_pending
+                    && matches!(result, Err(AutomationError::Timeout(_)))
+                {
+                    result = Err(AutomationError::Network(
+                        crate::network::NetworkError::Timeout,
+                    ));
+                }
+                page.navigation_fetch_pending = false;
                 let _ = response.send(result);
             }
             Command::Text { response } => {
@@ -658,7 +685,7 @@ fn run_page(
                         if cancellation.is_cancelled() {
                             break Err(AutomationError::Cancellation);
                         }
-                        if started.elapsed() >= timeout {
+                        if !timeout.is_zero() && started.elapsed() >= timeout {
                             break Err(AutomationError::Timeout(timeout));
                         }
                         if evaluate(
@@ -691,7 +718,7 @@ fn run_page(
                     if cancellation.is_cancelled() {
                         break Err(AutomationError::Cancellation);
                     }
-                    if started.elapsed() >= timeout {
+                    if !timeout.is_zero() && started.elapsed() >= timeout {
                         break Err(AutomationError::Timeout(timeout));
                     }
                     if let Err(error) = page.run_pending_tasks() {
@@ -792,10 +819,10 @@ fn evaluate(page: &Page, expression: &str) -> Result<Value, AutomationError> {
 impl From<NavigationError> for AutomationError {
     fn from(error: NavigationError) -> Self {
         match error {
-            NavigationError::Network(error) => Self::Transport(error.to_string()),
+            NavigationError::Network(error) => Self::Network(error),
             NavigationError::HttpStatus(status) => Self::HttpStatus(status),
             NavigationError::InvalidUrl(error) => {
-                Self::InvalidInput(format!("invalid URL: {error}"))
+                Self::Network(crate::network::NetworkError::InvalidUrl(error.to_string()))
             }
             NavigationError::InvalidRequest(error) => Self::InvalidInput(error),
             other => Self::Navigation(other.to_string()),

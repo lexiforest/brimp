@@ -841,7 +841,7 @@ async function __runChildDocumentScripts(context) {
 async function __runChildExternalScript(context, source) {
   try {
     const url = new URL(source, context.eventTarget.location.href).href;
-    const text = await (await fetch(url)).text();
+    const text = await (await __fetchResource(url, {}, 'script')).text();
     __runInChildWindow(context, text);
   } catch (error) {
     // A failing subresource must not abort the rest of the document.
@@ -898,7 +898,7 @@ class HTMLIFrameElement extends HTMLElement {
             // Remote frames load like a navigation: fetch outside the page's
             // script path, parse, then run the document's scripts.
             context.loading = true;
-            fetch(location.href)
+            __fetchResource(location.href, {}, 'document')
               .then((response) => response.text())
               .then((html) => {
                 if (context.aborted) return;

@@ -159,7 +159,7 @@ unsafe extern "C" fn response_headers(
 fn run(
     config: CurlConfig,
     url: &str,
-    headers: HeaderList,
+    mut headers: HeaderList,
     receiver: &mpsc::Receiver<Command>,
     callback: &(dyn Fn(WebSocketEvent) + Send),
 ) -> Result<(), NetworkError> {
@@ -168,15 +168,21 @@ fn run(
     if handle.is_null() {
         return Err(NetworkError::Network("failed to create curl handle".into()));
     }
-    struct Easy(*mut Curl);
+    struct Easy(*mut Curl, crate::fingerprint::HeaderLists);
     impl Drop for Easy {
         fn drop(&mut self) {
             unsafe { curl_easy_cleanup(self.0) };
         }
     }
-    let easy = Easy(handle);
+    let mut easy = Easy(handle, Default::default());
     let url = CString::new(url).map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
-    let profile = CString::new(config.impersonation_target)
+    let supplied_headers = headers.clone();
+    if let Some(fingerprint) = &config.fingerprint
+        && config.default_headers
+    {
+        crate::fingerprint::add_default_headers(fingerprint, &mut headers)?;
+    }
+    let profile = CString::new(config.impersonation_target.as_str())
         .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
     let mut header_list: *mut CurlSlist = ptr::null_mut();
     for (name, value) in headers.iter() {
@@ -196,11 +202,25 @@ fn run(
         }
     }
     let header_list = Headers(header_list);
-    let impersonate =
-        unsafe { curl_easy_impersonate(easy.0, profile.as_ptr(), config.default_headers as i32) };
-    if impersonate != CURLE_OK {
-        return Err(NetworkError::Network(curl_error(easy.0, impersonate)));
-    }
+    easy.1 = if let Some(fingerprint) = &config.fingerprint {
+        crate::fingerprint::apply(
+            easy.0,
+            fingerprint,
+            config.default_headers,
+            &supplied_headers,
+        )?
+    } else {
+        let code = unsafe {
+            curl_easy_impersonate(easy.0, profile.as_ptr(), config.default_headers as i32)
+        };
+        if code != CURLE_OK {
+            return Err(NetworkError::Impersonation {
+                code,
+                message: curl_error(easy.0, code),
+            });
+        }
+        Default::default()
+    };
     let mut incoming_headers = Vec::<u8>::new();
     let mut debug = DebugHeaders { callback };
     unsafe {
@@ -244,19 +264,27 @@ fn run(
         if let Some((proxy, kind)) = &proxy {
             setopt(easy.0, CURLOPT_PROXY, proxy.as_ptr())?;
             setopt(easy.0, CURLOPT_PROXYTYPE, *kind as c_long)?;
+        } else if !config.trust_env {
+            setopt(easy.0, CURLOPT_PROXY, c"".as_ptr())?;
+        }
+        if let Some(no_proxy) = &config.no_proxy {
+            let value = CString::new(no_proxy.as_str())
+                .map_err(|e| NetworkError::InvalidRequest(e.to_string()))?;
+            setopt(easy.0, CURLOPT_NOPROXY, value.as_ptr())?;
         }
         if let Some(path) = config.ca_bundle {
             let path = CString::new(path.to_string_lossy().as_bytes())
                 .map_err(|error| NetworkError::InvalidRequest(error.to_string()))?;
             setopt(easy.0, CURLOPT_CAINFO, path.as_ptr())?;
+            setopt(easy.0, crate::ffi::CURLOPT_PROXY_CAINFO, path.as_ptr())?;
             let code = curl_easy_perform(easy.0);
             if code != CURLE_OK {
-                return Err(NetworkError::Network(curl_error(handle, code)));
+                return Err(crate::ffi::transfer_error(handle, code));
             }
         } else {
             let code = curl_easy_perform(easy.0);
             if code != CURLE_OK {
-                return Err(NetworkError::Network(curl_error(handle, code)));
+                return Err(crate::ffi::transfer_error(handle, code));
             }
         }
     }
@@ -314,7 +342,7 @@ fn run(
             continue;
         }
         if code != CURLE_OK {
-            return Err(NetworkError::Network(curl_error(handle, code)));
+            return Err(crate::ffi::transfer_error(handle, code));
         }
         if metadata.is_null() {
             continue;
@@ -358,7 +386,7 @@ fn send(handle: *mut Curl, bytes: &[u8], flags: u32) -> Result<(), NetworkError>
             continue;
         }
         if code != CURLE_OK {
-            return Err(NetworkError::Network(curl_error(handle, code)));
+            return Err(crate::ffi::transfer_error(handle, code));
         }
         offset += sent;
     }
@@ -375,20 +403,62 @@ mod tests {
 
     #[test]
     fn curl_impersonate_websocket_round_trip() {
+        websocket_round_trip(CurlConfig::default(), false);
+    }
+
+    #[test]
+    fn inline_fingerprint_websocket_headers() {
+        let mut fingerprint = crate::fingerprint::Fingerprint::default();
+        fingerprint
+            .ws_headers
+            .insert("X-Fingerprint".into(), "websocket".into());
+        fingerprint
+            .ws_headers
+            .insert("X-WebSocket".into(), "on".into());
+        websocket_round_trip(
+            CurlConfig {
+                fingerprint: Some(fingerprint),
+                default_headers: true,
+                ..Default::default()
+            },
+            true,
+        );
+    }
+
+    // Tungstenite requires an unboxed HTTP response error in its callback API.
+    #[allow(clippy::result_large_err)]
+    fn websocket_round_trip(config: CurlConfig, custom: bool) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let address = listener.local_addr().unwrap();
         let server = std::thread::spawn(move || {
             let (stream, _) = listener.accept().unwrap();
-            let mut socket = tungstenite::accept(stream).unwrap();
+            let mut socket = tungstenite::accept_hdr(
+                stream,
+                |request: &tungstenite::handshake::server::Request, response| {
+                    if custom {
+                        assert_eq!(request.headers().get("x-fingerprint").unwrap(), "request");
+                        assert_eq!(request.headers().get("x-websocket").unwrap(), "on");
+                    }
+                    Ok(response)
+                },
+            )
+            .unwrap();
             let message = socket.read().unwrap();
             socket.send(message).unwrap();
             socket.close(None).unwrap();
         });
         let (events_sender, events_receiver) = mpsc::channel();
         let socket = open_websocket(
-            CurlConfig::default(),
+            config,
             format!("ws://{address}/echo"),
-            HeaderList::new(),
+            if custom {
+                HeaderList::from_iter([(
+                    http::HeaderName::from_static("x-fingerprint"),
+                    http::HeaderValue::from_static("request"),
+                )])
+            } else {
+                HeaderList::new()
+            },
             Box::new(move |event| {
                 if !matches!(
                     event,

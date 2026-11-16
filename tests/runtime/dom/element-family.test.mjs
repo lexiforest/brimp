@@ -160,7 +160,7 @@ test('SVG element classes follow the shape hierarchy and expose non-rendering ge
   );
 });
 
-test('Element geometry and computed-style placeholders do not alter styles or emit scroll events', async () => {
+test('Element geometry reads the layout box for client and scroll metrics', async () => {
   assert.deepEqual(
     await evaluate(
       `(() => {
@@ -172,6 +172,8 @@ test('Element geometry and computed-style placeholders do not alter styles or em
   })()`,
       [],
     ),
-    [[0, 0, 0, 0, 0, 0], 12, 7, 0, true, '100px', true, '5px'],
+    // The typed-OM height applies before the reading, so the border box is
+    // 100x5; scroll offsets stay plain settable state (no scrolling model).
+    [[5, 100, 0, 0, 5, 100], 12, 7, 0, true, '100px', true, '5px'],
   );
 });

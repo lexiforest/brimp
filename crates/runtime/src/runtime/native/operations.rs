@@ -181,15 +181,19 @@ fn wait(
             }
             return Ok(());
         }
-        if started.elapsed() >= timeout {
+        if !timeout.is_zero() && started.elapsed() >= timeout {
             return Err(AutomationError::Timeout(timeout));
         }
         if !page.run_one_task()? && !page.advance_to_next_timer() {
-            page.wait_for_work(Some(
-                timeout
-                    .saturating_sub(started.elapsed())
-                    .min(Duration::from_millis(10)),
-            ));
+            // Nothing is queued: this is where the engine's own deferred work
+            // runs, e.g. an asynchronous WebAssembly compilation completing.
+            page.pump_engine_jobs();
+            let pause = Duration::from_millis(10);
+            page.wait_for_work(Some(if timeout.is_zero() {
+                pause
+            } else {
+                timeout.saturating_sub(started.elapsed()).min(pause)
+            }));
         }
     }
 }

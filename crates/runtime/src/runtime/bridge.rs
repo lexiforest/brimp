@@ -86,7 +86,8 @@ struct Request {
     command: Value,
     response: mpsc::SyncSender<Result<BridgeValue, AutomationError>>,
     delivery: Arc<AtomicU8>,
-    deadline: Instant,
+    deadline: Option<Instant>,
+    cancellation: crate::runtime::CancellationToken,
 }
 #[derive(Clone)]
 pub struct BridgeEndpoint {
@@ -113,14 +114,19 @@ impl BridgeEndpoint {
                 command,
                 response,
                 delivery: delivery.clone(),
-                deadline: Instant::now() + self.timeout,
+                deadline: (!self.timeout.is_zero()).then(|| Instant::now() + self.timeout),
+                cancellation: crate::runtime::CancellationToken::current(),
             })
             .map_err(|_| AutomationError::StaleHandle)?;
         self.wake.unpark();
-        let result = receiver
-            .recv_timeout(self.timeout)
-            .map_err(|_| AutomationError::Timeout(self.timeout))
-            .and_then(|v| v);
+        let result = if self.timeout.is_zero() {
+            receiver.recv().map_err(|_| AutomationError::StaleHandle)
+        } else {
+            receiver
+                .recv_timeout(self.timeout)
+                .map_err(|_| AutomationError::Timeout(self.timeout))
+        }
+        .and_then(|v| v);
         delivery.store(
             if result.is_ok() { RECEIVED } else { ABANDONED },
             Ordering::Release,
@@ -147,7 +153,8 @@ impl BridgeEndpoint {
             command: json!({"op":"dispose","token":token}),
             response,
             delivery: Arc::new(AtomicU8::new(RECEIVED)),
-            deadline: Instant::now() + self.timeout,
+            deadline: (!self.timeout.is_zero()).then(|| Instant::now() + self.timeout),
+            cancellation: crate::runtime::CancellationToken::new(),
         });
         self.wake.unpark();
     }
@@ -254,10 +261,15 @@ impl BridgeRuntime {
             let Ok(request) = self.receiver.try_recv() else {
                 break;
             };
+            if request.cancellation.is_cancelled() {
+                let _ = request.response.send(Err(AutomationError::Cancellation));
+                continue;
+            }
             if request.delivery.load(Ordering::Acquire) == ABANDONED {
                 continue;
             }
             progress = true;
+            let _scope = request.cancellation.enter();
             let result = js
                 .call_function_with_string(&self.controller, &request.command.to_string())
                 .and_then(|v| v.to_object());
@@ -275,8 +287,12 @@ impl BridgeRuntime {
         let mut index = 0;
         while index < self.pending.len() {
             let pending = &self.pending[index];
-            let cancelled = pending.request.delivery.load(Ordering::Acquire) == ABANDONED
-                || Instant::now() >= pending.request.deadline;
+            let cancelled = pending.request.cancellation.is_cancelled()
+                || pending.request.delivery.load(Ordering::Acquire) == ABANDONED
+                || pending
+                    .request
+                    .deadline
+                    .is_some_and(|deadline| Instant::now() >= deadline);
             let state = js
                 .call_function_with_string_and_object(
                     &poll,
@@ -287,7 +303,11 @@ impl BridgeRuntime {
             let state: Value = serde_json::from_str(&state)
                 .map_err(|e| JsException::from_message(e.to_string()))?;
             let result = if cancelled {
-                Some(Err(AutomationError::Timeout(self.endpoint.timeout)))
+                Some(Err(if pending.request.cancellation.is_cancelled() {
+                    AutomationError::Cancellation
+                } else {
+                    AutomationError::Timeout(self.endpoint.timeout)
+                }))
             } else if state["done"] == true {
                 Some(if let Some(error) = state["error"].as_str() {
                     Err(message_error(error))
@@ -422,7 +442,8 @@ mod tests {
                 command: json!({"op":"invoke","token":token,"handle":true}),
                 response,
                 delivery: delivery.clone(),
-                deadline: Instant::now() + Duration::from_secs(1),
+                deadline: Some(Instant::now() + Duration::from_secs(1)),
+                cancellation: crate::runtime::CancellationToken::new(),
             })
             .unwrap();
         bridge.pump(&js).unwrap();

@@ -359,12 +359,76 @@ const __computedDefault = (element, name) => {
   if (name === 'transform') return 'none';
   return '';
 };
+function __camelCase(name) {
+  return name.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+// The cascade and box model live in layout.js; a computed style reads its used
+// values from there and only falls back to the legacy defaults if the layout
+// module is unavailable.
+let __computedStyleSource = null;
+Object.defineProperty(globalThis, '__brimpInstallComputedStyleSource', {
+  value: (source) => {
+    __computedStyleSource = source;
+  },
+  writable: false,
+  enumerable: false,
+  configurable: true,
+});
+const __computedStylePropertyNames = [
+  'display',
+  'position',
+  'visibility',
+  'opacity',
+  'box-sizing',
+  'width',
+  'height',
+  'top',
+  'right',
+  'bottom',
+  'left',
+  'margin-top',
+  'margin-right',
+  'margin-bottom',
+  'margin-left',
+  'padding-top',
+  'padding-right',
+  'padding-bottom',
+  'padding-left',
+  'border-top-width',
+  'border-right-width',
+  'border-bottom-width',
+  'border-left-width',
+  'font-size',
+  'font-family',
+  'font-weight',
+  'font-style',
+  'line-height',
+  'color',
+  'text-align',
+  'white-space',
+  'transform',
+  'content-visibility',
+];
 class CSSComputedStyle {
   constructor(element) {
     __computedStyleElements.set(this, element);
+    for (const name of __computedStylePropertyNames) {
+      if (name in CSSComputedStyle.prototype) continue;
+      Object.defineProperty(CSSComputedStyle.prototype, __camelCase(name), {
+        get() {
+          return this.__value(name);
+        },
+        configurable: true,
+        enumerable: true,
+      });
+    }
   }
   __value(name) {
     const element = __computedStyleElements.get(this);
+    if (__computedStyleSource !== null) {
+      const used = __computedStyleSource(element, name);
+      if (used !== undefined) return used;
+    }
     try {
       const inline = element.style?.getPropertyValue(name);
       if (inline) return inline;
@@ -374,16 +438,34 @@ class CSSComputedStyle {
     return __computedDefault(element, name);
   }
   get cssText() {
-    return '';
+    const element = __computedStyleElements.get(this);
+    const declarations = [];
+    for (const name of __computedStylePropertyNames) {
+      const value = this.__value(name);
+      if (value !== '') declarations.push(`${name}: ${value};`);
+    }
+    void element;
+    return declarations.join(' ');
   }
   get length() {
-    return 0;
+    return this.__entries().length;
   }
-  item() {
-    return '';
+  __entries() {
+    const entries = [];
+    for (const name of __computedStylePropertyNames) {
+      const value = this.__value(name);
+      if (value !== '' && value !== undefined) entries.push([name, value]);
+    }
+    return entries;
+  }
+  item(index) {
+    if (arguments.length === 0) throw new TypeError('CSSStyleDeclaration.item requires an index');
+    return this.__entries()[Number(index)]?.[0] ?? '';
   }
   getPropertyValue(name) {
-    return this.__value(String(name));
+    if (arguments.length === 0)
+      throw new TypeError('CSSStyleDeclaration.getPropertyValue requires a property');
+    return this.__value(__cssRulePropertyName(String(name)));
   }
   getPropertyPriority() {
     return '';
@@ -414,14 +496,18 @@ class CSSComputedStyle {
     return this.__value('content-visibility');
   }
   get fontFamily() {
+    const value = this.__value('font-family');
+    if (value) return value;
     const element = __computedStyleElements.get(this);
     const font = element?.style?.font ?? element?.style?.getPropertyValue('font') ?? '';
     if (['caption', 'icon', 'menu', 'message-box', 'small-caption', 'status-bar'].includes(font))
       return '-apple-system';
-    return this.__value('font-family') || 'Times New Roman';
+    return '-apple-system';
   }
   [Symbol.iterator]() {
-    return [][Symbol.iterator]();
+    return this.__entries()
+      .map(([name]) => name)
+      [Symbol.iterator]();
   }
 }
 for (const key of Reflect.ownKeys(CSSComputedStyle.prototype)) {

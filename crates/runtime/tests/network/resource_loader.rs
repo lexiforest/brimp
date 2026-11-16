@@ -325,7 +325,7 @@ fn enforces_timeout_and_response_limit() {
     let error = runtime()
         .block_on(loader.fetch(ResourceRequest::get(format!("http://{address}/slow"))))
         .unwrap_err();
-    assert!(matches!(error, NetworkError::Transport(_)));
+    assert!(matches!(error, NetworkError::Transfer { code: 28, .. }));
     server.join().unwrap();
 }
 
@@ -369,7 +369,7 @@ fn dropping_request_and_final_loader_cancels_and_joins_worker() {
 fn validates_proxy_urls() {
     assert!(Proxy::parse("http://proxy.test:8080").is_ok());
     assert!(Proxy::parse("socks5h://proxy.test:1080").is_ok());
-    assert!(Proxy::parse("https://proxy.test").is_err());
+    assert!(Proxy::parse("https://proxy.test").is_ok());
 }
 
 #[test]
@@ -431,7 +431,7 @@ fn curl_negotiates_request_authentication_credentials() {
             ..Default::default()
         };
         let url = if proxy {
-            config.proxy = Some(Proxy::parse(format!("http://{address}")).unwrap());
+            config.proxy_options.proxy = Some(format!("http://{address}"));
             "http://auth-fixture.invalid/".to_owned()
         } else {
             format!("http://{address}/")

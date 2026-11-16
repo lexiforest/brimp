@@ -67,7 +67,8 @@ impl Page {
                 }
                 (ScriptMode::Async, ScriptSource::External(src)) => {
                     let script_url = base_url.join(&src)?.to_string();
-                    let request = self.resource_request(&script_url)?;
+                    let mut request = self.resource_request(&script_url)?;
+                    request.resource_type = Some("script".into());
                     let sender = self.tasks.sender();
                     let realm = self.realm_id;
                     self.pending_navigation_scripts
@@ -109,7 +110,8 @@ impl Page {
                             continue;
                         }
                     };
-                    let request = self.resource_request(&script_url)?;
+                    let mut request = self.resource_request(&script_url)?;
+                    request.resource_type = Some("script".into());
                     let source = script_url.clone();
                     let loader = Arc::clone(&self.network_scope.loader);
                     let browsing_context = Arc::clone(&self.browsing_context);

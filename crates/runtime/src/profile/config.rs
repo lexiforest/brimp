@@ -105,12 +105,47 @@ impl BrowserProfile {
     pub(crate) fn core(&self) -> &Value {
         self.resolve_core().expect("validated core profile")
     }
+    pub(crate) fn prepare_fingerprint(
+        &mut self,
+    ) -> Result<Option<brimp_net::fingerprint::Fingerprint>, ProfileError> {
+        let value = self
+            .values
+            .get("network")
+            .and_then(|network| network.get("fingerprint"));
+        let Some(value) = value.filter(|value| !value.is_null()) else {
+            return Ok(None);
+        };
+        let fingerprint: brimp_net::fingerprint::Fingerprint =
+            serde_json::from_value(value.clone()).map_err(|error| {
+                ProfileError::InvalidValue(format!("invalid network fingerprint: {error}"))
+            })?;
+        for (header, scope, field) in [
+            ("user-agent", "identity", "user_agent"),
+            ("accept", "network", "accept"),
+            ("accept-encoding", "network", "accept_encoding"),
+        ] {
+            if self
+                .values
+                .get(scope)
+                .and_then(|scope| scope.get(field))
+                .is_none()
+                && let Some((_, value)) = fingerprint
+                    .headers
+                    .iter()
+                    .find(|(name, _)| name.eq_ignore_ascii_case(header))
+            {
+                self.set(scope, field, Value::String(value.clone()));
+            }
+        }
+        self.validate()?;
+        Ok(Some(fingerprint))
+    }
     pub(crate) fn network_profile(&self) -> &str {
         self.core()["network"]["impersonation"]
             .as_str()
             .expect("network profile string")
     }
-    fn headers(&self, core: &Value) -> Vec<(&'static str, String)> {
+    fn headers(&self, core: &Value) -> Vec<(String, String)> {
         let text = |scope: &str, field: &str| {
             core[scope][field]
                 .as_str()
@@ -133,7 +168,7 @@ impl BrowserProfile {
             })
             .collect::<Vec<_>>()
             .join(",");
-        vec![
+        let mut headers: Vec<(String, String)> = vec![
             ("user-agent", text("identity", "user_agent")),
             ("accept", text("network", "accept")),
             ("accept-language", language),
@@ -141,9 +176,50 @@ impl BrowserProfile {
         ]
         .into_iter()
         .chain(chromium_client_hints(core))
-        .collect()
+        .map(|(name, value)| (name.to_owned(), value))
+        .collect();
+        if let Some(defaults) = self
+            .values
+            .get("network")
+            .and_then(|value| value.get("fingerprint"))
+            .and_then(|value| value.get("headers"))
+            .and_then(Value::as_object)
+        {
+            for (name, value) in defaults {
+                let Some(value) = value.as_str() else {
+                    continue;
+                };
+                if name.eq_ignore_ascii_case("host") && value.is_empty() {
+                    continue;
+                }
+                let explicit = match name.to_ascii_lowercase().as_str() {
+                    "user-agent" => self
+                        .values
+                        .get("identity")
+                        .and_then(|value| value.get("user_agent")),
+                    "accept-language" => self
+                        .values
+                        .get("identity")
+                        .and_then(|value| value.get("languages")),
+                    "accept" => self
+                        .values
+                        .get("network")
+                        .and_then(|value| value.get("accept")),
+                    "accept-encoding" => self
+                        .values
+                        .get("network")
+                        .and_then(|value| value.get("accept_encoding")),
+                    _ => None,
+                };
+                if explicit.is_none() {
+                    headers.retain(|(old, _)| !old.eq_ignore_ascii_case(name));
+                    headers.push((name.clone(), value.to_owned()));
+                }
+            }
+        }
+        headers
     }
-    pub(crate) fn request_headers(&self) -> Vec<(&'static str, String)> {
+    pub(crate) fn request_headers(&self) -> Vec<(String, String)> {
         self.headers(self.core())
     }
 }

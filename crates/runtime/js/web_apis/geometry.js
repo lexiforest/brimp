@@ -320,26 +320,130 @@
           enumerable: true,
         });
     }
-  // There is no layout engine, so element geometry is a zero rectangle at the
-  // origin rather than an absent value: scripts read `.width`, `.top`, `.right`
-  // and `rects.length` without special-casing this runtime.
+  // Element geometry comes from the layout pass in layout.js: the border box
+  // in viewport coordinates, which is what `getBoundingClientRect` reports.
+  const layout = globalThis.__brimpTakeLayout?.() ?? null;
   const geometryElement = () =>
     typeof Element === 'function' ? Element.prototype : global.Element.prototype;
-  for (const [name, method] of [
-    ['getBoundingClientRect', () => new DOMRect(0, 0, 0, 0)],
-    ['getClientRects', () => new DOMRectList([])],
-  ])
-    Object.defineProperty(geometryElement(), name, {
-      value: {
-        [name]() {
-          if (!(this instanceof Element)) throw new TypeError('Illegal invocation');
-          return method();
-        },
-      }[name],
-      writable: true,
-      configurable: true,
-      enumerable: true,
+  const requireElement = (receiver) => {
+    if (!(receiver instanceof Element)) throw new TypeError('Illegal invocation');
+    return receiver;
+  };
+  const borderBox = (element) => {
+    const box = layout ? layout.box(element) : null;
+    if (!box) return null;
+    return {
+      x: box.x,
+      y: box.y,
+      width: box.width,
+      height: box.height,
+      top: box.y,
+      right: box.x + box.width,
+      bottom: box.y + box.height,
+      left: box.x,
+    };
+  };
+  // The DOM defines these on the element class that owns them (`HTMLElement`
+  // for the offset family), so every element prototype gets the layout-backed
+  // member: a subclass declaration would otherwise shadow a single one.
+  const geometryTargets = () => {
+    const targets = [];
+    for (const name of ['HTMLElement', 'SVGElement', 'Element']) {
+      const constructor = globalThis[name];
+      if (typeof constructor === 'function' && constructor.prototype)
+        targets.push(constructor.prototype);
+    }
+    if (targets.length === 0) targets.push(geometryElement());
+    return targets;
+  };
+  const defineGeometryMember = (name, descriptor) => {
+    for (const target of geometryTargets())
+      Object.defineProperty(target, name, { configurable: true, enumerable: true, ...descriptor });
+  };
+  const defineGeometryMethod = (name, fn) => {
+    defineGeometryMember(name, { value: { [name]: fn }[name], writable: true });
+  };
+  defineGeometryMethod('getBoundingClientRect', function getBoundingClientRect() {
+    const element = requireElement(this);
+    const box = borderBox(element);
+    if (!box) return new DOMRect(0, 0, 0, 0);
+    return new DOMRect(box.x, box.y, box.width, box.height);
+  });
+  defineGeometryMethod('getClientRects', function getClientRects() {
+    const element = requireElement(this);
+    const fragments = layout ? layout.fragments(element) : null;
+    if (fragments && fragments.length > 0)
+      return new DOMRectList(fragments.map((r) => new DOMRect(r.x, r.y, r.width, r.height)));
+    const box = borderBox(element);
+    return box
+      ? new DOMRectList([new DOMRect(box.x, box.y, box.width, box.height)])
+      : new DOMRectList([]);
+  });
+  // The legacy offset/client/scroll family reads the same boxes.
+  const defineLayoutGetter = (name, read) => {
+    defineGeometryMember(name, {
+      get() {
+        return read(requireElement(this));
+      },
     });
+  };
+  defineLayoutGetter('offsetWidth', (element) => {
+    const box = borderBox(element);
+    return box ? Math.round(box.width) : 0;
+  });
+  defineLayoutGetter('offsetHeight', (element) => {
+    const box = borderBox(element);
+    return box ? Math.round(box.height) : 0;
+  });
+  const offsetOrigin = (element) => {
+    const parent = offsetParentOf(element);
+    const parentBox = parent ? borderBox(parent) : null;
+    return parentBox ? { x: parentBox.x, y: parentBox.y } : { x: 0, y: 0 };
+  };
+  defineLayoutGetter('offsetLeft', (element) => {
+    const box = borderBox(element);
+    if (!box) return 0;
+    return Math.round(box.x - offsetOrigin(element).x);
+  });
+  defineLayoutGetter('offsetTop', (element) => {
+    const box = borderBox(element);
+    if (!box) return 0;
+    return Math.round(box.y - offsetOrigin(element).y);
+  });
+  // The containing block: the nearest positioned ancestor, else the body.
+  const offsetParentOf = (element) => {
+    const box = borderBox(element);
+    if (!box) return null;
+    let parent = element.parentElement;
+    while (parent) {
+      const style = layout ? layout.computed(parent) : null;
+      if (style && style.position !== 'static') return parent;
+      parent = parent.parentElement;
+    }
+    const body = element.ownerDocument?.body;
+    return body && body !== element ? body : null;
+  };
+  defineLayoutGetter('offsetParent', offsetParentOf);
+  defineLayoutGetter('clientWidth', (element) => {
+    const box = layout ? layout.box(element) : null;
+    if (!box) return 0;
+    return Math.round(box.width);
+  });
+  defineLayoutGetter('clientHeight', (element) => {
+    const box = layout ? layout.box(element) : null;
+    if (!box) return 0;
+    return Math.round(box.height);
+  });
+  defineLayoutGetter('clientTop', () => 0);
+  defineLayoutGetter('clientLeft', () => 0);
+  defineLayoutGetter('scrollWidth', (element) => {
+    const box = layout ? layout.box(element) : null;
+    return box ? Math.max(Math.round(box.width), Math.round(box.contentWidth)) : 0;
+  });
+  defineLayoutGetter('scrollHeight', (element) => {
+    const box = layout ? layout.box(element) : null;
+    return box ? Math.max(Math.round(box.height), Math.round(box.contentHeight)) : 0;
+  });
   for (const [name, value] of Object.entries({
     DOMPointReadOnly,
     DOMPoint,

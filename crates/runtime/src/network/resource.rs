@@ -9,6 +9,8 @@ pub struct ResourceRequest {
     pub request_id: Option<u64>,
     pub max_response_bytes: Option<usize>,
     pub resource_type: Option<String>,
+    pub proxy_options: super::ProxyOptions,
+    pub resolved_proxy: Option<std::sync::Arc<super::ProxySelection>>,
     pub method: Method,
     pub url: String,
     pub headers: HeaderList,
@@ -36,6 +38,8 @@ impl ResourceRequest {
             request_id: None,
             max_response_bytes: None,
             resource_type: None,
+            proxy_options: Default::default(),
+            resolved_proxy: None,
             method,
             url: url.into(),
             headers: HeaderList::new(),
@@ -64,8 +68,29 @@ pub struct ResponseMetadata {
     pub header_bytes: u64,
 }
 
-#[derive(Debug, Error, Clone)]
+#[derive(Debug, Error, Clone, serde::Serialize, serde::Deserialize)]
 pub enum NetworkError {
+    #[error("resource transfer failed: {message}")]
+    Transfer {
+        code: u32,
+        message: String,
+        proxy_connect: bool,
+        certificate_verify: bool,
+    },
+    #[error("impersonation failed: {message}")]
+    Impersonation { code: u32, message: String },
+    #[error("invalid URL: {0}")]
+    InvalidUrl(String),
+    #[error("invalid URL scheme: {0}")]
+    InvalidSchema(String),
+    #[error("invalid proxy URL: {0}")]
+    InvalidProxyUrl(String),
+    #[error("invalid header: {0}")]
+    InvalidHeader(String),
+    #[error("redirect limit of {0} exceeded")]
+    TooManyRedirects(usize),
+    #[error("request timed out")]
+    Timeout,
     #[error("invalid resource request: {0}")]
     InvalidRequest(String),
     #[error("resource transfer failed: {0}")]
@@ -86,6 +111,9 @@ pub type ResourceCallback = Box<dyn FnOnce(Result<ResourceResponse, NetworkError
 
 #[async_trait]
 pub trait ResourceLoader: Send + Sync {
+    fn prepare_request(&self, _request: &mut ResourceRequest) -> Result<(), NetworkError> {
+        Ok(())
+    }
     /// Records a response supplied by an engine subsystem without a transport request.
     fn observe_response(&self, _request: &ResourceRequest, _response: &ResourceResponse) {}
 
@@ -137,5 +165,28 @@ pub trait ResourceLoader: Send + Sync {
 impl From<String> for NetworkError {
     fn from(value: String) -> Self {
         Self::Transport(value)
+    }
+}
+
+impl From<brimp_net::Error> for NetworkError {
+    fn from(error: brimp_net::Error) -> Self {
+        match error {
+            brimp_net::Error::Transfer {
+                code,
+                message,
+                proxy_connect,
+                certificate_verify,
+            } => Self::Transfer {
+                code,
+                message,
+                proxy_connect,
+                certificate_verify,
+            },
+            brimp_net::Error::Impersonation { code, message } => {
+                Self::Impersonation { code, message }
+            }
+            brimp_net::Error::InvalidRequest(message) => Self::InvalidRequest(message),
+            other => Self::Transport(other.to_string()),
+        }
     }
 }

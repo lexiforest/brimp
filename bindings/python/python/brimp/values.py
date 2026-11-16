@@ -48,7 +48,10 @@ def encode(value, ancestors=None):
         return {"type": "binary", "value": list(bytes(value))}
     if isinstance(value, HostFunction):
         return {"type": "hostFunction", "value": value.name}
-    from . import JSHandle
+    from . import JSHandle, AsyncJSHandle
+
+    if isinstance(value, AsyncJSHandle):
+        value = value._handle
 
     if isinstance(value, JSHandle):
         return {"type": "reference", "value": value._reference()}

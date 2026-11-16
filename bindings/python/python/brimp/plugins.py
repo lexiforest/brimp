@@ -5,7 +5,7 @@ import inspect
 import json
 import threading
 
-from ._brimp import Reentry
+from .exceptions import Reentry
 
 _active = threading.local()
 

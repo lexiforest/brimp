@@ -7,12 +7,11 @@ description: Use and develop the brimp-net HTTP and WebSocket transport.
 HTTP client that uses `curl_easy_impersonate` for browser-like TLS and HTTP
 transport while returning standard `http` responses and Hyper-compatible `http_body::Body` streams.
 
-In addition to native impersonation targets, `Config::impersonation_target`
-accepts named profiles from curl-cffi's `fingerprints.json` catalog. Brimp-net
-looks in `$IMPERSONATE_CONFIG_DIR`, `$XDG_CONFIG_HOME/impersonate`, and then
-`~/.config/impersonate`. Resolution happens once on the first request and is
-shared by client clones, including resolution failures. Create a new client to
-use changed catalog contents.
+`Config::impersonation_target` selects a built-in preset. For explicit transport
+settings, pass `Config::fingerprint` with a `brimp_net::fingerprint::Fingerprint`.
+The runtime does not read fingerprint catalogs or credentials. The
+[`brimp fingerprints` CLI](/guides/profiles/#pro-fingerprints) owns catalog
+updates and exports the data into portable browser profiles.
 
 ## Requirements
 
@@ -105,9 +104,18 @@ longer describe the body bytes delivered to Rust.
 ### Proxies
 
 Set `Config::proxy` with a parsed `Proxy` to route every transfer through an
-HTTP or SOCKS5 proxy. HTTP proxies tunnel HTTPS requests with CONNECT.
+HTTP, HTTPS or SOCKS5 proxy. HTTP proxies tunnel HTTPS requests with CONNECT.
 `socks5://` resolves destination names locally; `socks5h://` delegates that
-resolution to the proxy.
+resolution to the proxy. `Config::trust_env = false` disables implicit environment
+proxies. An explicit empty `Config::no_proxy` disables environment exclusions.
+`ca_bundle` verifies both destination and HTTPS proxy certificates.
+
+The browser runtime uses `CurlConfig::proxy_options` for session defaults and
+`ResourceRequest::proxy_options` for request overrides. It resolves proxy policy
+before cache lookup and isolates transport clients by proxy and credentials,
+retaining at most 32 idle/reusable client entries per loader. In-flight requests
+keep their client alive if an entry is evicted. Page routes override session
+routes, and matching routes bypass response caching.
 
 ```rust
 use brimp_net::{Client, Config, Proxy};

@@ -85,9 +85,11 @@ test('previously ineffective profile fields reach their runtime consumers', asyn
       const ctx = document.createElement('canvas').getContext('2d');
       ctx.font = '10px sans-serif';
       return [audio.sampleRate, audio.destination.maxChannelCount, navigator.doNotTrack,
-        navigator.deviceMemory, gl.getParameter(3379), ctx.measureText('abcd').width];
+        navigator.deviceMemory, gl.getParameter(3379), ctx.measureText('abcd').width > 0];
     })()`),
-      [192000, 8, '1', 16, 8192, 30],
+      // `canvas.fallbackAdvance` only applies when the platform has no face for
+      // the requested family, so the advance itself is the shaped font's.
+      [192000, 8, '1', 16, 8192, true],
     );
   } finally {
     await session.close();

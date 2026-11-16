@@ -84,13 +84,20 @@ fn lexbor_selectors_declarations_and_namespaced_attributes() {
     );
 }
 #[test]
-fn core_has_no_layout_or_xml_parser() {
+fn core_layout_places_blocks_and_there_is_no_xml_parser() {
     let page = page();
     check(
         &page,
         r##"(() => {
-        if (document.body.getBoundingClientRect().width !== 0 || document.body.getClientRects().length !== 0 || document.body.clientWidth !== 0 ||
-            getComputedStyle(document.body).display !== "block" || document.elementFromPoint(0, 0) !== undefined) return false;
+        // The document body holds a `main` block, so it has a border box of the
+        // viewport width minus the body margin and its own content height.
+        const body = document.body.getBoundingClientRect();
+        if (body.width <= 0 || body.x !== 8 || document.body.getClientRects().length !== 1) return false;
+        if (document.body.clientWidth !== Math.round(body.width)) return false;
+        if (getComputedStyle(document.body).display !== "block") return false;
+        if (getComputedStyle(document.body).marginTop !== "8px") return false;
+        const main = document.querySelector('main').getBoundingClientRect();
+        if (main.y !== 8 || main.height <= 0) return false;
         try { new DOMParser().parseFromString('<a/>', 'application/xml'); return false; }
         catch (error) { return error instanceof TypeError; }
     })()"##,

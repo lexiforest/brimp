@@ -3,6 +3,8 @@ use std::time::Duration;
 
 #[derive(Debug, thiserror::Error, Serialize, Deserialize)]
 pub enum AutomationError {
+    #[error(transparent)]
+    Network(#[from] crate::network::NetworkError),
     #[error("host callbacks cannot reenter the same page")]
     Reentry,
     #[error("invalid input: {0}")]
@@ -34,6 +36,18 @@ pub enum AutomationError {
 impl AutomationError {
     pub fn code(&self) -> &'static str {
         match self {
+            Self::Network(
+                crate::network::NetworkError::Timeout
+                | crate::network::NetworkError::Transfer { code: 28, .. },
+            ) => "timeout",
+            Self::Network(
+                crate::network::NetworkError::InvalidRequest(_)
+                | crate::network::NetworkError::InvalidUrl(_)
+                | crate::network::NetworkError::InvalidSchema(_)
+                | crate::network::NetworkError::InvalidProxyUrl(_)
+                | crate::network::NetworkError::InvalidHeader(_),
+            ) => "invalid_input",
+            Self::Network(_) => "transport",
             Self::Reentry => "reentry",
             Self::InvalidInput(_) => "invalid_input",
             Self::Transport(_) => "transport",

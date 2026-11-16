@@ -11,6 +11,65 @@ Unspecified settings use defaults.
 Capturing a value does not add a missing browser capability. For example, a
 screen size configures what page scripts read; it does not create a layout engine.
 
+## Pro fingerprints
+
+The CLI manages [impersonate.pro](https://impersonate.pro) access and downloaded
+fingerprints. Set `IMPERSONATE_API_KEY` in your environment, or save it once:
+
+```sh
+brimp fingerprints config --api-key YOUR_API_KEY
+brimp fingerprints update
+brimp fingerprints list
+```
+
+Choose a name from the list and export a browser profile:
+
+```sh
+brimp fingerprints show TARGET_NAME --profile > browser-profile.json
+brimp fetch https://example.com --profile browser-profile.json
+```
+
+`brimp fingerprints show TARGET_NAME` prints the raw fingerprint JSON instead.
+Updates are explicit and replace `fingerprints.json` only after all pages download
+and validate successfully. Requests never download fingerprints or read the catalog.
+An exported profile is self-contained, so it can be deployed without the catalog
+or API key.
+
+The CLI shares curl_cffi's configuration directory: `$IMPERSONATE_CONFIG_DIR`
+when set, otherwise `$XDG_CONFIG_HOME/impersonate` or `~/.config/impersonate` on
+Linux/macOS, and `%APPDATA%\impersonate` on Windows. It uses `config.json` for the
+stored key and `fingerprints.json` for downloaded targets. `IMPERSONATE_API_KEY`
+overrides the saved key. `IMPERSONATE_API_ROOT` or `update --api-root` selects the
+API root; the default is `https://api.impersonate.pro/v1`.
+
+## Editable fingerprints in Python
+
+`brimp.Fingerprint` has the same data fields and defaults as curl_cffi's
+`Fingerprint`, including TLS, HTTP/2, HTTP/3, QUIC and WebSocket settings. Load
+raw JSON exported by the CLI, edit it and supply it as a profile:
+
+```python
+import json
+from pathlib import Path
+import brimp
+
+fingerprint = brimp.Fingerprint(**json.loads(Path("fingerprint.json").read_text()))
+fingerprint.headers["X-Client"] = "my-agent"
+with brimp.Session(profile=fingerprint) as session:
+    page = session.get("https://example.com")
+    print(page.status_code)
+```
+
+To combine transport settings with a captured browser environment, place the
+object at `profile["values"]["network"]["fingerprint"]`. JSON profiles use a plain
+object at the same path; `brimp.AsyncSession` accepts the same inputs.
+
+An explicit fingerprint takes precedence over `network.impersonation` and selects
+its preferred `http_version`. Its User-Agent, Accept and Accept-Encoding headers
+supply missing profile defaults. Explicit browser identity fields and request
+headers take precedence. A transport fingerprint does not capture screen, audio,
+WebGL or other browser environment values; use a captured profile for those.
+
 ## Capture from your browser
 
 ```sh

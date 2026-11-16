@@ -70,8 +70,8 @@ impl RedirectStream {
                         Ok(true) => {
                             if generation >= state.options.limit {
                                 state.callback.lock().unwrap()(
-                                    ResourceStreamEvent::Error(NetworkError::Transport(
-                                        "redirect limit exceeded".into(),
+                                    ResourceStreamEvent::Error(NetworkError::TooManyRedirects(
+                                        state.options.limit,
                                     )),
                                     control,
                                 );

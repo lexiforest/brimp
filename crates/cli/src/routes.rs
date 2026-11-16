@@ -154,6 +154,7 @@ impl Routes {
                                 body,
                                 status,
                             } => route.continue_request(RouteOverrides {
+                                proxy_options: Default::default(),
                                 url: url.clone(),
                                 method: method.clone(),
                                 headers: headers.clone(),

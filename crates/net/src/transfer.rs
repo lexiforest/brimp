@@ -42,6 +42,7 @@ pub(crate) struct CurlTransfer {
     request_url_string: String,
     proxy_url: Option<CString>,
     request_headers: *mut CurlSlist,
+    fingerprint_headers: fingerprint::HeaderLists,
     request_body: Option<Vec<u8>>,
     method: Method,
     method_string: Option<CString>,
@@ -71,6 +72,7 @@ impl CurlTransfer {
         named_fingerprint: Option<&fingerprint::Fingerprint>,
     ) -> Result<Self, Error> {
         let (mut parts, request_body) = request.into_parts();
+        let supplied_headers = parts.headers.clone();
         if transfer_default_headers(&config, named_fingerprint) {
             fingerprint::add_default_headers(
                 named_fingerprint.expect("custom fingerprint is present"),
@@ -121,6 +123,7 @@ impl CurlTransfer {
             request_url_string,
             proxy_url: None,
             request_headers: ptr::null_mut(),
+            fingerprint_headers: Default::default(),
             request_body,
             method: parts.method,
             method_string: None,
@@ -142,7 +145,12 @@ impl CurlTransfer {
         };
 
         if let Some(profile) = named_fingerprint {
-            fingerprint::apply(transfer.handle, profile)?;
+            transfer.fingerprint_headers = fingerprint::apply(
+                transfer.handle,
+                profile,
+                transfer.config.default_headers,
+                &supplied_headers,
+            )?;
         } else {
             let target = CString::new(transfer.config.impersonation_target.as_str())
                 .map_err(|error| Error::Initialization(error.to_string()))?;
@@ -155,10 +163,13 @@ impl CurlTransfer {
             };
             if result != CURLE_OK {
                 let message = curl_error(transfer.handle, result);
-                return Err(Error::Initialization(format!(
-                    "libcurl-impersonate could not select `{}`: {message}",
-                    transfer.config.impersonation_target
-                )));
+                return Err(Error::Impersonation {
+                    code: result,
+                    message: format!(
+                        "libcurl-impersonate could not select `{}`: {message}",
+                        transfer.config.impersonation_target
+                    ),
+                });
             }
         }
 
@@ -283,7 +294,7 @@ impl CurlTransfer {
             let code = curl_easy_perform(self.handle);
             if code != CURLE_OK {
                 self.trace_connection(Some(code));
-                return Err(Error::Network(curl_error(self.handle, code)));
+                return Err(crate::ffi::transfer_error(self.handle, code));
             }
         }
         self.trace_connection(None);
@@ -318,6 +329,7 @@ impl CurlTransfer {
                 let path = CString::new(path.to_string_lossy().as_bytes())
                     .map_err(|e| Error::InvalidRequest(e.to_string()))?;
                 setopt(self.handle, crate::ffi::CURLOPT_CAINFO, path.as_ptr())?;
+                setopt(self.handle, crate::ffi::CURLOPT_PROXY_CAINFO, path.as_ptr())?;
             }
             for auth in &self.auth.0 {
                 let username = CString::new(auth.username.as_bytes())
@@ -371,6 +383,13 @@ impl CurlTransfer {
                     proxy.curl_proxy_type() as c_long,
                 )?;
                 self.proxy_url = Some(proxy_url);
+            } else if !self.config.trust_env {
+                setopt(self.handle, CURLOPT_PROXY, c"".as_ptr())?;
+            }
+            if let Some(no_proxy) = &self.config.no_proxy {
+                let value = CString::new(no_proxy.as_str())
+                    .map_err(|e| Error::InvalidRequest(e.to_string()))?;
+                setopt(self.handle, crate::ffi::CURLOPT_NOPROXY, value.as_ptr())?;
             }
             if !self.request_headers.is_null() {
                 setopt(self.handle, CURLOPT_HTTPHEADER, self.request_headers)?;

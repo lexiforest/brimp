@@ -64,6 +64,7 @@ const CLASS_DEFINITIONS: &str = concat!(
     include_str!("../../js/web_apis/fonts.js"),
     include_str!("../../js/web_apis/window_environment.js"),
     include_str!("../../js/web_apis/storage_host.js"),
+    include_str!("../../js/web_apis/layout.js"),
     include_str!("../../js/web_apis/scheduling.js"),
     include_str!("../../js/web_apis/install.js"),
     include_str!("../../js/web_apis/shape_placeholders.js"),
@@ -96,6 +97,7 @@ pub struct PendingFetch {
     /// The issuing document's URL when it is not the page's own document
     /// (frame scripts). Fetch metadata and same-origin checks use it.
     pub referrer: Option<String>,
+    pub resource_type: String,
 }
 
 pub enum PendingWebSocketOperation {
@@ -1094,6 +1096,7 @@ fn is_platform_operation(operation: &str) -> bool {
                 | "formUrlEncode"
                 | "decodeBytes"
                 | "encodeUtf8"
+                | "textMetrics"
         )
 }
 

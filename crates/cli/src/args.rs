@@ -13,6 +13,11 @@ pub struct Cli {
 }
 #[derive(Subcommand)]
 pub enum Command {
+    /// Manage impersonate.pro fingerprint catalogs and export profile data.
+    Fingerprints {
+        #[command(subcommand)]
+        command: Fingerprints,
+    },
     /// Capture a profile from a live browser on localhost.
     Profile {
         #[command(subcommand)]
@@ -45,6 +50,28 @@ pub enum Command {
     Plugins {
         #[command(subcommand)]
         command: Plugins,
+    },
+}
+#[derive(Subcommand)]
+pub enum Fingerprints {
+    /// Persist an impersonate.pro API key; IMPERSONATE_API_KEY overrides it.
+    Config {
+        #[arg(long)]
+        api_key: String,
+    },
+    /// Download the fingerprint catalog atomically.
+    Update {
+        #[arg(long)]
+        api_root: Option<String>,
+    },
+    /// List downloaded fingerprint names and client metadata.
+    List,
+    /// Print a downloaded fingerprint as JSON.
+    Show {
+        name: String,
+        /// Wrap the fingerprint in a browser profile for --profile or Session.
+        #[arg(long)]
+        profile: bool,
     },
 }
 #[derive(Subcommand)]
@@ -85,7 +112,7 @@ pub struct Doctor {
     /// Load a validated browser profile JSON file.
     #[arg(long)]
     pub profile: Option<PathBuf>,
-    /// HTTP/SOCKS proxy URL.
+    /// HTTP, HTTPS or SOCKS5 proxy URL.
     #[arg(long)]
     pub proxy: Option<String>,
     /// PEM certificate authority bundle.
@@ -165,7 +192,7 @@ pub struct Options {
     /// Seed a session cookie as NAME=VALUE for the target URL.
     #[arg(long)]
     pub cookie: Vec<String>,
-    /// HTTP/SOCKS proxy URL.
+    /// HTTP, HTTPS or SOCKS5 proxy URL.
     #[arg(long)]
     pub proxy: Option<String>,
     /// PEM certificate authority bundle.

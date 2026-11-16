@@ -1,5 +1,6 @@
 mod actions;
 mod args;
+mod fingerprints;
 mod output;
 mod plugins;
 mod profile;
@@ -8,7 +9,7 @@ mod signals;
 
 use args::{Cli, Command, Format, Options};
 use brimp_runtime::{
-    network::{CurlConfig, Proxy},
+    network::{CurlConfig, ProxyOptions},
     runtime::{
         AutomationError, CancellationToken, ExtractionOptions, NavigationWait,
         clock::{ClockOptions, TimeMode},
@@ -95,6 +96,11 @@ fn main() -> std::process::ExitCode {
             std::process::ExitCode::from(match error {
                 AutomationError::InvalidInput(_) => 2,
                 AutomationError::Transport(_) => 10,
+                error @ AutomationError::Network(_) => match error.code() {
+                    "timeout" => 14,
+                    "invalid_input" => 2,
+                    _ => 10,
+                },
                 AutomationError::HttpStatus(_) => 11,
                 AutomationError::Navigation(_) => 12,
                 AutomationError::JavaScript(_) => 13,
@@ -111,6 +117,7 @@ fn main() -> std::process::ExitCode {
 }
 fn run(cli: Cli) -> Result<()> {
     match cli.command {
+        Command::Fingerprints { command } => fingerprints::run(command),
         Command::Profile {
             command: args::Profile::Capture(options),
         } => profile::capture(options),
@@ -193,7 +200,10 @@ fn network_config(
         std::fs::File::open(path).map_err(invalid)?;
     }
     Ok(CurlConfig {
-        proxy: proxy.map(Proxy::parse).transpose().map_err(invalid)?,
+        proxy_options: ProxyOptions {
+            proxy: proxy.map(str::to_owned),
+            ..Default::default()
+        },
         ca_bundle,
         request_timeout: timeout,
         ..Default::default()

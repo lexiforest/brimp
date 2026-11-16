@@ -1,6 +1,5 @@
 //! Thread-safe host operations on a managed page.
 
-use super::options::validate_timeout;
 use super::{
     ElementHandle, FileUpload, HandleToken, IdentityOptions, JSHandle, Operation, OperationResult,
     RequestOptions,
@@ -116,6 +115,8 @@ impl NativePage {
         let mut request = crate::network::ResourceRequest::new(method, url.to_string());
         request.headers = crate::runtime::routes::parse_headers(options.headers.clone())?;
         request.body = options.body.clone();
+        request.proxy_options = options.proxy_options.clone();
+        request.resource_type = Some("fetch".into());
         // Capture before obtaining the context: navigation at either boundary must
         // invalidate this stream, including a gap between redirect hops.
         let generation = self.network.stream_generation();
@@ -124,7 +125,6 @@ impl NativePage {
             unreachable!()
         };
         let timeout = options.timeout.unwrap_or(self.timeout);
-        validate_timeout(timeout)?;
         crate::runtime::native::streaming::open(
             &self.network,
             context,
@@ -208,6 +208,7 @@ impl NativePage {
             options.body,
             options.allow_redirects,
             options.max_redirects,
+            options.proxy_options,
         )
     }
 

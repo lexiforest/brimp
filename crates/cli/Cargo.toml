@@ -10,6 +10,7 @@ name = "brimp"
 path = "src/main.rs"
 
 [dependencies]
+brimp-net = { path = "../net" }
 brimp-runtime = { path = "../runtime" }
 clap = { version = "4.6", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }

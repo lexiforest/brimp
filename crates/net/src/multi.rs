@@ -211,7 +211,7 @@ fn drive(multi: *mut CurlMulti, active: &mut HashMap<usize, Box<CurlTransfer>>) 
             transfer.finish_streaming(if result == 0 {
                 Ok(())
             } else {
-                Err(Error::Network(crate::ffi::curl_error(handle, result)))
+                Err(crate::ffi::transfer_error(handle, result))
             });
         }
     }
@@ -272,8 +272,7 @@ fn service_consumers(multi: *mut CurlMulti, active: &mut HashMap<usize, Box<Curl
                 curl_multi_remove_handle(multi, handle);
             }
             if let Some(mut transfer) = active.remove(&(handle as usize)) {
-                transfer
-                    .finish_streaming(Err(Error::Network(crate::ffi::curl_error(handle, result))));
+                transfer.finish_streaming(Err(crate::ffi::transfer_error(handle, result)));
             }
         }
     }

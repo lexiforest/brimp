@@ -381,7 +381,7 @@ function __sheetForOwner(owner) {
   __ownerSheets.set(owner, entry);
   if (owner instanceof HTMLStyleElement) __replaceCssRules(sheet, source);
   else if (source) {
-    fetch(source)
+    __fetchResource(source, {}, 'stylesheet')
       .then(async (response) => {
         if (!response.ok) throw new Error('Stylesheet request failed');
         const css = await response.text();

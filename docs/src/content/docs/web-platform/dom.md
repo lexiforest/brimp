@@ -18,11 +18,22 @@ The sections below describe page-side JavaScript. For host handle ownership, see
 
 ## Element geometry
 
-There is no layout engine, so `getBoundingClientRect()` returns a zero `DOMRect`
-at the origin and `getClientRects()` returns an empty `DOMRectList` rather than
-`undefined`. The result objects are real value objects, so scripts that read
-`.width`, `.top`, `.right` or `rects.length` keep working; nothing is measured,
-and unrelated receivers raise `TypeError` like other DOM methods.
+Element geometry comes from a box-layout pass over normal flow: block children
+stack, inline content fills line boxes, margins and paddings apply, and
+`position: relative`/`absolute`/`fixed` offsets are honoured. `getBoundingClientRect`
+reports the border box in viewport coordinates, `getClientRects` reports the
+line fragments of an inline element, and the `offset*`/`client*`/`scroll*`
+family reads the same boxes.
+
+Text is measured with the platform font manager at the element's computed
+family, size, weight and slant, so line heights and wrapped widths follow the
+installed fonts rather than a fixed ratio. Percentages resolve against the
+containing block. Unrelated receivers raise `TypeError` like other DOM methods.
+
+Not implemented: floats, flex and grid containers, one rect per inline fragment
+within a single element, vertical writing modes, scroll positions, drawing
+(shadows, borders with radius, backgrounds) and hit testing beyond
+`elementFromPoint`.
 
 ## Parse and create documents
 
@@ -37,7 +48,8 @@ NodeIterator, attribute removal, XPath and non-rendering Shadow DOM. Shadow root
 have isolated canonical subtrees, named slots, connected roots and composed event
 retargeting, including closed-root path filtering. Custom element definitions
 read observedAttributes before construction, as required by Lit's initialization.
-There is no CSS cascade, computed geometry or rendering. Manual slot assignment,
+Computed style is available through `getComputedStyle`, backed by the same
+cascade and layout pass. Manual slot assignment,
 declarative shadow roots and full focus delegation remain
 outside this implementation. XPath uses the pinned `xpath` library; mutation
 invalidation of XPath iterators is not yet implemented.

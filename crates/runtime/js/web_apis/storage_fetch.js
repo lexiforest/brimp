@@ -224,7 +224,7 @@ globalThis.Headers = Headers;
 globalThis.Response = Response;
 globalThis.Request = Request;
 
-globalThis.fetch = (input, init = {}) => {
+let __resourceFetch = (input, init = {}, resourceType = 'fetch') => {
   let request;
   try {
     request = new Request(input, init);
@@ -239,6 +239,7 @@ globalThis.fetch = (input, init = {}) => {
     JSON.stringify([...request.headers]),
     request.__bodyBytes === null ? null : JSON.stringify(Array.from(request.__bodyBytes)),
     request.referrer === 'about:client' ? null : request.referrer,
+    resourceType,
   ).then(
     (serialized) => {
       const payload = JSON.parse(serialized);
@@ -249,6 +250,13 @@ globalThis.fetch = (input, init = {}) => {
     },
   );
 };
+function __fetchResource(input, init = {}, resourceType = 'fetch') {
+  return __resourceFetch(input, init, resourceType);
+}
+globalThis.__brimpSetResourceFetch = (implementation) => {
+  __resourceFetch = implementation;
+};
+globalThis.fetch = (input, init = {}) => __fetchResource(input, init);
 
 class XMLHttpRequestEventTarget extends EventTarget {
   constructor() {
@@ -399,14 +407,18 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
         Math.max(0, Number(this.timeout)),
       );
     }
-    fetch(this.__url, {
-      method: this.__method,
-      headers: this.__headers,
-      body,
-      credentials: this.withCredentials ? 'include' : 'same-origin',
-      signal: controller.signal,
-      referrer: __xhrReferrers.get(this),
-    })
+    __fetchResource(
+      this.__url,
+      {
+        method: this.__method,
+        headers: this.__headers,
+        body,
+        credentials: this.withCredentials ? 'include' : 'same-origin',
+        signal: controller.signal,
+        referrer: __xhrReferrers.get(this),
+      },
+      'xhr',
+    )
       .then(async (response) => {
         if (generation !== this.__generation || !this.__sent) return;
         this.status = response.status;

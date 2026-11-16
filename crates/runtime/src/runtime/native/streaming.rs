@@ -27,8 +27,7 @@ pub(crate) struct BodyState {
     queue: Mutex<Queue>,
     changed: Condvar,
     cancellation: CancellationToken,
-    deadline: Instant,
-    timeout: Duration,
+    deadline: Option<Instant>,
     page_id: u64,
 }
 impl BodyState {
@@ -49,8 +48,11 @@ impl BodyState {
         if self.cancellation.is_cancelled() {
             return Err(AutomationError::Cancellation);
         }
-        if Instant::now() >= self.deadline {
-            return Err(AutomationError::Timeout(self.timeout));
+        if self
+            .deadline
+            .is_some_and(|deadline| Instant::now() >= deadline)
+        {
+            return Err(AutomationError::Network(NetworkError::Timeout));
         }
         Ok(())
     }
@@ -74,7 +76,7 @@ impl BodyStream {
                 return Ok(Some(bytes));
             }
             if let Some(error) = queue.error.take() {
-                return Err(AutomationError::Transport(error.to_string()));
+                return Err(AutomationError::from(error));
             }
             if queue.done {
                 return Ok(None);
@@ -98,7 +100,7 @@ impl BodyStream {
                 return Ok(headers.clone());
             }
             if let Some(error) = queue.error.take() {
-                return Err(AutomationError::Transport(error.to_string()));
+                return Err(AutomationError::from(error));
             }
             if queue.done {
                 return Err(AutomationError::Transport(
@@ -133,12 +135,12 @@ pub(crate) fn open(
     options: RequestOptions,
     timeout: Duration,
 ) -> Result<StreamingResponse, AutomationError> {
-    let deadline = Instant::now() + timeout;
+    let deadline = (!timeout.is_zero()).then(|| Instant::now() + timeout);
     context.apply_request_identity(&mut request.headers);
     let mut supplied = crate::runtime::request::supplied_cookie(&request);
     for redirects in 0..=options.max_redirects {
         crate::runtime::request::refresh_cookie_header(&context, &mut request, supplied.as_deref())
-            .map_err(|e| AutomationError::Transport(e.to_string()))?;
+            .map_err(AutomationError::from)?;
         let state = Arc::new(BodyState {
             queue: Mutex::new(Queue {
                 headers: None,
@@ -151,7 +153,6 @@ pub(crate) fn open(
             changed: Condvar::new(),
             cancellation: CancellationToken::new(),
             deadline,
-            timeout,
             page_id,
         });
         network.register_stream(&state, generation)?;
@@ -210,7 +211,7 @@ pub(crate) fn open(
                     directive
                 }),
             )
-            .map_err(|e| AutomationError::Transport(e.to_string()))?;
+            .map_err(AutomationError::from)?;
         {
             let mut queue = state.queue.lock().unwrap();
             queue.handle = Some(control);
@@ -232,7 +233,7 @@ pub(crate) fn open(
                 &headers,
                 &mut supplied,
             )
-            .map_err(|e| AutomationError::Transport(e.to_string()))?
+            .map_err(AutomationError::from)?
         {
             return Ok(StreamingResponse {
                 metadata,
@@ -241,10 +242,9 @@ pub(crate) fn open(
         }
         stream.cancel();
         if redirects == options.max_redirects {
-            return Err(AutomationError::Transport(format!(
-                "redirect limit of {} exceeded",
-                options.max_redirects
-            )));
+            return Err(AutomationError::Network(
+                crate::network::NetworkError::TooManyRedirects(options.max_redirects),
+            ));
         }
     }
     unreachable!()

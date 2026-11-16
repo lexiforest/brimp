@@ -451,6 +451,29 @@ pub(super) fn dispatch(
                 serde_json::to_string(input.as_bytes()).map_err(err)?,
             ))
         }
+        "textMetrics" => {
+            // Layout and canvas both measure through the platform font manager;
+            // geometry is core, so this cannot live in a plugin.
+            let request: serde_json::Value =
+                serde_json::from_str(&required_string(call, 2, "text request")?).map_err(err)?;
+            let text = request["text"].as_str().unwrap_or_default().to_string();
+            let family = request["family"].as_str().unwrap_or("Helvetica");
+            let size = request["size"].as_f64().unwrap_or(16.0) as f32;
+            let bold = request["bold"].as_bool().unwrap_or(false);
+            let italic = request["italic"].as_bool().unwrap_or(false);
+            let family = crate::runtime::text::first_family(family);
+            let metrics = crate::runtime::text::measure(&text, &family, size, bold, italic)
+                .ok_or_else(|| NativeError::new("no system typeface"))?;
+            Ok(NativeValue::String(
+                serde_json::json!({
+                    "width": metrics.width,
+                    "ascent": metrics.ascent,
+                    "descent": metrics.descent,
+                    "leading": metrics.leading,
+                })
+                .to_string(),
+            ))
+        }
         "base64Encode" => {
             use base64::Engine as _;
             let bytes_json = required_string(call, 2, "bytes")?;
@@ -494,6 +517,14 @@ pub(super) fn dispatch(
                 .filter(|value| !value.is_null_or_undefined())
                 .map(|value| value.to_string())
                 .transpose()?;
+            // Destinations drive request headers (Sec-Fetch-Dest, Accept) and
+            // the resource loader's policy, so the JS layer names the request's.
+            let resource_type = call
+                .argument(7)
+                .filter(|value| !value.is_null_or_undefined())
+                .map(|value| value.to_string())
+                .transpose()?
+                .unwrap_or_else(|| "fetch".to_string());
             let (promise, settlement) = call.make_deferred_promise()?.into_parts();
             let mut fetches = state.fetches.borrow_mut();
             let id = fetches.next_id();
@@ -506,6 +537,7 @@ pub(super) fn dispatch(
                     body,
                     streaming: operation == "fetchStream",
                     referrer,
+                    resource_type,
                 },
                 settlement,
             );

@@ -170,9 +170,7 @@ impl JsRuntime {
     pub fn pump_jobs(&self) {
         // SAFETY: JsRuntime is thread-bound and this services only the current
         // thread's loop. No JS value or VM is accessed from a foreign thread.
-        unsafe {
-            crate::ffi::run_loop_cycle(0);
-        }
+        crate::ffi::run_loop_cycle();
     }
 
     pub fn garbage_collect(&self) {

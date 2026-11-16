@@ -8,8 +8,10 @@ for each document you want to keep open. Close the session when you finish;
 this closes its pages and releases their resources.
 
 The examples use the [local tutorial server](/quick-start/#1-start-the-example-site).
-Python calls are synchronous; Node.js calls return Promises. Request timeouts use
-seconds in Python and milliseconds in Node.js.
+Python's `Session` is synchronous; `AsyncSession` supports asyncio. Node.js calls
+return Promises. Request timeouts use seconds (including fractions) in Python and milliseconds in Node.js.
+Python accepts `None`/`0` to disable the deadline. Timeout tuples are unsupported. Omitting the argument inherits the session
+setting. See [Python timeouts](/api/python/#timeouts).
 
 ## Fetch a page and read the result
 
@@ -54,6 +56,68 @@ stream and leave the page's navigation metadata unchanged.
 See the [Python](/reference/python/) and
 [Node.js](/reference/node/) references for all response properties.
 
+## Make a one-off Python request
+
+Module-level helpers return the same live `brimp.Page` as a session request:
+
+```python
+import brimp
+
+with brimp.get("http://127.0.0.1:8765/") as page:
+    page.raise_for_status()
+    print(page.evaluate("document.querySelector('h1').textContent"))
+```
+
+This prints `Hello from JavaScript`. The helper keeps a private session alive
+until you close the page. Use a `with` block or call `page.close()` to release
+both; the original HTTP metadata and body remain readable afterward. Each helper
+call has separate cookies and connections. Use `brimp.Session` to share them or
+configure plugins, profiles, or other session settings.
+
+Available helpers are `request(method, url)`, `get`, `head`, `post`, `put`, `patch`,
+`delete`, `options`, `trace`, and `query`. They accept the keyword arguments of
+`Page.request`; session and page methods support the same HTTP verbs.
+
+## Construct Python request URLs
+
+Set a session `base_url` to resolve relative URLs and `params` for default query
+values. Request-level `params` accepts a mapping or a sequence of key/value pairs:
+
+```python
+import brimp
+
+with brimp.Session(
+    base_url="http://127.0.0.1:8765/",
+    params={"source": "agent"},
+) as session:
+    page = session.get("echo", params={"q": "browser runtime", "tag": ["a", "b"]})
+    print(page.url)
+```
+
+The URL ends in `/echo?source=agent&q=browser+runtime&tag=a&tag=b`.
+You can update `session.base_url` and `session.params` before subsequent requests.
+These settings apply to `Page.request` and `Page.stream` too; they do not rewrite
+requests made by scripts inside the page.
+
+Query values merge in this order: the supplied URL, session params, then request
+params. A single incoming value replaces a single existing value with the same
+key; repeated keys append, preserving their order. Lists produce repeated query
+keys, and blank values are retained. Following curl-cffi, booleans and dictionary
+values use JSON encoding. `None` becomes the string `None`; it does not remove a
+default parameter.
+
+The merged URL then resolves against `base_url` using normal relative-URL rules.
+A leading `/` starts at the host root; an absolute URL overrides the base. End
+the base with `/` to treat its final path component as a directory. A base query
+is inherited only when the relative URL has neither a path nor a replacement
+query.
+
+Automatic quoting encodes spaces and non-ASCII characters while preserving
+reserved percent escapes. Pass `quote=":"` to additionally encode colons in the
+path and query, or `quote=False` to skip automatic Python quoting. Explicit
+`params` still undergo query encoding. The native transport continues to validate
+URLs and may normalize their spelling, such as the case of percent escapes.
+
 ## Reuse a page or open another one
 
 `session.get()` creates a new page. `page.get()` navigates an existing page to a
@@ -79,6 +143,57 @@ Navigation replaces the page's JavaScript environment, called its **realm**.
 Handles from the previous document then raise `StaleHandle`. Use
 [handles](/guides/values/) when you need to keep a DOM node or JavaScript object
 between calls, and obtain fresh handles after navigation.
+
+## Use Python with asyncio
+
+Use `brimp.AsyncSession` to fetch and interact with pages without blocking the
+asyncio event loop:
+
+```python
+import asyncio
+import brimp
+
+async def main():
+    async with brimp.AsyncSession(
+        base_url="http://127.0.0.1:8765/",
+        max_clients=4,
+    ) as session:
+        pages = await asyncio.gather(session.get("/"), session.get("/article"))
+        for page in pages:
+            page.raise_for_status()
+            async with page:
+                heading = await page.query_selector("h1")
+                async with heading:
+                    print(await heading.text_content())
+
+asyncio.run(main())
+```
+
+This prints `Hello from JavaScript` twice. Async sessions accept the same options
+and request arguments as synchronous sessions. Requests return `brimp.AsyncPage`.
+Await navigation, evaluation, DOM operations, handle methods and `close()`.
+Buffered HTTP properties such as `status_code`, `text` and `content`, plus
+`json()` and `raise_for_status()`, are synchronous. HTTP errors refer to the async
+page through `error.page`.
+
+`max_clients` defaults to 10 and limits concurrent native operations. Separate
+pages can run concurrently; operations on one page run in order. A completed
+request releases its concurrency slot while its page remains usable. Create and
+use each session on one event loop, and close it with `async with` or
+`await session.close()`.
+
+Cancelling a task signals its native operation and waits for that call to finish
+before returning `asyncio.CancelledError`. Cancelling a queued call prevents it
+from starting. A cancelled `session.get()` closes its newly created page; a
+cancelled operation on an existing page leaves that page open. Cancellation does
+not undo JavaScript changes or restore a document interrupted during navigation.
+Closing the session interrupts active work, rejects queued work and releases its
+pages and executor threads. Cleanup completes even if the close task is cancelled.
+
+`page.on()` and `page.route()` still register synchronous callbacks. Plugin
+handlers also remain synchronous and run on the session's callback dispatcher.
+Use `await session.route()` to register a synchronous callback across pages.
+Async streaming and coroutine callbacks are not yet supported.
 
 ## Wait for a JavaScript result
 
@@ -173,7 +288,8 @@ Separate pages can execute concurrently. Python releases the GIL during native
 waits; Node.js performs them away from its event loop.
 
 Response/authentication routes buffer at most 32 MiB. Registering a route bypasses
-cache lookup so it still sees matching requests. The in-memory GET cache honors
+cache reads and writes for matching requests. Other cache entries are separated
+by proxy and credentials. See [proxies and request filtering](/guides/proxies/). The in-memory GET cache honors
 max-age, no-store and no-cache; it excludes Vary and Set-Cookie responses.
 Retained response bodies have separate limits: 32 MiB total and 8 MiB per body
 by default.

@@ -340,6 +340,7 @@ function installProfile(profile) {
     },
   });
 
+  globalThis.__brimpInstallLayout?.(profile);
   globalThis.__brimpInstallWindowEnvironment(profile);
   globalThis.__brimpInstallIntlProfile(identity);
   globalThis.__brimpInstallMediaQueries(profile);

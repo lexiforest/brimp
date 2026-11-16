@@ -80,6 +80,7 @@ function installCanvas({ global, canvas, host, profile: settings }, options = {}
     'canvas2dDrawPath',
     'canvas2dClip',
     'canvas2dDrawText',
+    'canvas2dMeasureText',
     'canvas2dPutImageData',
     'canvas2dGetImageData',
     'canvasEncode',
@@ -382,7 +383,9 @@ function installCanvas({ global, canvas, host, profile: settings }, options = {}
   function call(operation, receiver, ...args) {
     if (
       canNative &&
-      (nativeReady.get(receiver) || operation === 'canvas2dAcquire') &&
+      (nativeReady.get(receiver) ||
+        operation === 'canvas2dAcquire' ||
+        operation === 'canvas2dMeasureText') &&
       nativeOperations.has(operation)
     ) {
       if (operation === 'canvas2dGetImageData') {

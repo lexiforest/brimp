@@ -51,13 +51,18 @@ def test_python_reference_has_public_members():
     reference = (SITE / "reference/python/index.html").read_text()
     errors = (SITE / "reference/python/errors/index.html").read_text()
     public_api = reference + errors
-    tree = ast.parse((ROOT / "bindings/python/python/brimp/__init__.py").read_text())
-    for node in tree.body:
-        if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
-            assert f'id="brimp.{node.name}"' in public_api
-            for child in node.body:
-                if isinstance(child, ast.FunctionDef) and not child.name.startswith("_"):
-                    assert f'id="brimp.{node.name}.{child.name}"' in public_api
+    for filename in ("__init__.py", "_async.py"):
+        tree = ast.parse((ROOT / "bindings/python/python/brimp" / filename).read_text())
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
+                assert f'id="brimp.{node.name}"' in public_api
+            if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+                assert f'id="brimp.{node.name}"' in public_api
+                for child in node.body:
+                    if isinstance(
+                        child, (ast.FunctionDef, ast.AsyncFunctionDef)
+                    ) and not child.name.startswith("_"):
+                        assert f'id="brimp.{node.name}.{child.name}"' in public_api
     # Inherited verbs and dynamically assigned response metadata need explicit coverage.
     for symbol in [
         "Session.get",
@@ -66,12 +71,26 @@ def test_python_reference_has_public_members():
         "Page.request_info",
         "Page.history",
         "Page.raise_for_status",
+        "AsyncSession.get",
+        "AsyncPage.status_code",
+        "AsyncPage.raise_for_status",
+        "AsyncElementHandle.dispose",
         "Route.stage",
     ]:
         assert f'id="brimp.{symbol}"' in reference
     plugins = (SITE / "reference/python/plugins/index.html").read_text()
     assert "brimp.plugins.host_storage" in plugins
-    assert "StaleHandle" in errors and "TransportError" in errors and "HTTPError" in errors
+    for name in [
+        "BrimpError",
+        "RequestException",
+        "StaleHandle",
+        "TransportError",
+        "HTTPError",
+        "CertificateVerifyError",
+        "RequestTimeout",
+        "JSONDecodeError",
+    ]:
+        assert f'id="brimp.{name}"' in errors
     assert 'id="brimp.Response"' not in reference
 
 
@@ -118,7 +137,7 @@ def test_architecture_pngs():
 
 def test_removed_api_paths_do_not_return_in_guides():
     bad = re.compile(
-        r"brimp\.get\(|\blaunch\(|\.screenshot\(|brimp (?:eval|cdp|serve)\b|--timeout-ms|profileJson|profile_json"
+        r"\blaunch\(|\.screenshot\(|brimp (?:eval|cdp|serve)\b|--timeout-ms|profileJson|profile_json"
     )
     for source in (ROOT / "docs/src/content/docs").rglob("*"):
         if source.suffix in (".md", ".mdx"):

@@ -33,6 +33,8 @@ pub struct RouteOverrides {
     pub headers: Option<Vec<(String, String)>>,
     pub body: Option<Vec<u8>>,
     pub status: Option<u16>,
+    #[serde(flatten)]
+    pub proxy_options: network::ProxyOptions,
 }
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -86,9 +88,12 @@ impl Route {
     }
     pub fn continue_request(&self, overrides: RouteOverrides) -> Result<(), AutomationError> {
         if let Some(original) = &self.0.response {
-            if overrides.url.is_some() || overrides.method.is_some() {
+            if overrides.url.is_some()
+                || overrides.method.is_some()
+                || !overrides.proxy_options.is_empty()
+            {
                 return Err(AutomationError::InvalidInput(
-                    "response continuation cannot change the request URL or method".into(),
+                    "response continuation cannot change the request URL, method or proxy".into(),
                 ));
             }
             let mut response = original.clone();
@@ -110,6 +115,9 @@ impl Route {
                 ));
             }
             let mut request = self.0.request.clone();
+            overrides.proxy_options.validate().map_err(invalid)?;
+            request.proxy_options.overlay(overrides.proxy_options);
+            request.resolved_proxy = None;
             if let Some(url) = overrides.url {
                 url::Url::parse(&url).map_err(invalid)?;
                 request.url = url;
@@ -186,8 +194,12 @@ pub(crate) fn parse_headers(
     let mut result = network::HeaderList::new();
     for (name, value) in pairs {
         result.append(
-            http::HeaderName::from_bytes(name.as_bytes()).map_err(invalid)?,
-            http::HeaderValue::from_str(&value).map_err(invalid)?,
+            http::HeaderName::from_bytes(name.as_bytes()).map_err(|e| {
+                AutomationError::Network(network::NetworkError::InvalidHeader(e.to_string()))
+            })?,
+            http::HeaderValue::from_str(&value).map_err(|e| {
+                AutomationError::Network(network::NetworkError::InvalidHeader(e.to_string()))
+            })?,
         );
     }
     Ok(result)
@@ -208,8 +220,15 @@ pub(crate) struct Routes {
     next: Arc<AtomicU64>,
     page_id: Arc<AtomicU64>,
     closed: Arc<AtomicBool>,
+    parent: Option<Arc<Routes>>,
 }
 impl Routes {
+    pub fn child(&self) -> Self {
+        Self {
+            parent: Some(Arc::new(self.clone())),
+            ..Self::default()
+        }
+    }
     pub fn matches(&self, url: &str) -> bool {
         self.state
             .lock()
@@ -217,6 +236,10 @@ impl Routes {
             .routes
             .values()
             .any(|route| route.pattern.matches(url))
+            || self
+                .parent
+                .as_ref()
+                .is_some_and(|parent| parent.matches(url))
     }
     pub fn set_page(&self, id: u64) {
         self.page_id.store(id, Ordering::Release);
@@ -280,6 +303,11 @@ impl Routes {
             .rev()
             .find(|route| route.stage == stage && route.pattern.matches(url))
             .map(|route| route.handler.clone())
+            .or_else(|| {
+                self.parent
+                    .as_ref()
+                    .and_then(|parent| parent.handler(url, stage))
+            })
     }
     fn dispatch(
         &self,

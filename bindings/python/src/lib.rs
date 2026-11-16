@@ -3,38 +3,46 @@ mod plugins;
 use brimp_runtime::runtime::native::{
     ElementHandle, JSHandle, NativePage, RequestOptions, Session, SessionOptions,
 };
-use brimp_runtime::runtime::{AutomationError, NavigationResponse};
-use pyo3::{create_exception, exceptions::PyException, prelude::*, types::PyBytes};
+use brimp_runtime::runtime::{AutomationError, CancellationToken, NavigationResponse};
+use pyo3::{prelude::*, types::PyBytes};
 use std::sync::Arc;
 use std::time::Duration;
 
-create_exception!(_brimp, RuntimeError, PyException);
-create_exception!(_brimp, InvalidInput, RuntimeError);
-create_exception!(_brimp, JavaScriptError, RuntimeError);
-create_exception!(_brimp, Timeout, RuntimeError);
-create_exception!(_brimp, Closed, RuntimeError);
-create_exception!(_brimp, Reentry, RuntimeError);
-create_exception!(_brimp, StaleHandle, RuntimeError);
-create_exception!(_brimp, TransportError, RuntimeError);
+mod errors;
+use errors::*;
 
-fn error(e: AutomationError) -> PyErr {
-    let message = e.to_string();
-    match e {
-        AutomationError::InvalidInput(_) => InvalidInput::new_err(message),
-        AutomationError::JavaScript(_) => JavaScriptError::new_err(message),
-        AutomationError::Timeout(_) => Timeout::new_err(message),
-        AutomationError::Closed => Closed::new_err(message),
-        AutomationError::Reentry => Reentry::new_err(message),
-        AutomationError::StaleHandle => StaleHandle::new_err(message),
-        AutomationError::Transport(_) => TransportError::new_err(message),
-        _ => RuntimeError::new_err(message),
-    }
-}
 fn duration(seconds: f64) -> PyResult<Duration> {
     Duration::try_from_secs_f64(seconds)
         .ok()
-        .filter(|v| !v.is_zero())
-        .ok_or_else(|| InvalidInput::new_err("timeout must be finite and positive"))
+        .filter(|duration| std::time::Instant::now().checked_add(*duration).is_some())
+        .ok_or_else(|| {
+            InvalidInput::new_err("timeout must be finite, nonnegative and representable")
+        })
+}
+
+/// Run one Python wrapper call with cancellation propagated to native commands.
+#[pyclass(name = "_Cancellation")]
+struct PyCancellation {
+    inner: CancellationToken,
+}
+#[pymethods]
+impl PyCancellation {
+    #[new]
+    fn new() -> Self {
+        Self {
+            inner: CancellationToken::new(),
+        }
+    }
+    fn cancel(&self) {
+        self.inner.cancel();
+    }
+    fn run(&self, function: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+        let _scope = self.inner.enter();
+        if self.inner.is_cancelled() {
+            return Err(RuntimeError::new_err("operation cancelled"));
+        }
+        Ok(function.call0()?.unbind())
+    }
 }
 
 #[pyclass(name = "_Session")]
@@ -46,18 +54,18 @@ struct PySession {
 impl PySession {
     #[new]
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (headers, timeout=30.0, proxy=None, plugins=Vec::new(), identity="{}", profile="null", clock="{}", diagnostics="null", storage_path=None))]
+    #[pyo3(signature = (headers, timeout=30.0, plugins=Vec::new(), identity="{}", profile="null", clock="{}", diagnostics="null", storage_path=None, proxy_options="{}"))]
     fn new(
         py: Python<'_>,
         headers: Vec<(String, String)>,
         timeout: f64,
-        proxy: Option<String>,
         plugins: Vec<plugins::Descriptor>,
         identity: &str,
         profile: &str,
         clock: &str,
         diagnostics: &str,
         storage_path: Option<String>,
+        proxy_options: &str,
     ) -> PyResult<Self> {
         let dispatcher = plugins::Dispatcher::new()?;
         let parsed_profile: Option<brimp_runtime::profile::BrowserProfile> =
@@ -75,16 +83,23 @@ impl PySession {
             timeout: duration(timeout)?,
             ..Default::default()
         };
-        options.network.proxy = proxy
-            .map(brimp_runtime::network::Proxy::parse)
-            .transpose()
+        // Python timeout formats normalize to one runtime deadline. Avoid an
+        // additional fixed 30-second transport deadline cutting it short.
+        options.network.request_timeout = Duration::ZERO;
+        options.network.connect_timeout = Duration::ZERO;
+        options.network.proxy_options = serde_json::from_str(proxy_options)
             .map_err(|e| InvalidInput::new_err(e.to_string()))?;
+        options
+            .network
+            .proxy_options
+            .validate()
+            .map_err(network_error)?;
         py.detach(|| Session::new(options))
             .map(|inner| Self {
                 inner: Arc::new(inner),
                 dispatcher,
             })
-            .map_err(error)
+            .map_err(session_error)
     }
     fn new_page(&self, py: Python<'_>) -> PyResult<PyPage> {
         py.detach(|| self.inner.new_page())
@@ -92,17 +107,30 @@ impl PySession {
                 inner,
                 dispatcher: self.dispatcher.clone(),
             })
-            .map_err(error)
+            .map_err(session_error)
     }
     fn close(&self, py: Python<'_>) {
         py.detach(|| self.inner.close());
         self.dispatcher.close();
     }
+    fn route(
+        &self,
+        pattern: &str,
+        stage: &str,
+        handler: Py<PyAny>,
+    ) -> PyResult<network::PyRouteRegistration> {
+        let stage = serde_json::from_value(serde_json::Value::String(stage.into()))
+            .map_err(|e| InvalidInput::new_err(e.to_string()))?;
+        self.inner
+            .route(pattern, stage, self.dispatcher.route_handler(handler))
+            .map(|inner| network::PyRouteRegistration { inner })
+            .map_err(session_error)
+    }
     fn set_cookie(&self, url: &str, name: &str, value: &str) -> PyResult<()> {
         self.inner
             .cookies()
             .set_cookie(url, name, value)
-            .map_err(error)
+            .map_err(session_error)
     }
     fn cookies_json(&self) -> PyResult<String> {
         serde_json::to_string(&self.inner.cookies().cookies())
@@ -248,7 +276,7 @@ impl PyPage {
     }
 
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (method, url, headers, body=None, timeout=None, allow_redirects=true, max_redirects=20))]
+    #[pyo3(signature = (method, url, headers, body=None, timeout=None, allow_redirects=true, max_redirects=20, proxy_options="{}"))]
     fn request(
         &self,
         py: Python<'_>,
@@ -259,6 +287,7 @@ impl PyPage {
         timeout: Option<f64>,
         allow_redirects: bool,
         max_redirects: usize,
+        proxy_options: &str,
     ) -> PyResult<PyResponse> {
         let options = RequestOptions {
             headers,
@@ -266,13 +295,15 @@ impl PyPage {
             timeout: timeout.map(duration).transpose()?,
             allow_redirects,
             max_redirects,
-            ..Default::default()
+            proxy_options: serde_json::from_str(proxy_options)
+                .map_err(|e| InvalidInput::new_err(e.to_string()))?,
+            cancellation: CancellationToken::current(),
         };
         py.detach(|| self.inner.request(method, url, options))
             .map(|inner| PyResponse { inner })
             .map_err(error)
     }
-    #[pyo3(signature=(method,url,headers,body,timeout,allow_redirects,max_redirects))]
+    #[pyo3(signature=(method,url,headers,body,timeout,allow_redirects,max_redirects,proxy_options="{}"))]
     #[allow(clippy::too_many_arguments)]
     fn stream(
         &self,
@@ -284,6 +315,7 @@ impl PyPage {
         timeout: Option<f64>,
         allow_redirects: bool,
         max_redirects: usize,
+        proxy_options: &str,
     ) -> PyResult<PyStream> {
         let options = RequestOptions {
             headers,
@@ -291,7 +323,9 @@ impl PyPage {
             timeout: timeout.map(duration).transpose()?,
             allow_redirects,
             max_redirects,
-            ..Default::default()
+            proxy_options: serde_json::from_str(proxy_options)
+                .map_err(|e| InvalidInput::new_err(e.to_string()))?,
+            cancellation: CancellationToken::current(),
         };
         py.detach(|| self.inner.stream(method, url, options))
             .map(|inner| PyStream {
@@ -458,20 +492,12 @@ fn _brimp(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<network::PyRoute>()?;
     m.add_class::<network::PySubscription>()?;
     m.add_class::<network::PyRouteRegistration>()?;
+    m.add_class::<PyCancellation>()?;
     m.add_class::<PyStream>()?;
     m.add_class::<PySession>()?;
     m.add_class::<PyPage>()?;
     m.add_class::<PyResponse>()?;
     m.add_class::<PyHandle>()?;
     m.add_class::<plugins::PyHostContext>()?;
-    let py = m.py();
-    m.add("RuntimeError", py.get_type::<RuntimeError>())?;
-    m.add("InvalidInput", py.get_type::<InvalidInput>())?;
-    m.add("JavaScriptError", py.get_type::<JavaScriptError>())?;
-    m.add("Timeout", py.get_type::<Timeout>())?;
-    m.add("Closed", py.get_type::<Closed>())?;
-    m.add("Reentry", py.get_type::<Reentry>())?;
-    m.add("StaleHandle", py.get_type::<StaleHandle>())?;
-    m.add("TransportError", py.get_type::<TransportError>())?;
     Ok(())
 }

@@ -15,11 +15,12 @@ Scalable browser runtime for agents.
 Usage: brimp <COMMAND>
 
 Commands:
-  profile  Capture a profile from a live browser on localhost
-  doctor   Verify native initialization and basic DOM/JavaScript/crypto functionality
-  fetch    Fetch a URL, execute page scripts, and output its live DOM or an evaluated result
-  run      Execute a classic/bundled JavaScript file (or - for stdin) in a browser realm
-  plugins  Inspect available plugins without creating a page
+  fingerprints  Manage impersonate.pro fingerprint catalogs and export profile data
+  profile       Capture a profile from a live browser on localhost
+  doctor        Verify native initialization and basic DOM/JavaScript/crypto functionality
+  fetch         Fetch a URL, execute page scripts, and output its live DOM or an evaluated result
+  run           Execute a classic/bundled JavaScript file (or - for stdin) in a browser realm
+  plugins       Inspect available plugins without creating a page
 
 Options:
   -h, --help
@@ -27,6 +28,90 @@ Options:
 
   -V, --version
           Print version
+
+```
+
+## `brimp fingerprints`
+
+```text
+Manage impersonate.pro fingerprint catalogs and export profile data
+
+Usage: brimp fingerprints <COMMAND>
+
+Commands:
+  config  Persist an impersonate.pro API key; IMPERSONATE_API_KEY overrides it
+  update  Download the fingerprint catalog atomically
+  list    List downloaded fingerprint names and client metadata
+  show    Print a downloaded fingerprint as JSON
+
+Options:
+  -h, --help
+          Print help
+
+```
+
+## `brimp fingerprints config`
+
+```text
+Persist an impersonate.pro API key; IMPERSONATE_API_KEY overrides it
+
+Usage: brimp fingerprints config --api-key <API_KEY>
+
+Options:
+      --api-key <API_KEY>
+
+
+  -h, --help
+          Print help
+
+```
+
+## `brimp fingerprints update`
+
+```text
+Download the fingerprint catalog atomically
+
+Usage: brimp fingerprints update [OPTIONS]
+
+Options:
+      --api-root <API_ROOT>
+
+
+  -h, --help
+          Print help
+
+```
+
+## `brimp fingerprints list`
+
+```text
+List downloaded fingerprint names and client metadata
+
+Usage: brimp fingerprints list
+
+Options:
+  -h, --help
+          Print help
+
+```
+
+## `brimp fingerprints show`
+
+```text
+Print a downloaded fingerprint as JSON
+
+Usage: brimp fingerprints show [OPTIONS] <NAME>
+
+Arguments:
+  <NAME>
+
+
+Options:
+      --profile
+          Wrap the fingerprint in a browser profile for --profile or Session
+
+  -h, --help
+          Print help
 
 ```
 
@@ -53,7 +138,7 @@ Usage: brimp profile capture [OPTIONS] --output <OUTPUT>
 
 Options:
       --output <OUTPUT>
-          
+
 
       --directory <DIRECTORY>
           Export index.html and capture.js for independent hosting
@@ -68,16 +153,16 @@ Options:
           [default: 10m]
 
       --overwrite
-          
+
 
       --plugin <PLUGINS>
           Select the complete plugin set (bundled names or JavaScript files)
 
       --plugin-options <PLUGIN_OPTIONS>
-          
+
 
       --no-plugins
-          
+
 
   -h, --help
           Print help
@@ -96,7 +181,7 @@ Options:
           Load a validated browser profile JSON file
 
       --proxy <PROXY>
-          HTTP/SOCKS proxy URL
+          HTTP, HTTPS or SOCKS5 proxy URL
 
       --ca-bundle <CA_BUNDLE>
           PEM certificate authority bundle
@@ -118,12 +203,12 @@ Usage: brimp fetch [OPTIONS] <URL>
 
 Arguments:
   <URL>
-          
+
 
 Options:
       --format <FORMAT>
           Raw response, live DOM, or Defuddle output. Fetch defaults to HTML
-          
+
           [possible values: raw, html, markdown, json]
 
       --output <OUTPUT>
@@ -158,7 +243,7 @@ Options:
 
       --wait <WAIT>
           domcontentloaded, load, networkidle, or nonnegative seconds
-          
+
           [default: load]
 
       --wait-selector <WAIT_SELECTOR>
@@ -166,12 +251,12 @@ Options:
 
       --network-idle <NETWORK_IDLE>
           Quiet interval used by network-idle waiting
-          
+
           [default: 500ms]
 
       --timeout <TIMEOUT>
           Wall-clock deadline for the entire command
-          
+
           [default: 30s]
 
       --header <HEADER>
@@ -181,7 +266,7 @@ Options:
           Seed a session cookie as NAME=VALUE for the target URL
 
       --proxy <PROXY>
-          HTTP/SOCKS proxy URL
+          HTTP, HTTPS or SOCKS5 proxy URL
 
       --ca-bundle <CA_BUNDLE>
           PEM certificate authority bundle
@@ -200,7 +285,7 @@ Options:
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
-          
+
           [default: GET]
 
       --data <DATA>
@@ -217,7 +302,7 @@ Options:
 
       --max-redirects <MAX_REDIRECTS>
           Maximum number of redirects to follow
-          
+
           [default: 20]
 
       --fail-on-http-error
@@ -249,12 +334,12 @@ Options:
 
       --connect-timeout <CONNECT_TIMEOUT>
           Connection establishment timeout
-          
+
           [default: 10s]
 
       --max-response-bytes <MAX_RESPONSE_BYTES>
           Maximum response body size in bytes
-          
+
           [default: 67108864]
 
       --trace <TRACE>
@@ -265,7 +350,7 @@ Options:
 
       --trace-mode <TRACE_MODE>
           API descriptor tracing or recursive browser/environment object tracing
-          
+
           [default: api]
           [possible values: api, recursive]
 
@@ -277,7 +362,7 @@ Options:
 
       --trace-capacity <TRACE_CAPACITY>
           Retained diagnostic ring capacity, up to one million records
-          
+
           [default: 4096]
 
       --events <EVENTS>
@@ -285,7 +370,7 @@ Options:
 
       --clock <CLOCK>
           Use real system time or a programmable realm clock
-          
+
           [default: system]
           [possible values: system, logical]
 
@@ -297,7 +382,7 @@ Options:
 
       --max-tasks <MAX_TASKS>
           Maximum tasks per logical-time advance, up to one million
-          
+
           [default: 10000]
 
       --actions <ACTIONS>
@@ -320,11 +405,11 @@ Usage: brimp run [OPTIONS] <program>
 
 Arguments:
   <program>
-          
+
 
 Options:
       --url <URL>
-          
+
 
       --html <HTML>
           Load a local HTML file as the page document instead of navigating
@@ -334,7 +419,7 @@ Options:
 
       --format <FORMAT>
           Raw response, live DOM, or Defuddle output. Fetch defaults to HTML
-          
+
           [possible values: raw, html, markdown, json]
 
       --output <OUTPUT>
@@ -369,7 +454,7 @@ Options:
 
       --wait <WAIT>
           domcontentloaded, load, networkidle, or nonnegative seconds
-          
+
           [default: load]
 
       --wait-selector <WAIT_SELECTOR>
@@ -377,12 +462,12 @@ Options:
 
       --network-idle <NETWORK_IDLE>
           Quiet interval used by network-idle waiting
-          
+
           [default: 500ms]
 
       --timeout <TIMEOUT>
           Wall-clock deadline for the entire command
-          
+
           [default: 30s]
 
       --header <HEADER>
@@ -392,7 +477,7 @@ Options:
           Seed a session cookie as NAME=VALUE for the target URL
 
       --proxy <PROXY>
-          HTTP/SOCKS proxy URL
+          HTTP, HTTPS or SOCKS5 proxy URL
 
       --ca-bundle <CA_BUNDLE>
           PEM certificate authority bundle
@@ -411,7 +496,7 @@ Options:
 
       --method <METHOD>
           HTTP method. Supplying data does not automatically change it
-          
+
           [default: GET]
 
       --data <DATA>
@@ -428,7 +513,7 @@ Options:
 
       --max-redirects <MAX_REDIRECTS>
           Maximum number of redirects to follow
-          
+
           [default: 20]
 
       --fail-on-http-error
@@ -460,12 +545,12 @@ Options:
 
       --connect-timeout <CONNECT_TIMEOUT>
           Connection establishment timeout
-          
+
           [default: 10s]
 
       --max-response-bytes <MAX_RESPONSE_BYTES>
           Maximum response body size in bytes
-          
+
           [default: 67108864]
 
       --trace <TRACE>
@@ -476,7 +561,7 @@ Options:
 
       --trace-mode <TRACE_MODE>
           API descriptor tracing or recursive browser/environment object tracing
-          
+
           [default: api]
           [possible values: api, recursive]
 
@@ -488,7 +573,7 @@ Options:
 
       --trace-capacity <TRACE_CAPACITY>
           Retained diagnostic ring capacity, up to one million records
-          
+
           [default: 4096]
 
       --events <EVENTS>
@@ -496,7 +581,7 @@ Options:
 
       --clock <CLOCK>
           Use real system time or a programmable realm clock
-          
+
           [default: system]
           [possible values: system, logical]
 
@@ -508,7 +593,7 @@ Options:
 
       --max-tasks <MAX_TASKS>
           Maximum tasks per logical-time advance, up to one million
-          
+
           [default: 10000]
 
       --actions <ACTIONS>
@@ -557,7 +642,7 @@ Usage: brimp plugins show <NAME>
 
 Arguments:
   <NAME>
-          
+
 
 Options:
   -h, --help

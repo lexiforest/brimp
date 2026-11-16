@@ -39,6 +39,7 @@ export default defineConfig({
           label: 'Guides',
           items: [
             { label: 'Sessions, pages and requests', slug: 'guides/automation' },
+            { label: 'Proxies and request filtering', slug: 'guides/proxies' },
             { label: 'Values and handles', slug: 'guides/values' },
             { label: 'Plugins', slug: 'guides/plugins' },
             { label: 'Browser profiles', slug: 'guides/profiles' },

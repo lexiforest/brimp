@@ -58,9 +58,19 @@ impl SessionCookies {
 impl Session {
     pub(super) fn create(
         mut options: SessionOptions,
-        profile: Option<crate::profile::BrowserProfile>,
+        mut profile: Option<crate::profile::BrowserProfile>,
         loader: Option<Arc<dyn ResourceLoader>>,
     ) -> Result<Self, AutomationError> {
+        if let Some(profile) = &mut profile
+            && let Some(fingerprint) = profile
+                .prepare_fingerprint()
+                .map_err(|error| AutomationError::InvalidInput(error.to_string()))?
+        {
+            options.network.fingerprint = Some(fingerprint);
+            options.network.default_headers = true;
+            // An explicit fingerprint selects its HTTP version.
+            options.network.prefer_http3 = false;
+        }
         let network_executor = super::networking::NetworkExecutor::new()?;
         let network_config = if loader.is_none() {
             Some(options.network.clone())
@@ -74,13 +84,13 @@ impl Session {
                     options.network.impersonation_profile = profile.network_profile().to_owned();
                 }
                 crate::network::CurlResourceLoader::check_profile(&options.network)
-                    .map_err(|e| AutomationError::Transport(e.to_string()))?;
+                    .map_err(AutomationError::from)?;
                 Arc::new(
                     crate::network::CurlResourceLoader::with_dispatcher(
                         options.network.clone(),
                         network_executor.handle(),
                     )
-                    .map_err(|e| AutomationError::Transport(e.to_string()))?,
+                    .map_err(AutomationError::from)?,
                 )
             }
         };
@@ -88,6 +98,7 @@ impl Session {
         static NEXT_SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         Ok(Self {
             id: NEXT_SESSION.fetch_add(1, Ordering::Relaxed),
+            routes: Default::default(),
             loader,
             profile,
             closed: AtomicBool::new(false),
@@ -136,16 +147,16 @@ impl Session {
                 "proxy pages require a session created with CurlConfig".into(),
             )
         })?;
-        config.proxy = Some(
-            crate::network::Proxy::parse(proxy)
-                .map_err(|error| AutomationError::InvalidInput(error.to_string()))?,
-        );
+        config.proxy_options.overlay(crate::network::ProxyOptions {
+            proxy: Some(proxy.into()),
+            ..Default::default()
+        });
         let loader = Arc::new(
             crate::network::CurlResourceLoader::with_dispatcher(
                 config.clone(),
                 self.network_executor.handle(),
             )
-            .map_err(|error| AutomationError::Transport(error.to_string()))?,
+            .map_err(AutomationError::from)?,
         );
         self.new_page_with_transports(
             options,
@@ -265,6 +276,7 @@ impl Session {
         for page in pages.into_iter().filter_map(|page| page.upgrade()) {
             page.close();
         }
+        self.routes.close();
         self.storage.close();
     }
     pub fn is_closed(&self) -> bool {
