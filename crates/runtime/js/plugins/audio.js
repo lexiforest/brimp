@@ -449,7 +449,78 @@ function installAudio({ global, host, profile: settings }, options = {}) {
   const speechProfile = settings.values(
     'speech',
     {
-      voices: [],
+      // Safari 27.0's installed voices, as `speechSynthesis.getVoices()` reports
+      // them; `brimp profile capture` replaces the list for another machine.
+      voices: [
+        { voiceURI: "com.apple.voice.super-compact.en-US.Samantha", name: "Samantha", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Albert", name: "Albert", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.BadNews", name: "Bad News", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Bahh", name: "Bahh", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Bells", name: "Bells", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Boing", name: "Boing", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Bubbles", name: "Bubbles", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Cellos", name: "Cellos", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Deranged", name: "Wobble", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Fred", name: "Fred", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.GoodNews", name: "Good News", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Hysterical", name: "Jester", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Junior", name: "Junior", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Kathy", name: "Kathy", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Organ", name: "Organ", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Princess", name: "Superstar", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Ralph", name: "Ralph", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Trinoids", name: "Trinoids", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Whisper", name: "Whisper", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.speech.synthesis.voice.Zarvox", name: "Zarvox", lang: "en-US", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.en-GB.Daniel", name: "Daniel", lang: "en-GB", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.en-AU.Karen", name: "Karen", lang: "en-AU", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.en-IE.Moira", name: "Moira", lang: "en-IE", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.en-IN.Rishi", name: "Rishi", lang: "en-IN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.en-ZA.Tessa", name: "Tessa", lang: "en-ZA", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.it-IT.Alice", name: "Alice", lang: "it-IT", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.sv-SE.Alva", name: "Alva", lang: "sv-SE", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.fr-CA.Amelie", name: "Am\u00e9lie", lang: "fr-CA", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ms-MY.Amira", name: "Amira", lang: "ms-MY", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.de-DE.Anna", name: "Anna", lang: "de-DE", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.he-IL.Carmit", name: "Carmit", lang: "he-IL", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.id-ID.Damayanti", name: "Damayanti", lang: "id-ID", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.bg-BG.Daria", name: "Daria", lang: "bg-BG", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.nl-BE.Ellen", name: "Ellen", lang: "nl-BE", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ro-RO.Ioana", name: "Ioana", lang: "ro-RO", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.pt-PT.Joana", name: "Joana", lang: "pt-PT", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.th-TH.Kanya", name: "Kanya", lang: "th-TH", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ja-JP.Kyoko", name: "Kyoko", lang: "ja-JP", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.hr-HR.Lana", name: "Lana", lang: "hr-HR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.sk-SK.Laura", name: "Laura", lang: "sk-SK", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.hi-IN.Lekha", name: "Lekha", lang: "hi-IN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.uk-UA.Lesya", name: "Lesya", lang: "uk-UA", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.vi-VN.Linh", name: "Linh", lang: "vi-VN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.pt-BR.Luciana", name: "Luciana", lang: "pt-BR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ar-001.Maged", name: "Majed", lang: "ar-001", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.hu-HU.Mariska", name: "T\u00fcnde", lang: "hu-HU", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.zh-TW.Meijia", name: "Meijia", lang: "zh-TW", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.el-GR.Melina", name: "Melina", lang: "el-GR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ru-RU.Milena", name: "Milena", lang: "ru-RU", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.es-ES.Monica", name: "M\u00f3nica", lang: "es-ES", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ca-ES.Montserrat", name: "Montse", lang: "ca-ES", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.nb-NO.Nora", name: "Nora", lang: "nb-NO", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.es-MX.Paulina", name: "Paulina", lang: "es-MX", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.da-DK.Sara", name: "Sara", lang: "da-DK", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.fi-FI.Satu", name: "Satu", lang: "fi-FI", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.zh-HK.Sinji", name: "Sinji", lang: "yue-HK", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.fr-FR.Thomas", name: "Thomas", lang: "fr-FR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.sl-SI.Tina", name: "Tina", lang: "sl-SI", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.zh-CN.Tingting", name: "Tingting", lang: "zh-CN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.nl-NL.Xander", name: "Xander", lang: "nl-NL", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.tr-TR.Yelda", name: "Yelda", lang: "tr-TR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ko-KR.Yuna", name: "Yuna", lang: "ko-KR", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.pl-PL.Zosia", name: "Zosia", lang: "pl-PL", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.cs-CZ.Zuzana", name: "Zuzana", lang: "cs-CZ", localService: true, default: true },
+        { voiceURI: "com.apple.voice.super-compact.ta-IN.Vani", name: "Vani", lang: "ta-IN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.compact.kn-IN.Alpana", name: "Soumya", lang: "kn-IN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.compact.te-IN.Geeta", name: "Geeta", lang: "te-IN", localService: true, default: true },
+        { voiceURI: "com.apple.voice.compact.bn-IN.Paya", name: "Piya", lang: "bn-IN", localService: true, default: true },
+      ],
     },
     {
       version: 1,
@@ -563,7 +634,9 @@ function installAudio({ global, host, profile: settings }, options = {}) {
     pause() {}
     resume() {}
     getVoices() {
-      if (this.#published) return installedVoices.slice();
+      // The list is part of the profile, so it is already known: Safari returns
+      // its installed voices immediately once they are loaded. `voiceschanged`
+      // still fires once, for code that waits for it.
       if (!this.#scheduled) {
         this.#scheduled = true;
         setTimeout(() => {
@@ -571,7 +644,7 @@ function installAudio({ global, host, profile: settings }, options = {}) {
           this.dispatchEvent(new Event('voiceschanged'));
         }, 0);
       }
-      return [];
+      return installedVoices.slice();
     }
   }
   Object.defineProperty(SpeechSynthesis.prototype, 'onvoiceschanged', {

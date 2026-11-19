@@ -13,7 +13,22 @@ fn core_only_selection_omits_subsystem_surfaces() {
     })
     .unwrap();
     let page = session.new_page().unwrap();
-    assert_eq!(page.evaluate("['Worker','SharedWorker','Notification','CanvasRenderingContext2D'].map(name => typeof globalThis[name])").unwrap(), json!(vec!["undefined";4]));
+    // The browser surface is core (WebKit's IDL, narrowed by the profile), so an
+    // interface object exists; what a plugin supplies is the behaviour behind it.
+    assert_eq!(
+        page.evaluate(
+            "['Worker','SharedWorker','Notification','CanvasRenderingContext2D'].map(name => typeof globalThis[name])"
+        )
+        .unwrap(),
+        json!(vec!["function"; 4])
+    );
+    assert_eq!(
+        page.evaluate(
+            "(() => { try { new Worker('/worker.js'); return 'constructed' } catch (error) { return error.name } })()"
+        )
+        .unwrap(),
+        json!("TypeError")
+    );
     assert_eq!(
         page.evaluate(
             "['serviceWorker','mediaDevices','bluetooth'].map(name => typeof navigator[name])"

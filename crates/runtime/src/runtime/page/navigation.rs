@@ -187,9 +187,9 @@ impl Page {
                 return Err(error);
             }
             self.document_ready = true;
-            self.execute_page_script(
-                "document.dispatchEvent(new Event('DOMContentLoaded', {bubbles:true}))",
-            );
+            self.bindings.sync_window_named_properties(&self.js)?;
+            self.bindings
+                .script_control(&self.js, serde_json::json!({"op": "domContentLoaded"}))?;
             self.events
                 .emit(crate::runtime::events::PageEvent::Lifecycle {
                     name: "dom_content_loaded".into(),
@@ -254,7 +254,8 @@ impl Page {
             serde_json::json!({"op":"ready", "state":"complete"}),
         )?;
         self.load_state = LoadState::Complete;
-        self.execute_page_script("window.dispatchEvent(new Event('load'))");
+        self.bindings
+            .script_control(&self.js, serde_json::json!({"op": "load"}))?;
         self.events
             .emit(crate::runtime::events::PageEvent::Lifecycle {
                 name: "load".into(),

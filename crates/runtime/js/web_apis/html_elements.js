@@ -850,10 +850,15 @@ async function __runChildExternalScript(context, source) {
 
 function __finishChildDocument(context) {
   const document = context.document;
-  document.dispatchEvent(new Event('readystatechange'));
-  document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true }));
-  EventTarget.prototype.dispatchEvent.call(context.window, new Event('load'));
-  document.dispatchEvent(new Event('load'));
+  // A frame document loads the same way the top one does: its lifecycle events
+  // come from the browser, so they are trusted.
+  document.dispatchEvent(__markTrustedEvent(new Event('readystatechange')));
+  document.dispatchEvent(__markTrustedEvent(new Event('DOMContentLoaded', { bubbles: true })));
+  EventTarget.prototype.dispatchEvent.call(
+    context.window,
+    __markTrustedEvent(new Event('load')),
+  );
+  document.dispatchEvent(__markTrustedEvent(new Event('load')));
 }
 
 class HTMLIFrameElement extends HTMLElement {
@@ -913,7 +918,7 @@ class HTMLIFrameElement extends HTMLElement {
               .catch(() => {})
               .finally(() => {
                 context.loading = false;
-                frame.dispatchEvent(new Event('load'));
+                frame.dispatchEvent(__markTrustedEvent(new Event('load')));
               });
             return;
           }
@@ -995,14 +1000,14 @@ class HTMLIFrameElement extends HTMLElement {
       srcdoc,
     );
     if (context.loading) return;
-    setTimeout(() => this.dispatchEvent(new Event('load')), 0);
+    setTimeout(() => this.dispatchEvent(__markTrustedEvent(new Event('load'))), 0);
   }
   __navigate(url) {
     this.contentWindow;
     const context = __iframeBrowsingContexts.get(this);
     context.navigate(url);
     if (context.loading) return;
-    setTimeout(() => this.dispatchEvent(new Event('load')), 0);
+    setTimeout(() => this.dispatchEvent(__markTrustedEvent(new Event('load'))), 0);
   }
 }
 class HTMLEmbedElement extends HTMLElement {
@@ -1303,6 +1308,7 @@ class HTMLFormElement extends HTMLElement {
       cancelable: true,
       submitter,
     });
+    if (__trustedActivationDepth > 0) __markTrustedEvent(event);
     if (this.dispatchEvent(event)) this.submit();
   }
   submit() {

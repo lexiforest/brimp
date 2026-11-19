@@ -194,7 +194,11 @@ impl Page {
         self.start_pending_websockets()?;
         let timer_callback = self.timers.borrow_mut().pop_due();
         if let Some(callback) = timer_callback {
-            self.js.call_function(&callback)?;
+            // A timer callback that throws reports to the page, as a browser
+            // does; it must not abort the host's task pump.
+            if let Err(error) = self.js.call_function(&callback) {
+                self.report_page_error_event(&error);
+            }
             self.start_pending_fetches()?;
             self.start_pending_websockets()?;
             return Ok(true);

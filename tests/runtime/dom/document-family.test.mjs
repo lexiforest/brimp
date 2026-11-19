@@ -125,8 +125,11 @@ test('Document heavy services preserve explicit placeholders without producing b
       [true, '[object DocumentTimeline]', true, true, null, 'undefined', 0],
       'TypeError',
       ['string', true, 19, '/', '/', ' ', false],
-      true,
-      true,
+      // A browser gives `HTMLDocument` and `XMLDocument` their own interface
+      // objects, both inheriting `Document.prototype`; a page document is an
+      // `HTMLDocument` and not an `XMLDocument`.
+      false,
+      false,
       [false, false, true, true, true],
       [null, null, null, null, null],
       ['', null, false, null, false, 'visible', true],
@@ -136,7 +139,7 @@ test('Document heavy services preserve explicit placeholders without producing b
       true,
       'TypeError',
       true,
-      true,
+      false,
       true,
       '[object DOMParser]',
     ],

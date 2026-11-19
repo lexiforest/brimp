@@ -284,9 +284,9 @@ impl Page {
             &self.js,
             serde_json::json!({"op":"ready", "state":"interactive"}),
         )?;
-        self.execute_page_script(
-            "document.dispatchEvent(new Event('DOMContentLoaded', {bubbles:true}))",
-        );
+        self.bindings.sync_window_named_properties(&self.js)?;
+        self.bindings
+            .script_control(&self.js, serde_json::json!({"op": "domContentLoaded"}))?;
         self.events
             .emit(crate::runtime::events::PageEvent::Lifecycle {
                 name: "dom_content_loaded".into(),

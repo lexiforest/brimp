@@ -44,6 +44,27 @@ no-op, `getComputedStyle()` reports cascaded values but no painted pixels, and
 media `play()` rejects.
 These methods cannot be used as evidence of rendering or playback support.
 
+## Where the interface surface comes from
+
+The names a page can see are generated, not transcribed. `scripts/idl/extract.mjs`
+reads WebKit's own IDL at the pinned commit into `crates/runtime/data/webkit-idl.json`
+(interfaces, parent chains, members, constants and arities), and
+`scripts/idl/capture.mjs` records which of those names a real Safari exposes and in
+what order. `crates/runtime/js/web_apis/idl_surface.js` installs the difference, so
+`Object.getOwnPropertyNames(window)`, interface objects, prototype chains and
+constants match the browser the profile claims. `scripts/idl/check.mjs` diffs the
+running surface against that reference and is the gate for changes:
+
+```
+node scripts/idl/extract.mjs    # WebKit IDL  -> crates/runtime/data/webkit-idl.json
+node scripts/idl/capture.mjs    # Safari      -> reference + runtime subset
+node scripts/idl/check.mjs      # Brimp       -> diff against the reference
+```
+
+An interface object exists for every name the reference browser carries. What a
+member *does* is a separate promise: a member this runtime implements keeps its
+implementation, and the rest are placeholders as described above.
+
 ## Examples and detailed contracts
 
 Each topic starts with practical capabilities and limits. Expand **Detailed

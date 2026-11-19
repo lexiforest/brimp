@@ -216,6 +216,10 @@ __defineEventHandlers(Window.prototype, [
 __defineEventHandlers(Window.prototype, __bodyWindowEventTypes);
 __defineEventHandlers(HTMLBodyElement.prototype, __bodyWindowEventTypes, true);
 __defineEventHandlers(HTMLFrameSetElement.prototype, __bodyWindowEventTypes, true);
+// The names the core modules define, before plugins add theirs. The IDL surface
+// compares the browser's window against the captured one and must leave a
+// plugin's globals alone.
+__idlCoreGlobalNames = Object.getOwnPropertyNames(globalThis);
 globalThis.NodeFilter = NodeFilter;
 globalThis.TreeWalker = TreeWalker;
 globalThis.NodeIterator = NodeIterator;
@@ -931,8 +935,10 @@ for (const [name, value] of Object.entries({
 const __performanceNavigation = new PerformanceNavigation(__performanceEntryToken);
 class PerformancePaintTiming extends PerformanceEntry {}
 class Performance extends EventTarget {
+  // Safari coarsens `performance.now()` to whole milliseconds; an uncoarsened
+  // clock is a fingerprint of its own.
   now() {
-    return __nativeHost('clockNow');
+    return Math.floor(__nativeHost('clockNow'));
   }
   get timeOrigin() {
     return __performanceTimeOrigin;

@@ -307,6 +307,81 @@ impl NativePage {
     pub fn drag_to(&self, source: &str, destination: &str) -> Result<(), AutomationError> {
         self.input(json!({"action":"dragTo","selector":source,"destination":destination}))
     }
+    /// Move the pointer to a viewport point, in `steps` increments.
+    pub fn mouse_move(&self, x: f64, y: f64, steps: u32) -> Result<(), AutomationError> {
+        self.input(json!({
+            "action": "move",
+            "x": x,
+            "y": y,
+            "steps": steps.max(1),
+        }))
+    }
+    pub fn mouse_down(
+        &self,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> Result<(), AutomationError> {
+        self.input(json!({
+            "action": "down",
+            "x": x,
+            "y": y,
+            "button": button,
+            "clickCount": click_count.max(1),
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn mouse_up(
+        &self,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> Result<(), AutomationError> {
+        self.input(json!({
+            "action": "up",
+            "x": x,
+            "y": y,
+            "button": button,
+            "clickCount": click_count.max(1),
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn mouse_click(
+        &self,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> Result<(), AutomationError> {
+        self.input(json!({
+            "action": "clickAt",
+            "x": x,
+            "y": y,
+            "button": button,
+            "clickCount": click_count.max(1),
+            "modifiers": modifiers,
+        }))
+    }
+    pub fn mouse_wheel(
+        &self,
+        x: f64,
+        y: f64,
+        delta_x: f64,
+        delta_y: f64,
+    ) -> Result<(), AutomationError> {
+        self.input(json!({
+            "action": "wheel",
+            "x": x,
+            "y": y,
+            "deltaX": delta_x,
+            "deltaY": delta_y,
+        }))
+    }
     pub fn set_input_files(
         &self,
         selector: &str,

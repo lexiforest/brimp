@@ -55,8 +55,6 @@ for (const [prototype, names] of [
       'releaseEvents',
       'clear',
       'caretRangeFromPoint',
-      'elementFromPoint',
-      'elementsFromPoint',
       'execCommand',
       'queryCommandEnabled',
       'queryCommandIndeterm',

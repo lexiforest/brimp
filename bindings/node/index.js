@@ -235,6 +235,77 @@ export class Session extends Requests {
     }
   }
 }
+const BUTTONS = ['left', 'right', 'middle'];
+
+/** Pointer input at viewport coordinates: `page.mouse.move/down/up/click/wheel`. */
+export class Mouse {
+  constructor(page) {
+    this._page = page;
+    this._x = 0;
+    this._y = 0;
+  }
+
+  get position() {
+    return [this._x, this._y];
+  }
+
+  async move(x, y, { steps = 1 } = {}) {
+    if (steps < 1) throw new RangeError('steps must be at least 1');
+    await invoke(() => this._page._inner.mouseMove(x, y, steps), this._page._pageId);
+    this._x = x;
+    this._y = y;
+    return this;
+  }
+
+  async down({ button = 'left', clickCount = 1, modifiers = 0 } = {}) {
+    if (!BUTTONS.includes(button)) throw new RangeError(`unsupported button: ${button}`);
+    await invoke(
+      () => this._page._inner.mouseDown(this._x, this._y, button, clickCount, modifiers),
+      this._page._pageId,
+    );
+    return this;
+  }
+
+  async up({ button = 'left', clickCount = 1, modifiers = 0 } = {}) {
+    if (!BUTTONS.includes(button)) throw new RangeError(`unsupported button: ${button}`);
+    await invoke(
+      () => this._page._inner.mouseUp(this._x, this._y, button, clickCount, modifiers),
+      this._page._pageId,
+    );
+    return this;
+  }
+
+  async click(x, y, { button = 'left', clickCount = 1, modifiers = 0, delay = 0 } = {}) {
+    if (!BUTTONS.includes(button)) throw new RangeError(`unsupported button: ${button}`);
+    if (x !== undefined || y !== undefined) {
+      if (x === undefined || y === undefined) throw new TypeError('click requires both x and y');
+      await this.move(x, y);
+    }
+    await invoke(
+      () => this._page._inner.mouseDown(this._x, this._y, button, clickCount, modifiers),
+      this._page._pageId,
+    );
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay * 1000));
+    await invoke(
+      () => this._page._inner.mouseUp(this._x, this._y, button, clickCount, modifiers),
+      this._page._pageId,
+    );
+    return this;
+  }
+
+  async wheel(deltaX, deltaY, { x, y } = {}) {
+    if (x !== undefined || y !== undefined) {
+      if (x === undefined || y === undefined) throw new TypeError('wheel requires both x and y');
+      await this.move(x, y);
+    }
+    await invoke(
+      () => this._page._inner.mouseWheel(this._x, this._y, deltaX, deltaY),
+      this._page._pageId,
+    );
+    return this;
+  }
+}
+
 export class Page extends Requests {
   #response = null;
 
@@ -519,6 +590,9 @@ export class Page extends Requests {
   }
   addInitScript(source) {
     return invoke(() => this._inner.addInitScript(source), this._pageId);
+  }
+  get mouse() {
+    return (this._mouse ??= new Mouse(this));
   }
   click(selector) {
     return invoke(() => this._inner.click(selector), this._pageId);

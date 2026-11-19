@@ -64,10 +64,10 @@ Document.prototype.close = function () {
   __writingDocuments.delete(this);
   if (this === document) {
     __documentReadyState = 'interactive';
-    this.dispatchEvent(new Event('readystatechange'));
-    this.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true }));
+    this.dispatchEvent(__markTrustedEvent(new Event('readystatechange')));
+    this.dispatchEvent(__markTrustedEvent(new Event('DOMContentLoaded', { bubbles: true })));
     __documentReadyState = 'complete';
-    this.dispatchEvent(new Event('readystatechange'));
-    window.dispatchEvent(new Event('load'));
+    this.dispatchEvent(__markTrustedEvent(new Event('readystatechange')));
+    window.dispatchEvent(__markTrustedEvent(new Event('load')));
   }
 };

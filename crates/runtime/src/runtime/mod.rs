@@ -1,7 +1,6 @@
 pub mod bridge;
 mod cancellation;
 mod canvas;
-pub(crate) mod text;
 pub mod clock;
 pub mod diagnostics;
 mod error;
@@ -10,6 +9,7 @@ pub mod native;
 pub mod networking;
 pub mod plugins;
 pub mod routes;
+pub(crate) mod text;
 pub use cancellation::CancellationToken;
 mod extraction;
 mod page;

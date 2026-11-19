@@ -387,6 +387,57 @@ impl PyPage {
         py.detach(|| self.inner.drag_to(source, destination))
             .map_err(error)
     }
+    fn mouse_move(&self, py: Python<'_>, x: f64, y: f64, steps: u32) -> PyResult<()> {
+        py.detach(|| self.inner.mouse_move(x, y, steps))
+            .map_err(error)
+    }
+    fn mouse_down(
+        &self,
+        py: Python<'_>,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> PyResult<()> {
+        py.detach(|| self.inner.mouse_down(x, y, button, click_count, modifiers))
+            .map_err(error)
+    }
+    fn mouse_up(
+        &self,
+        py: Python<'_>,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> PyResult<()> {
+        py.detach(|| self.inner.mouse_up(x, y, button, click_count, modifiers))
+            .map_err(error)
+    }
+    fn mouse_click(
+        &self,
+        py: Python<'_>,
+        x: f64,
+        y: f64,
+        button: &str,
+        click_count: u32,
+        modifiers: u8,
+    ) -> PyResult<()> {
+        py.detach(|| self.inner.mouse_click(x, y, button, click_count, modifiers))
+            .map_err(error)
+    }
+    fn mouse_wheel(
+        &self,
+        py: Python<'_>,
+        x: f64,
+        y: f64,
+        delta_x: f64,
+        delta_y: f64,
+    ) -> PyResult<()> {
+        py.detach(|| self.inner.mouse_wheel(x, y, delta_x, delta_y))
+            .map_err(error)
+    }
     fn set_input_files(&self, py: Python<'_>, selector: &str, files: &str) -> PyResult<()> {
         let files =
             serde_json::from_str(files).map_err(|e| InvalidInput::new_err(e.to_string()))?;

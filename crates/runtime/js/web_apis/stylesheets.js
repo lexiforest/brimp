@@ -391,10 +391,11 @@ function __sheetForOwner(owner) {
         __sheetState(sheet).originClean =
           new URL(response.url || source, document.URL).origin === new URL(document.URL).origin;
         entry.sheet = sheet;
-        owner.dispatchEvent(new Event('load'));
+        owner.dispatchEvent(__markTrustedEvent(new Event('load')));
       })
       .catch(() => {
-        if (__ownerSheets.get(owner) === entry) owner.dispatchEvent(new Event('error'));
+        if (__ownerSheets.get(owner) === entry)
+          owner.dispatchEvent(__markTrustedEvent(new Event('error')));
       });
   }
   return entry.sheet;

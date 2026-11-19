@@ -890,7 +890,9 @@ pub fn expand_font_shorthand(css: &str) -> String {
             }
             // Read the property name up to `:` while it looks like one.
             let mut cursor = index;
-            while cursor < bytes.len() && (bytes[cursor].is_ascii_alphanumeric() || bytes[cursor] == b'-') {
+            while cursor < bytes.len()
+                && (bytes[cursor].is_ascii_alphanumeric() || bytes[cursor] == b'-')
+            {
                 cursor += 1;
             }
             let name = &css[index..cursor];
@@ -927,7 +929,11 @@ pub fn expand_font_shorthand(css: &str) -> String {
                         out.push_str(&longhands);
                         // The expansion ends with its own terminator, so a source
                         // `;` would otherwise leave an empty declaration behind.
-                        index = if bytes.get(end) == Some(&b';') { end + 1 } else { end };
+                        index = if bytes.get(end) == Some(&b';') {
+                            end + 1
+                        } else {
+                            end
+                        };
                     }
                     None => {
                         out.push_str(&css[name_start + if separator { 1 } else { 0 }..end]);
@@ -966,7 +972,9 @@ fn expand_font_value(value: &str) -> Option<String> {
             "italic" | "oblique" => style = Some(lower),
             "small-caps" => variant = Some(lower),
             "bold" | "bolder" | "lighter" => weight = Some(lower),
-            _ if lower.chars().all(|c| c.is_ascii_digit()) && lower.len() == 3 => weight = Some(lower),
+            _ if lower.chars().all(|c| c.is_ascii_digit()) && lower.len() == 3 => {
+                weight = Some(lower)
+            }
             _ if is_font_size(&lower) => {
                 size_index = Some(position);
                 break;
@@ -978,7 +986,11 @@ fn expand_font_value(value: &str) -> Option<String> {
     let size = tokens[size_index].to_ascii_lowercase();
     let mut rest = size_index + 1;
     let mut line_height = "normal".to_string();
-    if tokens.get(size_index).map(|t| t.contains('/')).unwrap_or(false) {
+    if tokens
+        .get(size_index)
+        .map(|t| t.contains('/'))
+        .unwrap_or(false)
+    {
         // `16px/20px` arrives as one token.
         let (size_part, line_part) = tokens[size_index].split_once('/')?;
         if !is_font_size(&size_part.to_ascii_lowercase()) {
@@ -987,14 +999,28 @@ fn expand_font_value(value: &str) -> Option<String> {
         let size = size_part.to_ascii_lowercase();
         let line = line_part.trim().to_string();
         let family = tokens[rest..].join(" ");
-        return finish_font(style.as_deref(), variant.as_deref(), weight.as_deref(), &size, &line, &family);
+        return finish_font(
+            style.as_deref(),
+            variant.as_deref(),
+            weight.as_deref(),
+            &size,
+            &line,
+            &family,
+        );
     }
     if tokens.get(rest).map(|t| t == "/").unwrap_or(false) {
         line_height = tokens.get(rest + 1)?.to_string();
         rest += 2;
     }
     let family = tokens[rest..].join(" ");
-    finish_font(style.as_deref(), variant.as_deref(), weight.as_deref(), &size, &line_height, &family)
+    finish_font(
+        style.as_deref(),
+        variant.as_deref(),
+        weight.as_deref(),
+        &size,
+        &line_height,
+        &family,
+    )
 }
 
 fn finish_font(
@@ -1018,7 +1044,9 @@ fn finish_font(
     if let Some(weight) = weight {
         out.push_str(&format!("font-weight: {weight}; "));
     }
-    out.push_str(&format!("font-size: {size}; line-height: {line_height}; font-family: {family};"));
+    out.push_str(&format!(
+        "font-size: {size}; line-height: {line_height}; font-family: {family};"
+    ));
     Some(out)
 }
 
@@ -1026,8 +1054,16 @@ fn is_font_size(token: &str) -> bool {
     let size = token.split('/').next().unwrap_or(token);
     if matches!(
         size,
-        "xx-small" | "x-small" | "small" | "medium" | "large" | "x-large" | "xx-large" | "xxx-large"
-            | "larger" | "smaller"
+        "xx-small"
+            | "x-small"
+            | "small"
+            | "medium"
+            | "large"
+            | "x-large"
+            | "xx-large"
+            | "xxx-large"
+            | "larger"
+            | "smaller"
     ) {
         return true;
     }
@@ -1090,7 +1126,10 @@ mod font_shorthand_tests {
             expand_font_shorthand("color: red; font: bold 12px Arial"),
             "color: red; font-weight: bold; font-size: 12px; line-height: normal; font-family: Arial;"
         );
-        assert_eq!(expand_font_shorthand("font-family: Georgia"), "font-family: Georgia");
+        assert_eq!(
+            expand_font_shorthand("font-family: Georgia"),
+            "font-family: Georgia"
+        );
     }
 
     #[test]
@@ -1110,6 +1149,9 @@ mod font_shorthand_tests {
         assert_eq!(expand_font_shorthand("a{font:"), "a{font:");
         // A declaration block that ends with a separator must not index past it.
         assert_eq!(expand_font_shorthand("color: red;"), "color: red;");
-        assert_eq!(expand_font_shorthand("font: 16px Ünïcode;"), "font-size: 16px; line-height: normal; font-family: Ünïcode;");
+        assert_eq!(
+            expand_font_shorthand("font: 16px Ünïcode;"),
+            "font-size: 16px; line-height: normal; font-family: Ünïcode;"
+        );
     }
 }

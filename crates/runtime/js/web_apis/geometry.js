@@ -379,6 +379,54 @@
       ? new DOMRectList([new DOMRect(box.x, box.y, box.width, box.height)])
       : new DOMRectList([]);
   });
+  // Hit testing: which laid-out elements contain a viewport point. This backs both
+  // `document.elementFromPoint` and coordinate input, so an event targets the
+  // element the point is over rather than a guess.
+  const containsPoint = (element, x, y) => {
+    const box = layout ? layout.box(element) : null;
+    if (!box) return false;
+    return x >= box.x && y >= box.y && x < box.x + box.width && y < box.y + box.height;
+  };
+  const hitPath = (receiver, x, y) => {
+    if (!(receiver instanceof Document)) throw new TypeError('Illegal invocation');
+    x = Number(x);
+    y = Number(y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return [];
+    const root = receiver.documentElement;
+    if (!root) return [];
+    const width = global.innerWidth || 0;
+    const height = global.innerHeight || 0;
+    if (width > 0 && height > 0 && (x < 0 || y < 0 || x >= width || y >= height)) return [];
+    const found = [];
+    const visit = (element, depth) => {
+      const computed = layout ? layout.computed(element) : null;
+      if (computed && (computed.display === 'none' || computed.visibility === 'hidden')) return;
+      if (!containsPoint(element, x, y)) return;
+      found.push({ element, depth });
+      for (const child of element.children) visit(child, depth + 1);
+    };
+    visit(root, 1);
+    // Deepest last: reverse so the topmost element comes first, as the DOM says.
+    found.sort((left, right) => right.depth - left.depth);
+    return found.map((entry) => entry.element);
+  };
+  Object.defineProperty(Document.prototype, 'elementsFromPoint', {
+    value: function elementsFromPoint(x, y) {
+      return hitPath(this, x, y);
+    },
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(Document.prototype, 'elementFromPoint', {
+    value: function elementFromPoint(x, y) {
+      return hitPath(this, x, y)[0] ?? null;
+    },
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+
   // The legacy offset/client/scroll family reads the same boxes.
   const defineLayoutGetter = (name, read) => {
     defineGeometryMember(name, {

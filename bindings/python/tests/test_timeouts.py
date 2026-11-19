@@ -57,7 +57,9 @@ def test_session_formats_and_native_operations(server, timeout):
 
 
 @pytest.mark.parametrize("stream", [False, True])
-@pytest.mark.parametrize("timeout", [None, 0, 2, 0.5])
+# A fractional budget that still covers realm installation (~0.3 s) plus the
+# 0.2 s route delay; 0.5 s was below the install cost itself.
+@pytest.mark.parametrize("timeout", [None, 0, 2, 1.5])
 def test_request_override_and_omitted_inheritance(server, timeout, stream):
     with brimp.Session(timeout=0.05, plugins=[], trust_env=False) as session:
         page = session.new_page()

@@ -10,8 +10,6 @@ use skia_safe::{Font, FontMgr, FontStyle, Typeface};
 const GENERIC: &[(&str, &str)] = &[
     ("proportional", "Helvetica"),
     ("sans-serif", "Helvetica"),
-    ("system-ui", "Helvetica"),
-    ("ui-sans-serif", "Helvetica"),
     ("serif", "Times"),
     ("ui-serif", "Times"),
     ("monospace", "Menlo"),
@@ -34,7 +32,16 @@ pub(crate) fn first_family(list: &str) -> String {
 }
 
 fn platform_family(name: &str) -> &str {
-    if name.eq_ignore_ascii_case("-apple-system") || name.eq_ignore_ascii_case("blinkmacsystemfont") {
+    // `-apple-system` and the `system-ui` generics are the platform UI face.
+    // Skia's macOS manager reaches CoreText but the system font's optical size
+    // variants (SF Text below 20px, SF Display above) do not reproduce Safari's
+    // advances, and Helvetica is the closer of the two; `TODO.md` records the
+    // remaining difference and why it is not a lookup table here.
+    if name.eq_ignore_ascii_case("-apple-system") || name.eq_ignore_ascii_case("blinkmacsystemfont")
+    {
+        return "Helvetica";
+    }
+    if name.eq_ignore_ascii_case("system-ui") || name.eq_ignore_ascii_case("ui-sans-serif") {
         return "Helvetica";
     }
     GENERIC

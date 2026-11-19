@@ -2,6 +2,7 @@
 
 import base64
 import inspect
+import time
 import json as _json
 import re
 import weakref
@@ -358,6 +359,79 @@ class _HTTPResult:
             )
 
 
+class Mouse:
+    """Pointer input at viewport coordinates.
+
+    A browser reports where the pointer is on every mouse and pointer event, and a
+    script that fingerprints input reads that position, the number and spacing of
+    samples and the button state. `Page.click()` targets an element; this class
+    drives the pointer itself.
+    """
+
+    _BUTTONS = ("left", "right", "middle")
+
+    def __init__(self, page):
+        self._page = page
+        self._x = 0.0
+        self._y = 0.0
+
+    @property
+    def position(self):
+        """The point the pointer last moved to."""
+        return (self._x, self._y)
+
+    def move(self, x, y, *, steps=1):
+        """Move the pointer to `(x, y)` over `steps` samples."""
+        if steps < 1:
+            raise ValueError("steps must be at least 1")
+        self._page._inner.mouse_move(float(x), float(y), int(steps))
+        self._x, self._y = float(x), float(y)
+        return self
+
+    def down(self, *, button="left", click_count=1, modifiers=0):
+        """Press `button` where the pointer is."""
+        _check_button(button)
+        self._page._inner.mouse_down(self._x, self._y, button, click_count, modifiers)
+        return self
+
+    def up(self, *, button="left", click_count=1, modifiers=0):
+        """Release `button`; a press and release on one element is a click."""
+        _check_button(button)
+        self._page._inner.mouse_up(self._x, self._y, button, click_count, modifiers)
+        return self
+
+    def click(self, x=None, y=None, *, button="left", click_count=1, modifiers=0, delay=0.0):
+        """Move to `(x, y)` when given, then press and release `button`.
+
+        `delay` waits that many seconds between the press and the release, which is
+        what a press-and-hold challenge measures.
+        """
+        _check_button(button)
+        if x is not None or y is not None:
+            if x is None or y is None:
+                raise ValueError("click requires both x and y")
+            self.move(x, y)
+        self._page._inner.mouse_down(self._x, self._y, button, click_count, modifiers)
+        if delay:
+            time.sleep(delay)
+        self._page._inner.mouse_up(self._x, self._y, button, click_count, modifiers)
+        return self
+
+    def wheel(self, delta_x, delta_y, *, x=None, y=None):
+        """Scroll at `(x, y)`, the pointer position by default."""
+        if x is not None or y is not None:
+            if x is None or y is None:
+                raise ValueError("wheel requires both x and y")
+            self.move(x, y)
+        self._page._inner.mouse_wheel(self._x, self._y, float(delta_x), float(delta_y))
+        return self
+
+
+def _check_button(button):
+    if button not in Mouse._BUTTONS:
+        raise ValueError(f"button must be one of {', '.join(Mouse._BUTTONS)}")
+
+
 class Page(_Requests, _HTTPResult):
     """An HTTP result and its live DOM and JavaScript environment.
 
@@ -643,6 +717,15 @@ class Page(_Requests, _HTTPResult):
 
     def add_init_script(self, source):
         self._inner.add_init_script(source)
+
+    @property
+    def mouse(self):
+        """Pointer input at viewport coordinates; see `Mouse`."""
+        mouse = getattr(self, "_mouse", None)
+        if mouse is None:
+            mouse = Mouse(self)
+            self._mouse = mouse
+        return mouse
 
     def click(self, selector):
         self._inner.click(selector)

@@ -386,6 +386,82 @@ impl NativePageBinding {
         blocking(move || page.tap(&selector)).await
     }
     #[napi]
+    pub async fn mouse_move(&self, x: f64, y: f64, steps: Option<u32>) -> Result<()> {
+        let page = self.inner.clone();
+        blocking(move || page.mouse_move(x, y, steps.unwrap_or(1))).await
+    }
+    #[napi]
+    pub async fn mouse_down(
+        &self,
+        x: f64,
+        y: f64,
+        button: Option<String>,
+        click_count: Option<u32>,
+        modifiers: Option<u8>,
+    ) -> Result<()> {
+        let page = self.inner.clone();
+        let button = button.unwrap_or_else(|| "left".to_string());
+        blocking(move || {
+            page.mouse_down(
+                x,
+                y,
+                &button,
+                click_count.unwrap_or(1),
+                modifiers.unwrap_or(0),
+            )
+        })
+        .await
+    }
+    #[napi]
+    pub async fn mouse_up(
+        &self,
+        x: f64,
+        y: f64,
+        button: Option<String>,
+        click_count: Option<u32>,
+        modifiers: Option<u8>,
+    ) -> Result<()> {
+        let page = self.inner.clone();
+        let button = button.unwrap_or_else(|| "left".to_string());
+        blocking(move || {
+            page.mouse_up(
+                x,
+                y,
+                &button,
+                click_count.unwrap_or(1),
+                modifiers.unwrap_or(0),
+            )
+        })
+        .await
+    }
+    #[napi]
+    pub async fn mouse_click(
+        &self,
+        x: f64,
+        y: f64,
+        button: Option<String>,
+        click_count: Option<u32>,
+        modifiers: Option<u8>,
+    ) -> Result<()> {
+        let page = self.inner.clone();
+        let button = button.unwrap_or_else(|| "left".to_string());
+        blocking(move || {
+            page.mouse_click(
+                x,
+                y,
+                &button,
+                click_count.unwrap_or(1),
+                modifiers.unwrap_or(0),
+            )
+        })
+        .await
+    }
+    #[napi]
+    pub async fn mouse_wheel(&self, x: f64, y: f64, delta_x: f64, delta_y: f64) -> Result<()> {
+        let page = self.inner.clone();
+        blocking(move || page.mouse_wheel(x, y, delta_x, delta_y)).await
+    }
+    #[napi]
     pub async fn focus(&self, selector: String) -> Result<()> {
         let page = self.inner.clone();
         blocking(move || page.focus(&selector)).await

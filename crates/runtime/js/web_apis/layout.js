@@ -1002,17 +1002,22 @@ function __layoutInlineFlow(runNodes, computed, startX, startY, contentWidth, bo
       boxes,
       child,
     );
-    lineHeight = Math.max(lineHeight, flow.height);
+    // An inline box with no content still has a line box of its own line height:
+    // Safari reports a zero-width, line-height-tall rectangle for it.
+    const empty = flow.width === 0 && flow.height === 0;
+    const inlineHeight = empty ? __layoutLineHeight(childComputed) : flow.height;
+    lineHeight = Math.max(lineHeight, inlineHeight);
+    if (empty) record(child, { x: lineX, y: inlineStartTop, width: 0, height: inlineHeight });
     const box = {
       x: lineX,
       y: inlineStartTop,
       width: Math.max(0, flow.width),
-      height: flow.height,
+      height: inlineHeight,
       kind: 'inline',
       contentX: lineX,
       contentY: inlineStartTop,
       contentWidth: Math.max(0, flow.width),
-      contentHeight: flow.height,
+      contentHeight: inlineHeight,
     };
     boxes.set(child, box);
     x = lineX + Math.max(0, flow.width);
@@ -1192,7 +1197,10 @@ function __layoutFragments(element) {
 function __layoutComputedProperty(element, name) {
   const computed = __layoutComputed(element);
   const box = __layoutBox(element);
-  const px = (value) => `${Math.round(value * 100) / 100}px`;
+  // WebKit lays out in 1/64 px units and reports the quantised length, while a
+  // specified length such as `font-size` keeps the value it was given.
+  const px = (value) => `${Math.round(value * 64) / 64}px`;
+  const specified = (value) => `${Math.round(value * 10000) / 10000}px`;
   switch (name) {
     case 'display':
       return computed.display;
@@ -1207,7 +1215,7 @@ function __layoutComputedProperty(element, name) {
     case 'height':
       return box && box.kind === 'block' ? px(box.contentHeight) : computed.heightText;
     case 'font-size':
-      return px(computed.fontSize);
+      return specified(computed.fontSize);
     case 'font-family':
       return computed.family;
     case 'font-weight':

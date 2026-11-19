@@ -103,9 +103,12 @@ def test_clock_diagnostics_and_plugins(tmp_path):
 def test_graphics_audio_host_extensions_and_core_only_selection():
     with Session(plugins=[]) as session:
         page = session.new_page()
+        # Core-only keeps the interface surface: `AudioContext` and
+        # `WebGLRenderingContext` exist without their plugins behind them, while
+        # `scheduler` is a plugin-installed object, not an interface.
         assert page.evaluate(
             "[typeof DOMPoint,typeof CSSUnitValue,typeof scheduler,typeof AudioContext,typeof WebGLRenderingContext]"
-        ) == ["function", "function", "undefined", "undefined", "undefined"]
+        ) == ["function", "function", "undefined", "function", "function"]
     with Session(
         time_mode="logical",
         plugins=[

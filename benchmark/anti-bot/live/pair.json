@@ -1,0 +1,177 @@
+[
+ {
+  "target": "cloudflare/5s",
+  "url": "https://steamdb.info/login/",
+  "brimp": {
+   "url": "https://steamdb.info/login/",
+   "title": "Just a moment...",
+   "text": "Checking your browser… Verification successful. Waiting for ",
+   "cookieNames": [],
+   "status": 403,
+   "cookies": []
+  },
+  "safari": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "丽笙酒店集团官方网站 | 预订全球客房",
+   "text": "Press Option+1 for screen-reader mode, Option+0 to cancelAcc",
+   "cookieNames": [
+    "RT",
+    "bm_sv",
+    "OptanonConsent",
+    "utag_main__pn",
+    "utag_main__se",
+    "utag_main__sn",
+    "utag_main__ss",
+    "utag_main__st"
+   ]
+  }
+ },
+ {
+  "target": "akamai",
+  "url": "https://www.radissonhotels.com/zh-cn/",
+  "brimp": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "",
+   "text": "Powered and protected by Privacy (function() { var chlgeId =",
+   "cookieNames": [
+    "bm_lso",
+    "rhg-device-info",
+    "bm_lso",
+    "bm_sz",
+    "_abck",
+    "bm_sc",
+    "bm_so"
+   ],
+   "status": 200,
+   "cookies": [
+    "AKA_A2",
+    "_abck",
+    "ak_bmsc",
+    "bm_lso",
+    "bm_lso",
+    "bm_s",
+    "bm_sc",
+    "bm_so",
+    "bm_sz",
+    "rhg-device-info"
+   ]
+  },
+  "safari": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "丽笙酒店集团官方网站 | 预订全球客房",
+   "text": "Press Option+1 for screen-reader mode, Option+0 to cancelAcc",
+   "cookieNames": [
+    "RT",
+    "bm_sv",
+    "OptanonConsent",
+    "utag_main__pn",
+    "utag_main__se",
+    "utag_main__sn",
+    "utag_main__ss",
+    "utag_main__st"
+   ]
+  }
+ },
+ {
+  "target": "datadome",
+  "url": "https://www.neimanmarcus.com/",
+  "brimp": {
+   "url": "https://www.neimanmarcus.com/",
+   "title": "neimanmarcus.com",
+   "text": "var dd={'rt':'c','cid':'AHrlqAAAAAMApSJuYhNY8JUAQTHPqA==','h",
+   "cookieNames": [
+    "datadome",
+    "dd_testcookie"
+   ],
+   "status": 403,
+   "cookies": [
+    "datadome",
+    "dd_testcookie"
+   ]
+  },
+  "safari": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "丽笙酒店集团官方网站 | 预订全球客房",
+   "text": "Press Option+1 for screen-reader mode, Option+0 to cancelAcc",
+   "cookieNames": [
+    "RT",
+    "bm_sv",
+    "OptanonConsent",
+    "utag_main__pn",
+    "utag_main__se",
+    "utag_main__sn",
+    "utag_main__ss",
+    "utag_main__st"
+   ]
+  }
+ },
+ {
+  "target": "f5shape",
+  "url": "https://www.southwest.com/",
+  "brimp": {
+   "url": "https://www.southwest.com/",
+   "title": "Southwest Airlines | Airline Tickets and",
+   "text": "var as=document.getElementById(\"an-scr\");as&&as.addEventList",
+   "cookieNames": [
+    "OptConsentGroups",
+    "locale",
+    "kndctr_65D316D751E563EC0A490D4C_AdobeOrg_cluster",
+    "kndctr_65D316D751E563EC0A490D4C_AdobeOrg_consent",
+    "AMCV_65D316D751E563EC0A490D4C%40AdobeOrg",
+    "AMCVS_65D316D751E563EC0A490D4C%40AdobeOrg",
+    "OptanonConsent",
+    "_bcnctkn"
+   ],
+   "status": 200,
+   "cookies": [
+    "AMCVS_65D316D751E563EC0A490D4C%40AdobeOrg",
+    "AMCV_65D316D751E563EC0A490D4C%40AdobeOrg",
+    "BrowserId",
+    "CookieConsentPolicy",
+    "LSKey-c$CookieConsentPolicy",
+    "OptConsentGroups",
+    "OptanonConsent",
+    "PIM-SESSION-ID",
+    "_bcnctkn",
+    "_cc-x"
+   ]
+  },
+  "safari": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "丽笙酒店集团官方网站 | 预订全球客房",
+   "text": "Press Option+1 for screen-reader mode, Option+0 to cancelAcc",
+   "cookieNames": [
+    "RT",
+    "bm_sv",
+    "OptanonConsent",
+    "utag_main__pn",
+    "utag_main__se",
+    "utag_main__sn",
+    "utag_main__ss",
+    "utag_main__st"
+   ]
+  }
+ },
+ {
+  "target": "reese84",
+  "url": "https://orion.nv.gov/portal/public/",
+  "brimp": {
+   "error": "Timeout: operation timed out after 60s"
+  },
+  "safari": {
+   "url": "https://www.radissonhotels.com/zh-cn/",
+   "title": "丽笙酒店集团官方网站 | 预订全球客房",
+   "text": "Press Option+1 for screen-reader mode, Option+0 to cancelAcc",
+   "cookieNames": [
+    "RT",
+    "bm_sv",
+    "OptanonConsent",
+    "utag_main__pn",
+    "utag_main__se",
+    "utag_main__sn",
+    "utag_main__ss",
+    "utag_main__st"
+   ]
+  }
+ }
+]

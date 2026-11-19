@@ -17,8 +17,14 @@ SOURCE = """async ({global, host}) => {
 def test_rtc_installer_selection_and_local_channels():
     from brimp import plugins
 
+    # The interface surface is core (WebKit IDL narrowed by the profile); what a
+    # plugin supplies is the behaviour behind it.
     with Session(plugins=[]) as session, session.new_page() as page:
-        assert page.evaluate("typeof RTCPeerConnection") == "undefined"
+        assert page.evaluate("typeof RTCPeerConnection") == "function"
+        assert page.evaluate("""(() => {
+            try { new RTCPeerConnection(); return 'constructed' }
+            catch (error) { return error.name }
+        })()""") == "TypeError"
     with Session(plugins=[plugins.rtc()]) as session, session.new_page() as page:
         assert page.evaluate("""(() => {
             const p = new RTCPeerConnection(), c = p.createDataChannel('python');
@@ -277,7 +283,9 @@ def test_default_browser_plugins_and_explicit_empty_selection():
     }
     for options, expected in [
         ({}, ["function", "function", "function"]),
-        ({"plugins": []}, ["undefined"] * 3),
+        # Core-only still carries the interface objects; the behaviour behind them
+        # belongs to the plugins that were left out.
+        ({"plugins": []}, ["function", "function", "function"]),
     ]:
         with Session(**options) as session, session.new_page() as page:
             assert (

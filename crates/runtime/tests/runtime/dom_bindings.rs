@@ -1531,7 +1531,8 @@ fn exposes_import_focus_crypto_and_resize_observer() {
             if (crypto.getRandomValues(bytes) !== bytes || !bytes.some(value => value !== 0)) return false;
             if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(crypto.randomUUID())) return false;
 
-            return typeof ResizeObserver === "undefined" && getComputedStyle(document.body).display === "block";
+            // The interface surface is core; the observer behind it is a plugin.
+            return typeof ResizeObserver === "function" && getComputedStyle(document.body).display === "block";
         })()"#,
     );
 }

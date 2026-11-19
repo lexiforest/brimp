@@ -280,12 +280,12 @@ pub fn run_loop_cycle() -> c_int {
     }
 }
 
-
 #[cfg(target_os = "macos")]
 #[link(name = "CoreFoundation", kind = "framework")]
 unsafe extern "C" {
     static kCFRunLoopDefaultMode: *const c_void;
-    fn CFRunLoopRunInMode(mode: *const c_void, seconds: c_double, return_after_source: bool) -> i32;
+    fn CFRunLoopRunInMode(mode: *const c_void, seconds: c_double, return_after_source: bool)
+    -> i32;
 }
 #[cfg(target_os = "macos")]
 fn default_run_loop_mode() -> *const c_void {

@@ -122,6 +122,14 @@ class Document extends Node {
         ? prototype
         : Document.prototype,
     );
+    // An HTML document is an `HTMLDocument` instance in a browser; an XML one is
+    // a plain `Document`.
+    if (
+      prototype === Document.prototype &&
+      typeof globalThis.HTMLDocument === 'function' &&
+      created.contentType === 'text/html'
+    )
+      Object.setPrototypeOf(created, globalThis.HTMLDocument.prototype);
     return created;
   }
   get readyState() {

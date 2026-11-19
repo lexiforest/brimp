@@ -79,7 +79,9 @@ test('DOM UI placeholders are callable on HTML, SVG and documents and reject unr
       const elementMethods=['animate',
         'hasPointerCapture','releasePointerCapture','setPointerCapture','requestFullscreen','requestPointerLock',
         'webkitRequestFullScreen','webkitRequestFullscreen','scroll','scrollBy','scrollTo','scrollIntoView','scrollIntoViewIfNeeded'];
-      const documentMethods=['captureEvents','releaseEvents','clear','caretRangeFromPoint','elementFromPoint','elementsFromPoint',
+      // elementFromPoint and elementsFromPoint are implemented in geometry.js
+      // (layout-backed hit testing) and are checked in the layout tests.
+      const documentMethods=['captureEvents','releaseEvents','clear','caretRangeFromPoint',
         'execCommand','queryCommandEnabled','queryCommandIndeterm','queryCommandState','queryCommandSupported','queryCommandValue',
         'exitFullscreen','exitPictureInPicture','exitPointerLock','webkitCancelFullScreen','webkitExitFullscreen'];
       const html=document.createElement('div'),svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -97,7 +99,7 @@ test('DOM UI placeholders are callable on HTML, SVG and documents and reject unr
       return [results.length,results.every(Boolean),html.childNodes.length,svg.childNodes.length,
         animations.map(a=>Array.isArray(a)&&a.length)];
     })()`),
-      [129, true, 0, 0, [0, 0, 0]],
+      [123, true, 0, 0, [0, 0, 0]],
     );
   } finally {
     await session.close();

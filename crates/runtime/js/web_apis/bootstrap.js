@@ -103,6 +103,19 @@ const __originalFunctionToString = Function.prototype.toString;
 // "webkit" is WebKit's multi-line native source; "chrome" is Blink's
 // single-line form with get/set prefixes. Brimp's engine is JSC, but a profile
 // can claim a Chromium identity, so the source style follows the identity.
+// The input controller marks the events it dispatches, but a `submit` or `reset`
+// event is created further down the activation path. This depth says the current
+// call stack began at a user action, which is what makes those events trusted.
+let __trustedActivationDepth = 0;
+function __trustedActivation(call) {
+  __trustedActivationDepth += 1;
+  try {
+    return call();
+  } finally {
+    __trustedActivationDepth -= 1;
+  }
+}
+
 let __nativeStyle = 'webkit';
 
 function __nativeSource(member) {
@@ -236,6 +249,14 @@ const __windowOverrides = new Map();
 
 globalThis.__brimpSetDocument = (document) => {
   __windowDocument = document;
+  // A page document is an `HTMLDocument`; an XML one stays a `Document`.
+  if (
+    typeof globalThis.HTMLDocument === 'function' &&
+    document !== null &&
+    typeof document === 'object' &&
+    document.contentType === 'text/html'
+  )
+    Object.setPrototypeOf(document, globalThis.HTMLDocument.prototype);
   if (!__windowDocumentAccessorInstalled) {
     Object.defineProperty(globalThis, 'document', {
       value: document,
@@ -275,6 +296,15 @@ function __installWindowAccessors(diagnosticsRecursive = false) {
     if (Object.hasOwn(globalThis, key)) continue;
     if (typeof key !== 'string') {
       Object.defineProperty(globalThis, key, descriptor);
+      continue;
+    }
+    if (typeof descriptor.value === 'function' && descriptor.get === undefined) {
+      Object.defineProperty(globalThis, key, {
+        value: descriptor.value,
+        writable: true,
+        enumerable: true,
+        configurable: diagnosticsRecursive || !__windowConfigurableFalse.has(key),
+      });
       continue;
     }
     const originalGet =
@@ -467,6 +497,11 @@ function __finalizeWebIdlInterfaces() {
   }
   delete globalThis.__brimpInstallShapePlaceholders;
   __installWindowAccessors(diagnosticsRecursive);
+  // Complete the surface from WebKit's IDL once every core API and plugin has
+  // installed its own, and after the window accessor pass has moved the global's
+  // members off Window.prototype.
+  if (globalThis.__skipIdl === undefined) globalThis.__brimpInstallIdlSurface?.();
+  delete globalThis.__brimpInstallIdlSurface;
   __markConsoleMembers();
   for (const name of Object.getOwnPropertyNames(globalThis)) {
     if (__initialGlobalNames.has(name)) continue;

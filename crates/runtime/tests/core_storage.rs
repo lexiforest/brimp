@@ -197,7 +197,10 @@ fn canvas_backend_order_and_core_value_identity() {
     }
     let s = session();
     let p = s.new_page().unwrap();
-    assert_eq!(p.evaluate("[typeof DOMMatrix,typeof CSSUnitValue,typeof ImageData,typeof MediaEncryptedEvent,typeof SpeechSynthesisUtterance,typeof TaskController,document.createElement('canvas').getContext('2d')]").unwrap(),json!(["function","function","function","undefined","undefined","undefined",null]));
+    // The interface surface is core — every name WebKit's IDL declares for the
+    // profile exists — while the behaviour behind a subsystem interface comes
+    // from its plugin, which this session does not install.
+    assert_eq!(p.evaluate("[typeof DOMMatrix,typeof CSSUnitValue,typeof ImageData,typeof MediaEncryptedEvent,typeof SpeechSynthesisUtterance,typeof TaskController,document.createElement('canvas').getContext('2d')]").unwrap(),json!(["function","function","function","function","function","undefined",null]));
 }
 #[test]
 fn indexeddb_serializes_concurrent_page_transactions_and_rolls_back() {

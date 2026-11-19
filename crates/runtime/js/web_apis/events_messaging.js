@@ -82,7 +82,9 @@ class Event {
       currentTarget: null,
       eventPhase: 0,
       defaultPrevented: false,
-      timeStamp: __nativeHost('clockNow'),
+      // The same coarsened clock `performance.now()` reports: a consumer can
+      // compare the two.
+      timeStamp: Math.floor(__nativeHost('clockNow')),
     });
     Object.defineProperty(this, 'isTrusted', {
       enumerable: true,

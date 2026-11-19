@@ -9,6 +9,7 @@
     "format:check": "prettier --check --ignore-path .gitignore --ignore-path .prettierignore \"**/*.{js,mjs,cjs}\""
   },
   "devDependencies": {
-    "prettier": "3.9.10"
+    "prettier": "3.9.10",
+    "webidl2": "^24.5.0"
   }
 }

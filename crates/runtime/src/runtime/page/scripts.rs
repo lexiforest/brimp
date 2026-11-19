@@ -442,7 +442,17 @@ impl Page {
         }
     }
 
-    fn report_page_script_error(&self, error: &JsException) {
+    /// Report a page error without evaluating JavaScript: the task pump can be
+    /// inside a host call that holds a JavaScript value, and re-entering the
+    /// engine there would borrow state twice.
+    pub(super) fn report_page_error_event(&self, error: &JsException) {
+        self.events
+            .emit(crate::runtime::events::PageEvent::Error {
+                message: error.to_string(),
+            });
+    }
+
+    pub(super) fn report_page_script_error(&self, error: &JsException) {
         self.events.emit(crate::runtime::events::PageEvent::Error {
             message: error.to_string(),
         });

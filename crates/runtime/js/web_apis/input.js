@@ -5,6 +5,13 @@ globalThis.__brimpInputController = (() => {
   let mouseDownTarget = null;
   let mouseButtons = 0;
   let drag = null;
+  // Where the pointer is. A browser reports it on every mouse and pointer event,
+  // and sensors read it, so the position is tracked even when a command targets an
+  // element rather than a coordinate.
+  let mouseX = 0;
+  let mouseY = 0;
+  let lastScreenX = 0;
+  let lastScreenY = 0;
 
   function trusted(event) {
     return __markTrustedEvent(event);
@@ -24,7 +31,13 @@ globalThis.__brimpInputController = (() => {
   }
 
   function mouseOptions(command, overrides = {}) {
+    const clientX = overrides.clientX ?? command.x ?? mouseX;
+    const clientY = overrides.clientY ?? command.y ?? mouseY;
     return {
+      clientX,
+      clientY,
+      screenX: overrides.screenX ?? command.screenX ?? Math.round(clientX + (window.screenX || 0)),
+      screenY: overrides.screenY ?? command.screenY ?? Math.round(clientY + (window.screenY || 0)),
       bubbles: true,
       cancelable: true,
       composed: true,
@@ -82,6 +95,21 @@ globalThis.__brimpInputController = (() => {
       mouse(target, 'mouseenter', command, { bubbles: false, relatedTarget: mouseTarget });
     }
     mouseTarget = target;
+  }
+
+  // The point a pointer lands on for an element: the centre of its border box,
+  // like a click through the page.
+  function pointFor(element) {
+    const box = element.getBoundingClientRect();
+    return {
+      x: Math.round(box.x + box.width / 2),
+      y: Math.round(box.y + box.height / 2),
+    };
+  }
+
+  function elementAt(x, y) {
+    const hit = document.elementFromPoint(x, y);
+    return hit && hit instanceof Element ? hit : document.documentElement;
   }
 
   function focus(target) {
@@ -151,11 +179,11 @@ globalThis.__brimpInputController = (() => {
   }
 
   function submit(form) {
-    if (form) form.requestSubmit();
+    if (form) __trustedActivation(() => form.requestSubmit());
   }
 
   function reset(form) {
-    if (form) form.reset();
+    if (form) __trustedActivation(() => form.reset());
   }
 
   function releaseClick(target, command) {
@@ -172,15 +200,18 @@ globalThis.__brimpInputController = (() => {
     }
   }
 
-  function moveElement(target, clickCount = 0, modifiers = 0) {
-    const command = { button: 0, buttons: 0, clickCount, modifiers };
+  function moveElement(target, clickCount = 0, modifiers = 0, point = null) {
+    const at = point ?? pointFor(target);
+    mouseX = at.x;
+    mouseY = at.y;
+    const command = { button: 0, buttons: mouseButtons, clickCount, modifiers, x: at.x, y: at.y };
     enterTarget(target, command);
     pointer(target, 'pointermove', command);
     mouse(target, 'mousemove', command);
     return command;
   }
-  function clickElement(target, clickCount = 1, modifiers = 0) {
-    const command = moveElement(target, clickCount, modifiers);
+  function clickElement(target, clickCount = 1, modifiers = 0, point = null) {
+    const command = moveElement(target, clickCount, modifiers, point);
     __notifyUserActivation();
     mouseDownTarget = target;
     command.buttons = mouseButtons = 1;
@@ -595,6 +626,131 @@ globalThis.__brimpInputController = (() => {
     }
   }
 
+  // Pointer state for commands that arrive as coordinates rather than a selector.
+  const buttonBits = { left: 1, right: 2, middle: 4 };
+  const buttonIndex = { left: 0, right: 2, middle: 1 };
+
+  function buttonOf(command) {
+    const name = command.button ?? 'left';
+    if (!(name in buttonBits)) throw new TypeError(`unsupported button: ${name}`);
+    return name;
+  }
+
+  function pointOf(command) {
+    if (typeof command.x !== 'number' || typeof command.y !== 'number')
+      throw new TypeError('coordinate commands require x and y');
+    return { x: Math.round(command.x), y: Math.round(command.y) };
+  }
+
+  // Move the pointer to a point, in `steps` increments. A sensor watches the
+  // number and spacing of `pointermove` samples, so a single jump is not the same
+  // as travel.
+  function movePointer(command) {
+    const to = pointOf(command);
+    const steps = Math.max(1, Math.min(1000, Math.trunc(Number(command.steps ?? 1)) || 1));
+    // A pointer already at the point does not move, so no event is reported.
+    if (steps === 1 && to.x === mouseX && to.y === mouseY) return;
+    const fromX = mouseX;
+    const fromY = mouseY;
+    for (let step = 1; step <= steps; step++) {
+      const ratio = step / steps;
+      const x = step === steps ? to.x : Math.round(fromX + (to.x - fromX) * ratio);
+      const y = step === steps ? to.y : Math.round(fromY + (to.y - fromY) * ratio);
+      const event = {
+        button: -1,
+        buttons: mouseButtons,
+        clickCount: 0,
+        modifiers: command.modifiers ?? 0,
+        x,
+        y,
+      };
+      const target = elementAt(x, y);
+      mouseX = x;
+      mouseY = y;
+      enterTarget(target, event);
+      pointer(target, 'pointermove', event);
+      mouse(target, 'mousemove', event);
+    }
+  }
+
+  function pressButton(command) {
+    const name = buttonOf(command);
+    const at = pointOf(command);
+    const target = elementAt(at.x, at.y);
+    movePointer({ ...command, steps: command.steps ?? 1 });
+    const event = {
+      button: buttonIndex[name],
+      buttons: mouseButtons | buttonBits[name],
+      clickCount: command.clickCount ?? 1,
+      modifiers: command.modifiers ?? 0,
+      x: at.x,
+      y: at.y,
+    };
+    __notifyUserActivation();
+    mouseDownTarget = target;
+    mouseButtons = event.buttons;
+    const accepted = pointer(target, 'pointerdown', event);
+    if (accepted && mouse(target, 'mousedown', event)) focus(focusableTarget(target));
+    return { target, event };
+  }
+
+  function releaseButton(command) {
+    const name = buttonOf(command);
+    const at = pointOf(command);
+    const target = elementAt(at.x, at.y);
+    const event = {
+      button: buttonIndex[name],
+      buttons: mouseButtons & ~buttonBits[name],
+      clickCount: command.clickCount ?? 1,
+      modifiers: command.modifiers ?? 0,
+      x: at.x,
+      y: at.y,
+    };
+    mouseButtons = event.buttons;
+    pointer(target, 'pointerup', event);
+    if (command.button === undefined || name === 'left' || mouseDownTarget !== null)
+      mouse(target, 'mouseup', event);
+    const downTarget = mouseDownTarget;
+    mouseDownTarget = null;
+    if (downTarget === target) {
+      // A click belongs to the element the press landed on.
+      const clickEvent = { ...event, buttons: 0 };
+      pointer(target, 'click', clickEvent);
+      if (buttonIndex[name] === 2) mouse(target, 'contextmenu', clickEvent);
+      else if (buttonIndex[name] === 1) mouse(target, 'auxclick', clickEvent);
+    }
+  }
+
+  function wheel(command) {
+    const at = pointOf(command);
+    const target = elementAt(at.x, at.y);
+    const event = {
+      button: -1,
+      buttons: mouseButtons,
+      clickCount: 0,
+      modifiers: command.modifiers ?? 0,
+      x: at.x,
+      y: at.y,
+    };
+    mouseX = at.x;
+    mouseY = at.y;
+    enterTarget(target, event);
+    const deltaX = Number(command.deltaX ?? 0);
+    const deltaY = Number(command.deltaY ?? 0);
+    if (deltaX === 0 && deltaY === 0) throw new TypeError('wheel requires deltaX or deltaY');
+    dispatch(
+      target,
+      new WheelEvent('wheel', {
+        ...mouseOptions(event),
+        deltaX,
+        deltaY,
+        deltaZ: 0,
+        deltaMode: command.deltaMode ?? 0,
+      }),
+    );
+    globalThis.scrollBy?.(deltaX, deltaY);
+  }
+
   function targetForSelector(selector) {
     const target = document.querySelector(String(selector));
     if (!target) throw new Error(`BRIMP_INPUT_NOT_FOUND:${selector}`);
@@ -641,6 +797,25 @@ globalThis.__brimpInputController = (() => {
   }
   return (serialized, targetOverride) => {
     const command = JSON.parse(String(serialized));
+    // Coordinate commands resolve their own target from the hit test.
+    if (command.action === 'move' || command.action === 'wheel') {
+      if (command.action === 'move') movePointer(command);
+      else wheel(command);
+      return 'true';
+    }
+    if (command.action === 'down') {
+      pressButton(command);
+      return 'true';
+    }
+    if (command.action === 'up') {
+      releaseButton(command);
+      return 'true';
+    }
+    if (command.action === 'clickAt') {
+      pressButton(command);
+      releaseButton(command);
+      return 'true';
+    }
     const target =
       targetOverride ??
       (command.selector == null ? document.activeElement : targetForSelector(command.selector));

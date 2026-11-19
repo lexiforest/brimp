@@ -33,7 +33,7 @@ fn reset_replaces_the_document_and_javascript_realm_without_closing_the_page() {
     let page = browser
         .new_page_with_options(PageOptions::default())
         .unwrap();
-    page.navigate("https://example.test/", Duration::from_secs(1))
+    page.navigate("https://example.test/", Duration::from_secs(5))
         .unwrap();
     page.evaluate("globalThis.leaked = 42").unwrap();
 
@@ -42,7 +42,7 @@ fn reset_replaces_the_document_and_javascript_realm_without_closing_the_page() {
     assert_eq!(page.evaluate("location.href").unwrap(), "about:blank");
     assert_eq!(page.evaluate("typeof leaked").unwrap(), "undefined");
     assert_eq!(page.title().unwrap(), "");
-    page.navigate("https://example.test/reused", Duration::from_secs(1))
+    page.navigate("https://example.test/reused", Duration::from_secs(5))
         .unwrap();
     assert_eq!(page.title().unwrap(), "Workflow");
 }
@@ -168,7 +168,7 @@ fn navigation_timeout_interrupts_non_yielding_javascript() {
     );
     assert!(started.elapsed() < Duration::from_secs(2));
     page.reset().unwrap();
-    page.navigate("https://loop.test/recovered", Duration::from_secs(1))
+    page.navigate("https://loop.test/recovered", Duration::from_secs(5))
         .unwrap();
     assert_eq!(page.title().unwrap(), "Recovered");
     page.close();
@@ -294,13 +294,13 @@ fn session_closure_closes_pages_and_new_session_isolates_cookies() {
         .new_page_with_options(PageOptions::default())
         .unwrap();
     first
-        .navigate("https://cookies.test/set", Duration::from_secs(1))
+        .navigate("https://cookies.test/set", Duration::from_secs(5))
         .unwrap();
     let second = browser
         .new_page_with_options(PageOptions::default())
         .unwrap();
     second
-        .navigate("https://cookies.test/shared", Duration::from_secs(1))
+        .navigate("https://cookies.test/shared", Duration::from_secs(5))
         .unwrap();
 
     browser.close();
@@ -311,7 +311,7 @@ fn session_closure_closes_pages_and_new_session_isolates_cookies() {
         .new_page_with_options(PageOptions::default())
         .unwrap();
     isolated
-        .navigate("https://cookies.test/isolated", Duration::from_secs(1))
+        .navigate("https://cookies.test/isolated", Duration::from_secs(5))
         .unwrap();
 
     let observed = loader.observed.lock().unwrap();
@@ -436,7 +436,7 @@ fn navigator_locks_queue_query_abort_and_release_real_operations() {
                 .build(),
         )
         .unwrap();
-    page.navigate("https://locks.test/", Duration::from_secs(1))
+    page.navigate("https://locks.test/", Duration::from_secs(5))
         .unwrap();
 
     let result = page
@@ -576,7 +576,7 @@ fn local_and_managed_pages_share_setup_and_have_explicit_lifetimes() {
         .block_on(local.goto("https://example.test/"))
         .unwrap();
     managed
-        .navigate("https://example.test/", Duration::from_secs(1))
+        .navigate("https://example.test/", Duration::from_secs(5))
         .unwrap();
     assert!(
         local

@@ -269,9 +269,26 @@ and [debugging](/examples/debugging/).
 ## Choose input, network controls, or streaming
 
 - Use `fill`, `click`, `press`, and related methods to interact with DOM elements.
-  Actions use nodes directly; they do not check visibility or coordinates.
-  See the [Python](/examples/python/#5-fill-the-form-and-save-the-edited-html)
-  and [Node.js](/examples/node/#2-work-with-dom-handles) tutorials.
+  A selector action lands on the centre of the element's border box and reports
+  those coordinates, so the events carry a position like a real pointer. See the
+  [Python](/examples/python/#5-fill-the-form-and-save-the-edited-html) and
+  [Node.js](/examples/node/#2-work-with-dom-handles) tutorials.
+- Use `page.mouse` when a page reads the pointer itself: `move(x, y, steps=…)`,
+  `down()`, `up()`, `click(x, y, delay=…)` and `wheel(delta_x, delta_y)`. The point
+  is hit-tested against the layout, so events target the element that is there,
+  with `clientX`/`clientY`/`screenX`/`screenY`, `buttons` and `isTrusted: true`.
+  `steps` interpolates the travel, and `delay` holds the button down between press
+  and release. Coordinates are viewport pixels.
+
+  ```python
+  box = page.evaluate("(() => { const r = document.querySelector('#go').getBoundingClientRect();"
+                      " return [r.x + r.width / 2, r.y + r.height / 2]; })()")
+  page.mouse.move(box[0] - 120, box[1] - 40, steps=8)
+  page.mouse.click(box[0], box[1], delay=0.15)
+  ```
+
+  `document.elementFromPoint` and `document.elementsFromPoint` use the same hit
+  test, so a script can look up the element at a point before acting on it.
 - Use `configure_network()` / `configureNetwork()` for offline mode, latency,
   cache bypass, and response retention. `set_extra_headers()` / `setExtraHeaders()`
   changes subsequent request headers. `clear_cache()` / `clearCache()` clears
