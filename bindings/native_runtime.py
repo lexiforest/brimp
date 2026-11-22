@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 SYSTEM_LIBRARIES = {
     "libc.so.6",
@@ -17,7 +17,6 @@ SYSTEM_LIBRARIES = {
     "libpthread.so.0",
     "libstdc++.so.6",
     "libgcc_s.so.1",
-    "libatomic.so.1",
 }
 
 
@@ -52,6 +51,7 @@ def macos_library(dep: str) -> str | None:
 
 
 def relocate_macos(binary: Path, *, extension: bool) -> None:
+    subprocess.run(["strip", "-S", "-x", str(binary)], check=True, capture_output=True)
     identifiers = run("otool", "-D", binary).splitlines()[1:]
     prefix = "@loader_path/native/" if extension else "@loader_path/"
     for dep in dependencies(binary):
@@ -140,6 +140,39 @@ def ldconfig_map() -> dict[str, Path]:
     return libraries
 
 
+def atomic_notices(destination: Path) -> None:
+    shutil.copytree(Path(__file__).parent / "licenses/gcc-runtime", destination, dirs_exist_ok=True)
+
+
+def bundle_atomic(root: Path, libraries: Path, notices: Path) -> None:
+    """Include libatomic explicitly: manylinux repair treats it as a system library."""
+    consumers = []
+    for path in root.rglob("*"):
+        if path.is_symlink() or not path.is_file():
+            continue
+        with path.open("rb") as source:
+            elf = source.read(4) == b"\x7fELF"
+        if elf and "libatomic.so.1" in needed(path):
+            consumers.append(path)
+    if not consumers:
+        return
+    source = ldconfig_map().get("libatomic.so.1")
+    if source is None:
+        raise RuntimeError("Install the build host's libatomic runtime before packaging")
+    libraries.mkdir(parents=True, exist_ok=True)
+    destination = libraries / "libatomic.so.1"
+    shutil.copyfile(source.resolve(), destination)
+    destination.chmod(0o755)
+    subprocess.run(["strip", "--strip-unneeded", destination], check=True)
+    for consumer in consumers:
+        relative = os.path.relpath(libraries, consumer.parent)
+        local = "$ORIGIN" if relative == "." else "$ORIGIN/" + relative
+        previous = run("patchelf", "--print-rpath", consumer).strip()
+        paths = list(dict.fromkeys([local, *filter(None, previous.split(":"))]))
+        subprocess.run(["patchelf", "--set-rpath", ":".join(paths), consumer], check=True)
+    atomic_notices(notices)
+
+
 def bundle_linux(binary: Path, jsc: Path, curl: Path, package: Path) -> None:
     if shutil.which("patchelf") is None:
         raise RuntimeError("patchelf is required to assemble Linux native packages")
@@ -162,6 +195,9 @@ def bundle_linux(binary: Path, jsc: Path, curl: Path, package: Path) -> None:
         destination.chmod(0o755)
         copied[name] = destination
         pending.extend(needed(destination))
+    # Strip before patchelf so section removal cannot invalidate repaired ELF alignment.
+    for path in [package / binary.name, *copied.values()]:
+        subprocess.run(["strip", "--strip-unneeded", str(path)], check=True, capture_output=True)
     subprocess.run(
         ["patchelf", "--set-rpath", "$ORIGIN/native", str(package / binary.name)],
         check=True,
@@ -173,6 +209,8 @@ def bundle_linux(binary: Path, jsc: Path, curl: Path, package: Path) -> None:
             check=True,
             capture_output=True,
         )
+    if "libatomic.so.1" in copied:
+        atomic_notices(native / "licenses/gcc-runtime")
 
 
 def bundle_windows(binary: Path, jsc: Path, curl: Path, package: Path, runtime: Path) -> None:

@@ -22,7 +22,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new(options: SessionOptions) -> Result<Self, AutomationError> {
+    pub fn new(options: SessionOptions) -> Result<Arc<Self>, AutomationError> {
         crate::runtime::routes::parse_headers(options.headers.clone())?;
         let mut profile = options.profile.clone().unwrap_or_default();
         options.identity.apply(&mut profile)?;
@@ -32,14 +32,14 @@ impl Session {
     pub fn with_resource_loader(
         options: SessionOptions,
         loader: Arc<dyn ResourceLoader>,
-    ) -> Result<Self, AutomationError> {
+    ) -> Result<Arc<Self>, AutomationError> {
         crate::runtime::routes::parse_headers(options.headers.clone())?;
         let mut profile = options.profile.clone().unwrap_or_default();
         options.identity.apply(&mut profile)?;
         Self::create(options, Some(profile), Some(loader))
     }
 
-    pub fn new_page(&self) -> Result<NativePage, AutomationError> {
+    pub fn new_page(self: &Arc<Self>) -> Result<NativePage, AutomationError> {
         let events = crate::runtime::events::EventHub::default();
         let network = Arc::new(crate::runtime::networking::NetworkRuntime::new(
             self.resource_loader(),
@@ -63,12 +63,91 @@ impl Session {
             network.clone(),
         )?;
         network.routes.set_page(page.id());
-        Ok(NativePage {
+        let mut page = NativePage {
             page,
             network,
             events,
             timeout: self.options.timeout,
-        })
+            popup_subscription: None,
+        };
+        let session = Arc::downgrade(self);
+        let opener_id = page.id();
+        page.popup_subscription = Some(Arc::new(page.events.on(
+            "popup_requested",
+            Arc::new(move |event| {
+                let crate::runtime::events::PageEvent::PopupRequested { id, .. } = event else {
+                    return;
+                };
+                let Some(session) = session.upgrade() else {
+                    return;
+                };
+                std::thread::spawn(move || {
+                    let result = (|| {
+                        let opener = session.page(opener_id)?;
+                        let context = opener.network_context()?;
+                        let control = context.popup(id).ok_or(AutomationError::Closed)?;
+                        if control.closed() {
+                            return Ok(());
+                        }
+                        let popup = session.new_page()?;
+                        control.attach(popup.network_context()?, popup.page.control.closed.clone());
+                        let url = control.url();
+                        if url != "about:blank"
+                            && let Err(error) = popup.request("GET", &url, Default::default())
+                        {
+                            opener
+                                .events
+                                .emit(crate::runtime::events::PageEvent::Error {
+                                    message: error.to_string(),
+                                });
+                        }
+                        opener
+                            .events
+                            .emit(crate::runtime::events::PageEvent::Popup {
+                                page_id: popup.id(),
+                            });
+                        Ok::<(), AutomationError>(())
+                    })();
+                    if let Err(error) = result
+                        && let Ok(opener) = session.page(opener_id)
+                    {
+                        opener
+                            .events
+                            .emit(crate::runtime::events::PageEvent::Error {
+                                message: error.to_string(),
+                            });
+                    }
+                });
+            }),
+        )?));
+        let mut state = self.state.lock().unwrap();
+        if self.is_closed() {
+            drop(state);
+            page.close()?;
+            return Err(AutomationError::Closed);
+        }
+        state.native_pages.push(page.clone());
+        Ok(page)
+    }
+
+    pub fn pages(&self) -> Vec<NativePage> {
+        let (pages, closed) = {
+            let mut state = self.state.lock().unwrap();
+            let (open, closed): (Vec<_>, Vec<_>) = std::mem::take(&mut state.native_pages)
+                .into_iter()
+                .partition(|page| !page.is_closed());
+            state.native_pages = open;
+            (state.native_pages.clone(), closed)
+        };
+        drop(closed);
+        pages
+    }
+
+    pub fn page(&self, id: u64) -> Result<NativePage, AutomationError> {
+        self.pages()
+            .into_iter()
+            .find(|page| page.id() == id)
+            .ok_or(AutomationError::Closed)
     }
 
     pub fn route(

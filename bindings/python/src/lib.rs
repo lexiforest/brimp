@@ -1,8 +1,7 @@
 mod network;
 mod plugins;
-use brimp_runtime::runtime::native::{
-    ElementHandle, JSHandle, NativePage, RequestOptions, Session, SessionOptions,
-};
+use brimp_runtime::browser::{ElementHandle, JSHandle, Page as NativePage, Session};
+use brimp_runtime::runtime::native::{RequestOptions, SessionOptions};
 use brimp_runtime::runtime::{AutomationError, CancellationToken, NavigationResponse};
 use pyo3::{prelude::*, types::PyBytes};
 use std::sync::Arc;
@@ -52,9 +51,28 @@ struct PySession {
 }
 #[pymethods]
 impl PySession {
+    fn pages(&self) -> Vec<PyPage> {
+        self.inner
+            .pages()
+            .into_iter()
+            .map(|inner| PyPage {
+                inner,
+                dispatcher: self.dispatcher.clone(),
+            })
+            .collect()
+    }
+    fn page(&self, id: u64) -> PyResult<PyPage> {
+        self.inner
+            .page(id)
+            .map(|inner| PyPage {
+                inner,
+                dispatcher: self.dispatcher.clone(),
+            })
+            .map_err(error)
+    }
     #[new]
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (headers, timeout=30.0, plugins=Vec::new(), identity="{}", profile="null", clock="{}", diagnostics="null", storage_path=None, proxy_options="{}"))]
+    #[pyo3(signature = (headers, timeout=30.0, plugins=Vec::new(), identity="{}", profile="null", clock="{}", diagnostics="null", storage_path=None, proxy_options="{}", engine="runtime", executable_path=None))]
     fn new(
         py: Python<'_>,
         headers: Vec<(String, String)>,
@@ -66,6 +84,8 @@ impl PySession {
         diagnostics: &str,
         storage_path: Option<String>,
         proxy_options: &str,
+        engine: &str,
+        executable_path: Option<String>,
     ) -> PyResult<Self> {
         let dispatcher = plugins::Dispatcher::new()?;
         let parsed_profile: Option<brimp_runtime::profile::BrowserProfile> =
@@ -94,12 +114,15 @@ impl PySession {
             .proxy_options
             .validate()
             .map_err(network_error)?;
-        py.detach(|| Session::new(options))
-            .map(|inner| Self {
-                inner: Arc::new(inner),
-                dispatcher,
-            })
-            .map_err(session_error)
+        py.detach(|| {
+            Session::new(
+                options,
+                engine,
+                executable_path.as_deref().map(std::path::Path::new),
+            )
+        })
+        .map(|inner| Self { inner, dispatcher })
+        .map_err(session_error)
     }
     fn new_page(&self, py: Python<'_>) -> PyResult<PyPage> {
         py.detach(|| self.inner.new_page())
@@ -128,16 +151,15 @@ impl PySession {
     }
     fn set_cookie(&self, url: &str, name: &str, value: &str) -> PyResult<()> {
         self.inner
-            .cookies()
             .set_cookie(url, name, value)
             .map_err(session_error)
     }
     fn cookies_json(&self) -> PyResult<String> {
-        serde_json::to_string(&self.inner.cookies().cookies())
+        serde_json::to_string(&self.inner.cookies().map_err(session_error)?)
             .map_err(|e| RuntimeError::new_err(e.to_string()))
     }
-    fn clear_cookies(&self) {
-        self.inner.cookies().clear_cookies();
+    fn clear_cookies(&self) -> PyResult<()> {
+        self.inner.clear_cookies().map_err(session_error)
     }
 }
 
@@ -166,6 +188,40 @@ struct PyPage {
 }
 #[pymethods]
 impl PyPage {
+    #[getter]
+    fn id(&self) -> u64 {
+        self.inner.id()
+    }
+    fn current_url(&self, py: Python<'_>) -> PyResult<String> {
+        py.detach(|| self.inner.current_url()).map_err(error)
+    }
+    fn automate(&self, py: Python<'_>, command: &str, timeout: Option<f64>) -> PyResult<String> {
+        let command =
+            serde_json::from_str(command).map_err(|e| InvalidInput::new_err(e.to_string()))?;
+        let timeout = timeout.map(duration).transpose()?;
+        py.detach(|| self.inner.automate(command, timeout))
+            .and_then(|v| {
+                serde_json::to_string(&v).map_err(|e| AutomationError::Internal(e.to_string()))
+            })
+            .map_err(error)
+    }
+    fn wait_for_network_idle(
+        &self,
+        py: Python<'_>,
+        quiet: f64,
+        timeout: Option<f64>,
+    ) -> PyResult<()> {
+        let quiet = duration(quiet)?;
+        let timeout = timeout
+            .map(duration)
+            .transpose()?
+            .unwrap_or(self.inner.default_timeout());
+        py.detach(|| {
+            self.inner
+                .wait_for_network_idle(quiet, timeout, CancellationToken::current())
+        })
+        .map_err(error)
+    }
     fn advance_time(
         &self,
         py: Python<'_>,
@@ -276,7 +332,7 @@ impl PyPage {
     }
 
     #[allow(clippy::too_many_arguments)]
-    #[pyo3(signature = (method, url, headers, body=None, timeout=None, allow_redirects=true, max_redirects=20, proxy_options="{}"))]
+    #[pyo3(signature = (method, url, headers, body=None, timeout=None, allow_redirects=true, max_redirects=20, proxy_options="{}", wait_until=None))]
     fn request(
         &self,
         py: Python<'_>,
@@ -288,8 +344,13 @@ impl PyPage {
         allow_redirects: bool,
         max_redirects: usize,
         proxy_options: &str,
+        wait_until: Option<String>,
     ) -> PyResult<PyResponse> {
         let options = RequestOptions {
+            wait_until: wait_until
+                .map(|v| serde_json::from_value(serde_json::Value::String(v)))
+                .transpose()
+                .map_err(|e| InvalidInput::new_err(e.to_string()))?,
             headers,
             body,
             timeout: timeout.map(duration).transpose()?,
@@ -318,6 +379,7 @@ impl PyPage {
         proxy_options: &str,
     ) -> PyResult<PyStream> {
         let options = RequestOptions {
+            wait_until: None,
             headers,
             body,
             timeout: timeout.map(duration).transpose()?,
@@ -330,13 +392,6 @@ impl PyPage {
         py.detach(|| self.inner.stream(method, url, options))
             .map(|inner| PyStream {
                 inner: Arc::new(inner),
-            })
-            .map_err(error)
-    }
-    fn evaluate(&self, py: Python<'_>, source: &str) -> PyResult<String> {
-        py.detach(|| self.inner.evaluate_handle(source)?.value())
-            .and_then(|v| {
-                serde_json::to_string(&v).map_err(|e| AutomationError::Internal(e.to_string()))
             })
             .map_err(error)
     }

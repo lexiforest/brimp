@@ -7,5 +7,5 @@
     "noEmit": true,
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["../bindings/node/index.d.ts"]
+  "include": ["../bindings/node/index.d.ts", "../bindings/node/test/automation.types.mts"]
 }

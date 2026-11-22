@@ -6,6 +6,7 @@ challenged, rate-limited or already trusted, and then no client passes or every
 client does. Safari is driven through `do JavaScript`, which does not set
 `navigator.webdriver`.
 """
+
 from __future__ import annotations
 
 import json
@@ -44,7 +45,7 @@ def safari_state(url: str, wait: float) -> dict:
     handle.close()
     raw = osascript(
         f'tell application "Safari" to do JavaScript (read file (POSIX file "{handle.name}" as text) '
-        'as «class utf8») in front document'
+        "as «class utf8») in front document"
     )
     try:
         return json.loads(raw)

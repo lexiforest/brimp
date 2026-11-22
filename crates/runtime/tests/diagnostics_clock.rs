@@ -6,7 +6,7 @@ use brimp_runtime::runtime::{
 use serde_json::json;
 use std::time::{Duration, Instant};
 
-fn logical(diagnostics: Option<DiagnosticsOptions>) -> Session {
+fn logical(diagnostics: Option<DiagnosticsOptions>) -> std::sync::Arc<Session> {
     Session::new(SessionOptions {
         clock: ClockOptions {
             mode: TimeMode::Logical,

@@ -1,5 +1,5 @@
 use brimp_runtime::runtime::{
-    native::{Session, SessionOptions},
+    native::SessionOptions,
     plugins::{HostCompletion, HostContext, HostInvocation, Plugin},
 };
 use napi::{
@@ -125,7 +125,8 @@ impl NativeHostCall {
             inner: brimp_runtime::runtime::native::JSHandle::from_reference(
                 self.context.bridge.clone(),
                 token,
-            ),
+            )
+            .into(),
         })
     }
     #[napi]
@@ -146,16 +147,19 @@ impl NativeHostCall {
     }
 }
 
-pub struct CreateSession(pub SessionOptions);
+use brimp_runtime::browser::Session;
+pub struct CreateSession(
+    pub SessionOptions,
+    pub String,
+    pub Option<std::path::PathBuf>,
+);
 impl Task for CreateSession {
-    type Output = Session;
+    type Output = Arc<Session>;
     type JsValue = super::NativeSession;
-    fn compute(&mut self) -> Result<Session> {
-        Session::new(self.0.clone()).map_err(super::error)
+    fn compute(&mut self) -> Result<Arc<Session>> {
+        Session::new(self.0.clone(), &self.1, self.2.as_deref()).map_err(super::error)
     }
-    fn resolve(&mut self, _env: Env, session: Session) -> Result<Self::JsValue> {
-        Ok(super::NativeSession {
-            inner: Arc::new(session),
-        })
+    fn resolve(&mut self, _env: Env, session: Arc<Session>) -> Result<Self::JsValue> {
+        Ok(super::NativeSession { inner: session })
     }
 }

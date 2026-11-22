@@ -87,6 +87,7 @@ impl Default for SessionOptions {
 
 #[derive(Clone, Debug)]
 pub struct RequestOptions {
+    pub wait_until: Option<crate::runtime::NavigationWait>,
     pub headers: Vec<(String, String)>,
     pub body: Option<Vec<u8>>,
     /// None inherits the session deadline; zero disables it.
@@ -100,6 +101,7 @@ pub struct RequestOptions {
 impl Default for RequestOptions {
     fn default() -> Self {
         Self {
+            wait_until: None,
             headers: Vec::new(),
             body: None,
             timeout: None,

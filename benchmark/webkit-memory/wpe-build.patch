@@ -1,0 +1,11 @@
+diff --git a/Source/WebKit/PlatformWPE.cmake b/Source/WebKit/PlatformWPE.cmake
+--- a/Source/WebKit/PlatformWPE.cmake
++++ b/Source/WebKit/PlatformWPE.cmake
+@@ -466,6 +466,7 @@
+ list(APPEND WebKit_LIBRARIES
++    GLib::GioUnix
+     GLib::Module
+     Soup3::Soup3
+ )
+ 
+ if (ENABLE_WPE_LEGACY_API)

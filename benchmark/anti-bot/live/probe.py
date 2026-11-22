@@ -4,6 +4,7 @@ The pyv8c examples each end with one question: did the site's own challenge scri
 run and leave its cookie? This asks exactly that, without the parts of those
 scripts that Brimp has no API for yet (coordinate mouse, press-and-hold).
 """
+
 from __future__ import annotations
 
 import argparse

@@ -52,7 +52,7 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
     })
     .unwrap();
     let page = session.new_page().unwrap();
-    let value = page.evaluate(r#"(() => {
+    let mut value = page.evaluate(r#"(() => {
         const canvas=document.createElement('canvas'); canvas.width=2; canvas.height=3;
         const c=canvas.getContext('2d'); c.fillStyle='#ff0000'; c.save(); c.translate(2,3); c.restore(); c.fillRect(0,0,2,3);
         const image=c.getImageData(0,0,2,3);
@@ -63,11 +63,21 @@ fn canvas_mock_preserves_state_and_consistent_dimensions() {
         const metrics=c.measureText('abcd');
         return {width:image.width,height:image.height,length:image.data.length,pixel:Array.from(image.data.slice(0,4)),encoded,fill:c.fillStyle,transform:c.getTransform().e,textWidth:metrics.width,hit:c.isPointInPath(0,0)};
     })()"#).unwrap();
+    // Platform font selection determines the advance; verify useful metrics
+    // and scaling without requiring a particular machine's installed fonts.
+    let width = value
+        .as_object_mut()
+        .unwrap()
+        .remove("textWidth")
+        .unwrap()
+        .as_f64()
+        .unwrap();
+    assert!(width.is_finite() && width > 0.0);
+    let doubled = page.evaluate("(() => { const c = document.createElement('canvas').getContext('2d'); c.font = '20px sans-serif'; return c.measureText('abcd').width; })()").unwrap().as_f64().unwrap();
+    assert!((doubled - width * 2.0).abs() < 0.01);
     assert_eq!(
         value,
-        // `textWidth` is the platform font's advance for "abcd" at the canvas's
-        // default 10px sans-serif, not a fixed ratio of the font size.
-        json!({"width":2,"height":3,"length":24,"pixel":[255,0,0,255],"encoded":{"prefix":"data:image/png;base64,","signature":[80,78,71],"width":2,"height":3},"fill":"#ff0000","transform":0,"textWidth":21.6845703125,"hit":false})
+        json!({"width":2,"height":3,"length":24,"pixel":[255,0,0,255],"encoded":{"prefix":"data:image/png;base64,","signature":[80,78,71],"width":2,"height":3},"fill":"#ff0000","transform":0,"hit":false})
     );
     assert_eq!(
         page.evaluate("typeof getComputedStyle(document.body)")

@@ -5,6 +5,7 @@ would notice. It drives Safari through `do JavaScript` rather than WebDriver:
 `safaridriver` sets `navigator.webdriver` and installs its own automation hooks,
 which changes the page it measures.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,9 @@ SIGNALS = (pathlib.Path(__file__).parent / "signals.js").read_text()
 
 
 def osascript(expression: str) -> str:
-    return subprocess.run(["osascript", "-e", expression], capture_output=True, text=True, check=True).stdout.strip()
+    return subprocess.run(
+        ["osascript", "-e", expression], capture_output=True, text=True, check=True
+    ).stdout.strip()
 
 
 def run_js(source: str) -> str:
@@ -31,7 +34,7 @@ def run_js(source: str) -> str:
     try:
         return osascript(
             f'tell application "Safari" to do JavaScript (read file (POSIX file "{handle.name}" as text) '
-            'as «class utf8») in front document'
+            "as «class utf8») in front document"
         )
     finally:
         pathlib.Path(handle.name).unlink()

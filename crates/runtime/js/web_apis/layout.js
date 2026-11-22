@@ -1152,9 +1152,14 @@ function __layoutShift(element, dx, dy, boxes) {
   shift(element);
 }
 
-function __layoutRun() {
-  const document = globalThis.document;
+function __layoutRun(document = globalThis.document) {
   if (!document) return new Map();
+  if (__layoutState.document !== document) {
+    __layoutState.observer?.disconnect();
+    __layoutState.observer = null;
+    __layoutState.document = document;
+    __layoutInvalidate();
+  }
   if (!__layoutState.observer && typeof MutationObserver === 'function') {
     __layoutState.observer = new MutationObserver(__layoutInvalidate);
     try {
@@ -1180,11 +1185,11 @@ function __layoutRun() {
 
 function __layoutBox(element) {
   if (!element || element.nodeType !== 1) return null;
-  return __layoutRun().get(element) ?? null;
+  return __layoutRun(element.ownerDocument).get(element) ?? null;
 }
 
 function __layoutFragments(element) {
-  __layoutRun();
+  __layoutRun(element.ownerDocument);
   const fragments = __layoutState.fragments?.get(element);
   if (!fragments || fragments.size === 0) return null;
   const rects = [];

@@ -9,18 +9,23 @@ import sys
 import tomllib
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tag", help="expected git tag, for example v0.1.2")
+    parser.add_argument("--package", choices=("brimp", "webkit"), default="brimp")
+    parser.add_argument("--tag", help="expected git tag: vVERSION or webkit-vVERSION")
     arguments = parser.parse_args()
     with (ROOT / "Cargo.toml").open("rb") as source:
         version = tomllib.load(source)["workspace"]["package"]["version"]
+    webkit_version = json.loads((ROOT / "tools/webkit/release.json").read_text())["version"]
     with (ROOT / "bindings/python/pyproject.toml").open("rb") as source:
         project = tomllib.load(source)["project"]
+    if project["optional-dependencies"]["webkit"] != [f"brimp-webkit=={webkit_version}"]:
+        raise RuntimeError(
+            "WebKit extra must match the companion version in tools/webkit/release.json"
+        )
     dynamic = project.get("dynamic", [])
     if "version" not in dynamic or "version" in project:
         raise RuntimeError("bindings/python/pyproject.toml must use dynamic version")
@@ -33,6 +38,12 @@ def main() -> int:
         raise RuntimeError(
             f"Node version {node['version']} does not match workspace version {version}"
         )
+    if node.get("peerDependencies", {}).get("@brimp/webkit") != webkit_version:
+        raise RuntimeError(
+            "Node WebKit peer must match the companion version in tools/webkit/release.json"
+        )
+    if node.get("peerDependenciesMeta", {}).get("@brimp/webkit") != {"optional": True}:
+        raise RuntimeError("The Node WebKit companion must remain an optional peer")
     for name, expected in node.get("optionalDependencies", {}).items():
         if expected != version:
             raise RuntimeError(f"{name} is pinned to {expected}, expected {version}")
@@ -40,8 +51,11 @@ def main() -> int:
     for path in (ROOT / "bindings/python/LICENSE", ROOT / "bindings/node/LICENSE"):
         if path.read_text() != license_text:
             raise RuntimeError(f"{path.relative_to(ROOT)} does not match the root LICENSE")
-    if arguments.tag and arguments.tag != f"v{version}":
-        raise RuntimeError(f"release tag {arguments.tag!r} does not match version v{version}")
+    prefix = "v"
+    if arguments.package == "webkit":
+        version, prefix = webkit_version, "webkit-v"
+    if arguments.tag and arguments.tag != f"{prefix}{version}":
+        raise RuntimeError(f"release tag {arguments.tag!r} does not match {prefix}{version}")
     print(version)
     return 0
 

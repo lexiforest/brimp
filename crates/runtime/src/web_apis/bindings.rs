@@ -263,7 +263,7 @@ pub struct BindingQueues {
     pub streaming: Rc<RefCell<StreamingQueue>>,
 }
 
-#[derive(Clone, Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct StoredCookie {
     pub name: String,
     pub value: String,
@@ -431,7 +431,54 @@ fn stored_cookie(cookie: &cookie_store::Cookie<'static>) -> StoredCookie {
     }
 }
 
+pub struct PopupControl {
+    url: Mutex<String>,
+    closed: std::sync::atomic::AtomicBool,
+    child: Mutex<
+        Option<(
+            std::sync::Weak<BrowsingContext>,
+            Arc<std::sync::atomic::AtomicBool>,
+        )>,
+    >,
+}
+impl PopupControl {
+    pub fn url(&self) -> String {
+        self.url.lock().unwrap().clone()
+    }
+    pub fn closed(&self) -> bool {
+        self.closed.load(std::sync::atomic::Ordering::Acquire)
+            || self
+                .child
+                .lock()
+                .unwrap()
+                .as_ref()
+                .is_some_and(|(_, closed)| closed.load(std::sync::atomic::Ordering::Acquire))
+    }
+    pub fn attach(&self, child: Arc<BrowsingContext>, closed: Arc<std::sync::atomic::AtomicBool>) {
+        if self.closed.load(std::sync::atomic::Ordering::Acquire) {
+            closed.store(true, std::sync::atomic::Ordering::Release);
+        }
+        *self.child.lock().unwrap() = Some((Arc::downgrade(&child), closed));
+    }
+    fn navigate(&self, url: String) {
+        *self.url.lock().unwrap() = url.clone();
+        if let Some((child, _)) = &*self.child.lock().unwrap()
+            && let Some(child) = child.upgrade()
+        {
+            child.request_navigation(url);
+        }
+    }
+    fn close(&self) {
+        self.closed
+            .store(true, std::sync::atomic::Ordering::Release);
+        if let Some((_, closed)) = &*self.child.lock().unwrap() {
+            closed.store(true, std::sync::atomic::Ordering::Release);
+        }
+    }
+}
+
 pub struct BrowsingContext {
+    popups: Mutex<std::collections::HashMap<u64, Arc<PopupControl>>>,
     url: Mutex<Option<String>>,
     pending_navigation: Mutex<Option<String>>,
     cookies: Arc<CookieJar>,
@@ -450,6 +497,7 @@ impl BrowsingContext {
     pub fn with_cookie_jar(cookies: Arc<CookieJar>) -> Self {
         Self {
             url: Mutex::new(None),
+            popups: Mutex::default(),
             pending_navigation: Mutex::new(None),
             cookies,
             request_headers: Mutex::new(Vec::new()),
@@ -477,6 +525,24 @@ impl BrowsingContext {
             .lock()
             .expect("request identity lock poisoned") = headers;
         Ok(())
+    }
+
+    pub fn popup(&self, id: u64) -> Option<Arc<PopupControl>> {
+        self.popups.lock().unwrap().get(&id).cloned()
+    }
+
+    fn open_popup(&self, url: String) -> u64 {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let id = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.popups.lock().unwrap().insert(
+            id,
+            Arc::new(PopupControl {
+                url: Mutex::new(url),
+                closed: Default::default(),
+                child: Mutex::new(None),
+            }),
+        );
+        id
     }
 
     pub(crate) fn update_identity_headers(
@@ -1098,6 +1164,8 @@ fn is_platform_operation(operation: &str) -> bool {
                 | "clearInterval"
                 | "location"
                 | "locationNavigate"
+                | "windowOpen"
+                | "popupControl"
                 | "historyUpdateUrl"
                 | "formUrlEncode"
                 | "decodeBytes"

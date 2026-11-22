@@ -1,3 +1,4 @@
+pub mod browser;
 pub mod dom;
 pub mod network;
 pub mod profile;

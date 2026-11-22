@@ -383,6 +383,52 @@ function __setLocationComponent(receiver, component, value) {
   receiver.assign(url.href);
 }
 
+const __namedPopups = new Map();
+Window.prototype.open = function open(url = '', target = '_blank') {
+  const context = this?.location ? this : window;
+  const href = url === '' ? 'about:blank' : new URL(String(url), context.location.href).href;
+  target = String(target);
+  if (['_self', '_parent', '_top'].includes(target)) {
+    const destination =
+      target === '_top' ? context.top : target === '_parent' ? context.parent : context;
+    destination.location.href = href;
+    return destination;
+  }
+  if (target && target !== '_blank') {
+    const existing = __namedPopups.get(target);
+    if (existing && !existing.closed) {
+      existing.location = href;
+      return existing;
+    }
+  }
+  const id = __callHost('windowOpen', null, href);
+  const control = (op, url) =>
+    JSON.parse(__callHost('popupControl', null, JSON.stringify({ id, op, url })));
+  const navigate = (value) =>
+    control('navigate', new URL(String(value), context.location.href).href);
+  const proxy = Object.create(Window.prototype);
+  const popupLocation = {
+    get href() {
+      return control('state').url;
+    },
+    set href(value) {
+      navigate(value);
+    },
+    assign: navigate,
+    replace: navigate,
+    toString() {
+      return this.href;
+    },
+  };
+  Object.defineProperties(proxy, {
+    closed: { get: () => control('state').closed },
+    close: { value: () => control('close') },
+    location: { get: () => popupLocation, set: navigate },
+  });
+  if (target && target !== '_blank') __namedPopups.set(target, proxy);
+  return proxy;
+};
+
 function __navigateLocation(receiver, value, replace) {
   const oldURL = receiver.href,
     next = new URL(__toUSVString(value), oldURL);

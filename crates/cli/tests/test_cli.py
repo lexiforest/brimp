@@ -750,8 +750,12 @@ def test_subsystem_plugins_and_options():
 def test_default_browser_plugins_and_core_only_selection():
     source = b"[typeof Worker,typeof AudioContext,typeof RTCPeerConnection,typeof hostStorage]"
     assert json.loads(run("run", "-", input=source).stdout) == ["function"] * 3 + ["undefined"]
-    assert json.loads(run("run", "-", "--no-plugins", input=source).stdout) == ["undefined"] * 4
-    assert (
-        json.loads(run("run", "-", "--plugin", "workers", input=source).stdout)
-        == ["function"] + ["undefined"] * 3
-    )
+    # Core keeps browser interface placeholders available without plugins.
+    assert json.loads(run("run", "-", "--no-plugins", input=source).stdout) == ["function"] * 3 + [
+        "undefined"
+    ]
+    unavailable = b"(() => { try { new Worker('/worker.js'); return 'constructed'; } catch (error) { return error.name; } })()"
+    assert json.loads(run("run", "-", "--no-plugins", input=unavailable).stdout) == "TypeError"
+    assert json.loads(run("run", "-", "--plugin", "workers", input=source).stdout) == [
+        "function"
+    ] * 3 + ["undefined"]

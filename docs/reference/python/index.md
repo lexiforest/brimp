@@ -38,9 +38,21 @@ manager to release both. Use Session for shared cookies and session configuratio
 
 ::: brimp.ElementHandle
 
+::: brimp.Mouse
+
 ::: brimp.Route
 
 ::: brimp.StreamingResponse
+
+## Locators and frames
+
+Locators resolve the current DOM on each operation. Frame scopes resolve a selector
+path; their methods return awaitables when created from an AsyncPage. See the
+[automation guide](/guides/automation/) for event expectations and popup ownership.
+
+::: brimp.Locator
+
+::: brimp.Frame
 
 ## Async sessions and pages
 

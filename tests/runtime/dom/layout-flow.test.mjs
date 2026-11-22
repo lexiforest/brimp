@@ -87,7 +87,8 @@ test('a text run gets a line box from the shaped font, not a fixed ratio', async
     assert.equal(values.normalLineHeight, 'normal');
     // A shaped 20px line is at least the font size and shorter than 3x it.
     assert.ok(values.normalHeight >= 20 && values.normalHeight < 60, String(values.normalHeight));
-    assert.equal(values.normalHeight, Math.round(values.normalHeight));
+    // Font metrics and CSS pixel geometry can be fractional on Linux.
+    assert.ok(Number.isFinite(values.normalHeight));
     assert.ok(values.measured > 20, String(values.measured));
   } finally {
     await session.close();

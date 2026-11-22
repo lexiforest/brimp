@@ -1,8 +1,7 @@
 mod network;
 mod plugins;
-use brimp_runtime::runtime::native::{
-    ElementHandle, JSHandle, NativePage, RequestOptions, Session, SessionOptions,
-};
+use brimp_runtime::browser::{ElementHandle, JSHandle, Page as NativePage, Session};
+use brimp_runtime::runtime::native::{RequestOptions, SessionOptions};
 use brimp_runtime::runtime::{AutomationError, CancellationToken};
 use napi::{Error, bindgen_prelude::*};
 use napi_derive::napi;
@@ -23,8 +22,8 @@ async fn blocking<T: Send + 'static>(
 fn duration(ms: f64) -> Result<Duration> {
     Duration::try_from_secs_f64(ms / 1000.0)
         .ok()
-        .filter(|v| !v.is_zero())
-        .ok_or_else(|| Error::from_reason("timeout must be finite and positive"))
+        .filter(|v| std::time::Instant::now().checked_add(*v).is_some())
+        .ok_or_else(|| Error::from_reason("invalid_input: timeout must be finite and nonnegative"))
 }
 fn pairs(headers: Vec<Vec<String>>) -> Result<Vec<(String, String)>> {
     headers
@@ -75,6 +74,8 @@ pub fn create_native_session(
     clock: Value,
     diagnostics: Value,
     storage_path: Option<String>,
+    engine: String,
+    executable_path: Option<String>,
 ) -> Result<AsyncTask<plugins::CreateSession>> {
     let mut options = SessionOptions {
         storage_path: storage_path.map(Into::into),
@@ -94,15 +95,39 @@ pub fn create_native_session(
         ..Default::default()
     };
     options.network.proxy_options.proxy = proxy;
+    options.network.request_timeout = Duration::ZERO;
+    options.network.connect_timeout = Duration::ZERO;
     options
         .network
         .proxy_options
         .validate()
         .map_err(|e| Error::from_reason(e.to_string()))?;
-    Ok(AsyncTask::new(plugins::CreateSession(options)))
+    Ok(AsyncTask::new(plugins::CreateSession(
+        options,
+        engine,
+        executable_path.map(Into::into),
+    )))
 }
 #[napi]
 impl NativeSession {
+    #[napi]
+    pub fn pages(&self) -> Vec<NativePageBinding> {
+        self.inner
+            .pages()
+            .into_iter()
+            .map(|inner| NativePageBinding { inner })
+            .collect()
+    }
+    #[napi]
+    pub fn page(&self, id: String) -> Result<NativePageBinding> {
+        let id = id
+            .parse()
+            .map_err(|_| Error::from_reason("invalid_input: invalid page id"))?;
+        self.inner
+            .page(id)
+            .map(|inner| NativePageBinding { inner })
+            .map_err(error)
+    }
     #[napi]
     pub async fn new_page(&self) -> Result<NativePageBinding> {
         let session = self.inner.clone();
@@ -119,19 +144,16 @@ impl NativeSession {
     }
     #[napi]
     pub fn set_cookie(&self, url: String, name: String, value: String) -> Result<()> {
-        self.inner
-            .cookies()
-            .set_cookie(&url, &name, &value)
-            .map_err(error)
+        self.inner.set_cookie(&url, &name, &value).map_err(error)
     }
     #[napi]
     pub fn cookies(&self) -> Result<Value> {
-        serde_json::to_value(self.inner.cookies().cookies())
+        serde_json::to_value(self.inner.cookies().map_err(error)?)
             .map_err(|e| Error::from_reason(e.to_string()))
     }
     #[napi]
-    pub fn clear_cookies(&self) {
-        self.inner.cookies().clear_cookies();
+    pub fn clear_cookies(&self) -> Result<()> {
+        self.inner.clear_cookies().map_err(error)
     }
 }
 
@@ -146,6 +168,44 @@ pub struct NativePageBinding {
 }
 #[napi]
 impl NativePageBinding {
+    #[napi]
+    pub async fn current_url(&self) -> Result<String> {
+        let page = self.inner.clone();
+        blocking(move || page.current_url()).await
+    }
+    #[napi]
+    pub async fn automate(
+        &self,
+        command: Value,
+        timeout: Option<f64>,
+        cancellation: &NativeCancellation,
+    ) -> Result<String> {
+        let page = self.inner.clone();
+        let timeout = timeout.map(duration).transpose()?;
+        let cancellation = cancellation.inner.clone();
+        blocking(move || {
+            let _scope = cancellation.enter();
+            serde_json::to_string(&page.automate(command, timeout)?)
+                .map_err(|e| AutomationError::Internal(e.to_string()))
+        })
+        .await
+    }
+    #[napi]
+    pub async fn wait_for_network_idle(
+        &self,
+        quiet: f64,
+        timeout: Option<f64>,
+        cancellation: &NativeCancellation,
+    ) -> Result<()> {
+        let page = self.inner.clone();
+        let quiet = duration(quiet)?;
+        let timeout = timeout
+            .map(duration)
+            .transpose()?
+            .unwrap_or(page.default_timeout());
+        let cancellation = cancellation.inner.clone();
+        blocking(move || page.wait_for_network_idle(quiet, timeout, cancellation)).await
+    }
     #[napi]
     pub async fn advance_time(&self, milliseconds: f64, max_tasks: u32) -> Result<Value> {
         let page = self.inner.clone();
@@ -278,9 +338,14 @@ impl NativePageBinding {
         allow_redirects: bool,
         max_redirects: u32,
         cancellation: &NativeCancellation,
+        wait_until: Option<String>,
     ) -> Result<NativeResponse> {
         let page = self.inner.clone();
         let options = RequestOptions {
+            wait_until: wait_until
+                .map(|v| serde_json::from_value(Value::String(v)))
+                .transpose()
+                .map_err(|e| Error::from_reason(format!("invalid_input: {e}")))?,
             headers: pairs(headers)?,
             body: body.map(|v| v.to_vec()),
             timeout: timeout.map(duration).transpose()?,
@@ -312,6 +377,7 @@ impl NativePageBinding {
         cancellation: &NativeCancellation,
     ) -> Result<NativeStream> {
         let options = RequestOptions {
+            wait_until: None,
             headers: pairs(headers)?,
             body: body.map(|b| b.to_vec()),
             timeout: timeout.map(duration).transpose()?,
@@ -326,15 +392,6 @@ impl NativePageBinding {
                 .map(|inner| NativeStream {
                     inner: Arc::new(inner),
                 })
-        })
-        .await
-    }
-    #[napi]
-    pub async fn evaluate(&self, source: String) -> Result<String> {
-        let page = self.inner.clone();
-        blocking(move || {
-            serde_json::to_string(&page.evaluate_handle(&source)?.value()?)
-                .map_err(|e| AutomationError::Internal(e.to_string()))
         })
         .await
     }

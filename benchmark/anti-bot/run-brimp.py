@@ -1,4 +1,5 @@
 """Run the signal probe in Brimp and print its JSON."""
+
 from __future__ import annotations
 
 import json

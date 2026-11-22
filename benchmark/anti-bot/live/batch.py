@@ -1,4 +1,5 @@
 """Run every target from the pyv8c examples and report what Brimp observed."""
+
 from __future__ import annotations
 
 import json
@@ -24,14 +25,18 @@ def run(name, url, marker, seconds=25.0):
             page = session.get(url, timeout=60)
             record["status"] = page.status_code
             record["title"] = page.evaluate("document.title")
-            record["ua_ok"] = page.evaluate("navigator.userAgent").startswith("Mozilla/5.0 (Macintosh")
+            record["ua_ok"] = page.evaluate("navigator.userAgent").startswith(
+                "Mozilla/5.0 (Macintosh"
+            )
             deadline = started + seconds
             while time.monotonic() < deadline:
                 page.run_pending_tasks()
                 time.sleep(0.25)
             record["cookies"] = {r["name"]: r["value"][:24] for r in session.cookies}
             record["final_title"] = page.evaluate("document.title")
-            record["body"] = (page.evaluate("document.body?.innerText || ''") or "")[:120].replace("\n", " ")
+            record["body"] = (page.evaluate("document.body?.innerText || ''") or "")[:120].replace(
+                "\n", " "
+            )
             # The marker cookie can also be the *pre-challenge* one; report both.
             values = {r["name"]: r["value"] for r in session.cookies}
             record["marker_present"] = any(key.startswith(marker) for key in values)

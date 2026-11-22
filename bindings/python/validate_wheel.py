@@ -9,7 +9,6 @@ import tomllib
 import zipfile
 from pathlib import Path
 
-
 PLATFORMS = {
     "x86_64-unknown-linux-gnu": "manylinux_2_34_x86_64",
     "aarch64-unknown-linux-gnu": "manylinux_2_34_aarch64",
@@ -24,6 +23,7 @@ REQUIRED_LIBRARIES = {
         "libicudata",
         "libicui18n",
         "libicuuc",
+        "libatomic",
     ),
     "aarch64-unknown-linux-gnu": (
         "libJavaScriptCore",
@@ -31,6 +31,7 @@ REQUIRED_LIBRARIES = {
         "libicudata",
         "libicui18n",
         "libicuuc",
+        "libatomic",
     ),
     "aarch64-apple-darwin": ("JavaScriptCore", "libcurl-impersonate"),
     "x86_64-pc-windows-msvc": (
@@ -106,6 +107,11 @@ def validate(wheel: Path, target: str) -> None:
         name.startswith("brimp/bundled/licenses/native/jsc-sdk/icu/") for name in names
     ):
         raise RuntimeError(f"{wheel.name} does not bundle the ICU license")
+    if target.endswith("linux-gnu"):
+        for notice in ("COPYING3", "COPYING.RUNTIME"):
+            name = f"brimp/bundled/licenses/native/gcc-runtime/{notice}"
+            if name not in names:
+                raise RuntimeError(f"{wheel.name} does not bundle {name}")
 
 
 def main() -> None:

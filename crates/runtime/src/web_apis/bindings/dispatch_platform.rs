@@ -6,6 +6,41 @@ pub(super) fn dispatch(
     operation: &str,
 ) -> Result<NativeValue, NativeError> {
     match operation {
+        "windowOpen" => {
+            let url = required_string(call, 2, "popup URL")?;
+            url::Url::parse(&url).map_err(err)?;
+            let id = state.browsing_context.open_popup(url.clone());
+            state
+                .events
+                .emit(crate::runtime::events::PageEvent::PopupRequested { id, url });
+            Ok(NativeValue::String(id.to_string()))
+        }
+        "popupControl" => {
+            let request: serde_json::Value =
+                serde_json::from_str(&required_string(call, 2, "popup command")?).map_err(err)?;
+            let id = request["id"]
+                .as_str()
+                .and_then(|v| v.parse().ok())
+                .ok_or_else(|| NativeError::new("invalid popup id"))?;
+            let popup = state
+                .browsing_context
+                .popup(id)
+                .ok_or_else(|| NativeError::new("popup closed"))?;
+            match request["op"].as_str() {
+                Some("close") => popup.close(),
+                Some("navigate") => {
+                    let url = request["url"]
+                        .as_str()
+                        .ok_or_else(|| NativeError::new("missing URL"))?;
+                    url::Url::parse(url).map_err(err)?;
+                    popup.navigate(url.into());
+                }
+                _ => (),
+            }
+            Ok(NativeValue::String(
+                serde_json::json!({"closed": popup.closed(), "url": popup.url()}).to_string(),
+            ))
+        }
         "storageOperation" => {
             let request: serde_json::Value =
                 serde_json::from_str(&required_string(call, 2, "storage request")?).map_err(err)?;

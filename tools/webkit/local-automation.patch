@@ -1,0 +1,662 @@
+diff --git a/Source/JavaScriptCore/inspector/protocol/Network.json b/Source/JavaScriptCore/inspector/protocol/Network.json
+index a535818daee8..41c1805aefcf 100644
+--- a/Source/JavaScriptCore/inspector/protocol/Network.json
++++ b/Source/JavaScriptCore/inspector/protocol/Network.json
+@@ -205,7 +205,8 @@
+             "description": "Returns content served for the given request.",
+             "async": true,
+             "parameters": [
+-                { "name": "requestId", "$ref": "RequestId", "description": "Identifier of the network request to get content for." }
++                { "name": "requestId", "$ref": "RequestId", "description": "Identifier of the network request to get content for." },
++                { "name": "raw", "type": "boolean", "optional": true, "description": "Return the retained response bytes as base64 without text decoding. Fails if raw bytes are unavailable." }
+             ],
+             "returns": [
+                 { "name": "body", "type": "string", "description": "Response body." },
+diff --git a/Source/WebCore/inspector/agents/InspectorNetworkAgent.cpp b/Source/WebCore/inspector/agents/InspectorNetworkAgent.cpp
+index 52ec14c570ca..0bd950581725 100644
+--- a/Source/WebCore/inspector/agents/InspectorNetworkAgent.cpp
++++ b/Source/WebCore/inspector/agents/InspectorNetworkAgent.cpp
+@@ -922,7 +922,7 @@ Inspector::Protocol::ErrorStringOr<void> InspectorNetworkAgent::setExtraHTTPHead
+     return { };
+ }
+ 
+-void InspectorNetworkAgent::getResponseBody(const Inspector::Protocol::Network::RequestId& requestId, Ref<GetResponseBodyCallback>&& callback)
++void InspectorNetworkAgent::getResponseBody(const Inspector::Protocol::Network::RequestId& requestId, std::optional<bool>&& raw, Ref<GetResponseBodyCallback>&& callback)
+ {
+     NetworkResourcesData::ResourceData const* resourceData = m_resourcesData->data(requestId);
+     if (!resourceData) {
+@@ -930,6 +930,22 @@ void InspectorNetworkAgent::getResponseBody(const Inspector::Protocol::Network::
+         return;
+     }
+ 
++    if (raw.value_or(false)) {
++        RefPtr buffer = resourceData->buffer();
++        if (!buffer && resourceData->cachedResource())
++            buffer = resourceData->cachedResource()->resourceBuffer();
++        if (buffer) {
++            callback->sendSuccess(base64EncodeToString(buffer->makeContiguous()->span()), true);
++            return;
++        }
++        if (resourceData->hasContent() && resourceData->base64Encoded()) {
++            callback->sendSuccess(resourceData->content(), true);
++            return;
++        }
++        callback->sendFailure("Raw response bytes are unavailable or were evicted"_s);
++        return;
++    }
++
+     if (resourceData->hasContent()) {
+         callback->sendSuccess(resourceData->content(), resourceData->base64Encoded());
+         return;
+diff --git a/Source/WebCore/inspector/agents/InspectorNetworkAgent.h b/Source/WebCore/inspector/agents/InspectorNetworkAgent.h
+index 2bc20b476708..1455e933085d 100644
+--- a/Source/WebCore/inspector/agents/InspectorNetworkAgent.h
++++ b/Source/WebCore/inspector/agents/InspectorNetworkAgent.h
+@@ -89,7 +89,7 @@ public:
+     Inspector::Protocol::ErrorStringOr<void> enable() override;
+     Inspector::Protocol::ErrorStringOr<void> disable() final;
+     Inspector::Protocol::ErrorStringOr<void> setExtraHTTPHeaders(Ref<JSON::Object>&&) final;
+-    void getResponseBody(const Inspector::Protocol::Network::RequestId&, Ref<GetResponseBodyCallback>&&) final;
++    void getResponseBody(const Inspector::Protocol::Network::RequestId&, std::optional<bool>&&, Ref<GetResponseBodyCallback>&&) final;
+     Inspector::Protocol::ErrorStringOr<void> setResourceCachingDisabled(bool) final;
+     Inspector::Protocol::ErrorStringOr<void> setClearResourceDataOnNavigate(bool) final;
+     void loadResource(const Inspector::Protocol::Network::FrameId&, const String& url, Ref<LoadResourceCallback>&&) final;
+diff --git a/Source/WebKit/Modules/OSX_Private.modulemap b/Source/WebKit/Modules/OSX_Private.modulemap
+index fb8d138a5ded..a8295245ecaa 100644
+--- a/Source/WebKit/Modules/OSX_Private.modulemap
++++ b/Source/WebKit/Modules/OSX_Private.modulemap
+@@ -1719,8 +1719,8 @@ framework module WebKit_Private [system] {
+     export *
+   }
+ 
+-  explicit module _WKAutomationSessionPrivateForTesting {
+-    header "_WKAutomationSessionPrivateForTesting.h"
++  explicit module _WKAutomationSessionLocalConnection {
++    header "_WKAutomationSessionLocalConnection.h"
+     export *
+   }
+ 
+diff --git a/Source/WebKit/Modules/iOS_Private.modulemap b/Source/WebKit/Modules/iOS_Private.modulemap
+index 5b2a0257dbff..7383c99abb29 100644
+--- a/Source/WebKit/Modules/iOS_Private.modulemap
++++ b/Source/WebKit/Modules/iOS_Private.modulemap
+@@ -2625,8 +2625,8 @@ framework module WebKit_Private [system] {
+     export *
+   }
+ 
+-  explicit module _WKAutomationSessionPrivateForTesting {
+-    header "_WKAutomationSessionPrivateForTesting.h"
++  explicit module _WKAutomationSessionLocalConnection {
++    header "_WKAutomationSessionLocalConnection.h"
+     export *
+   }
+ 
+diff --git a/Source/WebKit/SourcesCocoa.txt b/Source/WebKit/SourcesCocoa.txt
+index dfa978e90a23..8bce16dede74 100644
+--- a/Source/WebKit/SourcesCocoa.txt
++++ b/Source/WebKit/SourcesCocoa.txt
+@@ -288,7 +288,7 @@ UIProcess/API/Cocoa/_WKArchiveExclusionRule.mm @nonARC
+ UIProcess/API/Cocoa/_WKAttachment.mm @nonARC
+ UIProcess/API/Cocoa/_WKAutomationSession.mm @nonARC
+ UIProcess/API/Cocoa/_WKAutomationSessionConfiguration.mm @nonARC
+-UIProcess/API/Cocoa/_WKAutomationSessionTesting.mm @nonARC
++UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.mm @nonARC
+ UIProcess/API/Cocoa/_WKContentRuleListAction.mm @nonARC
+ UIProcess/API/Cocoa/_WKContextMenuElementInfo.mm @nonARC
+ UIProcess/API/Cocoa/_WKCustomHeaderFields.mm @nonARC @no-unify-when(bundle<=8)
+diff --git a/Source/WebKit/UIProcess/API/APIAutomationSessionClient.h b/Source/WebKit/UIProcess/API/APIAutomationSessionClient.h
+index 7f111c8e9b02..182a26649a45 100644
+--- a/Source/WebKit/UIProcess/API/APIAutomationSessionClient.h
++++ b/Source/WebKit/UIProcess/API/APIAutomationSessionClient.h
+@@ -97,7 +97,7 @@ public:
+ 
+     virtual void performApplicationCommand(WebKit::WebAutomationSession&, WebKit::WebPageProxy&, const WTF::String& commandName, const WTF::String& arguments, CompletionHandler<void(const WTF::String&)>&& completionHandler) { completionHandler(WTF::String()); }
+ 
+-    virtual bool shouldEnableInspectorTesting(WebKit::WebAutomationSession&) { return false; }
++    virtual bool shouldEnableInspectorProtocol(WebKit::WebAutomationSession&) { return false; }
+ };
+ 
+ } // namespace API
+diff --git a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionDelegate.h b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionDelegate.h
+index 337a9928646e..3daa6655526e 100644
+--- a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionDelegate.h
++++ b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionDelegate.h
+@@ -80,7 +80,7 @@ typedef NS_ENUM(NSInteger, _WKAutomationSessionWebExtensionResourceOptions) {
+ 
+ - (void)_automationSession:(_WKAutomationSession *)automationSession performCommandForWebView:(WKWebView *)webView commandName:(NSString *)commandName arguments:(NSString *)arguments completionHandler:(void(^)(NSString * _Nullable))completionHandler WK_API_AVAILABLE(macos(27.0), ios(27.0), visionos(27.0));
+ 
+-- (BOOL)_automationSessionShouldEnableInspectorTesting:(_WKAutomationSession *)automationSession WK_API_AVAILABLE(macos(27.0), ios(27.0), visionos(27.0));
++- (BOOL)_automationSessionShouldEnableInspectorProtocol:(_WKAutomationSession *)automationSession WK_API_AVAILABLE(macos(27.0), ios(27.0), visionos(27.0));
+ 
+ @end
+ 
+diff --git a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionPrivateForTesting.h b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.h
+similarity index 77%
+rename from Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionPrivateForTesting.h
+rename to Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.h
+index 21839d623f4e..4ce1a2c7c113 100644
+--- a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionPrivateForTesting.h
++++ b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.h
+@@ -29,28 +29,26 @@
+ 
+ NS_HEADER_AUDIT_BEGIN(nullability, sendability)
+ 
+-/// Testing-only SPI that lets in-process API tests drive the Automation
+-/// backend without a RemoteInspector transport. Not intended for production
+-/// clients; the surface exists solely to exercise WebAutomationSession's
+-/// dispatch path (and downstream Inspector backend round-trips) from unit
+-/// tests in TestWebKitAPI.
+-@interface _WKAutomationSession (PrivateForTesting)
++/// Private embedding interface for a local Automation protocol client.
++/// The embedding application owns its transport and must connect and dispatch
++/// on the main run loop. No listening port or RemoteInspector service is required.
++@interface _WKAutomationSession (LocalConnection)
+ 
+ /// Register the given WKWebView as a browsing context for this session and
+ /// return the handle. The session's process pool must already include the
+ /// web view's process. Subsequent Automation commands referencing the
+ /// returned handle will resolve to this WKWebView.
+-- (NSString *)_registerWebViewForTesting:(WKWebView *)webView;
++- (NSString *)_registerWebView:(WKWebView *)webView;
+ 
+ /// Install a block that captures every outbound JSON-RPC message the
+ /// session would otherwise send through its FrontendChannel (responses
+ /// and events). Replaces any previously installed handler. Passing nil
+-/// detaches the test channel.
+-- (void)_setMessageToFrontendHandlerForTesting:(nullable void (^)(NSString *message))handler;
++/// detaches the local channel.
++- (void)_setMessageToFrontendHandler:(nullable void (^)(NSString *message))handler;
+ 
+ /// Drive an inbound JSON-RPC message into the Automation backend dispatcher
+ /// as if it arrived from the remote driver. Synchronous.
+-- (void)_dispatchMessageFromRemoteForTesting:(NSString *)message;
++- (void)_dispatchMessageFromRemote:(NSString *)message;
+ 
+ @end
+ 
+diff --git a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionTesting.mm b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.mm
+similarity index 65%
+rename from Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionTesting.mm
+rename to Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.mm
+index 2ab5654fa210..07cdf1e42f29 100644
+--- a/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionTesting.mm
++++ b/Source/WebKit/UIProcess/API/Cocoa/_WKAutomationSessionLocalConnection.mm
+@@ -24,7 +24,7 @@
+  */
+ 
+ #import "config.h"
+-#import "_WKAutomationSessionPrivateForTesting.h"
++#import "_WKAutomationSessionLocalConnection.h"
+ 
+ #if ENABLE(REMOTE_INSPECTOR)
+ 
+@@ -41,16 +41,12 @@
+ 
+ namespace WebKit {
+ 
+-// A FrontendChannel that funnels every outbound JSON-RPC message into a
+-// caller-supplied Objective-C block. Used by API tests as a stand-in for
+-// the real RemoteInspector transport so a test can observe what the
+-// automation backend would send back to the driver. Lifetime is managed
+-// by the Objective-C wrapper @_WKAutomationSessionTestChannel below; the
+-// channel disconnects from the session before deallocation.
+-class TestFrontendChannel final : public Inspector::FrontendChannel {
+-    WTF_MAKE_TZONE_ALLOCATED(TestFrontendChannel);
++// Local embedding transport. The wrapper disconnects before deallocation;
++// the application owns framing and delivery of messages outside this process.
++class LocalFrontendChannel final : public Inspector::FrontendChannel {
++    WTF_MAKE_TZONE_ALLOCATED(LocalFrontendChannel);
+ public:
+-    explicit TestFrontendChannel(void (^handler)(NSString *))
++    explicit LocalFrontendChannel(void (^handler)(NSString *))
+         : m_handler(makeBlockPtr(handler))
+     {
+     }
+@@ -67,18 +63,18 @@ private:
+     BlockPtr<void(NSString *)> m_handler;
+ };
+ 
+-WTF_MAKE_TZONE_ALLOCATED_IMPL(TestFrontendChannel);
++WTF_MAKE_TZONE_ALLOCATED_IMPL(LocalFrontendChannel);
+ 
+ } // namespace WebKit
+ 
+-@interface _WKAutomationSessionTestChannel : NSObject {
++@interface _WKAutomationSessionLocalChannel : NSObject {
+ @public
+-    std::unique_ptr<WebKit::TestFrontendChannel> _channel;
++    std::unique_ptr<WebKit::LocalFrontendChannel> _channel;
+     WeakObjCPtr<_WKAutomationSession> _session;
+ }
+ @end
+ 
+-@implementation _WKAutomationSessionTestChannel
++@implementation _WKAutomationSessionLocalChannel
+ - (void)dealloc
+ {
+     RetainPtr session = _session.get();
+@@ -90,11 +86,11 @@ WTF_MAKE_TZONE_ALLOCATED_IMPL(TestFrontendChannel);
+ }
+ @end
+ 
+-static void *kAutomationTestChannelKey = &kAutomationTestChannelKey;
++static void *kAutomationLocalChannelKey = &kAutomationLocalChannelKey;
+ 
+-@implementation _WKAutomationSession (PrivateForTesting)
++@implementation _WKAutomationSession (LocalConnection)
+ 
+-- (NSString *)_registerWebViewForTesting:(WKWebView *)webView
++- (NSString *)_registerWebView:(WKWebView *)webView
+ {
+     RefPtr page = [webView _page].get();
+     if (!page)
+@@ -103,35 +99,35 @@ static void *kAutomationTestChannelKey = &kAutomationTestChannelKey;
+     return session->handleForWebPageProxy(*page).createNSString().autorelease();
+ }
+ 
+-- (void)_setMessageToFrontendHandlerForTesting:(void (^)(NSString *))handler
++- (void)_setMessageToFrontendHandler:(void (^)(NSString *))handler
+ {
+     Ref session = downcast<WebKit::WebAutomationSession>([self _apiObject]);
+ 
+-    // Tear down any previously installed test channel first. The wrapper's
++    // Tear down any previously installed local channel first. The wrapper's
+     // dealloc disconnects the channel from the session, so just dropping the
+     // associated object would race; do the disconnect deterministically.
+-    RetainPtr existing = (_WKAutomationSessionTestChannel *)objc_getAssociatedObject(self, kAutomationTestChannelKey);
++    RetainPtr existing = (_WKAutomationSessionLocalChannel *)objc_getAssociatedObject(self, kAutomationLocalChannelKey);
+     if (existing) {
+         if (existing->_channel)
+             session->disconnect(*existing->_channel);
+         existing->_channel = nullptr;
+         existing->_session = nil;
+-        objc_setAssociatedObject(self, kAutomationTestChannelKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
++        objc_setAssociatedObject(self, kAutomationLocalChannelKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+     }
+ 
+     if (!handler)
+         return;
+ 
+-    RetainPtr wrapper = adoptNS([[_WKAutomationSessionTestChannel alloc] init]);
+-    wrapper->_channel = makeUnique<WebKit::TestFrontendChannel>(handler);
++    RetainPtr wrapper = adoptNS([[_WKAutomationSessionLocalChannel alloc] init]);
++    wrapper->_channel = makeUnique<WebKit::LocalFrontendChannel>(handler);
+     wrapper->_session = self;
+ 
+     session->connect(*wrapper->_channel);
+ 
+-    objc_setAssociatedObject(self, kAutomationTestChannelKey, wrapper.get(), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
++    objc_setAssociatedObject(self, kAutomationLocalChannelKey, wrapper.get(), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+ }
+ 
+-- (void)_dispatchMessageFromRemoteForTesting:(NSString *)message
++- (void)_dispatchMessageFromRemote:(NSString *)message
+ {
+     Ref session = downcast<WebKit::WebAutomationSession>([self _apiObject]);
+     session->dispatchMessageFromRemote(String(message));
+diff --git a/Source/WebKit/UIProcess/Automation/Automation.json b/Source/WebKit/UIProcess/Automation/Automation.json
+index e5a189f36a54..a64a29205aba 100644
+--- a/Source/WebKit/UIProcess/Automation/Automation.json
++++ b/Source/WebKit/UIProcess/Automation/Automation.json
+@@ -977,7 +977,7 @@
+         },
+         {
+             "name": "sendInspectorMessage",
+-            "description": "Relay a Web Inspector backend message from the client into the given browsing context's Inspector controller. Available when the session is configured to permit Inspector-protocol testing over the Automation transport.",
++            "description": "Relay a Web Inspector backend message from the client into the given browsing context's Inspector controller. Available when the session is configured to permit Inspector protocol access over the Automation transport.",
+             "condition": "ENABLE(REMOTE_INSPECTOR)",
+             "parameters": [
+                 { "name": "browsingContextHandle", "$ref": "BrowsingContextHandle", "description": "The handle for the browsing context whose Inspector controller should receive the message." },
+diff --git a/Source/WebKit/UIProcess/Automation/WebAutomationSession.cpp b/Source/WebKit/UIProcess/Automation/WebAutomationSession.cpp
+index 16eb695ee07c..d207fccff267 100644
+--- a/Source/WebKit/UIProcess/Automation/WebAutomationSession.cpp
++++ b/Source/WebKit/UIProcess/Automation/WebAutomationSession.cpp
+@@ -254,7 +254,7 @@ CommandResult<void> WebAutomationSession::sendInspectorMessage(const Inspector::
+ {
+     assertIsMainRunLoop();
+ 
+-    SYNC_FAIL_WITH_PREDEFINED_ERROR_IF(!m_client || !m_client->shouldEnableInspectorTesting(*this), NotImplemented);
++    SYNC_FAIL_WITH_PREDEFINED_ERROR_IF(!m_client || !m_client->shouldEnableInspectorProtocol(*this), NotImplemented);
+ 
+     RefPtr page = webPageProxyForHandle(browsingContextHandle);
+     SYNC_FAIL_WITH_PREDEFINED_ERROR_IF(!page, WindowNotFound);
+diff --git a/Source/WebKit/UIProcess/Automation/WebAutomationSession.h b/Source/WebKit/UIProcess/Automation/WebAutomationSession.h
+index b7596a4c384d..9678c0add65d 100644
+--- a/Source/WebKit/UIProcess/Automation/WebAutomationSession.h
++++ b/Source/WebKit/UIProcess/Automation/WebAutomationSession.h
+@@ -490,7 +490,7 @@ private:
+ #endif
+ 
+     // Web Inspector backend passthrough: clients with the
+-    // shouldEnableInspectorTesting capability can issue
++    // shouldEnableInspectorProtocol capability can issue
+     // Automation.sendInspectorMessage to forward an Inspector backend
+     // command into a page's WebPageInspectorController; the controller's
+     // responses and events come back as Automation.receiveInspectorMessage.
+diff --git a/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.h b/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.h
+index 12cb4afd85c4..64e742afe430 100644
+--- a/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.h
++++ b/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.h
+@@ -58,7 +58,7 @@ private:
+ 
+     void performApplicationCommand(WebKit::WebAutomationSession&, WebKit::WebPageProxy&, const String& commandName, const String& arguments, CompletionHandler<void(const String&)>&&) override;
+ 
+-    bool shouldEnableInspectorTesting(WebKit::WebAutomationSession&) override;
++    bool shouldEnableInspectorProtocol(WebKit::WebAutomationSession&) override;
+ 
+     bool isShowingJavaScriptDialogOnPage(WebAutomationSession&, WebPageProxy&) override;
+     void dismissCurrentJavaScriptDialogOnPage(WebAutomationSession&, WebPageProxy&) override;
+@@ -92,7 +92,7 @@ private:
+         bool loadWebExtensionWithOptions : 1;
+         bool unloadWebExtension : 1;
+         bool performApplicationCommand : 1;
+-        bool shouldEnableInspectorTesting : 1;
++        bool shouldEnableInspectorProtocol : 1;
+     } m_delegateMethods;
+ };
+ 
+diff --git a/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.mm b/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.mm
+index f34fbce31343..a065a2b1c1e7 100644
+--- a/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.mm
++++ b/Source/WebKit/UIProcess/Cocoa/AutomationSessionClient.mm
+@@ -63,7 +63,7 @@ AutomationSessionClient::AutomationSessionClient(id <_WKAutomationSessionDelegat
+     m_delegateMethods.unloadWebExtension = [delegate respondsToSelector:@selector(_automationSession:unloadWebExtensionWithIdentifier:completionHandler:)];
+ #endif
+     m_delegateMethods.performApplicationCommand = [delegate respondsToSelector:@selector(_automationSession:performCommandForWebView:commandName:arguments:completionHandler:)];
+-    m_delegateMethods.shouldEnableInspectorTesting = [delegate respondsToSelector:@selector(_automationSessionShouldEnableInspectorTesting:)];
++    m_delegateMethods.shouldEnableInspectorProtocol = [delegate respondsToSelector:@selector(_automationSessionShouldEnableInspectorProtocol:)];
+ }
+ 
+ void AutomationSessionClient::didDisconnectFromRemote(WebAutomationSession& session)
+@@ -181,11 +181,11 @@ void AutomationSessionClient::performApplicationCommand(WebAutomationSession& se
+         completionHandler(nullString());
+ }
+ 
+-bool AutomationSessionClient::shouldEnableInspectorTesting(WebAutomationSession& session)
++bool AutomationSessionClient::shouldEnableInspectorProtocol(WebAutomationSession& session)
+ {
+-    if (!m_delegateMethods.shouldEnableInspectorTesting)
++    if (!m_delegateMethods.shouldEnableInspectorProtocol)
+         return false;
+-    return [m_delegate.get() _automationSessionShouldEnableInspectorTesting:RetainPtr { wrapper(session) }];
++    return [m_delegate.get() _automationSessionShouldEnableInspectorProtocol:RetainPtr { wrapper(session) }];
+ }
+ 
+ bool AutomationSessionClient::isShowingJavaScriptDialogOnPage(WebAutomationSession& session, WebPageProxy& page)
+diff --git a/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.cpp b/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.cpp
+index 6a852dde5e49..b2952fc06968 100644
+--- a/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.cpp
++++ b/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.cpp
+@@ -288,7 +288,7 @@ CommandResult<void> ProxyingNetworkAgent::setExtraHTTPHeaders(Ref<JSON::Object>&
+     return { };
+ }
+ 
+-void ProxyingNetworkAgent::getResponseBody(const Protocol::Network::RequestId& requestId, Ref<GetResponseBodyCallback>&& callback)
++void ProxyingNetworkAgent::getResponseBody(const Protocol::Network::RequestId& requestId, std::optional<bool>&& raw, Ref<GetResponseBodyCallback>&& callback)
+ {
+     auto parsed = IdentifierRegistry::parseProtocolRequestId(requestId);
+     if (!parsed) {
+@@ -320,7 +320,7 @@ void ProxyingNetworkAgent::getResponseBody(const Protocol::Network::RequestId& r
+     }
+ 
+     targetProcess->sendWithAsyncReply(
+-        Messages::WebInspectorBackend::GetResponseBody { resourceID },
++        Messages::WebInspectorBackend::GetResponseBody { resourceID, raw.value_or(false) },
+         [callback = WTF::move(callback)](String content, bool base64Encoded, String errorString) mutable {
+             if (!errorString.isEmpty())
+                 callback->sendFailure(errorString);
+diff --git a/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.h b/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.h
+index 408a8108556c..d9a2a14c1fa8 100644
+--- a/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.h
++++ b/Source/WebKit/UIProcess/Inspector/Agents/ProxyingNetworkAgent.h
+@@ -78,7 +78,7 @@ public:
+     CommandResult<void> enable() final;
+     CommandResult<void> disable() final;
+     CommandResult<void> setExtraHTTPHeaders(Ref<JSON::Object>&&) final;
+-    void getResponseBody(const Protocol::Network::RequestId&, Ref<GetResponseBodyCallback>&&) final;
++    void getResponseBody(const Protocol::Network::RequestId&, std::optional<bool>&&, Ref<GetResponseBodyCallback>&&) final;
+     CommandResult<void> setResourceCachingDisabled(bool) final;
+     CommandResult<void> setClearResourceDataOnNavigate(bool) final;
+     void loadResource(const Protocol::Network::FrameId&, const String& url, Ref<LoadResourceCallback>&&) final;
+diff --git a/Source/WebKit/WebKit.xcodeproj/project.pbxproj b/Source/WebKit/WebKit.xcodeproj/project.pbxproj
+index 2fffc59caa30..b4afd67f997b 100644
+--- a/Source/WebKit/WebKit.xcodeproj/project.pbxproj
++++ b/Source/WebKit/WebKit.xcodeproj/project.pbxproj
+@@ -2348,7 +2348,7 @@
+ 		C1E123BA20A11573002646F4 /* PDFContextMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = C1E123B920A11572002646F4 /* PDFContextMenu.h */; };
+ 		C3EE0FDA0234F84002CAF7FB /* ProxyingNetworkAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = EB43329193327F9D842EE004 /* ProxyingNetworkAgent.h */; };
+ 		C3EE0FDA0234F84002CAF7FC /* ProxyingPageAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = EB43329193327F9D842EE005 /* ProxyingPageAgent.h */; };
+-		C4450D54570C4383A25745E6 /* _WKAutomationSessionPrivateForTesting.h in Headers */ = {isa = PBXBuildFile; fileRef = BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionPrivateForTesting.h */; settings = {ATTRIBUTES = (Private, ); }; };
++		C4450D54570C4383A25745E6 /* _WKAutomationSessionLocalConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionLocalConnection.h */; settings = {ATTRIBUTES = (Private, ); }; };
+ 		C517388112DF8F4F00EE3F47 /* DragControllerAction.h in Headers */ = {isa = PBXBuildFile; fileRef = C517388012DF8F4F00EE3F47 /* DragControllerAction.h */; };
+ 		C54256B518BEC18C00DE4179 /* WKDateTimeInputControl.h in Headers */ = {isa = PBXBuildFile; fileRef = C54256AF18BEC18B00DE4179 /* WKDateTimeInputControl.h */; };
+ 		C54256B718BEC18C00DE4179 /* WKFormPeripheral.h in Headers */ = {isa = PBXBuildFile; fileRef = C54256B118BEC18B00DE4179 /* WKFormPeripheral.h */; };
+@@ -7805,7 +7805,7 @@
+ 		A188D2E32B6B0F4E00E65A08 /* WKVisibilityPropagationView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WKVisibilityPropagationView.mm; sourceTree = "<group>"; };
+ 		A190E9402F3DB703009615AD /* WKAVContentSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKAVContentSource.h; sourceTree = "<group>"; };
+ 		A190E9412F3DB703009615AD /* WKAVContentSource.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = WKAVContentSource.mm; sourceTree = "<group>"; };
+-		A197A4B2903C423281A84E16 /* _WKAutomationSessionTesting.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = _WKAutomationSessionTesting.mm; sourceTree = "<group>"; };
++		A197A4B2903C423281A84E16 /* _WKAutomationSessionLocalConnection.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = _WKAutomationSessionLocalConnection.mm; sourceTree = "<group>"; };
+ 		A19DD3BF1D07D16800AC823B /* _WKWebViewPrintFormatterInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKWebViewPrintFormatterInternal.h; sourceTree = "<group>"; };
+ 		A19E65B02F3C62A600A94318 /* WKSExperienceController+Transitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "WKSExperienceController+Transitions.swift"; path = "DerivedSources/WebKit/WKSExperienceController+Transitions.swift"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		A1A207432D8A7A92003B1A13 /* LinearMediaKit.swiftinterface */ = {isa = PBXFileReference; lastKnownFileType = text; path = LinearMediaKit.swiftinterface; sourceTree = "<group>"; };
+@@ -8118,7 +8118,7 @@
+ 		BC33DD671238464600360F3F /* APINumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APINumber.h; sourceTree = "<group>"; };
+ 		BC33E0CF12408E8600360F3F /* InjectedBundleRangeHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InjectedBundleRangeHandle.h; sourceTree = "<group>"; };
+ 		BC33E0D012408E8600360F3F /* InjectedBundleRangeHandle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InjectedBundleRangeHandle.cpp; sourceTree = "<group>"; };
+-		BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionPrivateForTesting.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKAutomationSessionPrivateForTesting.h; sourceTree = "<group>"; };
++		BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionLocalConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _WKAutomationSessionLocalConnection.h; sourceTree = "<group>"; };
+ 		BC39C4331626366F008BC689 /* WKDOMRange.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = WKDOMRange.mm; sourceTree = "<group>"; };
+ 		BC39C4341626366F008BC689 /* WKDOMRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WKDOMRange.h; sourceTree = "<group>"; };
+ 		BC3DE46615A91763008D26FC /* com.apple.WebKit.WebContent.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = com.apple.WebKit.WebContent.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
+@@ -12862,8 +12862,8 @@
+ 				99788ACA1F421DCA00C08000 /* _WKAutomationSessionConfiguration.mm */,
+ 				990D28A81C6404B000986977 /* _WKAutomationSessionDelegate.h */,
+ 				990D28AF1C65203900986977 /* _WKAutomationSessionInternal.h */,
+-				BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionPrivateForTesting.h */,
+-				A197A4B2903C423281A84E16 /* _WKAutomationSessionTesting.mm */,
++				BC35BB81026B48A6A3BDAA80 /* _WKAutomationSessionLocalConnection.h */,
++				A197A4B2903C423281A84E16 /* _WKAutomationSessionLocalConnection.mm */,
+ 				5C4609E222430E4C009943C2 /* _WKContentRuleListAction.h */,
+ 				5C4609E322430E4D009943C2 /* _WKContentRuleListAction.mm */,
+ 				5C4609E422430E4D009943C2 /* _WKContentRuleListActionInternal.h */,
+@@ -17975,7 +17975,7 @@
+ 				99788ACB1F421DDA00C08000 /* _WKAutomationSessionConfiguration.h in Headers */,
+ 				990D28AC1C6420CF00986977 /* _WKAutomationSessionDelegate.h in Headers */,
+ 				990D28B11C65208D00986977 /* _WKAutomationSessionInternal.h in Headers */,
+-				C4450D54570C4383A25745E6 /* _WKAutomationSessionPrivateForTesting.h in Headers */,
++				C4450D54570C4383A25745E6 /* _WKAutomationSessionLocalConnection.h in Headers */,
+ 				CD89ACBD2EA696A300C76423 /* _WKCaptionStyleMenuController.h in Headers */,
+ 				97C476282ECD33A6004D1492 /* _WKCaptionStyleMenuControllerInternal.h in Headers */,
+ 				5C4609E7224317B4009943C2 /* _WKContentRuleListAction.h in Headers */,
+diff --git a/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.cpp b/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.cpp
+index 6809eefe3fce..ae5dff715d09 100644
+--- a/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.cpp
++++ b/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.cpp
+@@ -298,12 +298,20 @@ void BackendResourceDataStore::clear()
+     m_contentSize = 0;
+ }
+ 
+-Expected<std::tuple<String, bool>, String> BackendResourceDataStore::getResponseBody(ResourceLoaderIdentifier resourceID)
++Expected<std::tuple<String, bool>, String> BackendResourceDataStore::getResponseBody(ResourceLoaderIdentifier resourceID, bool raw)
+ {
+     ResourceData const* resourceData = data(resourceID);
+     if (!resourceData)
+         return makeUnexpected("Missing resource for given requestId"_s);
+ 
++    if (raw) {
++        if (RefPtr buffer = resourceData->buffer())
++            return std::tuple<String, bool> { base64EncodeToString(buffer->makeContiguous()->span()), true };
++        if (resourceData->hasContent() && resourceData->base64Encoded())
++            return std::tuple<String, bool> { resourceData->content(), true };
++        return makeUnexpected("Raw response bytes are unavailable or were evicted"_s);
++    }
++
+     if (resourceData->hasContent())
+         return std::tuple<String, bool> { resourceData->content(), resourceData->base64Encoded() };
+ 
+diff --git a/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.h b/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.h
+index c4266c4c6483..9186cb80879a 100644
+--- a/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.h
++++ b/Source/WebKit/WebProcess/Inspector/BackendResourceDataStore.h
+@@ -152,7 +152,7 @@ public:
+     ResourceData const* data(WebCore::ResourceLoaderIdentifier);
+     void clear();
+ 
+-    Expected<std::tuple<String, bool>, String> getResponseBody(WebCore::ResourceLoaderIdentifier);
++    Expected<std::tuple<String, bool>, String> getResponseBody(WebCore::ResourceLoaderIdentifier, bool raw);
+ 
+ private:
+     ResourceData* resourceDataForId(WebCore::ResourceLoaderIdentifier);
+diff --git a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.cpp b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.cpp
+index 2c00e9564ade..020b83736ee1 100644
+--- a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.cpp
++++ b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.cpp
+@@ -398,10 +398,10 @@ void WebInspectorBackend::removeInstrumentationForFrame(FrameIdentifier frameID)
+     m_framePageAgentProxies.remove(frameID);
+ }
+ 
+-void WebInspectorBackend::getResponseBody(ResourceLoaderIdentifier resourceID, CompletionHandler<void(String content, bool base64Encoded, String errorString)>&& completionHandler)
++void WebInspectorBackend::getResponseBody(ResourceLoaderIdentifier resourceID, bool raw, CompletionHandler<void(String content, bool base64Encoded, String errorString)>&& completionHandler)
+ {
+     CheckedRef resourceDataStore = m_resourceDataStore.get();
+-    auto result = resourceDataStore->getResponseBody(resourceID);
++    auto result = resourceDataStore->getResponseBody(resourceID, raw);
+     if (result.has_value()) {
+         auto& [content, base64Encoded] = result.value();
+         completionHandler(content, base64Encoded, String());
+diff --git a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.h b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.h
+index 6dc7645752fb..8349b5fbc50d 100644
+--- a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.h
++++ b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.h
+@@ -96,7 +96,7 @@ public:
+ 
+     void enableNetworkInstrumentation();
+     void disableNetworkInstrumentation();
+-    void getResponseBody(WebCore::ResourceLoaderIdentifier, CompletionHandler<void(String content, bool base64Encoded, String errorString)>&&);
++    void getResponseBody(WebCore::ResourceLoaderIdentifier, bool raw, CompletionHandler<void(String content, bool base64Encoded, String errorString)>&&);
+ 
+     void enablePageInstrumentation();
+     void disablePageInstrumentation();
+diff --git a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.messages.in b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.messages.in
+index bfb6bc379492..c6ac4a52fbd7 100644
+--- a/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.messages.in
++++ b/Source/WebKit/WebProcess/Inspector/WebInspectorBackend.messages.in
+@@ -55,5 +55,5 @@ messages -> WebInspectorBackend {
+     # asks each process only for the frames it hosts. See webkit.org/b/308896.
+     GetFrameResourceData(Vector<WebCore::FrameIdentifier> frameIDs) -> (Vector<std::pair<WebCore::FrameIdentifier, Inspector::FrameResourceData>> resourcesByFrame) Async
+ 
+-    GetResponseBody(WebCore::ResourceLoaderIdentifier resourceID) -> (String content, bool base64Encoded, String errorString) Async
++    GetResponseBody(WebCore::ResourceLoaderIdentifier resourceID, bool raw) -> (String content, bool base64Encoded, String errorString) Async
+ }
+diff --git a/Tools/TestWebKitAPI/Tests/WebKit/WebPage/SendInspectorMessage.swift b/Tools/TestWebKitAPI/Tests/WebKit/WebPage/SendInspectorMessage.swift
+index 90d3948e41a5..b6242cc224da 100644
+--- a/Tools/TestWebKitAPI/Tests/WebKit/WebPage/SendInspectorMessage.swift
++++ b/Tools/TestWebKitAPI/Tests/WebKit/WebPage/SendInspectorMessage.swift
+@@ -31,17 +31,17 @@ import WebKit_Private.WKProcessPoolPrivate
+ import WebKit_Private._WKAutomationSession
+ import WebKit_Private._WKAutomationSessionConfiguration
+ import WebKit_Private._WKAutomationSessionDelegate
+-import WebKit_Private._WKAutomationSessionPrivateForTesting
++import WebKit_Private._WKAutomationSessionLocalConnection
+ 
+ import struct Swift.String
+ 
+ @MainActor
+ private final class TestSendInspectorMessageDelegate: NSObject, @preconcurrency _WKAutomationSessionDelegate {
+-    var allowInspectorTesting: Bool = false
++    var allowInspectorProtocol: Bool = false
+ 
+     // swift-format-ignore: NoLeadingUnderscores
+-    func _automationSessionShouldEnableInspectorTesting(_ automationSession: _WKAutomationSession) -> Bool {
+-        allowInspectorTesting
++    func _automationSessionShouldEnableInspectorProtocol(_ automationSession: _WKAutomationSession) -> Bool {
++        allowInspectorProtocol
+     }
+ }
+ 
+@@ -180,7 +180,7 @@ private final class SessionFixture {
+ 
+     var captured: [String] { capturedStorage.strings }
+ 
+-    init(allowInspectorTesting: Bool) async throws {
++    init(allowInspectorProtocol: Bool) async throws {
+         let page = WebPage()
+         self.page = page
+ 
+@@ -189,18 +189,18 @@ private final class SessionFixture {
+         self.session = session
+ 
+         let delegate = TestSendInspectorMessageDelegate()
+-        delegate.allowInspectorTesting = allowInspectorTesting
++        delegate.allowInspectorProtocol = allowInspectorProtocol
+         self.delegate = delegate
+         session.delegate = delegate
+ 
+         let processPool = page.backingWebView.configuration.processPool
+         processPool._setAutomationSession(session)
+ 
+-        let registeredHandle = session._registerWebView(forTesting: page.backingWebView)
++        let registeredHandle = session._registerWebView(page.backingWebView)
+         self.handle = registeredHandle
+ 
+         let messages = capturedStorage
+-        session._setMessageToFrontendHandler(forTesting: { message in
++        session._setMessageToFrontendHandler({ message in
+             messages.strings.append(message)
+         })
+ 
+@@ -220,7 +220,7 @@ private final class SessionFixture {
+ struct AutomationSendInspectorMessageTests {
+     @Test
+     func roundTripTargetSetPauseOnStart() async throws {
+-        let fx = try await SessionFixture(allowInspectorTesting: true)
++        let fx = try await SessionFixture(allowInspectorProtocol: true)
+ 
+         let envelope = try makeSendInspectorMessageEnvelope(
+             outerId: 1,
+@@ -229,7 +229,7 @@ struct AutomationSendInspectorMessageTests {
+             method: "Target.setPauseOnStart",
+             params: ["pauseOnStart": AnyEncodable(false)]
+         )
+-        fx.session._dispatchMessageFromRemote(forTesting: envelope)
++        fx.session._dispatchMessageFromRemote(envelope)
+ 
+         await waitForCaptured {
+             findMessage(withOuterId: 1, in: fx.captured) != nil
+@@ -252,7 +252,7 @@ struct AutomationSendInspectorMessageTests {
+ 
+     @Test
+     func deniedWhenGateReturnsFalse() async throws {
+-        let fx = try await SessionFixture(allowInspectorTesting: false)
++        let fx = try await SessionFixture(allowInspectorProtocol: false)
+ 
+         let envelope = try makeSendInspectorMessageEnvelope(
+             outerId: 2,
+@@ -260,7 +260,7 @@ struct AutomationSendInspectorMessageTests {
+             innerId: 99,
+             method: "Page.getResourceTree"
+         )
+-        fx.session._dispatchMessageFromRemote(forTesting: envelope)
++        fx.session._dispatchMessageFromRemote(envelope)
+ 
+         await waitForCaptured(maxIterations: 60) {
+             findMessage(withOuterId: 2, in: fx.captured) != nil
+@@ -273,7 +273,7 @@ struct AutomationSendInspectorMessageTests {
+ 
+     @Test
+     func windowNotFoundForUnknownHandle() async throws {
+-        let fx = try await SessionFixture(allowInspectorTesting: true)
++        let fx = try await SessionFixture(allowInspectorProtocol: true)
+ 
+         let envelope = try makeSendInspectorMessageEnvelope(
+             outerId: 3,
+@@ -281,7 +281,7 @@ struct AutomationSendInspectorMessageTests {
+             innerId: 99,
+             method: "Page.getResourceTree"
+         )
+-        fx.session._dispatchMessageFromRemote(forTesting: envelope)
++        fx.session._dispatchMessageFromRemote(envelope)
+ 
+         await waitForCaptured(maxIterations: 60) {
+             findMessage(withOuterId: 3, in: fx.captured) != nil

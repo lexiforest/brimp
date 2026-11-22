@@ -40,7 +40,7 @@ pub struct Page {
     session_id: u64,
     pub(super) operation_deadline: Option<Instant>,
     pub(super) cancellation: super::CancellationToken,
-    wait_until: NavigationWait,
+    pub(super) wait_until: NavigationWait,
     pub(super) navigation_fetch_pending: bool,
     pending_navigation_scripts: std::cell::Cell<usize>,
     navigation_jobs: RefCell<Vec<tokio::task::AbortHandle>>,
@@ -48,13 +48,13 @@ pub struct Page {
     diagnostics: Option<super::diagnostics::Diagnostics>,
     realm_id: u64,
     owner_id: u64,
-    events: super::events::EventHub,
+    pub(super) events: super::events::EventHub,
     network: Option<Arc<super::networking::NetworkRuntime>>,
     plugins: Vec<super::plugins::Plugin>,
     plugin_runtime: Option<super::plugins::PluginRuntime>,
     plugin_scopes: Vec<super::diagnostics::PluginScope>,
     pub(crate) bridge: super::bridge::BridgeRuntime,
-    plugin_timeout: Duration,
+    pub(super) plugin_timeout: Duration,
     pub(crate) shutdown: Arc<AtomicBool>,
     // Bindings must drop before `js`, because their objects are protected in that context.
     bindings: BindingRuntime,
@@ -63,7 +63,7 @@ pub struct Page {
     module_loader: ProtectedJsObject,
     defuddle_extractor: Option<ProtectedJsObject>,
     timers: Rc<RefCell<TimerQueue>>,
-    browsing_context: Arc<BrowsingContext>,
+    pub(super) browsing_context: Arc<BrowsingContext>,
     fetches: Rc<RefCell<FetchQueue>>,
     js: JsRuntime,
     document: Rc<RefCell<BrowserDocument>>,
@@ -237,6 +237,21 @@ impl Page {
         value: &ProtectedJsObject,
     ) -> Result<super::bridge::Reference, super::AutomationError> {
         self.bridge.retain(&self.js, value)
+    }
+
+    pub(crate) fn bridge_copy(
+        &self,
+        value: &ProtectedJsObject,
+    ) -> Result<super::bridge::BridgeValue, super::AutomationError> {
+        let wire = self
+            .js
+            .call_function_with_string_and_object(
+                &self.bridge.controller,
+                r#"{"op":"copy"}"#,
+                value,
+            )?
+            .to_string()?;
+        serde_json::from_str(&wire).map_err(|e| super::AutomationError::Internal(e.to_string()))
     }
 
     pub(crate) fn bridge_get(

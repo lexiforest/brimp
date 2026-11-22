@@ -8,7 +8,6 @@ import gzip
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
@@ -17,6 +16,7 @@ import tarfile
 import tempfile
 import tomllib
 import zipfile
+from pathlib import Path
 
 from native_runtime import WINDOWS_RUNTIME, bundle_native, sha
 
@@ -126,19 +126,15 @@ def package(binary: Path, target: str, jsc: Path, curl: Path, licenses: Path, ou
 
 def validate_archive(path: Path, target: str) -> None:
     expected_root = path.name.removesuffix(".tar.gz").removesuffix(".zip") + "/"
-    if path.suffix == ".zip":
-        archive = zipfile.ZipFile(path)
-        names = archive.namelist()
-        read = archive.open
-    else:
-        archive = tarfile.open(path, "r:gz")
-        members = archive.getmembers()
-        if any(not member.isfile() for member in members):
-            archive.close()
-            raise RuntimeError(f"unexpected non-file entry in {path.name}")
-        names = archive.getnames()
-        read = archive.extractfile
-    with archive:
+    with zipfile.ZipFile(path) if path.suffix == ".zip" else tarfile.open(path, "r:gz") as archive:
+        if path.suffix == ".zip":
+            names = archive.namelist()
+            read = archive.open
+        else:
+            if any(not member.isfile() for member in archive.getmembers()):
+                raise RuntimeError(f"unexpected non-file entry in {path.name}")
+            names = archive.getnames()
+            read = archive.extractfile
         if len(names) != len(set(names)) or any(
             not name.startswith(expected_root) or ".." in Path(name).parts for name in names
         ):
@@ -172,6 +168,9 @@ def validate_archive(path: Path, target: str) -> None:
                 "native/libicudata",
                 "native/libicui18n",
                 "native/libicuuc",
+                "native/libatomic.so.1",
+                "native/licenses/gcc-runtime/COPYING3",
+                "native/licenses/gcc-runtime/COPYING.RUNTIME",
             )
         else:
             required_libraries = ("native/libJavaScriptCore", "native/libcurl-impersonate")

@@ -1,4 +1,5 @@
 """Log every request a challenge page makes, and the cookies it ends up with."""
+
 from __future__ import annotations
 
 import argparse
@@ -16,6 +17,7 @@ def main() -> int:
 
     seen = []
     with brimp.Session() as session:
+
         def policy(route):
             request = route.request
             seen.append([request["resource_type"], request["method"], request["url"][:120]])
@@ -29,12 +31,17 @@ def main() -> int:
             time.sleep(0.25)
         remove()
         cookies = {record["name"]: record["value"][:40] for record in session.cookies}
-        print(json.dumps({
-            "status": page.status_code,
-            "title": page.evaluate("document.title"),
-            "cookies": cookies,
-            "requests": seen,
-        }, indent=1)[:4000])
+        print(
+            json.dumps(
+                {
+                    "status": page.status_code,
+                    "title": page.evaluate("document.title"),
+                    "cookies": cookies,
+                    "requests": seen,
+                },
+                indent=1,
+            )[:4000]
+        )
     return 0
 
 

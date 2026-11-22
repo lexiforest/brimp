@@ -5,6 +5,7 @@ The examples that need a gesture are different: Akamai scores the pointer, and t
 Cloudflare "5s" flow needs a click on a checkbox rendered inside a cross-origin
 frame. This script drives `page.mouse` for both and reports what the site did.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -83,7 +84,11 @@ def cloudflare(url, seconds):
                 page.mouse.click(target[0], target[1], delay=0.08)
                 pump(page, 1.5)
                 jar = cookies(session)
-                entry = {"frame": src[:60], "point": [round(v) for v in target], "cookies": sorted(jar)}
+                entry = {
+                    "frame": src[:60],
+                    "point": [round(v) for v in target],
+                    "cookies": sorted(jar),
+                }
                 result["attempts"].append(entry)
                 if "cf_clearance" in jar:
                     result["pass"] = True

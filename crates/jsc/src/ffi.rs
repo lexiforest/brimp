@@ -308,4 +308,9 @@ fn run_loop_once(_mode: *const c_void) -> c_int {
 unsafe extern "C" {
     fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
 }
+// RTLD_DEFAULT is null on Linux but -2 on Darwin. Passing the Darwin handle to
+// glibc's dlsym dereferences an invalid link map when deferred jobs are pumped.
+#[cfg(unix)]
+const RTLD_DEFAULT: *mut c_void = libc::RTLD_DEFAULT;
+#[cfg(not(unix))]
 const RTLD_DEFAULT: *mut c_void = -2isize as *mut c_void;

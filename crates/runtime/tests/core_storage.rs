@@ -16,7 +16,7 @@ impl ResourceLoader for Loader {
         })
     }
 }
-fn session() -> Session {
+fn session() -> std::sync::Arc<Session> {
     Session::with_resource_loader(
         brimp_runtime::runtime::native::SessionOptions {
             plugins: vec![],
@@ -26,7 +26,7 @@ fn session() -> Session {
     )
     .unwrap()
 }
-fn page(s: &Session, url: &str) -> NativePage {
+fn page(s: &Arc<Session>, url: &str) -> NativePage {
     let p = s.new_page().unwrap();
     p.request("GET", url, Default::default()).unwrap();
     p

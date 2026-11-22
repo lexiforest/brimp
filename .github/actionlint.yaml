@@ -1,0 +1,4 @@
+# The engine is built and tested on the same Xcode 27 runner as lexiforest/brimp-webkit.
+self-hosted-runner:
+  labels:
+    - xcode-27

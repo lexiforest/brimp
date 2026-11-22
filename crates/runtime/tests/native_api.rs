@@ -32,7 +32,7 @@ impl ResourceLoader for Fixture {
         })
     }
 }
-fn session() -> Session {
+fn session() -> std::sync::Arc<Session> {
     Session::with_resource_loader(
         SessionOptions {
             timeout: Duration::from_secs(2),

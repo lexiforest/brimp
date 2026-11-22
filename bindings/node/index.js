@@ -1,6 +1,8 @@
 import { encode, decode, referenceValue } from './values.js';
 export { HostFunction } from './values.js';
 import { Readable } from 'node:stream';
+import { Locator, Frame } from './automation.js';
+export { Locator, Frame } from './automation.js';
 import { callbackContext, configurePlugins, browserPlugins } from './plugins.js';
 export {
   Plugin,
@@ -152,16 +154,31 @@ export async function createSession({
   timeout = 30000,
   proxy,
   auth,
-  plugins = browserPlugins(),
+  plugins,
   identity = {},
   profile = null,
   clock = {},
   diagnostics = null,
   storagePath = null,
+  engine = 'runtime',
+  executablePath,
 } = {}) {
   const token = {};
-  const { descriptors, dispatch, dispose } = await configurePlugins(plugins, token);
+  const { descriptors, dispatch, dispose } = await configurePlugins(
+    plugins ?? (engine === 'runtime' ? browserPlugins() : []),
+    token,
+  );
   try {
+    if (engine === 'webkit' && executablePath == null) {
+      let enginePackage;
+      try {
+        enginePackage = require('@brimp/webkit');
+      } catch (cause) {
+        if (cause.code !== 'MODULE_NOT_FOUND') throw cause;
+        throw new Error('Install @brimp/webkit to use engine="webkit"', { cause });
+      }
+      executablePath = enginePackage.executablePath();
+    }
     return new Session(
       await invoke(() =>
         native.createNativeSession(
@@ -175,10 +192,13 @@ export async function createSession({
           clock,
           diagnostics,
           storagePath,
+          engine,
+          executablePath,
         ),
       ),
       token,
       dispose,
+      timeout,
     );
   } catch (error) {
     await dispose();
@@ -186,11 +206,13 @@ export async function createSession({
   }
 }
 export class Session extends Requests {
-  constructor(inner, token, dispose) {
+  constructor(inner, token, dispose, timeout) {
     super();
     this._inner = inner;
     this._pluginToken = token;
     this._disposePlugins = dispose;
+    this._timeout = timeout;
+    this._pages = new Set();
   }
   _checkCallback() {
     if (callbackContext.getStore()?.session === this._pluginToken)
@@ -201,7 +223,16 @@ export class Session extends Requests {
   }
   async newPage() {
     this._checkCallback();
-    return new Page(await invoke(() => this._inner.newPage()), this);
+    return this._wrapPage(await invoke(() => this._inner.newPage()));
+  }
+  _wrapPage(inner) {
+    for (const page of this._pages) if (page._pageId === inner.id) return page;
+    const page = new Page(inner, this);
+    this._pages.add(page);
+    return page;
+  }
+  get pages() {
+    return this._inner.pages().map((inner) => this._wrapPage(inner));
   }
   async request(method, url, options) {
     const page = await this.newPage();
@@ -228,6 +259,8 @@ export class Session extends Requests {
   }
   async close() {
     this._checkCallback();
+    for (const page of this._pages) page._notifyClosed();
+    this._pages.clear();
     try {
       await invoke(() => this._inner.close());
     } finally {
@@ -285,7 +318,7 @@ export class Mouse {
       () => this._page._inner.mouseDown(this._x, this._y, button, clickCount, modifiers),
       this._page._pageId,
     );
-    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay * 1000));
+    if (delay > 0) await new Promise((resolve) => setTimeout(resolve, delay));
     await invoke(
       () => this._page._inner.mouseUp(this._x, this._y, button, clickCount, modifiers),
       this._page._pageId,
@@ -347,6 +380,119 @@ export class Page extends Requests {
     this._pageId = inner.id;
     this._subscriptions = new Set();
     this._routes = new Set();
+    this._expectations = new Set();
+    this._closed = false;
+    this._closeListener = this.on('close', () => this._notifyClosed());
+  }
+  _notifyClosed() {
+    this._closed = true;
+    this._session._pages.delete(this);
+    for (const reject of this._expectations)
+      reject(new Closed('page closed while waiting for event', 'closed'));
+  }
+  locator(selector) {
+    return new Locator(this, [selector]);
+  }
+  currentUrl() {
+    return invoke(() => this._inner.currentUrl(), this._pageId);
+  }
+  async waitForPopup(options) {
+    const record = await this.waitForEvent('popup', options);
+    return this._session._wrapPage(this._session._inner.page(String(record.pageId)));
+  }
+  frameLocator(selector) {
+    return new Frame(this, [selector]);
+  }
+  frames() {
+    return new Frame(this, []).frames();
+  }
+  async _cancellable(operation, { signal } = {}) {
+    const token = new native.NativeCancellation();
+    const abort = () => token.cancel();
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) abort();
+    try {
+      return await invoke(() => operation(token), this._pageId);
+    } finally {
+      signal?.removeEventListener('abort', abort);
+    }
+  }
+  async _automate(command, options = {}) {
+    return decode(
+      JSON.parse(
+        await this._cancellable(
+          (token) => this._inner.automate(command, options.timeout, token),
+          options,
+        ),
+      ),
+    );
+  }
+  waitForSelector(selector, options) {
+    return this.locator(selector).waitFor(options);
+  }
+  waitForFunction(source, options) {
+    return new Frame(this, []).waitForFunction(source, options);
+  }
+  waitForLoadState(state = 'load', options) {
+    return new Frame(this, []).waitForLoadState(state, options);
+  }
+  waitForNetworkIdle({ quiet = 500, ...options } = {}) {
+    return this._cancellable(
+      (token) => this._inner.waitForNetworkIdle(quiet, options.timeout, token),
+      options,
+    );
+  }
+  waitForEvent(event, { predicate, timeout = this._session._timeout, signal } = {}) {
+    this._checkCallback();
+    if (this._closed) return Promise.reject(new Closed('page is closed', 'closed'));
+    if (!Number.isFinite(timeout) || timeout < 0)
+      throw new TypeError('timeout must be finite and nonnegative');
+    return new Promise((resolve, reject) => {
+      let remove = () => {};
+      let timer;
+      const finish = (error, value) => {
+        remove();
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', abort);
+        this._expectations.delete(closed);
+        if (error) reject(error);
+        else resolve(value);
+      };
+      const closed = (error) => finish(error);
+      const abort = () => finish(new RuntimeError('event wait cancelled', 'cancelled'));
+      this._expectations.add(closed);
+      try {
+        remove = this.on(event, (record) => {
+          try {
+            if (!predicate || predicate(record)) finish(null, record);
+          } catch (error) {
+            finish(error);
+          }
+        });
+      } catch (error) {
+        finish(error);
+        return;
+      }
+      if (timeout)
+        timer = setTimeout(() => finish(new Timeout('event wait timed out', 'timeout')), timeout);
+      signal?.addEventListener('abort', abort, { once: true });
+      if (signal?.aborted) abort();
+    });
+  }
+  waitForResponse(url, options = {}) {
+    return this.waitForEvent('response', {
+      ...options,
+      predicate: (record) => record.response.url === url,
+    });
+  }
+  waitForNavigation({ waitUntil = 'load', ...options } = {}) {
+    if (!['load', 'domcontentloaded'].includes(waitUntil))
+      throw new TypeError('waitUntil must be load or domcontentloaded');
+    const name = waitUntil === 'load' ? 'load' : 'dom_content_loaded';
+    return this.waitForEvent('lifecycle', {
+      ...options,
+      predicate: (record) => record.name === name,
+    });
   }
   _checkCallback() {
     if (callbackContext.getStore()?.pageId === this._pageId)
@@ -495,7 +641,16 @@ export class Page extends Requests {
   async request(
     method,
     url,
-    { headers, body, timeout, allowRedirects = true, maxRedirects = 20, auth, signal } = {},
+    {
+      headers,
+      body,
+      timeout,
+      allowRedirects = true,
+      maxRedirects = 20,
+      auth,
+      signal,
+      waitUntil,
+    } = {},
   ) {
     const token = new native.NativeCancellation();
     const abort = () => token.cancel();
@@ -513,6 +668,7 @@ export class Page extends Requests {
             allowRedirects,
             maxRedirects,
             token,
+            waitUntil,
           ),
         this._pageId,
       );
@@ -570,8 +726,8 @@ export class Page extends Requests {
   raiseForStatus() {
     if (this.statusCode >= 400 && this.statusCode < 600) throw new HTTPError(this);
   }
-  async evaluate(source) {
-    return decode(JSON.parse(await invoke(() => this._inner.evaluate(source), this._pageId)));
+  async evaluate(source, options) {
+    return this._automate({ op: 'evaluate', source }, options);
   }
   async evaluateHandle(source) {
     return new JSHandle(
@@ -633,6 +789,8 @@ export class Page extends Requests {
     return result;
   }
   close() {
+    this._notifyClosed();
+    this._session._pages.delete(this);
     return invoke(() => this._inner.close(), this._pageId);
   }
 }

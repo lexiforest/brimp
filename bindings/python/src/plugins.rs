@@ -205,7 +205,8 @@ impl PyHostContext {
             inner: brimp_runtime::runtime::native::JSHandle::from_reference(
                 self.inner.bridge.clone(),
                 token,
-            ),
+            )
+            .into(),
         })
     }
     fn emit(&self, channel: String, value: &str) -> PyResult<()> {

@@ -1,4 +1,5 @@
 """Pointer input at coordinates: `page.mouse`."""
+
 from __future__ import annotations
 
 import time
@@ -73,7 +74,11 @@ def test_press_and_hold_reports_a_single_click():
         time.sleep(0.2)
         page.mouse.up()
         assert time.monotonic() - pressed >= 0.2
-        assert page.evaluate("log.map((entry) => entry[0])") == ["pointerdown", "pointerup", "click"]
+        assert page.evaluate("log.map((entry) => entry[0])") == [
+            "pointerdown",
+            "pointerup",
+            "click",
+        ]
 
 
 def test_wheel_reports_deltas_at_the_point():
@@ -92,7 +97,10 @@ def test_wheel_reports_deltas_at_the_point():
 def test_selector_click_reports_the_element_centre():
     with brimp.Session() as session:
         page = session.new_page()
-        page.load_html('<div id="a" style="margin:20px;width:100px;height:40px"></div>', "https://example.test/")
+        page.load_html(
+            '<div id="a" style="margin:20px;width:100px;height:40px"></div>',
+            "https://example.test/",
+        )
         page.evaluate(
             "globalThis.first = null;"
             "addEventListener('pointermove', (event) => { first ??= [event.clientX, event.clientY]; }, true)"

@@ -12,6 +12,7 @@ use std::sync::{
 
 #[derive(Default)]
 pub(super) struct SessionState {
+    pub(super) native_pages: Vec<super::native::NativePage>,
     pages: Vec<Weak<PageControl>>,
     starting: Vec<Weak<AtomicBool>>,
 }
@@ -60,7 +61,7 @@ impl Session {
         mut options: SessionOptions,
         mut profile: Option<crate::profile::BrowserProfile>,
         loader: Option<Arc<dyn ResourceLoader>>,
-    ) -> Result<Self, AutomationError> {
+    ) -> Result<Arc<Self>, AutomationError> {
         if let Some(profile) = &mut profile
             && let Some(fingerprint) = profile
                 .prepare_fingerprint()
@@ -96,7 +97,7 @@ impl Session {
         };
         let network_config = network_config.map(|_| options.network.clone());
         static NEXT_SESSION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
-        Ok(Self {
+        Ok(Arc::new(Self {
             id: NEXT_SESSION.fetch_add(1, Ordering::Relaxed),
             routes: Default::default(),
             loader,
@@ -111,15 +112,17 @@ impl Session {
             network_config,
             options,
             network_executor,
-        })
+        }))
     }
-    pub fn with_profile(profile: crate::profile::BrowserProfile) -> Result<Self, AutomationError> {
+    pub fn with_profile(
+        profile: crate::profile::BrowserProfile,
+    ) -> Result<Arc<Self>, AutomationError> {
         Self::with_profile_and_network_config(profile, Default::default())
     }
     pub fn with_profile_and_network_config(
         profile: crate::profile::BrowserProfile,
         network: crate::network::CurlConfig,
-    ) -> Result<Self, AutomationError> {
+    ) -> Result<Arc<Self>, AutomationError> {
         Self::new(SessionOptions {
             profile: Some(profile),
             network,
@@ -266,16 +269,20 @@ impl Session {
         if self.closed.swap(true, Ordering::AcqRel) {
             return;
         }
-        let pages = {
+        let (pages, native_pages) = {
             let mut state = self.state.lock().expect("session state poisoned");
             for flag in state.starting.drain(..).filter_map(|flag| flag.upgrade()) {
                 flag.store(true, Ordering::Release);
             }
-            std::mem::take(&mut state.pages)
+            (
+                std::mem::take(&mut state.pages),
+                std::mem::take(&mut state.native_pages),
+            )
         };
         for page in pages.into_iter().filter_map(|page| page.upgrade()) {
             page.close();
         }
+        drop(native_pages);
         self.routes.close();
         self.storage.close();
     }
@@ -307,11 +314,5 @@ impl PageSetup {
                 AutomationError::Internal(error.to_string())
             }
         })
-    }
-}
-
-impl Default for Session {
-    fn default() -> Self {
-        Self::new(Default::default()).expect("session runtime must initialize")
     }
 }

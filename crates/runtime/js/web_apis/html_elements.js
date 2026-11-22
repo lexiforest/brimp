@@ -854,10 +854,7 @@ function __finishChildDocument(context) {
   // come from the browser, so they are trusted.
   document.dispatchEvent(__markTrustedEvent(new Event('readystatechange')));
   document.dispatchEvent(__markTrustedEvent(new Event('DOMContentLoaded', { bubbles: true })));
-  EventTarget.prototype.dispatchEvent.call(
-    context.window,
-    __markTrustedEvent(new Event('load')),
-  );
+  EventTarget.prototype.dispatchEvent.call(context.window, __markTrustedEvent(new Event('load')));
   document.dispatchEvent(__markTrustedEvent(new Event('load')));
 }
 

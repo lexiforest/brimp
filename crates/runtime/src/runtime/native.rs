@@ -3,6 +3,7 @@
 //! Sessions and page methods submit owned commands; handles refer to values rooted
 //! by the owner-thread bridge. Child modules keep these responsibilities separate.
 
+mod automation;
 mod handles;
 mod operations;
 mod options;

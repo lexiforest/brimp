@@ -4,6 +4,7 @@ Same origin, same SDK path, same API call; the cookie wait reads the session jar
 instead of a profile, and there is no resource interceptor (Brimp fetches what the
 page asks for).
 """
+
 from __future__ import annotations
 
 import json
@@ -12,7 +13,10 @@ import time
 import brimp
 
 ORIGIN = "https://orion.nv.gov"
-URL = ORIGIN + "/portal/public/#/public/nvsos/en/CaseXscreen?screen=external-GenericFilingsSearch&tabRoute=agent"
+URL = (
+    ORIGIN
+    + "/portal/public/#/public/nvsos/en/CaseXscreen?screen=external-GenericFilingsSearch&tabRoute=agent"
+)
 API_URL = ORIGIN + "/core/api/_q/v1/nv-sos/public/CRAEntities"
 KEYWORD = "NORTHWEST"
 
@@ -24,15 +28,29 @@ def header_for(cookies, name):
 
 def search_body(keyword, page_number=1, page_size=25):
     params = {
-        "agentName": keyword, "registeredAgentType": "", "craId": "", "nvBusinessId": "",
-        "craEntityNumber": "", "agentStatus": "", "filingNo": "", "submit1": False,
-        "searchDumy": True, "restrictedAndProhibitedWords": "", "totalRecordCount": "",
-        "searchType": "STARTS_WITH", "searchTerm": "",
+        "agentName": keyword,
+        "registeredAgentType": "",
+        "craId": "",
+        "nvBusinessId": "",
+        "craEntityNumber": "",
+        "agentStatus": "",
+        "filingNo": "",
+        "submit1": False,
+        "searchDumy": True,
+        "restrictedAndProhibitedWords": "",
+        "totalRecordCount": "",
+        "searchType": "STARTS_WITH",
+        "searchTerm": "",
     }
     return {
-        "data": {}, "origin": "", "origin_key": "CaseX",
+        "data": {},
+        "origin": "",
+        "origin_key": "CaseX",
         "gridInput": {"params": {"parameters": params.copy()}, "persistPrevParams": False},
-        "parameters": params, "pageNo": page_number, "pageSize": page_size, "sortBy": {},
+        "parameters": params,
+        "pageNo": page_number,
+        "pageSize": page_size,
+        "sortBy": {},
     }
 
 

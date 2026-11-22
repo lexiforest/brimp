@@ -213,6 +213,162 @@ This prints `GET`. Starting background work without returning its Promise does
 not wait for that work to finish. Return the result you need, or check the
 application's completion condition before reading it.
 
+## Wait and act on a changing document
+
+Use a locator when an element can appear, become enabled, or be replaced after
+you first select it. A locator keeps selectors rather than a rooted DOM node.
+Each operation resolves the current document again. Single-element operations
+reject multiple matches; narrow the selector or use `nth(index)` explicitly.
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/", wait_until="domcontentloaded")
+    page.wait_for_load_state("load")
+    page.wait_for_function("() => document.querySelector('h1') !== null", timeout=5)
+    heading = page.locator("h1")
+    heading.wait_for(state="visible", timeout=5)
+    print(heading.text_content())
+```
+
+The Node equivalents are `waitUntil`, `waitForLoadState`, `waitForFunction`,
+`waitForSelector`, and `locator(...).waitFor(...)`. Python durations are seconds;
+Node durations are milliseconds. Omit `timeout` to inherit the session default,
+or use zero to disable it. Python also accepts `None`. Node operation options
+accept `signal: AbortSignal`; cancelling an asyncio task interrupts its native
+wait. `evaluate` accepts the same operation timeout and cancellation controls.
+
+Selector states are `attached`, `detached`, `visible`, and `hidden`; the default
+is `visible`. Function waits repeatedly evaluate an expression or call a returned
+function with the JSON-compatible `arg` option, awaiting Promises and returning
+the first truthy result. Predicate exceptions propagate immediately.
+`wait_for_network_idle(quiet=0.5)` / `waitForNetworkIdle({quiet: 500})` waits for a
+quiet interval with no active requests. Prefer an application condition when a
+page polls continuously. Draining currently due tasks is a separate operation.
+
+Locators support `click`, `hover`, `fill`, `type_text` / `typeText`, `press`,
+`text_content` / `textContent`, `get_attribute` / `getAttribute`, `count`, nested
+`locator` queries, and `nth`. Input actions wait for a connected, visible,
+enabled target with a stable box; text entry also checks editability, and pointer
+actions check that the target receives the center-point hit. Resolution, checks,
+and input dispatch occur on the page owner thread. Existing `page.click` and
+handle actions remain immediate operations.
+
+These checks use Brimp's layout engine. Unsupported layout, scrolling and paint
+behavior still limit actionability; locators do not add a full browser renderer.
+Hidden or covered targets time out instead of receiving a forced click.
+
+## Subscribe before an action
+
+Subscribe before triggering navigation or a request, so an immediate event is
+not missed. Python expectations remove their listener on success, timeout,
+cancellation, or an exception in the action:
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    with page.expect_response("http://127.0.0.1:8765/echo") as pending:
+        page.evaluate("fetch('/echo').then(() => null)")
+    print(pending.value["response"]["status"])
+
+    with page.expect_navigation():
+        page.evaluate("location.href = '/article'")
+    print(page.current_url())
+```
+
+For `AsyncPage`, use `async with` and `await pending.value`. Generic
+`expect_event(event, predicate=...)` supports the documented page events;
+predicates are synchronous. `expect_navigation(wait_until="domcontentloaded")`
+selects the earlier milestone; the default is `load`.
+
+Node subscriptions begin when the wait method is called:
+
+```js
+import { createSession } from '@brimp/brimp';
+
+const session = await createSession();
+try {
+  const page = await session.get('http://127.0.0.1:8765/');
+  const pending = page.waitForResponse('http://127.0.0.1:8765/echo', {timeout: 5000});
+  await page.evaluate("fetch('/echo').then(() => null)");
+  console.log((await pending).response.status);
+
+  await Promise.all([
+    page.waitForNavigation(),
+    page.evaluate("location.href = '/article'"),
+  ]);
+  console.log(await page.currentUrl());
+} finally {
+  await session.close();
+}
+```
+
+`waitForEvent(event, {predicate, timeout, signal})` provides generic observation.
+Response convenience waits match an exact URL; use a generic event predicate for
+other matching rules. Closing the page/session rejects pending expectations.
+Navigation milestones cover document/script loading; use an application condition
+or network-idle wait when you also need background requests to finish.
+
+## Frames and popups
+
+`page.frame_locator("iframe#checkout")` / `page.frameLocator('iframe#checkout')`
+returns a frame scope. Use `frame.locator(...)` to interact with its document,
+`frame.evaluate(...)` to run in its JavaScript realm, and another `frame_locator`
+to enter a nested frame. These selector paths resolve again after replacement.
+`page.frames()` and `frame.frames()` discover the frames in the current document;
+await them in Python async and Node. Generated discovery paths describe the
+current DOM position; use stable selectors when the page rearranges its frames.
+
+Opening `window.open(...)` or clicking a link with a new-window target creates a
+session-owned page with shared cookies, settings and plugins:
+
+```python
+import brimp
+
+with brimp.Session() as session:
+    page = session.get("http://127.0.0.1:8765/")
+    with page.expect_popup(timeout=10) as pending:
+        page.evaluate("void window.open('/article', '_blank')")
+    popup = pending.value
+    print(popup.current_url())
+    print(popup.evaluate("document.title"))
+    popup.close()
+```
+
+```js
+import { createSession } from '@brimp/brimp';
+
+const session = await createSession();
+try {
+  const page = await session.get('http://127.0.0.1:8765/');
+  const pending = page.waitForPopup({timeout: 10000});
+  await page.evaluate("void window.open('/article', '_blank')");
+  const popup = await pending;
+  console.log(await popup.currentUrl());
+  await popup.close();
+} finally {
+  await session.close();
+}
+```
+
+`session.pages` lists open pages and preserves host wrapper identity. Select the
+page object you want to operate on; there is no process-wide active-tab state.
+Popups survive opener navigation/closure and close with the session. Popup
+notification follows the first navigation attempt; request failures are also
+reported through the opener's error event. `current_url()` / `currentUrl()` reads
+the live document URL. HTTP snapshot properties still describe requests made
+through that host Page's request methods; a discovered popup initially has no host
+HTTP snapshot.
+
+The page-side popup proxy supports `closed`, `close()` and location navigation,
+including reuse by name within the opener realm. Cross-window DOM access,
+`opener` scripting, popup `postMessage`, window features and popup blocking policy
+are not implemented. Frame execution retains the runtime's existing isolation and
+layout limits.
+
 ## Attach a route before navigation
 
 Create a blank page when you need to install listeners or routes before scripts

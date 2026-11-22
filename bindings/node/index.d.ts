@@ -1,7 +1,12 @@
 /// <reference types="node" />
 export type Headers = Record<string, string> | [string, string][];
-export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
-export interface IdentityOptions { userAgent?: string; languages?: string[]; platform?: string; }
+export type JSONValue =
+  null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
+export interface IdentityOptions {
+  userAgent?: string;
+  languages?: string[];
+  platform?: string;
+}
 /** Partial interface-owned values, optionally produced by `brimp profile capture`. */
 export interface BrowserProfile {
   format?: 'brimp-profile';
@@ -9,33 +14,94 @@ export interface BrowserProfile {
   values?: Record<string, Record<string, JSONValue>>;
   capture?: JSONValue;
 }
-export interface DiagnosticsOptions { mode?: 'api' | 'recursive'; path?: string; include?: string[]; capacity?: number; stack?: boolean; }
-export interface TraceRecord { sequence: number; pageId: number; realmId: number; elapsedMs: number; kind: string; path: string; outcome: string; stack: string | null; details: {layer?: 'recursive'; note?: string; arguments?: JSONValue[]; argumentCount?: number; target?: string | null; property?: string | null} | null; }
-export interface DiagnosticCoverage { enabled: boolean; mode: 'api' | 'recursive'; include: string[]; limitations: string[]; }
+export interface DiagnosticsOptions {
+  mode?: 'api' | 'recursive';
+  path?: string;
+  include?: string[];
+  capacity?: number;
+  stack?: boolean;
+}
+export interface TraceRecord {
+  sequence: number;
+  pageId: number;
+  realmId: number;
+  elapsedMs: number;
+  kind: string;
+  path: string;
+  outcome: string;
+  stack: string | null;
+  details: {
+    layer?: 'recursive';
+    note?: string;
+    arguments?: JSONValue[];
+    argumentCount?: number;
+    target?: string | null;
+    property?: string | null;
+  } | null;
+}
+export interface DiagnosticCoverage {
+  enabled: boolean;
+  mode: 'api' | 'recursive';
+  include: string[];
+  limitations: string[];
+}
 export interface ShapeDifference {
-  kind: string; path: string; property: string | null;
-  expected: unknown; observed: unknown; message: string; sequence: number;
+  kind: string;
+  path: string;
+  property: string | null;
+  expected: unknown;
+  observed: unknown;
+  message: string;
+  sequence: number;
 }
 export interface ShapeClaim {
-  type: string; kind: string; hasValue: boolean; valueType: string;
-  writable: boolean; enumerable: boolean; configurable: boolean;
-  hasGet: boolean; hasSet: boolean; native: boolean;
-  name: string | null; length: number | null; property: string | null;
+  type: string;
+  kind: string;
+  hasValue: boolean;
+  valueType: string;
+  writable: boolean;
+  enumerable: boolean;
+  configurable: boolean;
+  hasGet: boolean;
+  hasSet: boolean;
+  native: boolean;
+  name: string | null;
+  length: number | null;
+  property: string | null;
 }
 export interface ShapeManifest {
-  format: 'brimp-shape'; version: 1; claims: Record<string, ShapeClaim>;
+  format: 'brimp-shape';
+  version: 1;
+  claims: Record<string, ShapeClaim>;
 }
-export interface DiagnosticBatch { records: TraceRecord[]; dropped: number; writeError: string | null; coverage: DiagnosticCoverage; shapeDifferences: ShapeDifference[]; }
+export interface DiagnosticBatch {
+  records: TraceRecord[];
+  dropped: number;
+  writeError: string | null;
+  coverage: DiagnosticCoverage;
+  shapeDifferences: ShapeDifference[];
+}
 export interface DependencyUsage {
-  layer: 'api' | 'native' | 'reflection' | 'recursive'; path: string; kind: string;
-  target: string | null; property: string | null; count: number; throws: number;
+  layer: 'api' | 'native' | 'reflection' | 'recursive';
+  path: string;
+  kind: string;
+  target: string | null;
+  property: string | null;
+  count: number;
+  throws: number;
 }
 export interface DiagnosticSummary {
-  dependencies: DependencyUsage[]; retained: number; dropped: number;
-  writeError: string | null; coverage: DiagnosticCoverage;
+  dependencies: DependencyUsage[];
+  retained: number;
+  dropped: number;
+  writeError: string | null;
+  coverage: DiagnosticCoverage;
   shapeDifferences: ShapeDifference[];
 }
 export interface SessionOptions {
+  engine?: 'runtime' | 'webkit';
+  /** WebKit helper executable; defaults to brimp-webkit on PATH. */
+  executablePath?: string;
   /** Persist origin localStorage, CacheStorage and IndexedDB in this file. */
   storagePath?: string | null;
   clock?: { mode?: 'system' | 'logical'; epochMs?: number };
@@ -52,6 +118,7 @@ export interface SessionOptions {
   auth?: [string, string];
 }
 export interface RequestOptions {
+  waitUntil?: 'load' | 'domcontentloaded';
   headers?: Headers;
   body?: string | Buffer | Uint8Array;
   /** Milliseconds. Inherits the session default. */
@@ -62,17 +129,32 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 export interface Cookie {
-  name: string; value: string; domain: string; path: string;
-  hostOnly: boolean; httpOnly: boolean; secure: boolean;
-  expires: number | null; sameSite: string | null;
+  name: string;
+  value: string;
+  domain: string;
+  path: string;
+  hostOnly: boolean;
+  httpOnly: boolean;
+  secure: boolean;
+  expires: number | null;
+  sameSite: string | null;
 }
 export interface RequestRecord {
-  method: string; url: string; headers: [string, string][]; body: Buffer | null;
+  method: string;
+  url: string;
+  headers: [string, string][];
+  body: Buffer | null;
 }
 export interface Redirect {
-  statusCode: number; reason: string; url: string; headers: [string, string][]; request: RequestRecord;
+  statusCode: number;
+  reason: string;
+  url: string;
+  headers: [string, string][];
+  request: RequestRecord;
 }
-export class RuntimeError extends Error { readonly code: string; }
+export class RuntimeError extends Error {
+  readonly code: string;
+}
 export class JavaScriptError extends RuntimeError {}
 export class StaleHandle extends RuntimeError {}
 export class Closed extends RuntimeError {}
@@ -102,12 +184,19 @@ declare class Requests {
 export class Session extends Requests {
   private constructor();
   newPage(): Promise<Page>;
+  readonly pages: Page[];
   setCookie(url: string, name: string, value: string): void;
   readonly cookies: Cookie[];
   clearCookies(): void;
   close(): Promise<void>;
 }
-export interface StreamingResponse { status: number; url: string; headers: [string,string][]; body: import("node:stream").Readable; cancel(): void; }
+export interface StreamingResponse {
+  status: number;
+  url: string;
+  headers: [string, string][];
+  body: import('node:stream').Readable;
+  cancel(): void;
+}
 /** A reusable browser realm and DOM. Navigation invalidates previous realm handles. */
 export interface ProfileField {
   default: unknown;
@@ -134,12 +223,36 @@ export interface ProfileReport {
  * HTTP properties require a response; newPage() and loadHtml() have none.
  */
 export class Page extends Requests {
+  readonly mouse: Mouse;
+  locator(selector: string): Locator;
+  frameLocator(selector: string): Frame;
+  frames(): Promise<Frame[]>;
+  currentUrl(): Promise<string>;
+  waitForSelector(selector: string, options?: SelectorWaitOptions): Promise<void>;
+  waitForFunction(
+    source: string,
+    options?: OperationOptions & { arg?: JSONValue },
+  ): Promise<CopiedValue>;
+  waitForLoadState(state?: 'load' | 'domcontentloaded', options?: OperationOptions): Promise<void>;
+  waitForNetworkIdle(options?: OperationOptions & { quiet?: number }): Promise<void>;
+  waitForEvent<E extends keyof PageEvents>(
+    event: E,
+    options?: OperationOptions & { predicate?: (record: PageEvents[E]) => boolean },
+  ): Promise<PageEvents[E]>;
+  waitForResponse(url: string, options?: OperationOptions): Promise<PageEvents['response']>;
+  waitForNavigation(
+    options?: OperationOptions & { waitUntil?: 'load' | 'domcontentloaded' },
+  ): Promise<PageEvents['lifecycle']>;
+  waitForPopup(options?: OperationOptions): Promise<Page>;
   profileContract(): Promise<ProfileContract>;
   /** Registered runtime API shape claims, used to generate a browser capture plugin. */
   shapeManifest(): Promise<ShapeManifest>;
   profileReport(): Promise<ProfileReport>;
-  advanceTime(milliseconds: number, options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
-  runPendingTasks(options?: {maxTasks?: number}): Promise<{now: number; tasks: number}>;
+  advanceTime(
+    milliseconds: number,
+    options?: { maxTasks?: number },
+  ): Promise<{ now: number; tasks: number }>;
+  runPendingTasks(options?: { maxTasks?: number }): Promise<{ now: number; tasks: number }>;
   /** Consume retained records and the dropped count. JSONL output is unaffected. */
   takeDiagnostics(): Promise<DiagnosticBatch>;
   /** Inspect retained records without consuming them or the dropped count. */
@@ -172,7 +285,7 @@ export class Page extends Requests {
    */
   raiseForStatus(): void;
   /** Evaluate browser JavaScript, await Promises, and copy rich values, including bigint and binary buffers. */
-  evaluate(source: string): Promise<CopiedValue>;
+  evaluate(source: string, options?: OperationOptions): Promise<CopiedValue>;
   evaluateHandle(source: string): Promise<JSHandle>;
   querySelector(selector: string): Promise<ElementHandle | null>;
   querySelectorAll(selector: string): Promise<ElementHandle[]>;
@@ -185,7 +298,7 @@ export class Page extends Requests {
   typeText(selector: string, text: string): Promise<void>;
   fill(selector: string, text: string): Promise<void>;
   /** Modifier bits: Alt=1, Control=2, Meta=4, Shift=8. */
-  press(selector: string, key: string, options?: {modifiers?: number}): Promise<void>;
+  press(selector: string, key: string, options?: { modifiers?: number }): Promise<void>;
   dragTo(source: string, destination: string): Promise<void>;
   setInputFiles(selector: string, files: FileUpload[]): Promise<void>;
   extract(options?: ExtractionOptions): Promise<ExtractedDocument>;
@@ -205,14 +318,19 @@ export class JSHandle {
   /** Calls function(value, ...args) and awaits its result in the page realm. */
   call(functionSource: string, ...args: HostValue[]): Promise<JSHandle>;
   /** Invoke the held function with an optional receiver. */
-  invoke(args?: HostValue[], options?: {thisArg?: HostValue}): Promise<JSHandle>;
+  invoke(args?: HostValue[], options?: { thisArg?: HostValue }): Promise<JSHandle>;
   setProperty(name: string, value: HostValue): Promise<void>;
   deleteProperty(name: string): Promise<boolean>;
   property(name: string): Promise<JSHandle>;
   propertyNames(): Promise<string[]>;
   dispose(): Promise<void>;
 }
-export interface FileUpload { name: string; content: Uint8Array; mimeType?: string; lastModified?: number; }
+export interface FileUpload {
+  name: string;
+  content: Uint8Array;
+  mimeType?: string;
+  lastModified?: number;
+}
 export class ElementHandle extends JSHandle {
   focus(): Promise<void>;
   click(): Promise<void>;
@@ -227,16 +345,65 @@ export class ElementHandle extends JSHandle {
   querySelectorAll(selector: string): Promise<ElementHandle[]>;
 }
 
-export type CopiedValue = undefined | null | boolean | number | bigint | string | ArrayBufferView | ArrayBuffer | CopiedValue[] | { [key: string]: CopiedValue };
-export type HostValue = undefined | null | boolean | number | bigint | string | ArrayBufferView | ArrayBuffer | JSHandle | HostFunction | HostValue[] | { [key: string]: HostValue };
+export type CopiedValue =
+  | undefined
+  | null
+  | boolean
+  | number
+  | bigint
+  | string
+  | ArrayBufferView
+  | ArrayBuffer
+  | CopiedValue[]
+  | { [key: string]: CopiedValue };
+export type HostValue =
+  | undefined
+  | null
+  | boolean
+  | number
+  | bigint
+  | string
+  | ArrayBufferView
+  | ArrayBuffer
+  | JSHandle
+  | HostFunction
+  | HostValue[]
+  | { [key: string]: HostValue };
 /** A registered plugin handler exposed to the page as a Promise-returning function. */
-export class HostFunction { private constructor(); readonly name: string; }
-export type HostHandler = (context: HostContext, ...args: HostValue[]) => HostValue | Promise<HostValue>;
-export interface PluginDescriptor { name: string; source: string; handlers?: Record<string, HostHandler>; }
-export interface PluginSessionScope { handlers?: Record<string, HostHandler>; dispose?: () => void | Promise<void>; }
+export class HostFunction {
+  private constructor();
+  readonly name: string;
+}
+export type HostHandler = (
+  context: HostContext,
+  ...args: HostValue[]
+) => HostValue | Promise<HostValue>;
+export interface PluginDescriptor {
+  name: string;
+  source: string;
+  handlers?: Record<string, HostHandler>;
+}
+export interface PluginSessionScope {
+  handlers?: Record<string, HostHandler>;
+  dispose?: () => void | Promise<void>;
+}
 export class Plugin implements PluginDescriptor {
-  constructor(name: string, source: string, handlers?: Record<string, HostHandler>, options?: JSONValue, setup?: () => PluginSessionScope);
-  static fromFile(path: string | URL, configuration: {name: string; handlers?: Record<string, HostHandler>; options?: JSONValue; setup?: () => PluginSessionScope}): Plugin;
+  constructor(
+    name: string,
+    source: string,
+    handlers?: Record<string, HostHandler>,
+    options?: JSONValue,
+    setup?: () => PluginSessionScope,
+  );
+  static fromFile(
+    path: string | URL,
+    configuration: {
+      name: string;
+      handlers?: Record<string, HostHandler>;
+      options?: JSONValue;
+      setup?: () => PluginSessionScope;
+    },
+  ): Plugin;
   readonly name: string;
   readonly source: string;
   readonly handlers: Record<string, HostHandler>;
@@ -253,7 +420,10 @@ export class HostContext {
   emit(channel: string, value: HostValue): void;
 }
 
-export function canvasPlugin(options?: { rgba?: [number, number, number, number]; characterWidth?: number }): Plugin;
+export function canvasPlugin(options?: {
+  rgba?: [number, number, number, number];
+  characterWidth?: number;
+}): Plugin;
 export function environmentPlugin(options?: Record<string, JSONValue>): Plugin;
 export function permissionsPlugin(options?: Record<string, JSONValue>): Plugin;
 export function devicesPlugin(options?: Record<string, JSONValue>): Plugin;
@@ -261,12 +431,29 @@ export function mediaPlugin(options?: Record<string, JSONValue>): Plugin;
 export function workersPlugin(options?: Record<string, JSONValue>): Plugin;
 export function trustedTypesPlugin(options?: Record<string, JSONValue>): Plugin;
 export function extractionPlugin(): Plugin;
-export interface ExtractionOptions { contentSelector?: string; removeImages?: boolean; language?: string; debug?: boolean; }
+export interface ExtractionOptions {
+  contentSelector?: string;
+  removeImages?: boolean;
+  language?: string;
+  debug?: boolean;
+}
 export interface ExtractedDocument {
-  title: string; description: string; domain: string; favicon: string; image: string;
-  language: string; parseTime: number; published: string; author: string; site: string;
-  schemaOrgData: JSONValue; wordCount: number; content: string; contentMarkdown?: string;
-  extractorType?: string; metaTags?: {name?: string; property?: string; content?: string}[];
+  title: string;
+  description: string;
+  domain: string;
+  favicon: string;
+  image: string;
+  language: string;
+  parseTime: number;
+  published: string;
+  author: string;
+  site: string;
+  schemaOrgData: JSONValue;
+  wordCount: number;
+  content: string;
+  contentMarkdown?: string;
+  extractorType?: string;
+  metaTags?: { name?: string; property?: string; content?: string }[];
 }
 
 export interface NetworkOptions {
@@ -278,20 +465,51 @@ export interface NetworkOptions {
   /** Delay for fully buffered responses, not transport bandwidth throttling. */
   bufferedDownloadBytesPerSecond?: number;
 }
-export interface NetworkRequest extends RequestRecord { id: number; resourceType: string | null; }
-export interface NetworkResponse { requestId: number; url: string; status: number; headers: [string,string][]; fromCache: boolean; }
-export interface MutationRecord { kind: string; target: number; added: number[]; removed: number[]; attribute: string | null; oldValue: string | null; }
+export interface NetworkRequest extends RequestRecord {
+  id: number;
+  resourceType: string | null;
+}
+export interface NetworkResponse {
+  requestId: number;
+  url: string;
+  status: number;
+  headers: [string, string][];
+  fromCache: boolean;
+}
+export interface MutationRecord {
+  kind: string;
+  target: number;
+  added: number[];
+  removed: number[];
+  attribute: string | null;
+  oldValue: string | null;
+}
 export interface PageEvents {
-  console: {event: 'console'; level: string; message: string};
-  error: {event: 'error'; message: string};
-  lifecycle: {event: 'lifecycle'; name: string; url: string};
-  mutation: {event: 'mutation'; record: MutationRecord};
-  request: {event: 'request'; request: NetworkRequest};
-  response: {event: 'response'; response: NetworkResponse};
-  requestFinished: {event: 'requestFinished'; requestId: number; bytes: number};
-  requestFailed: {event: 'requestFailed'; requestId: number; message: string; cancelled: boolean};
-  webSocket: {event: 'webSocket'; id: number; url: string; kind: string; data: Buffer; message: string | null};
-  eventSource: {event: 'eventSource'; requestId: number; eventName: string; eventId: string; data: string};
+  close: { event: 'close' };
+  popup: { event: 'popup'; pageId: number };
+  console: { event: 'console'; level: string; message: string };
+  error: { event: 'error'; message: string };
+  lifecycle: { event: 'lifecycle'; name: string; url: string };
+  mutation: { event: 'mutation'; record: MutationRecord };
+  request: { event: 'request'; request: NetworkRequest };
+  response: { event: 'response'; response: NetworkResponse };
+  requestFinished: { event: 'requestFinished'; requestId: number; bytes: number };
+  requestFailed: { event: 'requestFailed'; requestId: number; message: string; cancelled: boolean };
+  webSocket: {
+    event: 'webSocket';
+    id: number;
+    url: string;
+    kind: string;
+    data: Buffer;
+    message: string | null;
+  };
+  eventSource: {
+    event: 'eventSource';
+    requestId: number;
+    eventName: string;
+    eventId: string;
+    data: string;
+  };
 }
 export type RouteStage = 'request' | 'response' | 'auth';
 /** One intercepted request. Complete it once; callbacks cannot reenter their page. */
@@ -303,37 +521,113 @@ export class Route {
   readonly authChallenge: string | null;
   readonly pending: boolean;
   body(): Buffer | null;
-  continueRequest(overrides?: {url?: string; method?: string; headers?: Headers; body?: string | Uint8Array; status?: number}): void;
-  fulfill(options?: {status?: number; headers?: Headers; body?: string | Uint8Array}): void;
+  continueRequest(overrides?: {
+    url?: string;
+    method?: string;
+    headers?: Headers;
+    body?: string | Uint8Array;
+    status?: number;
+  }): void;
+  fulfill(options?: { status?: number; headers?: Headers; body?: string | Uint8Array }): void;
   fail(message?: string): void;
   authenticate(username: string, password: string): void;
 }
 export interface Page {
-  on<E extends keyof PageEvents>(event: E, handler: (record: PageEvents[E]) => void | Promise<void>): () => void;
-  route(pattern: string, handler: (route: Route) => void | Promise<void>, options?: {stage?: RouteStage}): () => void;
+  on<E extends keyof PageEvents>(
+    event: E,
+    handler: (record: PageEvents[E]) => void | Promise<void>,
+  ): () => void;
+  route(
+    pattern: string,
+    handler: (route: Route) => void | Promise<void>,
+    options?: { stage?: RouteStage },
+  ): () => void;
   configureNetwork(options?: NetworkOptions): Promise<void>;
   setExtraHeaders(headers: Headers): void;
   clearCache(): void;
   responseBody(requestId: number): Buffer;
 }
 
-export function graphicsPlugin(options?: {rgba?: number[]; renderer?: string; webgpu?: boolean}, handlers?: PluginDescriptor['handlers']): Plugin;
-export function audioPlugin(options?: {sampleRate?: number}, handlers?: PluginDescriptor['handlers']): Plugin;
+export function graphicsPlugin(
+  options?: { rgba?: number[]; renderer?: string; webgpu?: boolean },
+  handlers?: PluginDescriptor['handlers'],
+): Plugin;
+export function audioPlugin(
+  options?: { sampleRate?: number },
+  handlers?: PluginDescriptor['handlers'],
+): Plugin;
 export function rtcPlugin(): Plugin;
 
 export interface PluginInfo {
   defaultEnabled: boolean;
-  installers: {node: string; python: string};
+  installers: { node: string; python: string };
   capabilities: string[];
   limitations: string[];
   lifetime: string;
-  options: Record<string, {default: JSONValue; python?: string; hostOnly?: boolean}>;
+  options: Record<string, { default: JSONValue; python?: string; hostOnly?: boolean }>;
 }
 export function browserPlugins(): Plugin[];
 export function pluginCatalog(): Record<string, PluginInfo>;
-export type StorageOperation = {type: 'get' | 'delete'; key: string} | {type: 'set'; key: string; value: HostValue} | {type: 'clear'};
+export type StorageOperation =
+  | { type: 'get' | 'delete'; key: string }
+  | { type: 'set'; key: string; value: HostValue }
+  | { type: 'clear' };
 export interface HostStorageBackend {
   transaction(origin: string, operations: StorageOperation[]): HostValue[] | Promise<HostValue[]>;
   close?(): void | Promise<void>;
 }
-export function hostStoragePlugin(options?: {backendFactory?: () => HostStorageBackend}): Plugin;
+export function hostStoragePlugin(options?: { backendFactory?: () => HostStorageBackend }): Plugin;
+
+/** Milliseconds. Zero disables the deadline; omission inherits the session default. */
+export interface OperationOptions {
+  timeout?: number;
+  signal?: AbortSignal;
+}
+export interface SelectorWaitOptions extends OperationOptions {
+  state?: 'attached' | 'detached' | 'visible' | 'hidden';
+}
+/** Strict selectors resolved afresh for each operation, with automatic actionability waits. */
+export class Locator {
+  private constructor();
+  locator(selector: string): Locator;
+  nth(index: number): Locator;
+  waitFor(options?: SelectorWaitOptions): Promise<void>;
+  count(options?: OperationOptions): Promise<number>;
+  textContent(options?: OperationOptions): Promise<string>;
+  getAttribute(name: string, options?: OperationOptions): Promise<string | null>;
+  click(options?: OperationOptions): Promise<void>;
+  hover(options?: OperationOptions): Promise<void>;
+  fill(text: string, options?: OperationOptions): Promise<void>;
+  typeText(text: string, options?: OperationOptions): Promise<void>;
+  press(key: string, options?: OperationOptions & { modifiers?: number }): Promise<void>;
+}
+/** A selector path to a frame, re-resolved after document replacement. */
+export class Frame {
+  private constructor();
+  frameLocator(selector: string): Frame;
+  frames(): Promise<Frame[]>;
+  url(): Promise<string>;
+  locator(selector: string): Locator;
+  evaluate(source: string, options?: OperationOptions): Promise<CopiedValue>;
+  waitForSelector(selector: string, options?: SelectorWaitOptions): Promise<void>;
+  waitForFunction(
+    source: string,
+    options?: OperationOptions & { arg?: JSONValue },
+  ): Promise<CopiedValue>;
+  waitForLoadState(state?: 'load' | 'domcontentloaded', options?: OperationOptions): Promise<void>;
+}
+export interface MouseButtonOptions {
+  button?: 'left' | 'right' | 'middle';
+  clickCount?: number;
+  modifiers?: number;
+}
+export class Mouse {
+  private constructor();
+  readonly position: [number, number];
+  move(x: number, y: number, options?: { steps?: number }): Promise<Mouse>;
+  down(options?: MouseButtonOptions): Promise<Mouse>;
+  up(options?: MouseButtonOptions): Promise<Mouse>;
+  /** delay is milliseconds. */
+  click(x?: number, y?: number, options?: MouseButtonOptions & { delay?: number }): Promise<Mouse>;
+  wheel(deltaX: number, deltaY: number, options?: { x?: number; y?: number }): Promise<Mouse>;
+}

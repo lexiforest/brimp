@@ -125,6 +125,7 @@ impl PageHandle {
             true,
             20,
             Default::default(),
+            None,
         )
     }
 
@@ -140,6 +141,7 @@ impl PageHandle {
         allow_redirects: bool,
         max_redirects: usize,
         proxy_options: crate::network::ProxyOptions,
+        wait_until: Option<super::NavigationWait>,
     ) -> Result<NavigationResponse, AutomationError> {
         let method = http::Method::from_bytes(method.as_ref().as_bytes()).map_err(|error| {
             AutomationError::InvalidInput(format!("invalid HTTP method: {error}"))
@@ -159,6 +161,7 @@ impl PageHandle {
                 allow_redirects,
                 max_redirects,
                 proxy_options,
+                wait_until,
                 response,
             }
         })?
@@ -372,9 +375,7 @@ pub(super) struct PageControl {
 }
 impl PageControl {
     pub(super) fn close(&self) {
-        if self.closed.swap(true, Ordering::AcqRel) {
-            return;
-        }
+        self.closed.store(true, Ordering::Release);
         if let Some(sender) = self
             .commands
             .lock()
@@ -428,6 +429,7 @@ enum Command {
         allow_redirects: bool,
         max_redirects: usize,
         proxy_options: crate::network::ProxyOptions,
+        wait_until: Option<super::NavigationWait>,
         response: mpsc::SyncSender<Result<NavigationResponse, AutomationError>>,
     },
 
@@ -508,6 +510,27 @@ fn run_page(
     };
     let _ = ready.send(Ok(page.id()));
     loop {
+        if closed.load(Ordering::Acquire) {
+            break;
+        }
+        if let Some(url) = page.browsing_context.take_pending_navigation() {
+            let timeout = page.plugin_timeout;
+            page.set_script_execution_deadline(timeout);
+            let result = runtime.block_on(async {
+                tokio::select! {
+                    biased;
+                    () = wait_for_close(&closed) => Err(AutomationError::Closed),
+                    () = tokio::time::sleep(timeout), if !timeout.is_zero() => Err(AutomationError::Timeout(timeout)),
+                    result = page.goto(&url) => result.map_err(AutomationError::from),
+                }
+            });
+            page.clear_script_execution_deadline();
+            if let Err(error) = result {
+                page.events.emit(super::events::PageEvent::Error {
+                    message: error.to_string(),
+                });
+            }
+        }
         let (command, cancellation) = match commands.try_recv() {
             Ok(command) => command,
             Err(mpsc::TryRecvError::Empty) => {
@@ -572,8 +595,13 @@ fn run_page(
                 allow_redirects,
                 max_redirects,
                 proxy_options,
+                wait_until,
                 response,
             } => {
+                let previous_wait = page.wait_until;
+                if let Some(wait_until) = wait_until {
+                    page.wait_until = wait_until;
+                }
                 let mut request = ResourceRequest::new(method, url);
                 request.headers = headers;
                 request.body = body;
@@ -613,6 +641,7 @@ fn run_page(
                     ));
                 }
                 page.navigation_fetch_pending = false;
+                page.wait_until = previous_wait;
                 let _ = response.send(result);
             }
             Command::Text { response } => {
@@ -710,6 +739,7 @@ fn run_page(
                 response,
             } => {
                 let started = Instant::now();
+                page.set_script_execution_deadline(timeout);
                 let mut idle_since = None;
                 let result = loop {
                     if let Err(error) = page.check_operation() {
@@ -735,6 +765,12 @@ fn run_page(
                     }
                     std::thread::sleep(Duration::from_millis(5));
                 };
+                page.clear_script_execution_deadline();
+                let result = if !timeout.is_zero() && started.elapsed() >= timeout {
+                    Err(AutomationError::Timeout(timeout))
+                } else {
+                    result
+                };
                 let _ = response.send(result);
             }
             Command::Input { command, response } => {
@@ -756,12 +792,14 @@ fn run_page(
                 let _ = response.send(result);
             }
             Command::Close(done) => {
+                page.events.emit(super::events::PageEvent::Close);
                 drop(page);
                 let _ = done.send(());
-                break;
+                return;
             }
         }
     }
+    page.events.emit(super::events::PageEvent::Close);
 }
 
 async fn wait_for_operation(

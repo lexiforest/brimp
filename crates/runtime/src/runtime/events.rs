@@ -41,6 +41,14 @@ pub struct MutationRecord {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "event", rename_all = "snake_case")]
 pub enum PageEvent {
+    Close,
+    PopupRequested {
+        id: u64,
+        url: String,
+    },
+    Popup {
+        page_id: u64,
+    },
     Console {
         level: String,
         message: String,
@@ -87,6 +95,9 @@ pub enum PageEvent {
 impl PageEvent {
     pub fn name(&self) -> &'static str {
         match self {
+            Self::Close => "close",
+            Self::PopupRequested { .. } => "popup_requested",
+            Self::Popup { .. } => "popup",
             Self::Console { .. } => "console",
             Self::Error { .. } => "error",
             Self::Lifecycle { .. } => "lifecycle",
@@ -116,6 +127,9 @@ impl std::fmt::Debug for EventHub {
 impl EventHub {
     pub fn on(&self, event: &str, callback: EventHandler) -> Result<Subscription, AutomationError> {
         if ![
+            "close",
+            "popup_requested",
+            "popup",
             "console",
             "error",
             "lifecycle",

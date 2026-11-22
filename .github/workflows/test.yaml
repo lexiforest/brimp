@@ -66,7 +66,7 @@ jobs:
 
       - name: Install Linux native build tools
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev libfreetype6-dev pkg-config patchelf ninja-build clang
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev libfreetype6-dev pkg-config patchelf ninja-build clang libatomic1
 
       - name: Prepare pinned native SDKs
         run: >-
@@ -76,7 +76,7 @@ jobs:
           --curl-release
 
       - name: Install test and packaging tools
-        run: python -m pip install pytest 'maturin>=1.9,<2'
+        run: python -m pip install pytest wheel 'maturin>=1.9,<2'
 
       - name: Restore native build cache
         id: native-cache
@@ -162,6 +162,8 @@ jobs:
           mkdir -p dist/wheels
           if [ "$RUNNER_OS" = "Windows" ]; then
             python bindings/python/bundle_windows_runtime.py --wheel dist/raw/*.whl --out dist/wheels
+          elif [ "$RUNNER_OS" = "Linux" ]; then
+            python bindings/python/bundle_linux_runtime.py --wheel dist/raw/*.whl --out dist/wheels
           else
             cp dist/raw/*.whl dist/wheels/
           fi

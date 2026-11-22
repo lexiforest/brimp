@@ -13,6 +13,7 @@ use std::time::{Duration, Instant};
 pub(crate) type HandleToken = Reference;
 
 pub(crate) enum Operation {
+    Automate(Value),
     AdvanceTime {
         milliseconds: f64,
         max_tasks: usize,
@@ -41,6 +42,7 @@ pub(crate) enum Operation {
 }
 
 pub(crate) enum OperationResult {
+    Copied(crate::runtime::bridge::BridgeValue),
     NetworkContext(Arc<crate::web_apis::BrowsingContext>),
     Value(Value),
     Handle(JSHandle),
@@ -48,7 +50,10 @@ pub(crate) enum OperationResult {
 }
 
 /// Commands execute on the owner thread; the shared bridge owns all GC roots.
-fn retain_handle(page: &Page, value: &ProtectedJsObject) -> Result<JSHandle, AutomationError> {
+pub(super) fn retain_handle(
+    page: &Page,
+    value: &ProtectedJsObject,
+) -> Result<JSHandle, AutomationError> {
     Ok(JSHandle::from_reference(
         page.bridge.endpoint(),
         page.bridge_retain(value)?,
@@ -66,6 +71,9 @@ pub(crate) fn execute_operation(
         return Err(AutomationError::Cancellation);
     }
     let result = match operation {
+        Operation::Automate(command) => {
+            return super::automation::run(page, command, timeout, closed, interrupt, epoch);
+        }
         Operation::ProfileContract => OperationResult::Value(page.profile_contract()?),
         Operation::ProfileReport => OperationResult::Value(page.profile_report()?),
         Operation::ShapeManifest => OperationResult::Value(page.shape_manifest()),

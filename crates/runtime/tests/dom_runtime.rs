@@ -1,7 +1,7 @@
 use brimp_runtime::runtime::{Page, PageOptions, Session};
 
 fn page() -> Page {
-    let browser = Session::default();
+    let browser = Session::new(Default::default()).unwrap();
     let mut page = browser.new_local_page(PageOptions::default()).unwrap();
     page.set_content("<!doctype html><main id='main'><b>before</b></main>")
         .unwrap();

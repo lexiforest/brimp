@@ -45,7 +45,11 @@ function installBridge(realm) {
       ancestors.has(value) ||
       (!Array.isArray(value) &&
         Object.getPrototypeOf(value) !== Object.prototype &&
-        Object.getPrototypeOf(value) !== null)
+        Object.getPrototypeOf(value) !== null &&
+        !(
+          Object.getPrototypeOf(Object.getPrototypeOf(value)) === null &&
+          Object.getPrototypeOf(value).constructor?.name === 'Object'
+        ))
     )
       throw new TypeError(
         'Value requires a JS reference; use evaluate_handle/evaluateHandle or host.ref(value)',
@@ -115,6 +119,7 @@ function installBridge(realm) {
   function controller(serialized, box) {
     const command = JSON.parse(serialized);
     if (command.op === 'retain') return JSON.stringify(retain(box.value));
+    if (command.op === 'copy') return JSON.stringify(encode(box.value));
     if (command.op === 'get') return { value: get(command.token) };
     if (command.op === 'dispose') {
       if (command.token.realm === realm) roots.delete(command.token.id);

@@ -16,7 +16,6 @@ for (const [prototype, names] of [
       'focus',
       'moveBy',
       'moveTo',
-      'open',
       'print',
       'prompt',
       'releaseEvents',

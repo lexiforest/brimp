@@ -16,9 +16,40 @@ pub struct NativePage {
     pub(super) network: Arc<crate::runtime::networking::NetworkRuntime>,
     pub(super) events: crate::runtime::events::EventHub,
     pub(super) timeout: Duration,
+    pub(super) popup_subscription: Option<Arc<crate::runtime::events::Subscription>>,
 }
 
 impl NativePage {
+    pub fn network_context(
+        &self,
+    ) -> Result<Arc<crate::web_apis::BrowsingContext>, AutomationError> {
+        match self.operation(Operation::NetworkContext)? {
+            OperationResult::NetworkContext(context) => Ok(context),
+            _ => unreachable!(),
+        }
+    }
+    pub fn current_url(&self) -> Result<String, AutomationError> {
+        Ok(self
+            .network_context()?
+            .current_url()
+            .unwrap_or_else(|| "about:blank".into()))
+    }
+    pub fn automate(
+        &self,
+        command: Value,
+        timeout: Option<Duration>,
+    ) -> Result<crate::runtime::bridge::BridgeValue, AutomationError> {
+        match self.page.native_operation(
+            Operation::Automate(command),
+            timeout.unwrap_or(self.timeout),
+        )? {
+            OperationResult::Copied(value) => Ok(value),
+            _ => unreachable!(),
+        }
+    }
+    pub fn default_timeout(&self) -> Duration {
+        self.timeout
+    }
     pub fn wait_for_selector(
         &self,
         selector: &str,
@@ -209,6 +240,7 @@ impl NativePage {
             options.allow_redirects,
             options.max_redirects,
             options.proxy_options,
+            options.wait_until,
         )
     }
 

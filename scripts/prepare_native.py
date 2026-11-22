@@ -13,9 +13,9 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-
-JSC_VERSION = "jsc-v2026082706"
-JSC_BASE_URL = f"https://github.com/lexiforest/WebKit/releases/download/{JSC_VERSION}"
+JSC_VERSION = "webkit-v-27.2.post4"
+JSC_ASSET_VERSION = JSC_VERSION.removeprefix("webkit-v-")
+JSC_BASE_URL = f"https://github.com/lexiforest/brimp-webkit/releases/download/{JSC_VERSION}"
 CURL_VERSION = "v2.3.2"
 CURL_BASE_URL = f"https://github.com/lexiforest/curl-impersonate/releases/download/{CURL_VERSION}"
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,8 +42,8 @@ class Target:
 TARGETS = {
     "x86_64-unknown-linux-gnu": Target(
         Asset(
-            f"JavaScriptCore-{JSC_VERSION}-linux-x64.tar.gz",
-            "ac72fd9de753dc0acdf2bfc389dc7bc4bd61c30f309eabeeec38930f367d3825",
+            f"javascriptcore-v{JSC_ASSET_VERSION}.x86_64-linux-gnu.tar.gz",
+            "cadcaa10f26f64a3670641c40d20f7f9c04730a863e96af3c8ceff42e3a936f4",
             JSC_BASE_URL,
         ),
         Asset(
@@ -54,8 +54,8 @@ TARGETS = {
     ),
     "aarch64-unknown-linux-gnu": Target(
         Asset(
-            f"JavaScriptCore-{JSC_VERSION}-linux-arm64.tar.gz",
-            "653d458e3b0103da2f4d28c17193d468fbc71983b04bb5a788c98566bfa74011",
+            f"javascriptcore-v{JSC_ASSET_VERSION}.aarch64-linux-gnu.tar.gz",
+            "27d6467c3cc550ca2af05034c15f39998c829c723a5d55df236570fe4821ce96",
             JSC_BASE_URL,
         ),
         Asset(
@@ -66,8 +66,8 @@ TARGETS = {
     ),
     "aarch64-apple-darwin": Target(
         Asset(
-            f"JavaScriptCore-{JSC_VERSION}-macos-arm64.tar.gz",
-            "1d5b379d96f3dccd13a62674993fc8dadf9fd1091542edb1854ccb639c22168c",
+            f"javascriptcore-v{JSC_ASSET_VERSION}.arm64-macos.tar.gz",
+            "5de0f1b498c73702a45bfc588252319747435b43f1c28f50d21d9c91af54a4e6",
             JSC_BASE_URL,
         ),
         Asset(
@@ -78,8 +78,8 @@ TARGETS = {
     ),
     "x86_64-pc-windows-msvc": Target(
         Asset(
-            f"JavaScriptCore-{JSC_VERSION}-windows-x64.tar.gz",
-            "28836e9afbed32c97aee0cacb9b4b27b11febc29c0c1ef13786f3a082e7a31b9",
+            f"javascriptcore-v{JSC_ASSET_VERSION}.x86_64-win32.tar.gz",
+            "13e755bfd80bbd8f735bff13dffb7082fa5a263c2057c21b61ceb6e15b09e23d",
             JSC_BASE_URL,
         ),
         Asset(

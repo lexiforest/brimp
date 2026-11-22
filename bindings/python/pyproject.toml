@@ -24,6 +24,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
 ]
 
+[project.optional-dependencies]
+webkit = ["brimp-webkit==0.1.0"]
+
 [project.urls]
 Homepage = "https://brimp.ai"
 Documentation = "https://docs.brimp.ai"

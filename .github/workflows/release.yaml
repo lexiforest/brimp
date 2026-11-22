@@ -6,7 +6,16 @@ on:
   push:
     tags:
       - "v*"
+      - "webkit-v*"
   workflow_dispatch:
+    inputs:
+      package:
+        description: Package to build and test (manual runs never publish)
+        type: choice
+        default: brimp
+        options:
+          - brimp
+          - webkit
 
 permissions:
   contents: read
@@ -20,6 +29,9 @@ env:
 jobs:
   verify:
     name: Verify release metadata
+    outputs:
+      package: ${{ steps.versions.outputs.package }}
+      webkit_version: ${{ steps.versions.outputs.webkit_version }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -27,16 +39,24 @@ jobs:
         with:
           python-version: "3.11"
       - name: Check versions and licenses
+        id: versions
+        env:
+          RELEASE_PACKAGE: ${{ startsWith(github.ref, 'refs/tags/webkit-v') && 'webkit' || inputs.package || 'brimp' }}
         run: |
+          echo "package=$RELEASE_PACKAGE" >> "$GITHUB_OUTPUT"
+          echo "webkit_version=$(python scripts/check_versions.py --package webkit)" >> "$GITHUB_OUTPUT"
           if [ "$GITHUB_REF_TYPE" = tag ]; then
-            python scripts/check_versions.py --tag "$GITHUB_REF_NAME"
+            python scripts/check_versions.py --package "$RELEASE_PACKAGE" --tag "$GITHUB_REF_NAME"
           else
-            python scripts/check_versions.py
+            python scripts/check_versions.py --package "$RELEASE_PACKAGE"
           fi
       - name: Run packaging helper tests
         run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf libatomic1
           python -m pip install pytest
-          python -m pytest bindings/python/test_packaging.py
+          python -m pip install wheel
+          python -m pytest bindings/python/test_packaging.py bindings/test_native_runtime.py tools/webkit/test_webkit_packaging.py scripts/test_release_versions.py
 
   linux:
     name: Build Linux ${{ matrix.target }}
@@ -69,7 +89,7 @@ jobs:
         run: echo "/opt/python/cp311-cp311/bin" >> "$GITHUB_PATH"
 
       - name: Install Linux tools
-        run: dnf install -y fontconfig-devel freetype-devel pkgconf-pkg-config patchelf ninja-build clang
+        run: dnf install -y fontconfig-devel freetype-devel pkgconf-pkg-config patchelf ninja-build clang libatomic
 
       - name: Download pinned native SDKs
         run: >-
@@ -79,15 +99,14 @@ jobs:
           --curl-release
 
       - name: Install build tools
-        run: python -m pip install pytest 'maturin>=1.9,<2'
+        run: python -m pip install pytest wheel 'maturin>=1.9,<2'
 
       - name: Build and repair wheel
         run: |
           maturin build --release --locked \
             --auditwheel repair --compatibility manylinux_2_34 \
             --manifest-path bindings/python/Cargo.toml --out dist/raw
-          mkdir -p dist/wheels
-          cp dist/raw/*.whl dist/wheels/
+          python bindings/python/bundle_linux_runtime.py --wheel dist/raw/*.whl --out dist/wheels
 
       - name: Validate and clean-install wheel
         run: |
@@ -294,12 +313,105 @@ jobs:
           path: dist/node/brimp-npm-*.tgz
           if-no-files-found: error
 
+  webkit:
+    name: Test WebKit companion ${{ matrix.target }}
+    needs: [verify, linux, native]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            runner: ubuntu-24.04
+            rust_target: x86_64-unknown-linux-gnu
+          - target: darwin-arm64
+            runner: xcode-27
+            rust_target: aarch64-apple-darwin
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.19.0'
+      - name: Install packaging tools
+        if: needs.verify.outputs.package == 'webkit'
+        run: python -m pip install 'wheel==0.45.1' 'auditwheel==6.8.0' pytest
+      - name: Install Linux host dependencies
+        if: runner.os == 'Linux' && needs.verify.outputs.package == 'webkit'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang-18 libwebkitgtk-6.0-dev libavif16 libjxl0.7 libatomic1 nlohmann-json3-dev patchelf \
+            xvfb xauth dbus-x11 bubblewrap xdg-dbus-proxy fonts-dejavu-core libgl1-mesa-dri
+      - name: Download verified WebKit SDK
+        if: needs.verify.outputs.package == 'webkit'
+        run: python tools/webkit/download.py --target '${{ matrix.target }}' --output .native/webkit-release
+      - name: Build host and package engine
+        if: needs.verify.outputs.package == 'webkit'
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            export CXX=clang++-18
+          fi
+          python tools/webkit/package.py --sdk "$BRIMP_WEBKIT_SDK" --out dist/webkit
+      - name: Download base Python wheel
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel-${{ matrix.rust_target }}
+          path: dist/base-wheels
+      - name: Download base Node platform package
+        uses: actions/download-artifact@v4
+        with:
+          name: node-${{ matrix.rust_target }}
+          path: dist/base-node
+      - name: Download base Node wrapper
+        uses: actions/download-artifact@v4
+        with:
+          name: node-main
+          path: dist/base-node
+      - name: Test installed packages
+        shell: bash
+        env:
+          RELEASE_PACKAGE: ${{ needs.verify.outputs.package }}
+          WEBKIT_VERSION: ${{ needs.verify.outputs.webkit_version }}
+        run: |
+          if [ "$RELEASE_PACKAGE" = webkit ]; then
+            companion=(--dist dist/webkit --hide-sdk "$BRIMP_WEBKIT_SDK")
+          else
+            companion=(--published "$WEBKIT_VERSION")
+          fi
+          if [ "$RUNNER_OS" = Linux ]; then
+            docker build -f tools/webkit/runtime.Dockerfile \
+              --build-arg TEST_UID="$(id -u)" -t brimp-webkit-runtime-test tools/webkit
+            # Nested user namespaces are needed by WebKit's own process sandbox.
+            docker run --rm --privileged \
+              -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
+              brimp-webkit-runtime-test tools/webkit/test_distribution.py \
+              "${companion[@]}" --base-wheels dist/base-wheels --base-node dist/base-node
+          else
+            python tools/webkit/test_distribution.py \
+              "${companion[@]}" --base-wheels dist/base-wheels --base-node dist/base-node
+          fi
+      - name: Upload WebKit packages
+        if: needs.verify.outputs.package == 'webkit'
+        uses: actions/upload-artifact@v4
+        with:
+          name: webkit-${{ matrix.target }}
+          path: dist/webkit/*
+          if-no-files-found: error
+          compression-level: 0
+
   publish:
     name: Publish release
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push'
     needs:
+      - verify
       - linux
       - native
+      - webkit
     runs-on: ubuntu-24.04
     environment: pypi
     permissions:
@@ -312,6 +424,7 @@ jobs:
           python-version: "3.11"
 
       - name: Download wheels
+        if: needs.verify.outputs.package == 'brimp'
         uses: actions/download-artifact@v4
         with:
           pattern: wheel-*
@@ -319,6 +432,7 @@ jobs:
           merge-multiple: true
 
       - name: Download Node packages
+        if: needs.verify.outputs.package == 'brimp'
         uses: actions/download-artifact@v4
         with:
           pattern: node-*
@@ -326,13 +440,23 @@ jobs:
           merge-multiple: true
 
       - name: Download CLI archives
+        if: needs.verify.outputs.package == 'brimp'
         uses: actions/download-artifact@v4
         with:
           pattern: cli-*
           path: dist/cli
           merge-multiple: true
 
+      - name: Download WebKit packages
+        if: needs.verify.outputs.package == 'webkit'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: webkit-*
+          path: dist/webkit
+          merge-multiple: true
+
       - name: Validate release artifacts
+        if: needs.verify.outputs.package == 'brimp'
         run: |
           for target in \
             x86_64-unknown-linux-gnu \
@@ -349,16 +473,39 @@ jobs:
           python bindings/package_cli.py --validate --all --out dist/cli
           python scripts/check_versions.py --tag "$GITHUB_REF_NAME"
 
+      - name: Validate companion release artifacts
+        if: needs.verify.outputs.package == 'webkit'
+        run: |
+          python scripts/check_versions.py --package webkit --tag "$GITHUB_REF_NAME"
+          python tools/webkit/validate.py dist/webkit
+
       - name: Write checksums
+        env:
+          RELEASE_PACKAGE: ${{ needs.verify.outputs.package }}
         run: |
           cd dist
-          sha256sum wheels/*.whl node/*.tgz cli/*.tar.gz cli/*.zip > SHA256SUMS
+          if [ "$RELEASE_PACKAGE" = webkit ]; then
+            sha256sum webkit/* > SHA256SUMS
+          else
+            sha256sum wheels/*.whl node/*.tgz cli/*.tar.gz cli/*.zip > SHA256SUMS
+          fi
           cat SHA256SUMS
+
+      - name: Collect Python distributions
+        env:
+          RELEASE_PACKAGE: ${{ needs.verify.outputs.package }}
+        run: |
+          mkdir -p dist/pypi
+          if [ "$RELEASE_PACKAGE" = webkit ]; then
+            cp dist/webkit/*.whl dist/pypi/
+          else
+            cp dist/wheels/*.whl dist/pypi/
+          fi
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: dist/wheels/
+          packages-dir: dist/pypi/
 
       - uses: actions/setup-node@v6
         with:
@@ -366,6 +513,7 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Publish npm packages
+        if: needs.verify.outputs.package == 'brimp'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -379,11 +527,24 @@ jobs:
           done
           npm publish dist/node/brimp-npm-*.tgz --access public --provenance
 
+      - name: Publish companion npm packages
+        if: needs.verify.outputs.package == 'webkit'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version=$(python scripts/check_versions.py --package webkit)
+          npm publish "dist/webkit/brimp-webkit-darwin-arm64-$version.tgz" --access public --provenance
+          npm publish "dist/webkit/brimp-webkit-linux-x64-$version.tgz" --access public --provenance
+          npm publish "dist/webkit/brimp-webkit-$version.tgz" --access public --provenance
+
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
+          # Companion releases must not replace the CLI installer's latest release.
+          make_latest: ${{ needs.verify.outputs.package == 'brimp' && 'true' || 'false' }}
           files: |
             dist/cli/*
             dist/wheels/*.whl
             dist/node/*.tgz
+            dist/webkit/*
             dist/SHA256SUMS

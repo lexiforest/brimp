@@ -4,6 +4,7 @@ Each check corresponds to one thing an example does between navigation and the
 cookie it waits for. It answers "can the runtime run this flow", not "would the
 real challenge accept it": the stand-in is not Akamai, DataDome, PX or Cloudflare.
 """
+
 from __future__ import annotations
 
 import json
@@ -66,10 +67,19 @@ def main() -> int:
 
         def blocked_resource():
             blocked = brimp.Session(trust_env=False)
-            remove = blocked.route("*", lambda route: route.fail("blocked") if route.request["resource_type"] == "stylesheet" else route.continue_request())
+            remove = blocked.route(
+                "*",
+                lambda route: (
+                    route.fail("blocked")
+                    if route.request["resource_type"] == "stylesheet"
+                    else route.continue_request()
+                ),
+            )
             with blocked.get(origin + "/") as blocked_page:
                 sheets = blocked_page.evaluate("document.styleSheets.length")
-                color = blocked_page.evaluate("getComputedStyle(document.getElementById('copy')).color")
+                color = blocked_page.evaluate(
+                    "getComputedStyle(document.getElementById('copy')).color"
+                )
             remove()
             blocked.close()
             return f"sheets={sheets} color={color}"
@@ -97,7 +107,9 @@ def main() -> int:
                 "document.body.insertAdjacentHTML('beforeend',"
                 " '<iframe id=f srcdoc=\"<p id=inner>frame</p>\"></iframe>')"
             )
-            return page.evaluate("(() => { const f = document.getElementById('f'); return f.contentDocument.getElementById('inner').textContent })()")
+            return page.evaluate(
+                "(() => { const f = document.getElementById('f'); return f.contentDocument.getElementById('inner').textContent })()"
+            )
 
         def pending_tasks():
             page.evaluate(
@@ -120,7 +132,9 @@ def main() -> int:
         check("follow-up API request authenticated by that cookie", api_with_cookie)
         check("route() blocks a stylesheet by resource type", blocked_resource)
         check("page.click dispatches trusted pointer events", click_dispatches_pointer_events)
-        check("page.hover dispatches pointermove", hover_is_hover if False else hover_is_pointer_move)
+        check(
+            "page.hover dispatches pointermove", hover_is_hover if False else hover_is_pointer_move
+        )
         check("iframe document reachable from the page", frames_are_reachable)
         check("run_pending_tasks drains timers", pending_tasks)
         check("load_html installs a saved document", saved_document)

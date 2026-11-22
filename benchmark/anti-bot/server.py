@@ -7,6 +7,7 @@ without network access. It is *not* an Akamai/DataDome/PX challenge and cannot t
 anyone whether a real one would pass; it only answers whether the runtime can run
 the same flow.
 """
+
 from __future__ import annotations
 
 import http.server
@@ -91,7 +92,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path.startswith("/collect"):
             payload = json.loads(body or b"{}")
             print(json.dumps({"collected": sorted(payload)}), flush=True)
-            return self._send(204, b"", "text/plain", [("Set-Cookie", "session=ok; Path=/; HttpOnly")])
+            return self._send(
+                204, b"", "text/plain", [("Set-Cookie", "session=ok; Path=/; HttpOnly")]
+            )
         return self._send(404)
 
 

@@ -20,7 +20,7 @@ Skia build depends on FreeType 2.10+.
 
 `scripts/prepare_native.py` downloads and verifies:
 
-- JavaScriptCore `jsc-v2026082706` from `lexiforest/WebKit`;
+- JavaScriptCore from `webkit-v-27.2.post4` in `lexiforest/brimp-webkit`;
 - curl-impersonate `v2.3.2` from `lexiforest/curl-impersonate`, including its
   BoringSSL WebCrypto interface.
 
@@ -45,7 +45,10 @@ maturin build --release --locked \
 ```
 
 Use `--compatibility manylinux_2_34` inside a manylinux_2_34 container for
-Linux. On Windows, run `bindings/python/bundle_windows_runtime.py` after maturin
+Linux, then run `bindings/python/bundle_linux_runtime.py --wheel dist/raw/NAME.whl
+--out dist/wheels` to include libatomic and its license notices. Manylinux treats
+libatomic as a system library, so ordinary wheel repair alone does not bundle it.
+On Windows, run `bindings/python/bundle_windows_runtime.py` after maturin
 to add `msvcp140.dll`, `msvcp140_2.dll`, `vcruntime140.dll` and
 `vcruntime140_1.dll` to `brimp.libs`.
 
@@ -118,13 +121,149 @@ dependencies. The publish job requires all four CLI archives and verifies their
 manifests before uploading them. The installer at `https://brimp.ai/install.sh`
 downloads the matching archive and checksum from the GitHub release.
 
+Release Rust binaries strip symbols. The Node/CLI bundlers also strip copied
+Unix SDK libraries before relocation and macOS signing.
+Linux Python, Node and CLI packages explicitly include libatomic and the GCC
+runtime license notices. The wheel postprocessor preserves the platform tag
+and regenerates RECORD after adding the library and adjusting loader paths.
+
 ## Release workflow
 
-`.github/workflows/release.yml` runs on `v*` tags. It builds the four wheels and
-the four platform packages and four CLI archives, installs and smoke-tests them, verifies the tag
-matches the workspace version, writes `SHA256SUMS`, publishes wheels to PyPI
-with trusted publishing, publishes npm packages with provenance, and creates a
-GitHub release.
+`.github/workflows/release.yaml` handles two independent release types:
+
+| Tag | Version source | Published artifacts |
+| --- | --- | --- |
+| `v0.1.2` | Cargo workspace and Brimp binding metadata | Brimp wheels, npm packages and CLI archives |
+| `webkit-v0.1.0` | `version` in `tools/webkit/release.json` | brimp-webkit wheels and @brimp/webkit packages |
+
+Brimp releases build and smoke-test the four platform distributions, then test
+the new Python/Node bindings against the exact published companion version from
+PyPI and npm. They do not download a WebKit SDK, build its host, or repackage or
+publish the companion. The separate JavaScriptCore SDK is still needed to build
+Brimp's default runtime.
+
+Companion releases build the host and package the pinned engine SDK for macOS
+arm64 and Linux x64. They build current Brimp bindings as test dependencies and
+test them against the candidate companion before publishing only the companion.
+This allows the first companion release without an existing Brimp release.
+
+Both release types validate their tag, write `SHA256SUMS`, publish through PyPI
+trusted publishing and npm provenance, and create a GitHub release. Companion
+releases do not replace the latest Brimp release used by the CLI installer.
 
 PyPI trusted publishing must be configured for the `pypi` environment and the
 `NPM_TOKEN` repository secret must be able to publish the `@brimp` scope.
+
+## WebKit companion packages
+
+New WebKit and JavaScriptCore SDK releases follow curl-impersonate's archive
+naming convention: `<product>-v<VERSION>.<architecture>-<platform>.tar.gz`.
+For example, tag `webkit-v-27.2.post4` produces:
+
+| SDK | Archive |
+| --- | --- |
+| WebKit Linux x86_64 | `webkit-v27.2.post4.x86_64-linux-gnu.tar.gz` |
+| WebKit macOS arm64 | `webkit-v27.2.post4.arm64-macos.tar.gz` |
+| JSC Linux x86_64 | `javascriptcore-v27.2.post4.x86_64-linux-gnu.tar.gz` |
+| JSC Linux aarch64 | `javascriptcore-v27.2.post4.aarch64-linux-gnu.tar.gz` |
+| JSC macOS arm64 | `javascriptcore-v27.2.post4.arm64-macos.tar.gz` |
+| JSC Windows x86_64 | `javascriptcore-v27.2.post4.x86_64-win32.tar.gz` |
+
+The Windows JSC symbols archive uses `.symbols.tar.gz` after the target.
+Linux WebKit's build distribution stays in its SDK metadata (`build_os`),
+rather than its archive name. Its ABI and system requirements still apply.
+Both SDK pins now use the published `webkit-v-27.2.post4` release and these names.
+The four JSC archive checksums are pinned in `scripts/prepare_native.py`.
+
+The Brimp repository publishes `brimp-webkit` to PyPI and `@brimp/webkit` plus
+its two platform packages to npm. They share the independent companion version
+in `tools/webkit/release.json`. Brimp's Python `webkit` extra and optional Node
+peer pin that companion version; `scripts/check_versions.py` checks those pins
+without requiring the Brimp and companion versions to match. Multiple Brimp
+releases can keep the same companion pin, avoiding duplicate engine releases and
+downloads. Bump the companion version and both pins only when the engine, native
+host, extraction code or packaged dependencies change.
+
+The WebKit repository publishes engine SDK archives; the downstream
+SDK tag is pinned in `tools/webkit/release.json` and verified against its release
+checksums and file manifest. Both platforms must use the same source commit.
+
+The WebKit release matrix currently targets macOS arm64 (the minimum OS comes
+from the SDK's deployment target) and Linux x64, built on Ubuntu 24.04 and repaired
+with auditwheel for `manylinux_2_39_x86_64`. Windows and Linux arm64 have no WebKit
+companion package. The default Brimp runtime retains its existing platform matrix.
+
+The Ubuntu 24.04 packaging host explicitly installs `libavif16` and `libjxl0.7`,
+which the pinned SDK links against. Current distro WebKit development packages
+can pull newer codec ABIs instead. Auditwheel includes these codec libraries in
+the companion payload.
+
+```sh
+pip install 'brimp[webkit]'
+npm install @brimp/brimp @brimp/webkit
+```
+
+Native binaries are stripped before packaging; Linux stripping precedes auditwheel
+repair, and macOS code is re-signed afterward. Development headers, static
+libraries, macOS linker stubs (`.tbd`) and debug bundles are omitted. The shared
+engine payload uses XZ compression to keep wheel/npm downloads small.
+
+The engine payload is included in each platform package. On first use it is
+checksum-verified and extracted atomically into `$XDG_CACHE_HOME/brimp/webkit`
+(or `~/.cache/brimp/webkit`). Extraction preserves framework symlinks and
+executable permissions, works with read-only package directories, and performs
+no network access. Python and Node use the same payload and cache key. Selecting
+`engine="webkit"` or `engine: 'webkit'` discovers the companion automatically;
+an explicit executable path still selects a development/custom host.
+
+Linux also requires a display or Xvfb, a D-Bus session, bubblewrap,
+xdg-dbus-proxy, fonts, and graphics drivers. These OS facilities are not pip/npm
+packages. On Ubuntu 24.04, install them with:
+
+```sh
+sudo apt-get install xvfb xauth dbus-x11 bubblewrap xdg-dbus-proxy fonts-dejavu-core fontconfig libgl1-mesa-dri libegl1 libegl-mesa0 libgles2
+```
+
+For a headless application, create a private `XDG_RUNTIME_DIR` and run it under
+`dbus-run-session -- xvfb-run -a`. Keep the WebKit process sandbox enabled.
+The SDK's current media limitations still apply.
+
+The release workflow builds the embedding host, bundles/signs macOS runtime
+code or repairs Linux ELF dependencies, and tests installed Python and Node
+packages while the input SDK path is hidden. Tests cover automatic discovery
+and the shared WebKit navigation/input/cancellation contracts. Linux installation
+tests run in an Ubuntu 24.04 container with only documented OS prerequisites; no
+distribution WebKit/GTK libraries or development SDKs are installed. Publishing waits
+for both platforms. The test image also removes any system libatomic installed
+transitively by graphics packages, so tests must use the bundled copies. Publishing validates
+versions, engine revisions and identical
+Python/npm payload hashes. Manual workflow runs build and test without publishing;
+select `package=brimp` to test with the published companion or `package=webkit`
+to build and test a companion candidate.
+
+Before the first release with WebKit:
+
+1. Validate the engine release pinned in `tools/webkit/release.json`.
+   The pinned `webkit-v-27.2.post4` includes the macOS trusted single-click fix.
+   Build and run installed-package tests against these published artifacts
+   before publishing Brimp.
+   The earlier Ubuntu 26.04 fixed-prefix SDK is rejected by this pipeline.
+2. Configure PyPI trusted publishing for **both** `brimp` and `brimp-webkit`,
+   using this repository, `release.yaml`, and the `pypi` environment. The npm token
+   needs publishing access to `@brimp/webkit`, `@brimp/webkit-darwin-arm64`, and
+   `@brimp/webkit-linux-x64` as well as the existing Brimp packages.
+3. Run the Release workflow manually with `package=webkit`. Once its checks pass,
+   push `webkit-v0.1.0` to publish the first companion to both registries.
+4. Run the workflow manually with `package=brimp` to test Brimp against that
+   published companion. Once its checks pass, push `v0.1.2` to publish Brimp.
+   Later Brimp versions use only their own `v*` tag while the companion is unchanged.
+
+For version checks, use `python scripts/check_versions.py --tag v0.1.2` for Brimp
+or `python scripts/check_versions.py --package webkit --tag webkit-v0.1.0` for
+the companion. The engine repository's `webkit-v-27.2.post4` SDK tag is separate
+from this repository's `webkit-v0.1.0` package tag.
+
+Local development can use `tools/webkit/package.py --sdk PATH --out DIST
+--development-sdk`. Such artifacts record development provenance and the release
+validator refuses to publish them. Use `tools/webkit/test_distribution.py` with
+base Brimp wheel/npm packages to exercise them outside the source tree.

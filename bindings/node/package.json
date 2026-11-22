@@ -30,6 +30,7 @@
     "LICENSE",
     "plugins.js",
     "values.js",
+    "automation.js",
     "bundled"
   ],
   "optionalDependencies": {
@@ -43,5 +44,13 @@
   },
   "engines": {
     "node": ">=22.19"
+  },
+  "peerDependencies": {
+    "@brimp/webkit": "0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@brimp/webkit": {
+      "optional": true
+    }
   }
 }

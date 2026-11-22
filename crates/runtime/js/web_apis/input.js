@@ -1,4 +1,5 @@
 globalThis.__brimpInputController = (() => {
+  let document = globalThis.document;
   const apply = Reflect.apply;
   const dispatchEvent = EventTarget.prototype.dispatchEvent;
   let mouseTarget = null;
@@ -174,7 +175,9 @@ globalThis.__brimpInputController = (() => {
       if (__buttonType(target) === 'submit') submit(__formOwner(target));
       else if (__buttonType(target) === 'reset') reset(__formOwner(target));
     } else if (target instanceof HTMLAnchorElement && target.href) {
-      location.href = target.href;
+      const realm = target.ownerDocument.defaultView || window;
+      if (target.target && target.target !== '_self') realm.open(target.href, target.target);
+      else realm.location.href = target.href;
     }
   }
 
@@ -796,52 +799,58 @@ globalThis.__brimpInputController = (() => {
     inputEvent(target, 'change');
   }
   return (serialized, targetOverride) => {
-    const command = JSON.parse(String(serialized));
-    // Coordinate commands resolve their own target from the hit test.
-    if (command.action === 'move' || command.action === 'wheel') {
-      if (command.action === 'move') movePointer(command);
-      else wheel(command);
+    const previousDocument = document;
+    document = targetOverride?.ownerDocument || globalThis.document;
+    try {
+      const command = JSON.parse(String(serialized));
+      // Coordinate commands resolve their own target from the hit test.
+      if (command.action === 'move' || command.action === 'wheel') {
+        if (command.action === 'move') movePointer(command);
+        else wheel(command);
+        return 'true';
+      }
+      if (command.action === 'down') {
+        pressButton(command);
+        return 'true';
+      }
+      if (command.action === 'up') {
+        releaseButton(command);
+        return 'true';
+      }
+      if (command.action === 'clickAt') {
+        pressButton(command);
+        releaseButton(command);
+        return 'true';
+      }
+      const target =
+        targetOverride ??
+        (command.selector == null ? document.activeElement : targetForSelector(command.selector));
+      if (!target || !(target instanceof Element)) throw new TypeError('input requires an element');
+      if (command.action === 'click')
+        clickElement(target, command.clickCount ?? 1, command.modifiers ?? 0);
+      else if (command.action === 'hover') moveElement(target, 0, command.modifiers ?? 0);
+      else if (command.action === 'type') typeText(target, command.text);
+      else if (command.action === 'tap') tapElement(target, command.modifiers ?? 0);
+      else if (command.action === 'focus') focus(target);
+      else if (command.action === 'fill') fill(target, command.text);
+      else if (command.action === 'files') files(target, command.files);
+      else if (command.action === 'dragTo') dragTo(target, targetForSelector(command.destination));
+      else if (command.action === 'key') {
+        focus(target);
+        dispatchKey(command);
+      } else if (command.action === 'press') {
+        focus(target);
+        const down = {
+          ...command,
+          eventType: 'keyDown',
+          text: Array.from(command.key).length === 1 ? command.key : '',
+        };
+        dispatchKey(down);
+        dispatchKey({ ...down, eventType: 'keyUp', text: '' });
+      } else throw new TypeError(`unsupported input action: ${command.action}`);
       return 'true';
+    } finally {
+      document = previousDocument;
     }
-    if (command.action === 'down') {
-      pressButton(command);
-      return 'true';
-    }
-    if (command.action === 'up') {
-      releaseButton(command);
-      return 'true';
-    }
-    if (command.action === 'clickAt') {
-      pressButton(command);
-      releaseButton(command);
-      return 'true';
-    }
-    const target =
-      targetOverride ??
-      (command.selector == null ? document.activeElement : targetForSelector(command.selector));
-    if (!target || !(target instanceof Element)) throw new TypeError('input requires an element');
-    if (command.action === 'click')
-      clickElement(target, command.clickCount ?? 1, command.modifiers ?? 0);
-    else if (command.action === 'hover') moveElement(target, 0, command.modifiers ?? 0);
-    else if (command.action === 'type') typeText(target, command.text);
-    else if (command.action === 'tap') tapElement(target, command.modifiers ?? 0);
-    else if (command.action === 'focus') focus(target);
-    else if (command.action === 'fill') fill(target, command.text);
-    else if (command.action === 'files') files(target, command.files);
-    else if (command.action === 'dragTo') dragTo(target, targetForSelector(command.destination));
-    else if (command.action === 'key') {
-      focus(target);
-      dispatchKey(command);
-    } else if (command.action === 'press') {
-      focus(target);
-      const down = {
-        ...command,
-        eventType: 'keyDown',
-        text: Array.from(command.key).length === 1 ? command.key : '',
-      };
-      dispatchKey(down);
-      dispatchKey({ ...down, eventType: 'keyUp', text: '' });
-    } else throw new TypeError(`unsupported input action: ${command.action}`);
-    return 'true';
   };
 })();

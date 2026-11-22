@@ -59,7 +59,9 @@ Object.defineProperty(globalThis, '__brimpScriptController', {
       if (op === 'domContentLoaded') {
         // The navigation lifecycle events come from the browser, so a listener
         // sees `isTrusted: true` exactly as it would in a browser.
-        document.dispatchEvent(__markTrustedEvent(new Event('DOMContentLoaded', { bubbles: true })));
+        document.dispatchEvent(
+          __markTrustedEvent(new Event('DOMContentLoaded', { bubbles: true })),
+        );
         return null;
       }
       if (op === 'load') {

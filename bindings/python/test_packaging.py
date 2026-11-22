@@ -39,6 +39,10 @@ class PackagingTests(unittest.TestCase):
                 ]
                 if "linux-gnu" in target:
                     names.append("brimp/bundled/licenses/native/jsc-sdk/icu/LICENSE")
+                    names.extend(
+                        f"brimp/bundled/licenses/native/gcc-runtime/{notice}"
+                        for notice in ("COPYING3", "COPYING.RUNTIME")
+                    )
                 with zipfile.ZipFile(wheel, "w") as archive:
                     for name in names:
                         archive.writestr(name, "test")

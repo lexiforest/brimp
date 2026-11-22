@@ -10,6 +10,8 @@ from . import Session, JSHandle, ElementHandle, Closed, undefined, _HTTPResult
 from .exceptions import SessionClosed
 from ._brimp import _Cancellation
 from .plugins import _check_session
+from ._automation import Automation
+from ._timeouts import UNSET, normalize_timeout
 
 
 async def _drain(future):
@@ -70,6 +72,8 @@ class AsyncSession(_AsyncRequests):
         if self.params is None:
             self.params = {}
         self._options = kwargs
+        self._timeout = normalize_timeout(kwargs.get("timeout", 30))
+        self._pages = set()
         self._loop = None
         self._executor = ThreadPoolExecutor(
             max_workers=max_clients, thread_name_prefix="brimp-async"
@@ -140,7 +144,19 @@ class AsyncSession(_AsyncRequests):
     async def new_page(self):
         """Create a blank AsyncPage. The session owns its lifetime."""
         page = await self._run(lambda: self._sync.new_page(), cleanup=lambda page: page.close())
-        return AsyncPage(page, self)
+        return self._wrap_page(page)
+
+    def _wrap_page(self, page):
+        for existing in tuple(self._pages):
+            if existing._page._inner.id == page._inner.id:
+                return existing
+        page = AsyncPage(page, self)
+        self._pages.add(page)
+        return page
+
+    @property
+    def pages(self):
+        return [] if self._sync is None else [self._wrap_page(page) for page in self._sync.pages]
 
     async def request(self, method, url, **kwargs):
         """Navigate a new AsyncPage; accepts Page.request keyword arguments."""
@@ -181,6 +197,9 @@ class AsyncSession(_AsyncRequests):
             raise
 
     async def _shutdown(self):
+        for page in tuple(self._pages):
+            page._notify_closed()
+        self._pages.clear()
         for token in self._pending.values():
             token.cancel()
         try:
@@ -207,7 +226,7 @@ class AsyncSession(_AsyncRequests):
         await self.close()
 
 
-class AsyncPage(_AsyncRequests, _HTTPResult):
+class AsyncPage(Automation, _AsyncRequests, _HTTPResult):
     """A live async page with synchronous buffered HTTP properties and json().
 
     Await navigation, JavaScript, DOM and handle operations. Cancellation stops
@@ -220,6 +239,26 @@ class AsyncPage(_AsyncRequests, _HTTPResult):
         self._lock = asyncio.Lock()
         self._closed = False
         self._closing = None
+        self._expectations = set()
+        self._close_listener = self.on("close", lambda _: self._notify_closed())
+
+    async def _automate(self, command, *, timeout=UNSET):
+        return await self._call(self._page._automate, command, timeout=timeout)
+
+    async def current_url(self):
+        return await self._call(self._page.current_url)
+
+    def _popup_page(self, record):
+        return self._session._wrap_page(self._page._popup_page(record))
+
+    async def wait_for_network_idle(self, *, quiet=0.5, timeout=UNSET):
+        return await self._call(self._page.wait_for_network_idle, quiet=quiet, timeout=timeout)
+
+    def _notify_closed(self):
+        self._closed = True
+        self._session._pages.discard(self)
+        for expectation in tuple(self._expectations):
+            expectation._closed()
 
     def _http_response(self):
         return self._page._http_response()
@@ -260,6 +299,8 @@ class AsyncPage(_AsyncRequests, _HTTPResult):
 
     async def close(self):
         """Close this page, interrupting its work without closing sibling pages."""
+        self._notify_closed()
+        self._session._pages.discard(self)
         loop = self._session._check_loop()
         if self._closing is None:
             self._closed = True
@@ -337,8 +378,8 @@ class AsyncPage(_AsyncRequests, _HTTPResult):
     async def response_body(self, request_id):
         return await self._call(self._page.response_body, request_id)
 
-    async def evaluate(self, source):
-        return await self._call(self._page.evaluate, source)
+    async def evaluate(self, source, *, timeout=UNSET):
+        return await self._call(self._page.evaluate, source, timeout=timeout)
 
     async def evaluate_handle(self, source):
         return await self._call(self._page.evaluate_handle, source)

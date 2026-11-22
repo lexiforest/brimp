@@ -46,6 +46,7 @@ from .exceptions import (
     JSONDecodeError,
 )
 from ._brimp import _Session
+from ._automation import Automation, Locator, Frame
 
 from .values import encode as _encode, decode as _decode, undefined, BigInt
 from .plugins import Plugin, HostContext, _check_session, _callback, browser as _browser_plugins
@@ -161,12 +162,16 @@ class Session(_Requests):
         time_origin=None,
         diagnostics=None,
         storage_path=None,
+        engine="runtime",
+        executable_path=None,
     ):
         if isinstance(profile, Fingerprint):
             profile = {"values": {"network": {"fingerprint": profile}}}
         _validate_base_url(base_url)
         self.base_url = base_url
         self.params = {} if params is None else params
+        self._timeout = _normalize_timeout(timeout)
+        self._pages = weakref.WeakSet()
         pairs = _headers(headers)
         if auth is not None:
             pairs.append(
@@ -181,11 +186,22 @@ class Session(_Requests):
         self._routes = set()
         bound = []
         try:
-            for plugin in _browser_plugins() if plugins is None else plugins:
+            selected_plugins = (
+                (_browser_plugins() if engine == "runtime" else []) if plugins is None else plugins
+            )
+            for plugin in selected_plugins:
                 plugin, dispose = plugin._bind()
                 bound.append(plugin)
                 if dispose:
                     self._plugin_disposers.append(dispose)
+            if engine == "webkit" and executable_path is None:
+                try:
+                    import brimp_webkit
+                except ModuleNotFoundError as error:
+                    if error.name != "brimp_webkit":
+                        raise
+                    raise RuntimeError("Install brimp[webkit] to use engine='webkit'") from error
+                executable_path = brimp_webkit.executable_path()
             self._inner = _Session(
                 pairs,
                 _normalize_timeout(timeout),
@@ -196,6 +212,8 @@ class Session(_Requests):
                 _json.dumps(diagnostics, allow_nan=False),
                 None if storage_path is None else str(storage_path),
                 _json.dumps(_proxy_options(proxy, proxies, proxy_auth, trust_env)),
+                engine,
+                None if executable_path is None else str(executable_path),
             )
         except BaseException:
             self._dispose_plugins()
@@ -219,7 +237,20 @@ class Session(_Requests):
     def new_page(self):
         """Create a blank page before attaching routes, listeners or init scripts."""
         _check_session(self._plugin_token)
-        return Page(self._inner.new_page(), self)
+        return self._wrap_page(self._inner.new_page())
+
+    def _wrap_page(self, inner):
+        for page in tuple(self._pages):
+            if page._inner.id == inner.id:
+                return page
+        page = Page(inner, self)
+        self._pages.add(page)
+        return page
+
+    @property
+    def pages(self):
+        """Currently open pages owned by this session."""
+        return [self._wrap_page(inner) for inner in self._inner.pages()]
 
     def request(self, method, url, **kwargs):
         """Navigate a new page. Keyword arguments are those of Page.request."""
@@ -258,6 +289,9 @@ class Session(_Requests):
 
     def close(self):
         _check_session(self._plugin_token)
+        for page in tuple(self._pages):
+            page._notify_closed()
+        self._pages.clear()
         try:
             self._inner.close()
         finally:
@@ -432,7 +466,7 @@ def _check_button(button):
         raise ValueError(f"button must be one of {', '.join(Mouse._BUTTONS)}")
 
 
-class Page(_Requests, _HTTPResult):
+class Page(Automation, _Requests, _HTTPResult):
     """An HTTP result and its live DOM and JavaScript environment.
 
     Obtain pages from Session. Navigation replaces the realm and invalidates
@@ -483,6 +517,39 @@ class Page(_Requests, _HTTPResult):
         self._session_cleanup = None
         self._subscriptions = set()
         self._routes = set()
+        self._expectations = set()
+        self._closed = False
+        reference = weakref.ref(self)
+
+        def closed(_):
+            if page := reference():
+                page._notify_closed()
+
+        self._close_listener = self.on("close", closed)
+
+    def _automate(self, command, *, timeout=_TIMEOUT_UNSET):
+        return _decode(
+            _json.loads(self._inner.automate(_json.dumps(command), _normalize_timeout(timeout)))
+        )
+
+    def current_url(self):
+        """Current document URL, including script-initiated navigations."""
+        return self._inner.current_url()
+
+    def _popup_page(self, record):
+        return self._session._wrap_page(self._session._inner.page(record["page_id"]))
+
+    def wait_for_network_idle(self, *, quiet=0.5, timeout=_TIMEOUT_UNSET):
+        """Wait for no active requests for quiet seconds."""
+        return self._inner.wait_for_network_idle(
+            _normalize_timeout(quiet), _normalize_timeout(timeout)
+        )
+
+    def _notify_closed(self):
+        self._closed = True
+        self._session._pages.discard(self)
+        for expectation in tuple(self._expectations):
+            expectation._closed()
 
     def on(self, event, handler):
         """Subscribe a synchronous event handler; return an unsubscribe function."""
@@ -633,6 +700,7 @@ class Page(_Requests, _HTTPResult):
         proxies=None,
         proxy_auth=None,
         trust_env=None,
+        wait_until=None,
     ):
         """Navigate this page and return it with a new response snapshot.
 
@@ -677,6 +745,7 @@ class Page(_Requests, _HTTPResult):
             allow_redirects,
             max_redirects,
             _json.dumps(_proxy_options(proxy, proxies, proxy_auth, trust_env)),
+            wait_until,
         )
         self._response = _Response(result)
         return self
@@ -701,9 +770,9 @@ class Page(_Requests, _HTTPResult):
             raise InvalidInput("page has no HTTP response")
         return self._response
 
-    def evaluate(self, source):
+    def evaluate(self, source, *, timeout=_TIMEOUT_UNSET):
         """Evaluate browser JavaScript, await Promises, and copy rich bridge values."""
-        return _decode(_json.loads(self._inner.evaluate(source)))
+        return self._automate({"op": "evaluate", "source": source}, timeout=timeout)
 
     def evaluate_handle(self, source):
         return JSHandle(self._inner.evaluate_handle(source))
@@ -773,7 +842,9 @@ class Page(_Requests, _HTTPResult):
         return self._inner.html()
 
     def close(self):
+        self._notify_closed()
         self._inner.close()
+        self._session._pages.discard(self)
         if self._session_cleanup is not None:
             self._session_cleanup()
 

@@ -21,10 +21,13 @@ def test_rtc_installer_selection_and_local_channels():
     # plugin supplies is the behaviour behind it.
     with Session(plugins=[]) as session, session.new_page() as page:
         assert page.evaluate("typeof RTCPeerConnection") == "function"
-        assert page.evaluate("""(() => {
+        assert (
+            page.evaluate("""(() => {
             try { new RTCPeerConnection(); return 'constructed' }
             catch (error) { return error.name }
-        })()""") == "TypeError"
+        })()""")
+            == "TypeError"
+        )
     with Session(plugins=[plugins.rtc()]) as session, session.new_page() as page:
         assert page.evaluate("""(() => {
             const p = new RTCPeerConnection(), c = p.createDataChannel('python');

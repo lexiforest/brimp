@@ -4,7 +4,7 @@ use brimp_runtime::runtime::{
     plugins::bundled,
 };
 use serde_json::json;
-fn session() -> Session {
+fn session() -> std::sync::Arc<Session> {
     Session::new(SessionOptions {
         clock: ClockOptions {
             mode: TimeMode::Logical,

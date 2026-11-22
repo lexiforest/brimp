@@ -11,7 +11,9 @@ impl Page {
         if self.plugins.is_empty() {
             return Ok(());
         }
-        self.js.set_execution_time_limit(self.plugin_timeout);
+        if !self.plugin_timeout.is_zero() {
+            self.js.set_execution_time_limit(self.plugin_timeout);
+        }
         let result = (|| {
             self.plugin_runtime = Some(crate::runtime::plugins::PluginRuntime::install(
                 &self.js,
@@ -38,7 +40,7 @@ impl Page {
                 {
                     return Ok(());
                 }
-                if start.elapsed() >= self.plugin_timeout {
+                if !self.plugin_timeout.is_zero() && start.elapsed() >= self.plugin_timeout {
                     return Err(JsException::from_message("plugin installation timed out"));
                 }
                 if !self.run_one_task()? && !self.advance_to_next_timer() {
@@ -61,10 +63,14 @@ impl Page {
         let Some(runtime) = self.plugin_runtime.take() else {
             return;
         };
-        self.js.set_execution_time_limit(self.plugin_timeout);
+        if !self.plugin_timeout.is_zero() {
+            self.js.set_execution_time_limit(self.plugin_timeout);
+        }
         let _ = runtime.cancel(&self.js);
         let start = Instant::now();
-        while !runtime.disposed(&self.js).unwrap_or(true) && start.elapsed() < self.plugin_timeout {
+        while !runtime.disposed(&self.js).unwrap_or(true)
+            && (self.plugin_timeout.is_zero() || start.elapsed() < self.plugin_timeout)
+        {
             if runtime.pump(&self.js).is_err() || self.run_one_task().is_err() {
                 break;
             }

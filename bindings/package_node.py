@@ -22,6 +22,7 @@ MAIN_FILES = (
     "index.d.ts",
     "plugins.js",
     "values.js",
+    "automation.js",
     "README.md",
     "LICENSE",
     "bundled",
@@ -147,7 +148,7 @@ def validate(directory: Path, *, complete: bool = False) -> None:
                 raise RuntimeError(
                     f"{archive.name} has version {manifest['version']}, expected {expected_version}"
                 )
-            if archive == main[0]:
+            if archive in main:
                 if manifest["name"] != "@brimp/brimp" or "package/brimp.node" in names:
                     raise RuntimeError(f"invalid main package: {archive.name}")
                 if "package/bundled/catalog.json" not in names:
@@ -161,6 +162,14 @@ def validate(directory: Path, *, complete: bool = False) -> None:
                 raise RuntimeError(f"platform package is missing brimp.node: {archive.name}")
             if "package/LICENSE" not in names:
                 raise RuntimeError(f"platform package is missing LICENSE: {archive.name}")
+            if manifest.get("os") == ["linux"]:
+                for name in (
+                    "package/native/libatomic.so.1",
+                    "package/native/licenses/gcc-runtime/COPYING3",
+                    "package/native/licenses/gcc-runtime/COPYING.RUNTIME",
+                ):
+                    if name not in names:
+                        raise RuntimeError(f"{archive.name} is missing {name}")
             if not any(
                 name.startswith("package/native/") or name.endswith(".dll") for name in names
             ):

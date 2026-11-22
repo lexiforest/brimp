@@ -5,9 +5,8 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-import pytest
-
 import brimp
+import pytest
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +45,8 @@ def server():
     worker.join()
 
 
-@pytest.mark.parametrize("timeout", [1, 0.8, None, 0])
+# Include default plugin startup in the finite budget, even under build load.
+@pytest.mark.parametrize("timeout", [2, 1.8, None, 0])
 def test_session_formats_and_native_operations(server, timeout):
     with brimp.Session(timeout=timeout, trust_env=False) as session:
         page = session.get(server + "/delay/0.1")
@@ -72,6 +72,26 @@ def test_request_override_and_omitted_inheritance(server, timeout, stream):
             with pytest.raises(brimp.RequestTimeout):
                 page.get(server + "/delay/0.2")
             assert page.get(server + "/delay/0.2", timeout=timeout).text == "ok"
+
+
+@pytest.mark.parametrize("timeout", [None, 0])
+def test_unlimited_timeout_allows_async_plugin_startup_and_disposal(timeout):
+    disposed = []
+    plugin = brimp.Plugin(
+        "unlimited",
+        """async ({global, host}) => {
+            await new Promise(resolve => setTimeout(resolve, 20));
+            global.installed = true;
+            return async () => {
+                await new Promise(resolve => setTimeout(resolve, 20));
+                await host.call('disposed');
+            };
+        }""",
+        {"disposed": lambda context: disposed.append(True)},
+    )
+    with brimp.Session(timeout=timeout, plugins=[plugin]) as session, session.new_page() as page:
+        assert page.evaluate("installed") is True
+    assert disposed == [True]
 
 
 @pytest.mark.parametrize("stream", [False, True])
@@ -115,9 +135,8 @@ def test_disabled_navigation_deadline_includes_promise_jobs(server):
 def test_invalid_formats(server, timeout):
     with pytest.raises(brimp.InvalidInput):
         brimp.Session(timeout=timeout, plugins=[])
-    with brimp.Session(plugins=[]) as session:
-        with pytest.raises(brimp.InvalidInput):
-            session.get(server, timeout=timeout)
+    with brimp.Session(plugins=[]) as session, pytest.raises(brimp.InvalidInput):
+        session.get(server, timeout=timeout)
 
 
 def test_async_inheritance_override_and_cancellation(server):
