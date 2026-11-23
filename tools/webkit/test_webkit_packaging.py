@@ -145,19 +145,19 @@ def test_sdk_requires_relocation_and_integrity(tmp_path):
         verify_sdk(sdk, "linux-x64", release=False)
 
 
-def test_release_gate_checks_provenance_and_identical_payloads(tmp_path):
+@pytest.fixture
+def companion_release(tmp_path):
     import zipfile
 
     from download import CONFIG
     from package import version
-    from validate import validate
 
     tag = json.loads(CONFIG.read_text())["tag"]
     payload = b"test engine payload"
     expected = hashlib.sha256(payload).hexdigest()
     artifacts = {}
     for target, wheel_tag in [
-        ("darwin-arm64", "macosx_27_0_arm64"),
+        ("darwin-arm64", "macosx_26_0_arm64"),
         ("linux-x64", "manylinux_2_39_x86_64"),
     ]:
         info = {
@@ -200,8 +200,36 @@ def test_release_gate_checks_provenance_and_identical_payloads(tmp_path):
         member = tarfile.TarInfo("package/package.json")
         member.size = len(data)
         archive.addfile(member, io.BytesIO(data))
-    validate(tmp_path)
+    return tmp_path, artifacts
+
+
+def test_release_gate_allows_publication_without_windows(companion_release):
+    from validate import validate
+
+    directory, _ = companion_release
+    validate(directory)
+
+
+@pytest.mark.parametrize("wheel_tag", ["macosx_26_0_arm64", "manylinux_2_39_x86_64"])
+def test_release_gate_requires_supported_platforms(companion_release, wheel_tag):
+    from validate import validate
+
+    directory, _ = companion_release
+    next(directory.glob(f"*-{wheel_tag}.whl")).unlink()
+    with pytest.raises(RuntimeError, match="exactly two WebKit wheels"):
+        validate(directory)
+
+
+def test_release_gate_checks_provenance_and_identical_payloads(companion_release):
+    import zipfile
+
+    from package import version
+    from validate import validate
+
+    tmp_path, artifacts = companion_release
     wheel = tmp_path / f"brimp_webkit-{version()}-py3-none-manylinux_2_39_x86_64.whl"
+    with zipfile.ZipFile(wheel) as archive:
+        payload = archive.read("brimp_webkit/runtime.tar.xz")
     artifacts["linux-x64"]["development"] = True
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr("brimp_webkit/runtime.json", json.dumps(artifacts["linux-x64"]))
@@ -235,3 +263,29 @@ def test_published_companion_is_pinned_for_both_registries(monkeypatch, system, 
         ["brimp-webkit==3.4.5"],
         ["@brimp/webkit@3.4.5", f"@brimp/webkit-{target}@3.4.5"],
     )
+
+
+@pytest.mark.parametrize("minimum", ["15.0", "26.0", "27.0"])
+def test_macos_sdk_requires_requested_deployment_target(tmp_path, minimum):
+    from download import CONFIG
+
+    config = json.loads(CONFIG.read_text())
+    sdk = tmp_path / "sdk"
+    sdk.mkdir()
+    (sdk / "manifest.json").write_text(
+        json.dumps(
+            {
+                "format": 1,
+                "tag": config["tag"],
+                "target": "arm64-macos",
+                "commit": "a" * 40,
+                "minimum_macos": minimum,
+                "files": {},
+            }
+        )
+    )
+    if minimum == "26.0":
+        assert verify_sdk(sdk, "darwin-arm64")["minimum_macos"] == "26.0"
+    else:
+        with pytest.raises(RuntimeError, match="rebuilt for macOS 26.0"):
+            verify_sdk(sdk, "darwin-arm64")

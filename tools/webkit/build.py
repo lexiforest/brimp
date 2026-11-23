@@ -10,6 +10,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from download import CONFIG
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -49,6 +51,7 @@ def build_macos(frameworks, output, parser):
             "xcrun",
             os.environ.get("CXX", "clang++"),
             "-std=c++20",
+            "-mmacosx-version-min=" + json.loads(CONFIG.read_text())["minimum_macos"],
             "-fobjc-arc",
             "-O2",
             "-g",

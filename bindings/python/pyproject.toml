@@ -6,6 +6,7 @@ build-backend = "maturin"
 name = "brimp"
 dynamic = ["version"]
 requires-python = ">=3.11"
+dependencies = ["brimp-webkit==0.1.0"]
 description = "Scalable browser runtime for agents."
 readme = "README.md"
 license = "MIT"
@@ -19,13 +20,12 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Programming Language :: Rust",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
 ]
-
-[project.optional-dependencies]
-webkit = ["brimp-webkit==0.1.0"]
 
 [project.urls]
 Homepage = "https://brimp.ai"
@@ -38,6 +38,9 @@ python-source = "python"
 module-name = "brimp._brimp"
 features = ["pyo3/extension-module"]
 strip = true
+
+[tool.maturin.target.aarch64-apple-darwin]
+macos-deployment-target = "26.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

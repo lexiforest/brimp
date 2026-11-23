@@ -12,7 +12,7 @@ from pathlib import Path
 PLATFORMS = {
     "x86_64-unknown-linux-gnu": "manylinux_2_34_x86_64",
     "aarch64-unknown-linux-gnu": "manylinux_2_34_aarch64",
-    "aarch64-apple-darwin": "macosx_11_0_arm64",
+    "aarch64-apple-darwin": "macosx_26_0_arm64",
     "x86_64-pc-windows-msvc": "win_amd64",
 }
 

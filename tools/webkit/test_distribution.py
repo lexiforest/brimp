@@ -49,10 +49,22 @@ def main():
             python_root = root / "venv"
             venv.EnvBuilder(with_pip=True, symlinks=True).create(python_root)
             python = python_root / "bin/python"
-            companion_wheels, companion_node = companion_sources(args.dist, args.published)
-            wheels = [*args.base_wheels.resolve().glob("*.whl"), *companion_wheels]
+            _, companion_node = companion_sources(args.dist, args.published)
+            wheels = list(args.base_wheels.resolve().glob("*.whl"))
+            # Install only Brimp explicitly: pip must resolve the required companion.
+            if args.dist:
+                dependency_source = ["--find-links", args.dist.resolve()]
+            else:
+                constraints = root / "constraints.txt"
+                constraints.write_text(f"brimp-webkit=={args.published}\n")
+                dependency_source = ["--constraint", constraints]
             # CI passes one base wheel for this platform, so pip cannot select a source checkout.
-            run([python, "-m", "pip", "install", "pytest", *wheels], root, environment)
+            run(
+                [python, "-m", "pip", "install", *dependency_source, "pytest", *wheels],
+                root,
+                environment,
+            )
+            run([python, "-m", "pip", "check"], root, environment)
             run(
                 [
                     python,

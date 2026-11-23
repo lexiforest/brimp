@@ -51,9 +51,10 @@ function __idlSlot(owner, name) {
 
 // Each accessor closes over its own name: a computed-name object literal would
 // allocate an object per member, which matters when a realm installs thousands.
-function __idlGetter(name) {
+function __idlGetter(name, globalReceiver) {
   const getter = function () {
-    const bag = __idlSlot(this, name);
+    // JSC invokes unqualified global accessors with an undefined receiver.
+    const bag = __idlSlot(this ?? globalReceiver, name);
     return bag.has(name) ? bag.get(name) : undefined;
   };
   return __markWebBuiltin(getter, name, 'get');
@@ -572,7 +573,7 @@ function __idlInstallGlobalMember(name, entry) {
     });
   else
     __idlDescribe(globalThis, name, {
-      get: __idlGetter(record.name),
+      get: __idlGetter(record.name, globalThis),
       set: record.setter ? __idlSetter(record.name) : undefined,
       enumerable: flags.enumerable,
       configurable: flags.configurable,

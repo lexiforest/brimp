@@ -65,8 +65,28 @@ def test_companion_pin_mismatch_is_rejected(checkout, monkeypatch, binding):
     else:
         path = checkout / "bindings/node/package.json"
         node = json.loads(path.read_text())
-        node["peerDependencies"]["@brimp/webkit"] = "9.9.9"
+        node["dependencies"]["@brimp/webkit"] = "9.9.9"
         path.write_text(json.dumps(node))
     monkeypatch.setattr(sys, "argv", ["check_versions.py"])
     with pytest.raises(RuntimeError, match="companion version"):
+        check_versions.main()
+
+
+@pytest.mark.parametrize("binding", ["python", "node"])
+def test_optional_companion_is_rejected(checkout, monkeypatch, binding):
+    if binding == "python":
+        path = checkout / "bindings/python/pyproject.toml"
+        text = path.read_text()
+        version = json.loads((checkout / "tools/webkit/release.json").read_text())["version"]
+        text = text.replace(f'dependencies = ["brimp-webkit=={version}"]\n', "")
+        path.write_text(
+            text + f'\n[project.optional-dependencies]\nwebkit = ["brimp-webkit=={version}"]\n'
+        )
+    else:
+        path = checkout / "bindings/node/package.json"
+        node = json.loads(path.read_text())
+        node["optionalDependencies"]["@brimp/webkit"] = node["dependencies"]["@brimp/webkit"]
+        path.write_text(json.dumps(node))
+    monkeypatch.setattr(sys, "argv", ["check_versions.py"])
+    with pytest.raises(RuntimeError, match="Required.*dependency"):
         check_versions.main()

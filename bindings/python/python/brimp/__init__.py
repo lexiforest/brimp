@@ -200,7 +200,9 @@ class Session(_Requests):
                 except ModuleNotFoundError as error:
                     if error.name != "brimp_webkit":
                         raise
-                    raise RuntimeError("Install brimp[webkit] to use engine='webkit'") from error
+                    raise RuntimeError(
+                        "The required brimp-webkit dependency is missing; reinstall brimp with dependencies"
+                    ) from error
                 executable_path = brimp_webkit.executable_path()
             self._inner = _Session(
                 pairs,

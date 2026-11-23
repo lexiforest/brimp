@@ -19,39 +19,44 @@ const CHROME_AGENT =
 const families = [
   [
     environmentPlugin,
-    'navigator.connection',
+    'typeof navigator.connection !== "undefined"',
     `navigator.connection.addEventListener('change',()=>{});`,
     { connection_rtt_ms: 7 },
     true,
   ],
   [
     permissionsPlugin,
-    'Notification',
+    'typeof Notification.permission !== "undefined"',
     `await Notification.requestPermission();await navigator.permissions.query({name:'notifications'});navigator.credentials.get();`,
     { notification_permission: 'denied' },
   ],
   [
     devicesPlugin,
-    'navigator.clipboard',
+    'typeof navigator.clipboard !== "undefined"',
     `navigator.clipboard.readText();navigator.geolocation.getCurrentPosition();navigator.wakeLock.request();await navigator.bluetooth.getAvailability();`,
     { bluetooth_available: true },
   ],
   [
     mediaPlugin,
-    'MediaStream',
+    'constructible(MediaStream)',
     `new MediaStream().getTracks();new MediaEncryptedEvent('encrypted');navigator.mediaSession.setActionHandler();await navigator.mediaDevices.enumerateDevices();`,
     {},
   ],
   [
     workersPlugin,
-    'Worker',
+    'constructible(Worker, "ignored.js")',
     `const w=new Worker('ignored.js');w.postMessage('ignored');w.terminate();navigator.serviceWorker.register();`,
     {},
   ],
-  [trustedTypesPlugin, 'trustedTypes', `trustedTypes.createPolicy();trustedTypes.isHTML();`, {}],
+  [
+    trustedTypesPlugin,
+    'typeof trustedTypes !== "undefined"',
+    `trustedTypes.createPolicy();trustedTypes.isHTML();`,
+    {},
+  ],
   [
     audioPlugin,
-    'AudioContext',
+    'constructible(AudioContext)',
     `const a=new AudioContext();a.createGain().connect(a.destination);new SpeechSynthesisUtterance('hello');await a.close();`,
     {},
   ],
@@ -69,8 +74,9 @@ for (const [installer, surface, calls, options, chromium] of families) {
         assert.deepEqual(
           await page.evaluate(`(async()=>{
           ${calls}
+          function constructible(C,...args){try{const value=new C(...args);value.close?.();value.terminate?.();return true}catch{return false}}
           document.body.textContent='continued';
-          return [${families.map(([, s]) => `typeof ${s} !== 'undefined'`).join(',')},document.body.textContent];
+          return [${families.map(([, s]) => s).join(',')},document.body.textContent];
         })()`),
           [...families.map(([f]) => f === installer), 'continued'],
         );
@@ -123,16 +129,18 @@ test('default browser plugins preserve ignored-result script continuation; expli
     const session = await createSession(options);
     try {
       const page = await session.newPage();
-      const present =
-        await page.evaluate(`[typeof Worker,typeof AudioContext,typeof RTCPeerConnection,
-        !!document.createElement('canvas').getContext('2d')]`);
+      const present = await page.evaluate(`(() => {
+        function constructible(C){try{const value=new C('ignored');value.close?.();value.terminate?.();return true}catch{return false}}
+        return [Worker,AudioContext,RTCPeerConnection].map(constructible)
+          .concat(!!document.createElement('canvas').getContext('2d'));
+      })()`);
       assert.deepEqual(
         present,
         options === undefined
-          ? ['function', 'function', 'function', true]
+          ? [true, true, true, true]
           : options.plugins.length
-            ? ['function', 'undefined', 'undefined', false]
-            : ['undefined', 'undefined', 'undefined', false],
+            ? [true, false, false, false]
+            : [false, false, false, false],
       );
       if (options === undefined)
         assert.equal(

@@ -5,18 +5,25 @@ description: Install a Python or Node.js package, or the standalone CLI.
 
 Install a Python or Node.js package for your application, or the standalone CLI.
 All three include the native runtime; no Rust toolchain or separate SDK download
-is needed.
+is needed. Python and Node also install the independently versioned WebKit
+companion as a required dependency.
+
+Python and Node package installations currently require:
 
 | Platform | Minimum system |
 | --- | --- |
-| macOS Apple silicon | macOS 11 |
-| Linux x86_64 or arm64 | glibc 2.34 |
-| Windows x64 | The package includes the required Visual C++ runtime DLLs |
+| macOS Apple silicon | macOS 26.0 |
+| Linux x86_64 | glibc 2.39 (for example Ubuntu 24.04) |
 
-Intel macOS and Windows arm64 packages are not provided.
+Windows and Linux arm64 WebKit binaries are not available yet. The standalone
+CLI supports macOS Apple silicon on macOS 26.0+, Linux x86_64/arm64 with glibc
+2.34+, and Windows x64. Intel macOS and Windows arm64 builds are not provided.
 
 Linux also needs the system C++ runtime (`libstdc++6` on Debian/Ubuntu).
 The packages include `libatomic`; it does not require a separate installation.
+Running the WebKit engine on Linux also requires a display or Xvfb, D-Bus,
+bubblewrap, xdg-dbus-proxy, fonts and graphics drivers. See the
+[Linux prerequisites](/development/packaging/#webkit-companion-packages).
 
 ## Python
 
@@ -29,8 +36,7 @@ python3 -m venv .venv
 python -m pip install brimp
 ```
 
-On Windows PowerShell, create the environment with `python -m venv .venv`, then
-run `.venv\Scripts\Activate.ps1` before the install command.
+This also installs the pinned `brimp-webkit` package; no extra is needed.
 
 ## Node.js
 
@@ -39,6 +45,9 @@ Use Node.js 22.19 or newer. In your application's directory:
 ```sh
 npm install @brimp/brimp
 ```
+
+This also installs `@brimp/webkit`. Keep npm optional dependencies enabled:
+the wrappers use them to select the native packages for your platform.
 
 If you are starting a new project, run `npm init -y` first. Save examples as
 `.mjs` files so Node.js treats them as ES modules.

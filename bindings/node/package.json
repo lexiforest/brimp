@@ -45,12 +45,7 @@
   "engines": {
     "node": ">=22.19"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@brimp/webkit": "0.1.0"
-  },
-  "peerDependenciesMeta": {
-    "@brimp/webkit": {
-      "optional": true
-    }
   }
 }

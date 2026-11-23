@@ -77,16 +77,17 @@ test('ignored-result graphics workload continues while existing buffers and read
   );
 });
 
-test('WebGL remains an optional graphics plugin surface', async () => {
+test('WebGL IDL names remain available while contexts require the graphics plugin', async () => {
   assert.deepEqual(
     await evaluate(
       `(() => ({
     webgl:typeof WebGLRenderingContext,webgl2:typeof WebGL2RenderingContext,
-    getContext:typeof document.createElement('canvas').getContext
+    getContext:typeof document.createElement('canvas').getContext,
+    context:document.createElement('canvas').getContext('webgl')
   }))()`,
       [],
     ),
-    { webgl: 'undefined', webgl2: 'undefined', getContext: 'function' },
+    { webgl: 'function', webgl2: 'function', getContext: 'function', context: null },
   );
   assert.deepEqual(
     await evaluate(
@@ -96,6 +97,6 @@ test('WebGL remains an optional graphics plugin surface', async () => {
   }))()`,
       [canvasPlugin()],
     ),
-    { webgl: 'undefined', webgl2: 'undefined', context: null },
+    { webgl: 'function', webgl2: 'function', context: null },
   );
 });

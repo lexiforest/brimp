@@ -52,10 +52,12 @@ def main() -> None:
             native.rename(hidden_native)
         try:
             virtualenv = temporary_path / "venv"
-            venv.EnvBuilder(with_pip=True).create(virtualenv)
+            venv.EnvBuilder(with_pip=True, symlinks=os.name != "nt").create(virtualenv)
             python = virtualenv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
             subprocess.run(
-                [python, "-m", "pip", "install", "--no-index", wheel],
+                # Check the base native payload before the companion is built.
+                # Release CI checks dependency resolution and both engines later.
+                [python, "-m", "pip", "install", "--no-index", "--no-deps", wheel],
                 check=True,
                 env=environment,
             )

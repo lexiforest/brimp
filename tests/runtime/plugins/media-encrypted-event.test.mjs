@@ -59,7 +59,13 @@ test(
   'MediaEncryptedEvent belongs to the media plugin',
   { skip: process.env.COVERAGE_BROWSER === 'safari' },
   async () => {
-    assert.equal(await evaluate('typeof MediaEncryptedEvent', false), 'undefined');
+    assert.equal(
+      await evaluate(
+        `(()=>{try{new MediaEncryptedEvent('encrypted');return false}catch(e){return e instanceof TypeError}})()`,
+        false,
+      ),
+      true,
+    );
     assert.equal(await evaluate('typeof MediaEncryptedEvent'), 'function');
   },
 );

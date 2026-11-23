@@ -67,15 +67,15 @@ test('offline audio returns a silent buffer placeholder and retains legacy pendi
   }
 });
 
-test('core-only selection omits the audio family', async () => {
+test('core-only selection retains audio IDL placeholders without audio behavior', async () => {
   const session = await createSession({ plugins: [] });
   try {
     const page = await session.newPage();
     assert.deepEqual(
       await page.evaluate(
-        '[typeof BaseAudioContext,typeof OfflineAudioContext,typeof AudioListener,typeof Worklet]',
+        '[BaseAudioContext,OfflineAudioContext,AudioListener,Worklet].map(C=>{try{new C();return false}catch(e){return e instanceof TypeError}})',
       ),
-      Array(4).fill('undefined'),
+      Array(4).fill(true),
     );
   } finally {
     await session.close();

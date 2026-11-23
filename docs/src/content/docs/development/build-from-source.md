@@ -36,7 +36,7 @@ Choose the target for your machine:
 
 | Platform | Target | Minimum system |
 | --- | --- | --- |
-| macOS Apple silicon | `aarch64-apple-darwin` | macOS 11 |
+| macOS Apple silicon | `aarch64-apple-darwin` | macOS 26.0 |
 | Linux x86_64 | `x86_64-unknown-linux-gnu` | glibc 2.34 |
 | Linux arm64 | `aarch64-unknown-linux-gnu` | glibc 2.34 |
 | Windows x64 | `x86_64-pc-windows-msvc` | Windows with the MSVC toolchain |

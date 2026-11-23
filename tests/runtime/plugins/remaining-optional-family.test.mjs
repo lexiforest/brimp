@@ -185,7 +185,7 @@ test('Core scheduling runs prioritized tasks and idle callbacks under Chromium',
       [],
       CHROME_AGENT,
     ),
-    ['object', 'function', 'undefined', 'undefined', 'object', 'undefined'],
+    ['object', 'function', 'function', 'undefined', 'object', 'function'],
   );
 });
 

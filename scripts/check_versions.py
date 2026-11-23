@@ -22,9 +22,9 @@ def main() -> int:
     webkit_version = json.loads((ROOT / "tools/webkit/release.json").read_text())["version"]
     with (ROOT / "bindings/python/pyproject.toml").open("rb") as source:
         project = tomllib.load(source)["project"]
-    if project["optional-dependencies"]["webkit"] != [f"brimp-webkit=={webkit_version}"]:
+    if f"brimp-webkit=={webkit_version}" not in project.get("dependencies", []):
         raise RuntimeError(
-            "WebKit extra must match the companion version in tools/webkit/release.json"
+            "Required WebKit dependency must match the companion version in tools/webkit/release.json"
         )
     dynamic = project.get("dynamic", [])
     if "version" not in dynamic or "version" in project:
@@ -38,12 +38,12 @@ def main() -> int:
         raise RuntimeError(
             f"Node version {node['version']} does not match workspace version {version}"
         )
-    if node.get("peerDependencies", {}).get("@brimp/webkit") != webkit_version:
+    if node.get("dependencies", {}).get(
+        "@brimp/webkit"
+    ) != webkit_version or "@brimp/webkit" in node.get("optionalDependencies", {}):
         raise RuntimeError(
-            "Node WebKit peer must match the companion version in tools/webkit/release.json"
+            "Required Node WebKit dependency must match the companion version in tools/webkit/release.json"
         )
-    if node.get("peerDependenciesMeta", {}).get("@brimp/webkit") != {"optional": True}:
-        raise RuntimeError("The Node WebKit companion must remain an optional peer")
     for name, expected in node.get("optionalDependencies", {}).items():
         if expected != version:
             raise RuntimeError(f"{name} is pinned to {expected}, expected {version}")

@@ -1,4 +1,4 @@
-"""Validate the complete WebKit release set before publishing any package."""
+"""Validate macOS arm64 and Linux x64 WebKit artifacts; Windows is not required."""
 
 import argparse
 import hashlib
@@ -41,8 +41,9 @@ def validate(directory):
                 raise RuntimeError(
                     "Linux WebKit wheel must be auditwheel-repaired for manylinux 2.39"
                 )
-            if target == "darwin-arm64" and "-macosx_" not in wheel.name:
-                raise RuntimeError("macOS WebKit wheel must declare its deployment target")
+            macos_tag = "macosx_" + config["minimum_macos"].replace(".", "_") + "_arm64"
+            if target == "darwin-arm64" and not wheel.name.endswith(f"-{macos_tag}.whl"):
+                raise RuntimeError(f"macOS WebKit wheel must target {config['minimum_macos']}")
             if not wheel.name.startswith(f"brimp_webkit-{version()}-py3-none-"):
                 raise RuntimeError("Unexpected WebKit wheel name/version")
     if targets != {"darwin-arm64", "linux-x64"}:

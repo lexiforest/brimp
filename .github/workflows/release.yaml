@@ -134,14 +134,10 @@ jobs:
           tar -xzf /tmp/node.tar.gz -C /usr/local --strip-components=1
           node --version
 
-      - name: Test Node packages
-        run: |
-          test_dir="$RUNNER_TEMP/brimp-node-test"
-          rm -rf "$test_dir"
-          mkdir -p "$test_dir"
-          npm install --prefix "$test_dir" --ignore-scripts --no-audit --no-fund --omit=optional dist/node/*.tgz
-          cp bindings/node/smoke.mjs "$test_dir/"
-          (cd "$test_dir" && node smoke.mjs)
+      # Test base payloads before a candidate companion exists. The WebKit
+      # matrix below verifies full installation with required dependencies.
+      - name: Test Node runtime payload
+        run: python bindings/test_node_distribution.py --directory dist/node
 
       - name: Validate Node packages
         run: python bindings/package_node.py --validate --out dist/node
@@ -188,8 +184,8 @@ jobs:
       matrix:
         include:
           - target: aarch64-apple-darwin
-            runner: macos-15
-            deployment_target: "11.0"
+            runner: macos-26
+            deployment_target: "26.0"
             node_suffix: darwin-arm64
           - target: x86_64-pc-windows-msvc
             runner: windows-2022
@@ -259,14 +255,10 @@ jobs:
         with:
           node-version: "22.19.0"
 
-      - name: Test Node packages
-        run: |
-          test_dir="$RUNNER_TEMP/brimp-node-test"
-          rm -rf "$test_dir"
-          mkdir -p "$test_dir"
-          npm install --prefix "$test_dir" --ignore-scripts --no-audit --no-fund --omit=optional dist/node/*.tgz
-          cp bindings/node/smoke.mjs "$test_dir/"
-          (cd "$test_dir" && node smoke.mjs)
+      # Test base payloads before a candidate companion exists. The WebKit
+      # matrix below verifies full installation with required dependencies.
+      - name: Test Node runtime payload
+        run: python bindings/test_node_distribution.py --directory dist/node
 
       - name: Validate Node packages
         run: python bindings/package_node.py --validate --out dist/node
@@ -316,6 +308,8 @@ jobs:
   webkit:
     name: Test WebKit companion ${{ matrix.target }}
     needs: [verify, linux, native]
+    # Only published WebKit platforms gate releases. Windows and Linux arm64
+    # still validate their JSC payloads above; they have no WebKit binary yet.
     strategy:
       fail-fast: false
       matrix:
@@ -404,6 +398,48 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+  webkit-macos26:
+    name: Test installed packages on macOS 26
+    needs: [verify, native, webkit]
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.19.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel-aarch64-apple-darwin
+          path: dist/base-wheels
+      - uses: actions/download-artifact@v4
+        with:
+          name: node-aarch64-apple-darwin
+          path: dist/base-node
+      - uses: actions/download-artifact@v4
+        with:
+          name: node-main
+          path: dist/base-node
+      - uses: actions/download-artifact@v4
+        if: needs.verify.outputs.package == 'webkit'
+        with:
+          name: webkit-darwin-arm64
+          path: dist/webkit
+      - name: Verify automatic discovery and both engines on the minimum OS
+        env:
+          RELEASE_PACKAGE: ${{ needs.verify.outputs.package }}
+          WEBKIT_VERSION: ${{ needs.verify.outputs.webkit_version }}
+        run: |
+          if [ "$RELEASE_PACKAGE" = webkit ]; then
+            companion=(--dist dist/webkit)
+          else
+            companion=(--published "$WEBKIT_VERSION")
+          fi
+          python tools/webkit/test_distribution.py "${companion[@]}" \
+            --base-wheels dist/base-wheels --base-node dist/base-node
+
   publish:
     name: Publish release
     if: github.event_name == 'push'
@@ -412,6 +448,7 @@ jobs:
       - linux
       - native
       - webkit
+      - webkit-macos26
     runs-on: ubuntu-24.04
     environment: pypi
     permissions:
@@ -475,6 +512,8 @@ jobs:
 
       - name: Validate companion release artifacts
         if: needs.verify.outputs.package == 'webkit'
+        # The complete companion release is macOS arm64 + Linux x64.
+        # Missing Windows WebKit must not prevent publication.
         run: |
           python scripts/check_versions.py --package webkit --tag "$GITHUB_REF_NAME"
           python tools/webkit/validate.py dist/webkit

@@ -10,9 +10,10 @@ import {
 
 const CHROME_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
-async function evaluate(source, plugins = [], identity) {
+async function evaluate(source, plugins = [], identity, profile) {
   const session = await createSession({
     plugins,
+    ...(profile ? { profile } : {}),
     ...(identity ? { profile: { values: { identity: { user_agent: identity } } } } : {}),
   });
   try {
@@ -44,7 +45,7 @@ test('MediaStream supplies stable identity and legacy calls without tracks or ca
     await evaluate(
       `['MediaStream','SourceBuffer','SpeechSynthesisUtterance','speechSynthesis'].map(n=>typeof globalThis[n])`,
     ),
-    ['undefined', 'undefined', 'undefined', 'undefined'],
+    ['function', 'function', 'function', 'undefined'],
   );
 });
 
@@ -87,6 +88,8 @@ test('Speech utterances retain payloads and manual handlers while synthesis stay
         [speechSynthesis.speaking,speechSynthesis.pending,speechSynthesis.paused],typeof SpeechSynthesis];
   })()`,
       [audioPlugin()],
+      undefined,
+      { values: { speech: { voices: [] } } },
     ),
     [
       ['', '', 1, 1, 1, null],

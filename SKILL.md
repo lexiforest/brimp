@@ -25,7 +25,7 @@ Supported systems:
 
 | System | Requirement |
 | --- | --- |
-| macOS | Apple silicon, macOS 11 or newer |
+| macOS | Apple silicon, macOS 26.0 or newer |
 | Linux | x86_64 or ARM64, glibc 2.34 or newer |
 | Windows | x64 |
 
@@ -64,6 +64,11 @@ by its full path; report the directory to add to `PATH`.
 
 ### Python
 
+Python packages require the separate `brimp-webkit` dependency, installed
+automatically by pip. Complete package installations currently support macOS 26.0+
+on Apple silicon and Linux x86_64 with glibc 2.39+. Windows and Linux arm64
+companion binaries are not available yet; the CLI retains the wider table above.
+
 Use Python 3.11 or newer and the project's existing environment. If no environment
 exists, create a virtual environment with `python3 -m venv .venv` (use `python`
 on Windows). Install with that environment's interpreter:
@@ -84,6 +89,9 @@ with brimp.Session() as session:
 ```
 
 ### Node.js
+
+The required `@brimp/webkit` dependency is installed automatically. Complete
+engine support currently has the same platform requirements as Python above.
 
 Use Node.js 22.19 or newer. Install `@brimp/brimp` with the project's package
 manager (`npm install @brimp/brimp` in an npm project). Keep platform optional

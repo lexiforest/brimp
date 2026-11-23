@@ -237,6 +237,7 @@ unsafe extern "C" {
 // `CFStringRef` in a Cocoa build and an unsigned index otherwise, so the symbol
 // is resolved at runtime and the mode is supplied in the shape that build has.
 // Linking one mangled name directly fails on a build with the other signature.
+#[cfg(unix)]
 pub fn run_loop_cycle() -> c_int {
     type CycleUnsigned = unsafe extern "C" fn(c_uint) -> c_int;
     static RESOLVED: std::sync::OnceLock<Option<usize>> = std::sync::OnceLock::new();
@@ -249,7 +250,7 @@ pub fn run_loop_cycle() -> c_int {
                 (c"_ZN3WTF7RunLoop5cycleEj".as_ptr(), false),
                 (c"_ZN3WTF7RunLoop5cycleEPK10__CFString".as_ptr(), true),
             ] {
-                let address = dlsym(RTLD_DEFAULT, symbol);
+                let address = libc::dlsym(libc::RTLD_DEFAULT, symbol);
                 if !address.is_null() {
                     // Remember which ABI the symbol was found under by marking
                     // the high bit; function pointers are at least aligned.
@@ -297,20 +298,23 @@ fn run_loop_once(mode: *const c_void) -> c_int {
     // SAFETY: the run loop is thread-bound and the mode is the process default.
     unsafe { CFRunLoopRunInMode(mode, 0.0, true) }
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(all(unix, not(target_os = "macos")))]
 fn default_run_loop_mode() -> *const c_void {
     std::ptr::null()
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(all(unix, not(target_os = "macos")))]
 fn run_loop_once(_mode: *const c_void) -> c_int {
     0
 }
-unsafe extern "C" {
-    fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
+#[cfg(windows)]
+pub fn run_loop_cycle() -> c_int {
+    // Windows has no dlsym; link the SDK's MSVC export directly.
+    #[link(name = "JavaScriptCore")]
+    unsafe extern "C" {
+        #[link_name = "?cycle@RunLoop@WTF@@SA?AW4CycleResult@12@I@Z"]
+        fn cycle(mode: c_uint) -> c_int;
+    }
+    // SAFETY: the pinned Windows JSC SDK exports WTF::RunLoop::cycle(unsigned).
+    // It pumps messages and timers on the calling thread without waiting.
+    unsafe { cycle(0) }
 }
-// RTLD_DEFAULT is null on Linux but -2 on Darwin. Passing the Darwin handle to
-// glibc's dlsym dereferences an invalid link map when deferred jobs are pumped.
-#[cfg(unix)]
-const RTLD_DEFAULT: *mut c_void = libc::RTLD_DEFAULT;
-#[cfg(not(unix))]
-const RTLD_DEFAULT: *mut c_void = -2isize as *mut c_void;

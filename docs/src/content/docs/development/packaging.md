@@ -7,10 +7,14 @@ The release workflow builds self-contained artifacts for four targets:
 
 | Target | Wheel tag | Node.js package |
 | --- | --- | --- |
-| macOS arm64 | `macosx_11_0_arm64` | `@brimp/brimp-darwin-arm64` |
+| macOS arm64 | `macosx_26_0_arm64` | `@brimp/brimp-darwin-arm64` |
 | Linux x86_64 | `manylinux_2_34_x86_64` | `@brimp/brimp-linux-x64-gnu` |
 | Linux arm64 | `manylinux_2_34_aarch64` | `@brimp/brimp-linux-arm64-gnu` |
 | Windows x64 | `win_amd64` | `@brimp/brimp-win32-x64` |
+
+These are the native runtime build targets. Normal Python/Node installations
+also require the WebKit companion, currently available only on macOS 26.0+ arm64
+and Linux x64 with glibc 2.39+. The standalone CLI keeps the wider matrix above.
 
 Intel macOS and Windows arm64 are not built. The pinned JavaScriptCore SDK
 does not publish those artifacts. Linux wheels require glibc 2.34 or newer; the
@@ -36,6 +40,7 @@ Build a wheel with maturin. `--auditwheel repair` performs auditwheel repair on
 Linux, delocate on macOS and delvewheel on Windows:
 
 ```sh
+export MACOSX_DEPLOYMENT_TARGET=26.0
 python scripts/prepare_native.py \
   --target aarch64-apple-darwin --output .native/release --curl-release
 python -m pip install 'maturin>=1.9,<2'
@@ -61,9 +66,11 @@ python bindings/python/test_wheel.py \
   --target aarch64-apple-darwin --directory dist/wheels
 ```
 
-`test_wheel.py` hides `.native`, removes the SDK environment, installs the wheel
-into a fresh virtual environment with `--no-index`, and runs
-`bindings/python/smoke.py`.
+`test_wheel.py` hides `.native`, removes the SDK environment, installs the base
+wheel into a fresh virtual environment with `--no-index --no-deps`, and runs
+`bindings/python/smoke.py`. This isolates the native payload before the required
+companion has been built. Full dependency resolution is tested later by the
+WebKit release matrix.
 
 ## Node.js packages
 
@@ -92,6 +99,11 @@ Validate an artifact set:
 ```sh
 python bindings/package_node.py --validate --all --out dist/node
 ```
+
+`bindings/test_node_distribution.py --directory dist/node` extracts and tests
+the base runtime payload without resolving dependencies. This build check can
+run before the first companion release exists. The WebKit release matrix uses
+pip/npm to verify complete installations with the required companion.
 
 ## Standalone CLI archives
 
@@ -147,6 +159,13 @@ arm64 and Linux x64. They build current Brimp bindings as test dependencies and
 test them against the candidate companion before publishing only the companion.
 This allows the first companion release without an existing Brimp release.
 
+Missing Windows WebKit binaries do not block either release type. Companion
+artifact validation and full WebKit installation tests require macOS arm64 and
+Linux x64 only. Windows JSC runtime builds and smoke tests remain required.
+The required companion dependency remains unchanged; publishing Windows Brimp
+artifacts does not make Python installation on Windows supported until a Windows
+companion wheel is available.
+
 Both release types validate their tag, write `SHA256SUMS`, publish through PyPI
 trusted publishing and npm provenance, and create a GitHub release. Companion
 releases do not replace the latest Brimp release used by the CLI installer.
@@ -175,10 +194,16 @@ rather than its archive name. Its ABI and system requirements still apply.
 Both SDK pins now use the published `webkit-v-27.2.post4` release and these names.
 The four JSC archive checksums are pinned in `scripts/prepare_native.py`.
 
+All macOS builds now target 26.0. The existing post4 WebKit SDK still targets
+27.0 and is rejected by the companion packager. Publish a new engine SDK built
+for 26.0, then update both SDK pins and JSC checksums before running a companion
+release. Existing archives must not be relabeled. The engine workflow and the
+Brimp release workflow both gate publication on macOS 26 tests.
+
 The Brimp repository publishes `brimp-webkit` to PyPI and `@brimp/webkit` plus
 its two platform packages to npm. They share the independent companion version
-in `tools/webkit/release.json`. Brimp's Python `webkit` extra and optional Node
-peer pin that companion version; `scripts/check_versions.py` checks those pins
+in `tools/webkit/release.json`. Brimp's required Python and Node dependencies
+pin that companion version; `scripts/check_versions.py` checks those pins
 without requiring the Brimp and companion versions to match. Multiple Brimp
 releases can keep the same companion pin, avoiding duplicate engine releases and
 downloads. Bump the companion version and both pins only when the engine, native
@@ -191,7 +216,9 @@ checksums and file manifest. Both platforms must use the same source commit.
 The WebKit release matrix currently targets macOS arm64 (the minimum OS comes
 from the SDK's deployment target) and Linux x64, built on Ubuntu 24.04 and repaired
 with auditwheel for `manylinux_2_39_x86_64`. Windows and Linux arm64 have no WebKit
-companion package. The default Brimp runtime retains its existing platform matrix.
+companion package yet, so normal package installation currently requires one of
+the supported WebKit platforms. The CLI and native runtime build matrix remain
+broader so those binaries are ready when the companion adds more platforms.
 
 The Ubuntu 24.04 packaging host explicitly installs `libavif16` and `libjxl0.7`,
 which the pinned SDK links against. Current distro WebKit development packages
@@ -199,8 +226,8 @@ can pull newer codec ABIs instead. Auditwheel includes these codec libraries in
 the companion payload.
 
 ```sh
-pip install 'brimp[webkit]'
-npm install @brimp/brimp @brimp/webkit
+pip install brimp
+npm install @brimp/brimp
 ```
 
 Native binaries are stripped before packaging; Linux stripping precedes auditwheel

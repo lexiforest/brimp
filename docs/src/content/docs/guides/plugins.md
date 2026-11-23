@@ -42,6 +42,10 @@ try {
 ```
 
 Use `plugins=[]` in Python or `plugins: []` in Node.js to select core APIs only.
+Core retains browser interface names from the IDL surface even when their plugin
+is disabled. Those names alone do not indicate working subsystem behavior: for
+example, `AudioContext` remains a placeholder constructor and canvas contexts
+require their corresponding plugins.
 Rust uses `bundled::browser()` for the defaults. On the CLI, repeated `--plugin`
 flags select the complete set; `--no-plugins` selects core only. Markdown and
 extraction JSON output also load the extractor.

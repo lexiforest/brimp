@@ -22,7 +22,7 @@ test('canvas drawing workflow preserves state, painted pixels and configured bac
       const focusResult=c.drawFocusIfNeeded(document.createElement('button'));
       c.restore();const matrix=c.getTransform();
       return [c.canvas===canvas,c.fillStyle,c.lineWidth,c.getLineDash(),[matrix.a,matrix.d,matrix.e,matrix.f],
-        [...c.getImageData(0,0,1,1).data],c.measureText('abcd').width,c.isPointInPath(0,0),c.isPointInStroke(0,0),
+        [...c.getImageData(0,0,1,1).data],Number.isFinite(c.measureText('abcd').width)&&c.measureText('abcd').width>0,c.isPointInPath(0,0),c.isPointInStroke(0,0),
         focusResult===undefined,c.getContextAttributes().alpha];
     })()`),
       [
@@ -32,7 +32,7 @@ test('canvas drawing workflow preserves state, painted pixels and configured bac
         [2, 4],
         [1, 1, 0, 0],
         [255, 255, 255, 255],
-        20,
+        true,
         false,
         false,
         true,

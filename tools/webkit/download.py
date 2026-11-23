@@ -23,6 +23,11 @@ def verify_sdk(sdk, target, *, release=True):
         raise RuntimeError("Wrong WebKit SDK format or target")
     if release and manifest["tag"] != config["tag"]:
         raise RuntimeError("SDK tag does not match tools/webkit/release.json")
+    if target == "darwin-arm64" and manifest.get("minimum_macos") != config["minimum_macos"]:
+        raise RuntimeError(
+            f"WebKit SDK must be rebuilt for macOS {config['minimum_macos']}; "
+            f"this SDK targets {manifest.get('minimum_macos')}"
+        )
     if (
         target == "linux-x64"
         and manifest.get("runtime_layout_version") != config["runtime_layout_version"]

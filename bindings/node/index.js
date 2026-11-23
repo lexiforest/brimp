@@ -175,7 +175,10 @@ export async function createSession({
         enginePackage = require('@brimp/webkit');
       } catch (cause) {
         if (cause.code !== 'MODULE_NOT_FOUND') throw cause;
-        throw new Error('Install @brimp/webkit to use engine="webkit"', { cause });
+        throw new Error(
+          'The required @brimp/webkit dependency is missing; reinstall @brimp/brimp with dependencies',
+          { cause },
+        );
       }
       executablePath = enginePackage.executablePath();
     }

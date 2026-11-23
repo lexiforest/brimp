@@ -29,7 +29,7 @@ From the Brimp repository root, using the adjacent checkout:
 ```sh
 git -C ../WebKit checkout "$(cat tools/webkit/REVISION)"
 cd ../WebKit
-Tools/Scripts/build-webkit --release '--only=Everything up to WebKit' -jobs 8 DEBUG_INFORMATION_FORMAT=dwarf COMPILATION_CACHE_ENABLE_CACHING=NO
+Tools/Scripts/build-webkit --release '--only=Everything up to WebKit' -jobs 8 MACOSX_DEPLOYMENT_TARGET=26.0 DEBUG_INFORMATION_FORMAT=dwarf COMPILATION_CACHE_ENABLE_CACHING=NO
 cd ../brimp
 python3 tools/webkit/build.py --webkit ../WebKit
 cargo build -p brimp-python -p brimp-node

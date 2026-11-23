@@ -63,10 +63,16 @@ impl ResourceStreamHandle {
     }
 
     pub(crate) fn attach(&self, handle: ResourceStreamHandle) {
+        let mut delegate = self.delegate.as_ref().unwrap().lock().unwrap();
+        // The loader may deliver and pause before returning its handle. A reader
+        // can already have resumed (or cancelled) the proxy by then. Reconcile
+        // under the same lock used by resume/cancel so neither signal is lost.
         if self.is_cancelled() {
             handle.cancel();
+        } else if !self.is_paused() {
+            handle.resume();
         }
-        *self.delegate.as_ref().unwrap().lock().unwrap() = Some(handle);
+        *delegate = Some(handle);
     }
 
     pub fn resume(&self) {
@@ -210,4 +216,34 @@ pub(crate) fn deliver_buffered(
         }
         deliver(ResourceStreamEvent::Complete);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn proxy_forwards_resume_before_transport_is_attached() {
+        let proxy = ResourceStreamHandle::proxy();
+        let transport = ResourceStreamHandle::new();
+        let control = transport.clone();
+        // A synchronous loader may fill the queue before returning its handle.
+        // The reader drains it using the proxy while attachment is still pending.
+        control.pause();
+        proxy.resume();
+        proxy.attach(transport);
+        assert!(!control.is_paused());
+        proxy.cancel();
+        assert!(control.is_cancelled());
+    }
+
+    #[test]
+    fn proxy_forwards_cancellation_before_transport_is_attached() {
+        let proxy = ResourceStreamHandle::proxy();
+        let transport = ResourceStreamHandle::new();
+        let control = transport.clone();
+        proxy.cancel();
+        proxy.attach(transport);
+        assert!(control.is_cancelled());
+    }
 }

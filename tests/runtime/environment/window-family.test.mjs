@@ -12,6 +12,20 @@ const inventory = JSON.parse(
 const handlers = inventory.windowHandlers;
 const constructors = inventory.windowConstructors;
 
+test('unqualified IDL globals use the window receiver without plugins', async () => {
+  const session = await createSession({ plugins: [] });
+  try {
+    const page = await session.newPage();
+    assert.deepEqual(
+      await page.evaluate(`[typeof speechSynthesis,typeof trustedTypes,
+        speechSynthesis===globalThis.speechSynthesis,trustedTypes===window.trustedTypes]`),
+      ['undefined', 'undefined', true, true],
+    );
+  } finally {
+    await session.close();
+  }
+});
+
 test('window handler family reuses ordinary DOM dispatch and supports clearing', async () => {
   const session = await createSession();
   try {
@@ -45,7 +59,7 @@ test('window identity and UI placeholders leave DOM and runtime state usable', a
       await page.evaluate(`(() => {
       const before=document.documentElement.outerHTML;
       const names=['alert','blur','captureEvents','close','confirm','find','focus',
-        'moveBy','moveTo','open','print','prompt','releaseEvents','reportError','resizeBy','resizeTo','scroll','scrollBy','scrollTo','stop'];
+        'moveBy','moveTo','print','prompt','releaseEvents','reportError','resizeBy','resizeTo','scroll','scrollBy','scrollTo','stop'];
       const noops=names.every(name=>window[name]('ignored')===undefined)&&alert('ignored')===undefined&&getComputedStyle(document.body).display==='block'&&typeof matchMedia('all')==='object';
       window.name=42;window.status='ready';
       const frame=document.createElement('iframe');document.body.appendChild(frame);

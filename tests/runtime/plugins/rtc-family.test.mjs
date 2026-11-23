@@ -108,10 +108,13 @@ test('RTC payload serialization and manual event dispatch work without a transpo
   );
 });
 
-test('RTC is separately opt-in and exposes only constructible entry points', async () => {
+test('RTC plugin replaces IDL placeholders with its supported entry points', async () => {
   assert.deepEqual(
-    await evaluate('[typeof RTCPeerConnection,typeof RTCIceCandidate,typeof RTCDataChannel]', []),
-    Array(3).fill('undefined'),
+    await evaluate(
+      '[RTCPeerConnection,RTCIceCandidate,RTCDataChannel].map(C=>{try{new C();return false}catch(e){return e instanceof TypeError}})',
+      [],
+    ),
+    Array(3).fill(true),
   );
   assert.deepEqual(
     await evaluate(

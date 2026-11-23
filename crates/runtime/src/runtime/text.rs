@@ -120,11 +120,3 @@ pub(crate) fn measure(
     }
     Some(metrics)
 }
-
-/// True when the platform resolves `family` to a face of its own rather than a
-/// fallback, which is what `document.fonts.check` and font probing report.
-pub(crate) fn has_family(family: &str) -> bool {
-    FontMgr::new()
-        .match_family_style(platform_family(family), FontStyle::normal())
-        .is_some()
-}
