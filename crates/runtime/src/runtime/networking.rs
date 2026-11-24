@@ -465,6 +465,105 @@ impl Drop for CompletionGuard {
         self.0.finish(self.1, Some(&NetworkError::Cancelled));
     }
 }
+
+#[cfg(test)]
+mod stream_tests {
+    use super::*;
+    use std::sync::mpsc;
+
+    struct RedirectFixture;
+    #[async_trait]
+    impl ResourceLoader for RedirectFixture {
+        async fn fetch(&self, request: ResourceRequest) -> Result<ResourceResponse, NetworkError> {
+            Ok(ResourceResponse {
+                status: http::StatusCode::FOUND,
+                headers: HeaderList::new(),
+                body: Vec::new(),
+                effective_url: request.url,
+                metadata: Default::default(),
+            })
+        }
+    }
+
+    #[test]
+    fn redirect_decision_finishes_before_transport_cancellation() {
+        cancel_during_callback(ResourceStreamDirective::Redirect);
+    }
+
+    #[test]
+    fn cancellation_still_fails_after_a_non_redirect_callback() {
+        cancel_during_callback(ResourceStreamDirective::Continue);
+        cancel_during_callback(ResourceStreamDirective::Cancel);
+    }
+
+    fn cancel_during_callback(directive: ResourceStreamDirective) {
+        let executor = NetworkExecutor::new().unwrap();
+        let events = EventHub::default();
+        let (terminal_tx, terminal_rx) = mpsc::channel();
+        let _subscriptions: Vec<_> = ["request_finished", "request_failed"]
+            .into_iter()
+            .map(|name| {
+                let tx = terminal_tx.clone();
+                events
+                    .on(
+                        name,
+                        Arc::new(move |event| {
+                            let _ = tx.send(event);
+                        }),
+                    )
+                    .unwrap()
+            })
+            .collect();
+        let network = NetworkRuntime::new(
+            Arc::new(RedirectFixture),
+            events,
+            executor.handle(),
+            Arc::new(CurlWebSocketConnector(CurlConfig::default())),
+            Routes::default(),
+        );
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let (release_tx, release_rx) = mpsc::channel();
+        let handle = network
+            .fetch_stream_callback(
+                ResourceRequest::get("https://stream.test/redirect"),
+                Box::new(move |event, _| {
+                    assert!(matches!(event, ResourceStreamEvent::Headers { .. }));
+                    entered_tx.send(()).unwrap();
+                    // The reader can drop the old hop after seeing its headers,
+                    // while this callback is still returning its redirect decision.
+                    release_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+                    directive
+                }),
+            )
+            .unwrap();
+        entered_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        handle.cancel();
+        let premature = terminal_rx.recv_timeout(Duration::from_millis(100));
+        release_tx.send(()).unwrap();
+        assert!(
+            matches!(premature, Err(mpsc::RecvTimeoutError::Timeout)),
+            "{premature:?}"
+        );
+        let terminal = terminal_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        if directive == ResourceStreamDirective::Redirect {
+            assert!(
+                matches!(terminal, PageEvent::RequestFinished { .. }),
+                "{terminal:?}"
+            );
+        } else {
+            assert!(
+                matches!(
+                    terminal,
+                    PageEvent::RequestFailed {
+                        cancelled: true,
+                        ..
+                    }
+                ),
+                "{terminal:?}"
+            );
+        }
+    }
+}
 async fn stream_ready(handle: &ResourceStreamHandle, directive: ResourceStreamDirective) -> bool {
     match directive {
         ResourceStreamDirective::Continue => handle.resume(),
@@ -525,12 +624,22 @@ impl ResourceLoader for NetworkRuntime {
         let loader = self.clone();
         let monitor = self.clone();
         let cancellation = control.clone();
+        let callback_active = Arc::new(Mutex::new(()));
+        let cancellation_callback = callback_active.clone();
         self.executor.spawn(async move {
             loop {
                 tokio::time::sleep(Duration::from_millis(5)).await;
                 if cancellation.is_cancelled() {
-                    monitor.routes.cancel_request(id);
+                    // Headers can wake a reader that cancels the old redirect
+                    // hop before its callback returns Redirect. Let that
+                    // decision finish first, without blocking this executor.
+                    let callback = match cancellation_callback.try_lock() {
+                        Err(std::sync::TryLockError::WouldBlock) => continue,
+                        result => result.unwrap(),
+                    };
                     monitor.finish(id, Some(&NetworkError::Cancelled));
+                    drop(callback);
+                    monitor.routes.cancel_request(id);
                     break;
                 }
                 if monitor
@@ -561,17 +670,21 @@ impl ResourceLoader for NetworkRuntime {
                 let _guard = CompletionGuard(loader.clone(), id);
                 loader.response(id, &response, true);
                 control.pause();
-                let directive = callback(
-                    ResourceStreamEvent::Headers {
-                        status: response.status,
-                        headers: response.headers,
-                        url: response.effective_url,
-                    },
-                    &control,
-                );
-                if directive == ResourceStreamDirective::Redirect {
-                    loader.finish(id, None);
-                }
+                let directive = {
+                    let _callback = callback_active.lock().unwrap();
+                    let directive = callback(
+                        ResourceStreamEvent::Headers {
+                            status: response.status,
+                            headers: response.headers,
+                            url: response.effective_url,
+                        },
+                        &control,
+                    );
+                    if directive == ResourceStreamDirective::Redirect {
+                        loader.finish(id, None);
+                    }
+                    directive
+                };
                 if !stream_ready(&control, directive).await {
                     return;
                 }
@@ -599,6 +712,7 @@ impl ResourceLoader for NetworkRuntime {
             let observed = loader.clone();
             let guard = CompletionGuard(loader.clone(), id);
             let wrapped: ResourceStreamCallback = Box::new(move |event, handle| {
+                let _callback = callback_active.lock().unwrap();
                 let _ = &guard;
                 match &event {
                     ResourceStreamEvent::Headers {

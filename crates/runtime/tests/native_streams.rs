@@ -148,7 +148,8 @@ fn realm_fetch_streams_follow_redirects_and_store_intermediate_cookies() {
     assert!(
         !events
             .iter()
-            .any(|event| matches!(event, PageEvent::RequestFailed { .. }))
+            .any(|event| matches!(event, PageEvent::RequestFailed { .. })),
+        "unexpected stream failure: {events:?}"
     );
     let ids: Vec<_> = events
         .iter()
