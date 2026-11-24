@@ -340,6 +340,15 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             clang-18 libwebkitgtk-6.0-dev libavif16 libjxl0.7 libatomic1 nlohmann-json3-dev patchelf \
             xvfb xauth dbus-x11 bubblewrap xdg-dbus-proxy fonts-dejavu-core libgl1-mesa-dri
+      - name: Enable Linux WebKit sandbox namespaces
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends apparmor apparmor-profiles bubblewrap
+          # Match the engine CI's scoped Ubuntu 24.04 user-namespace policy.
+          # Privileged Docker alone does not grant unprivileged bwrap this access.
+          sudo apparmor_parser -r /usr/share/apparmor/extra-profiles/bwrap-userns-restrict
+          bwrap --unshare-user --unshare-pid --ro-bind / / --proc /proc true
       - name: Download verified WebKit SDK
         if: needs.verify.outputs.package == 'webkit'
         run: python tools/webkit/download.py --target '${{ matrix.target }}' --output .native/webkit-release

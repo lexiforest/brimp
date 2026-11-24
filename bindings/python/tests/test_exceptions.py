@@ -172,9 +172,10 @@ def test_untrusted_tls_certificate(proxy):
         with brimp.Session(trust_env=False, plugins=[], **options) as session:
             with pytest.raises(brimp.CertificateVerifyError) as raised:
                 session.get(url)
-        # HTTP/3 fallback can retain code 7 after a TCP certificate failure.
+        # HTTP/3 fallback can retain connect (7) or receive (56) errors after
+        # certificate verification fails; Windows CI also reports code 56.
         # The exception uses the native verification result without rewriting code.
-        assert raised.value.code in {7, 60}
+        assert raised.value.code in {7, 56, 60}
         assert f"({raised.value.code})" in str(raised.value)
     finally:
         httpd.shutdown()

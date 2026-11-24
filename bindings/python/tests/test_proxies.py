@@ -3,6 +3,7 @@
 import asyncio
 import base64
 import json
+import os
 import threading
 from contextlib import ExitStack, contextmanager
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -143,7 +144,10 @@ def test_environment_and_explicit_direct(endpoints, monkeypatch):
     monkeypatch.delenv("http_proxy")
     monkeypatch.delenv("no_proxy")
     monkeypatch.setenv("HTTP_PROXY", a)
-    assert brimp.get(origin).json()["server"] == "origin"
+    # Windows treats HTTP_PROXY and http_proxy as the same environment key.
+    expected = "a" if os.name == "nt" else "origin"
+    assert brimp.get(origin).json()["server"] == expected
+    assert brimp.get(origin, trust_env=False).json()["server"] == "origin"
 
 
 def test_redirects_reapply_routes_and_request_proxy(endpoints):

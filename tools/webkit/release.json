@@ -2,6 +2,6 @@
   "version": "0.1.0",
   "minimum_macos": "26.0",
   "repository": "lexiforest/brimp-webkit",
-  "tag": "webkit-v-27.2.post4",
+  "tag": "webkit-v-27.2.post7",
   "runtime_layout_version": 1
 }

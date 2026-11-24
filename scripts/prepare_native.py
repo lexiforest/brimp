@@ -13,7 +13,7 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
-JSC_VERSION = "webkit-v-27.2.post4"
+JSC_VERSION = "webkit-v-27.2.post7"
 JSC_ASSET_VERSION = JSC_VERSION.removeprefix("webkit-v-")
 JSC_BASE_URL = f"https://github.com/lexiforest/brimp-webkit/releases/download/{JSC_VERSION}"
 CURL_VERSION = "v2.3.2"
@@ -43,7 +43,7 @@ TARGETS = {
     "x86_64-unknown-linux-gnu": Target(
         Asset(
             f"javascriptcore-v{JSC_ASSET_VERSION}.x86_64-linux-gnu.tar.gz",
-            "cadcaa10f26f64a3670641c40d20f7f9c04730a863e96af3c8ceff42e3a936f4",
+            "9eedb85f2a452e870c04627ba52439f056cfab086d7feb374e61bad0724e113b",
             JSC_BASE_URL,
         ),
         Asset(
@@ -55,7 +55,7 @@ TARGETS = {
     "aarch64-unknown-linux-gnu": Target(
         Asset(
             f"javascriptcore-v{JSC_ASSET_VERSION}.aarch64-linux-gnu.tar.gz",
-            "27d6467c3cc550ca2af05034c15f39998c829c723a5d55df236570fe4821ce96",
+            "c29fab5b4101b9b6a2f0029ed3630f08993740c23138df2897c285347540cf8a",
             JSC_BASE_URL,
         ),
         Asset(
@@ -67,7 +67,7 @@ TARGETS = {
     "aarch64-apple-darwin": Target(
         Asset(
             f"javascriptcore-v{JSC_ASSET_VERSION}.arm64-macos.tar.gz",
-            "5de0f1b498c73702a45bfc588252319747435b43f1c28f50d21d9c91af54a4e6",
+            "60e7277e7f1344189e554d885c8fb8fbc8ee826d6fbedcb488d3932458c22d85",
             JSC_BASE_URL,
         ),
         Asset(
@@ -79,7 +79,7 @@ TARGETS = {
     "x86_64-pc-windows-msvc": Target(
         Asset(
             f"javascriptcore-v{JSC_ASSET_VERSION}.x86_64-win32.tar.gz",
-            "13e755bfd80bbd8f735bff13dffb7082fa5a263c2057c21b61ceb6e15b09e23d",
+            "7f3da8579115b6b179fc1a592c182ad09717b0e945f6bce94e6953c135bc28a0",
             JSC_BASE_URL,
         ),
         Asset(

@@ -105,7 +105,21 @@ jobs:
           key: ${{ steps.native-cache.outputs.cache-primary-key }}
 
       - name: Run workspace tests
-        run: cargo test --locked --workspace
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            # Each test can create several JSC VMs. Bound concurrent memory use.
+            /usr/bin/time -l cargo test --locked --workspace -- --test-threads=2
+          else
+            cargo test --locked --workspace
+          fi
+
+      - name: Collect macOS failure diagnostics
+        if: failure() && runner.os == 'macOS'
+        run: |
+          sysctl hw.memsize
+          vm_stat
+          sudo log show --last 10m --style compact \
+            --predicate 'process == "kernel" AND (eventMessage CONTAINS[c] "memorystatus" OR eventMessage CONTAINS[c] "killed" OR eventMessage CONTAINS[c] "code signature")'
 
       - name: Check runtime dependency boundary
         run: python scripts/check_runtime_dependencies.py

@@ -61,7 +61,9 @@ for `wss`.
 
 `trust_env=True` is the default. When no configured proxy matches, Brimp reads
 `http_proxy`, `https_proxy` and `all_proxy`, with `no_proxy` exclusions. Uppercase
-variants work except `HTTP_PROXY`; lowercase values take precedence. Explicit
+variants work except `HTTP_PROXY` on Unix; lowercase values take precedence.
+Windows environment names are case-insensitive, so `HTTP_PROXY` and `http_proxy`
+select the same proxy. Explicit
 proxy settings, including route overrides, take precedence over environment
 settings and their exclusions. `trust_env=False` disables environment proxy use.
 

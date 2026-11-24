@@ -24,7 +24,7 @@ Skia build depends on FreeType 2.10+.
 
 `scripts/prepare_native.py` downloads and verifies:
 
-- JavaScriptCore from `webkit-v-27.2.post4` in `lexiforest/brimp-webkit`;
+- JavaScriptCore from `webkit-v-27.2.post7` in `lexiforest/brimp-webkit`;
 - curl-impersonate `v2.3.2` from `lexiforest/curl-impersonate`, including its
   BoringSSL WebCrypto interface.
 
@@ -177,28 +177,28 @@ PyPI trusted publishing must be configured for the `pypi` environment and the
 
 New WebKit and JavaScriptCore SDK releases follow curl-impersonate's archive
 naming convention: `<product>-v<VERSION>.<architecture>-<platform>.tar.gz`.
-For example, tag `webkit-v-27.2.post4` produces:
+For example, tag `webkit-v-27.2.post7` produces:
 
 | SDK | Archive |
 | --- | --- |
-| WebKit Linux x86_64 | `webkit-v27.2.post4.x86_64-linux-gnu.tar.gz` |
-| WebKit macOS arm64 | `webkit-v27.2.post4.arm64-macos.tar.gz` |
-| JSC Linux x86_64 | `javascriptcore-v27.2.post4.x86_64-linux-gnu.tar.gz` |
-| JSC Linux aarch64 | `javascriptcore-v27.2.post4.aarch64-linux-gnu.tar.gz` |
-| JSC macOS arm64 | `javascriptcore-v27.2.post4.arm64-macos.tar.gz` |
-| JSC Windows x86_64 | `javascriptcore-v27.2.post4.x86_64-win32.tar.gz` |
+| WebKit Linux x86_64 | `webkit-v27.2.post7.x86_64-linux-gnu.tar.gz` |
+| WebKit macOS arm64 | `webkit-v27.2.post7.arm64-macos.tar.gz` |
+| JSC Linux x86_64 | `javascriptcore-v27.2.post7.x86_64-linux-gnu.tar.gz` |
+| JSC Linux aarch64 | `javascriptcore-v27.2.post7.aarch64-linux-gnu.tar.gz` |
+| JSC macOS arm64 | `javascriptcore-v27.2.post7.arm64-macos.tar.gz` |
+| JSC Windows x86_64 | `javascriptcore-v27.2.post7.x86_64-win32.tar.gz` |
 
 The Windows JSC symbols archive uses `.symbols.tar.gz` after the target.
 Linux WebKit's build distribution stays in its SDK metadata (`build_os`),
 rather than its archive name. Its ABI and system requirements still apply.
-Both SDK pins now use the published `webkit-v-27.2.post4` release and these names.
+Both SDK pins now use the published `webkit-v-27.2.post7` release and these names.
 The four JSC archive checksums are pinned in `scripts/prepare_native.py`.
 
-All macOS builds now target 26.0. The existing post4 WebKit SDK still targets
-27.0 and is rejected by the companion packager. Publish a new engine SDK built
-for 26.0, then update both SDK pins and JSC checksums before running a companion
-release. Existing archives must not be relabeled. The engine workflow and the
-Brimp release workflow both gate publication on macOS 26 tests.
+All macOS builds target 26.0. The pinned post7 WebKit and JSC SDKs were built
+for 26.0; their downloaded archives were verified against the release checksums.
+The companion packager rejects SDKs with a different minimum instead of relabeling
+them. The engine workflow and the Brimp release workflow both gate publication
+on macOS 26 tests.
 
 The Brimp repository publishes `brimp-webkit` to PyPI and `@brimp/webkit` plus
 its two platform packages to npm. They share the independent companion version
@@ -271,7 +271,7 @@ to build and test a companion candidate.
 Before the first release with WebKit:
 
 1. Validate the engine release pinned in `tools/webkit/release.json`.
-   The pinned `webkit-v-27.2.post4` includes the macOS trusted single-click fix.
+   The pinned `webkit-v-27.2.post7` includes the macOS trusted single-click fix.
    Build and run installed-package tests against these published artifacts
    before publishing Brimp.
    The earlier Ubuntu 26.04 fixed-prefix SDK is rejected by this pipeline.
@@ -287,7 +287,7 @@ Before the first release with WebKit:
 
 For version checks, use `python scripts/check_versions.py --tag v0.1.2` for Brimp
 or `python scripts/check_versions.py --package webkit --tag webkit-v0.1.0` for
-the companion. The engine repository's `webkit-v-27.2.post4` SDK tag is separate
+the companion. The engine repository's `webkit-v-27.2.post7` SDK tag is separate
 from this repository's `webkit-v0.1.0` package tag.
 
 Local development can use `tools/webkit/package.py --sdk PATH --out DIST
