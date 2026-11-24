@@ -148,9 +148,13 @@ and regenerates RECORD after adding the library and adjusting loader paths.
 | `v0.1.2` | Cargo workspace and Brimp binding metadata | Brimp wheels, npm packages and CLI archives |
 | `webkit-v0.1.0` | `version` in `tools/webkit/release.json` | brimp-webkit wheels and @brimp/webkit packages |
 
-Brimp releases build and smoke-test the four platform distributions, then test
-the new Python/Node bindings against the exact published companion version from
-PyPI and GitHub release tarballs. They do not download a WebKit SDK, build its host, or repackage or
+Brimp releases build and smoke-test the four platform distributions, then install
+the new Python wheel in a clean environment. pip resolves its required
+`brimp-webkit` dependency from PyPI, matching the user installation path. While
+npm publishing is paused, these checks do not require a published Node companion
+or GitHub release tarballs. Node builds and runtime tests remain enabled, and
+companion candidate releases still test both Python and Node packages.
+Brimp releases do not download a WebKit SDK, build its host, or repackage or
 publish the companion. The separate JavaScriptCore SDK is still needed to build
 Brimp's default runtime.
 

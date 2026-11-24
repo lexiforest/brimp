@@ -251,21 +251,50 @@ def test_companion_metadata_uses_its_own_version(tmp_path, monkeypatch):
     assert "Version: 7.8.9\n" in (metadata / "METADATA").read_text()
 
 
-@pytest.mark.parametrize(
-    "system,machine,target", [("Darwin", "arm64", "darwin-arm64"), ("Linux", "x86_64", "linux-x64")]
-)
-def test_published_companion_uses_pypi_and_github_tarballs(monkeypatch, system, machine, target):
+def test_published_companion_uses_pip_dependency_resolution_only(tmp_path, monkeypatch, capsys):
     import test_distribution
 
-    monkeypatch.setattr(test_distribution.platform, "system", lambda: system)
-    monkeypatch.setattr(test_distribution.platform, "machine", lambda: machine)
-    assert test_distribution.companion_sources(None, "3.4.5") == (
-        ["brimp-webkit==3.4.5"],
+    wheels = tmp_path / "wheels"
+    wheels.mkdir()
+    wheel = wheels / "brimp-0.1.2-py3-none-any.whl"
+    wheel.touch()
+    monkeypatch.setattr(
+        sys,
+        "argv",
         [
-            "https://github.com/lexiforest/brimp/releases/download/webkit-v3.4.5/brimp-webkit-3.4.5.tgz",
-            f"https://github.com/lexiforest/brimp/releases/download/webkit-v3.4.5/brimp-webkit-{target}-3.4.5.tgz",
+            "test_distribution.py",
+            "--published",
+            "0.1.0",
+            "--base-wheels",
+            str(wheels),
         ],
     )
+    monkeypatch.setattr(test_distribution.venv.EnvBuilder, "create", lambda *args: None)
+    monkeypatch.setattr(
+        subprocess, "check_output", lambda *args, **kwargs: "/installed/brimp-webkit"
+    )
+    commands = []
+
+    def run(command, directory, environment):
+        commands.append([str(arg) for arg in command])
+        if "install" in command:
+            assert (directory / "constraints.txt").read_text() == "brimp-webkit==0.1.0\n"
+
+    monkeypatch.setattr(test_distribution, "run", run)
+    test_distribution.main()
+    assert commands[0][1:] == [
+        "-m",
+        "pip",
+        "install",
+        "--constraint",
+        commands[0][5],
+        "pytest",
+        str(wheel),
+    ]
+    assert all(command[0].endswith("/bin/python") for command in commands)
+    result = json.loads(capsys.readouterr().out)
+    assert result["python"] == "passed"
+    assert result["node"] == "not run: npm publishing is paused"
 
 
 @pytest.mark.parametrize("minimum", ["15.0", "26.0", "27.0"])

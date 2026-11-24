@@ -3,7 +3,6 @@
 import argparse
 import json
 import os
-import platform
 import shutil
 import subprocess
 import tempfile
@@ -23,11 +22,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--dist", type=Path, help="locally built companion packages")
-    source.add_argument("--published", help="exact companion version from PyPI and GitHub Releases")
+    source.add_argument(
+        "--published",
+        help="exact companion version from PyPI (Python-only while npm publishing is paused)",
+    )
     parser.add_argument("--base-wheels", type=Path, required=True)
-    parser.add_argument("--base-node", type=Path, required=True)
+    parser.add_argument(
+        "--base-node", type=Path, help="Node packages for testing a local companion"
+    )
     parser.add_argument("--hide-sdk", type=Path)
     args = parser.parse_args()
+    if args.dist and not args.base_node:
+        parser.error("--dist requires --base-node")
     sdk = args.hide_sdk.resolve() if args.hide_sdk else None
     if sdk:
         hidden = sdk.with_name(sdk.name + ".distribution-test-hidden")
@@ -49,7 +55,6 @@ def main():
             python_root = root / "venv"
             venv.EnvBuilder(with_pip=True, symlinks=True).create(python_root)
             python = python_root / "bin/python"
-            _, companion_node = companion_sources(args.dist, args.published)
             wheels = list(args.base_wheels.resolve().glob("*.whl"))
             # Install only Brimp explicitly: pip must resolve the required companion.
             if args.dist:
@@ -85,10 +90,23 @@ def main():
                 ROOT / "bindings/python/tests/test_browser_backend.py", root / "test_backend.py"
             )
             run([python, "-m", "pytest", root / "test_backend.py", "-v"], root, environment)
+            if args.published:
+                print(
+                    json.dumps(
+                        {
+                            "python": "passed",
+                            "node": "not run: npm publishing is paused",
+                            "sdk_hidden": sdk is not None,
+                            "published_companion": args.published,
+                            "automatic_discovery": True,
+                        }
+                    )
+                )
+                return
             # Use another extraction directory to test Node's independent installation path.
             environment["XDG_CACHE_HOME"] = str(root / "node-cache")
             (root / "package.json").write_text('{"private":true,"type":"module"}\n')
-            packages = [*args.base_node.resolve().glob("*.tgz"), *companion_node]
+            packages = [*args.base_node.resolve().glob("*.tgz"), *args.dist.resolve().glob("*.tgz")]
             run(
                 [
                     "npm",
@@ -140,21 +158,6 @@ def main():
     finally:
         if sdk:
             hidden.rename(sdk)
-
-
-def companion_sources(directory, published):
-    if directory is not None:
-        return list(directory.resolve().glob("*.whl")), list(directory.resolve().glob("*.tgz"))
-    target = {("Darwin", "arm64"): "darwin-arm64", ("Linux", "x86_64"): "linux-x64"}[
-        (platform.system(), platform.machine())
-    ]
-    # Explicitly install the platform package because the isolated test omits
-    # optional dependencies and supplies the base platform package separately.
-    base = f"https://github.com/lexiforest/brimp/releases/download/webkit-v{published}"
-    return [f"brimp-webkit=={published}"], [
-        f"{base}/brimp-webkit-{published}.tgz",
-        f"{base}/brimp-webkit-{target}-{published}.tgz",
-    ]
 
 
 if __name__ == "__main__":

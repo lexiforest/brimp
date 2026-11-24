@@ -328,6 +328,7 @@ jobs:
         with:
           python-version: '3.11'
       - uses: actions/setup-node@v6
+        if: needs.verify.outputs.package == 'webkit'
         with:
           node-version: '22.19.0'
       - name: Install packaging tools
@@ -366,11 +367,13 @@ jobs:
           name: wheel-${{ matrix.rust_target }}
           path: dist/base-wheels
       - name: Download base Node platform package
+        if: needs.verify.outputs.package == 'webkit'
         uses: actions/download-artifact@v4
         with:
           name: node-${{ matrix.rust_target }}
           path: dist/base-node
       - name: Download base Node wrapper
+        if: needs.verify.outputs.package == 'webkit'
         uses: actions/download-artifact@v4
         with:
           name: node-main
@@ -382,7 +385,7 @@ jobs:
           WEBKIT_VERSION: ${{ needs.verify.outputs.webkit_version }}
         run: |
           if [ "$RELEASE_PACKAGE" = webkit ]; then
-            companion=(--dist dist/webkit --hide-sdk "$BRIMP_WEBKIT_SDK")
+            companion=(--dist dist/webkit --hide-sdk "$BRIMP_WEBKIT_SDK" --base-node dist/base-node)
           else
             companion=(--published "$WEBKIT_VERSION")
           fi
@@ -393,10 +396,10 @@ jobs:
             docker run --rm --privileged \
               -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" -w "$GITHUB_WORKSPACE" \
               brimp-webkit-runtime-test tools/webkit/test_distribution.py \
-              "${companion[@]}" --base-wheels dist/base-wheels --base-node dist/base-node
+              "${companion[@]}" --base-wheels dist/base-wheels
           else
             python tools/webkit/test_distribution.py \
-              "${companion[@]}" --base-wheels dist/base-wheels --base-node dist/base-node
+              "${companion[@]}" --base-wheels dist/base-wheels
           fi
       - name: Upload WebKit packages
         if: needs.verify.outputs.package == 'webkit'
@@ -417,6 +420,7 @@ jobs:
         with:
           python-version: '3.11'
       - uses: actions/setup-node@v6
+        if: needs.verify.outputs.package == 'webkit'
         with:
           node-version: '22.19.0'
       - uses: actions/download-artifact@v4
@@ -424,10 +428,12 @@ jobs:
           name: wheel-aarch64-apple-darwin
           path: dist/base-wheels
       - uses: actions/download-artifact@v4
+        if: needs.verify.outputs.package == 'webkit'
         with:
           name: node-aarch64-apple-darwin
           path: dist/base-node
       - uses: actions/download-artifact@v4
+        if: needs.verify.outputs.package == 'webkit'
         with:
           name: node-main
           path: dist/base-node
@@ -442,12 +448,12 @@ jobs:
           WEBKIT_VERSION: ${{ needs.verify.outputs.webkit_version }}
         run: |
           if [ "$RELEASE_PACKAGE" = webkit ]; then
-            companion=(--dist dist/webkit)
+            companion=(--dist dist/webkit --base-node dist/base-node)
           else
             companion=(--published "$WEBKIT_VERSION")
           fi
           python tools/webkit/test_distribution.py "${companion[@]}" \
-            --base-wheels dist/base-wheels --base-node dist/base-node
+            --base-wheels dist/base-wheels
 
   publish:
     name: Publish release
@@ -555,8 +561,8 @@ jobs:
         with:
           packages-dir: dist/pypi/
 
-      # npm registry publishing is paused. Keep the tested Node tarballs in
-      # the GitHub release so subsequent Brimp releases can consume them.
+      # npm registry publishing is paused. Keep the tested Node tarballs
+      # available for download in the GitHub release.
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
