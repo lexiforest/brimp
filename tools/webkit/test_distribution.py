@@ -23,7 +23,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--dist", type=Path, help="locally built companion packages")
-    source.add_argument("--published", help="exact companion version from PyPI and npm")
+    source.add_argument("--published", help="exact companion version from PyPI and GitHub Releases")
     parser.add_argument("--base-wheels", type=Path, required=True)
     parser.add_argument("--base-node", type=Path, required=True)
     parser.add_argument("--hide-sdk", type=Path)
@@ -150,9 +150,10 @@ def companion_sources(directory, published):
     ]
     # Explicitly install the platform package because the isolated test omits
     # optional dependencies and supplies the base platform package separately.
+    base = f"https://github.com/lexiforest/brimp/releases/download/webkit-v{published}"
     return [f"brimp-webkit=={published}"], [
-        f"@brimp/webkit@{published}",
-        f"@brimp/webkit-{target}@{published}",
+        f"{base}/brimp-webkit-{published}.tgz",
+        f"{base}/brimp-webkit-{target}-{published}.tgz",
     ]
 
 

@@ -150,7 +150,7 @@ and regenerates RECORD after adding the library and adjusting loader paths.
 
 Brimp releases build and smoke-test the four platform distributions, then test
 the new Python/Node bindings against the exact published companion version from
-PyPI and npm. They do not download a WebKit SDK, build its host, or repackage or
+PyPI and GitHub release tarballs. They do not download a WebKit SDK, build its host, or repackage or
 publish the companion. The separate JavaScriptCore SDK is still needed to build
 Brimp's default runtime.
 
@@ -166,12 +166,13 @@ The required companion dependency remains unchanged; publishing Windows Brimp
 artifacts does not make Python installation on Windows supported until a Windows
 companion wheel is available.
 
-Both release types validate their tag, write `SHA256SUMS`, publish through PyPI
-trusted publishing and npm provenance, and create a GitHub release. Companion
-releases do not replace the latest Brimp release used by the CLI installer.
+Both release types validate their tag, write `SHA256SUMS`, publish wheels through
+PyPI trusted publishing, and create a GitHub release. npm registry publication is
+paused for both Brimp and its companion. Node packages are still built, tested,
+and attached to GitHub Releases as `.tgz` archives; no `NPM_TOKEN` is required.
+Companion releases do not replace the latest Brimp release used by the CLI installer.
 
-PyPI trusted publishing must be configured for the `pypi` environment and the
-`NPM_TOKEN` repository secret must be able to publish the `@brimp` scope.
+PyPI trusted publishing must be configured for the `pypi` environment.
 
 ## WebKit companion packages
 
@@ -200,9 +201,10 @@ The companion packager rejects SDKs with a different minimum instead of relabeli
 them. The engine workflow and the Brimp release workflow both gate publication
 on macOS 26 tests.
 
-The Brimp repository publishes `brimp-webkit` to PyPI and `@brimp/webkit` plus
-its two platform packages to npm. They share the independent companion version
-in `tools/webkit/release.json`. Brimp's required Python and Node dependencies
+The Brimp repository publishes `brimp-webkit` to PyPI and distributes `@brimp/webkit`
+and its two platform packages as GitHub release tarballs while npm publishing is
+paused. They share the independent companion version in `tools/webkit/release.json`.
+Brimp's required Python and Node dependencies
 pin that companion version; `scripts/check_versions.py` checks those pins
 without requiring the Brimp and companion versions to match. Multiple Brimp
 releases can keep the same companion pin, avoiding duplicate engine releases and
@@ -227,8 +229,11 @@ the companion payload.
 
 ```sh
 pip install brimp
-npm install @brimp/brimp
 ```
+
+For Node, install the main and matching platform `.tgz` files for both Brimp and
+its pinned companion from their GitHub Releases. Registry installation will be
+available when npm publishing resumes.
 
 Native binaries are stripped before packaging; Linux stripping precedes auditwheel
 repair, and macOS code is re-signed afterward. Development headers, static
@@ -276,11 +281,9 @@ Before the first release with WebKit:
    before publishing Brimp.
    The earlier Ubuntu 26.04 fixed-prefix SDK is rejected by this pipeline.
 2. Configure PyPI trusted publishing for **both** `brimp` and `brimp-webkit`,
-   using this repository, `release.yaml`, and the `pypi` environment. The npm token
-   needs publishing access to `@brimp/webkit`, `@brimp/webkit-darwin-arm64`, and
-   `@brimp/webkit-linux-x64` as well as the existing Brimp packages.
+   using this repository, `release.yaml`, and the `pypi` environment.
 3. Run the Release workflow manually with `package=webkit`. Once its checks pass,
-   push `webkit-v0.1.0` to publish the first companion to both registries.
+   push `webkit-v0.1.0` to publish its wheels to PyPI and its artifacts to GitHub Releases.
 4. Run the workflow manually with `package=brimp` to test Brimp against that
    published companion. Once its checks pass, push `v0.1.2` to publish Brimp.
    Later Brimp versions use only their own `v*` tag while the companion is unchanged.

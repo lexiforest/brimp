@@ -254,14 +254,17 @@ def test_companion_metadata_uses_its_own_version(tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     "system,machine,target", [("Darwin", "arm64", "darwin-arm64"), ("Linux", "x86_64", "linux-x64")]
 )
-def test_published_companion_is_pinned_for_both_registries(monkeypatch, system, machine, target):
+def test_published_companion_uses_pypi_and_github_tarballs(monkeypatch, system, machine, target):
     import test_distribution
 
     monkeypatch.setattr(test_distribution.platform, "system", lambda: system)
     monkeypatch.setattr(test_distribution.platform, "machine", lambda: machine)
     assert test_distribution.companion_sources(None, "3.4.5") == (
         ["brimp-webkit==3.4.5"],
-        ["@brimp/webkit@3.4.5", f"@brimp/webkit-{target}@3.4.5"],
+        [
+            "https://github.com/lexiforest/brimp/releases/download/webkit-v3.4.5/brimp-webkit-3.4.5.tgz",
+            f"https://github.com/lexiforest/brimp/releases/download/webkit-v3.4.5/brimp-webkit-{target}-3.4.5.tgz",
+        ],
     )
 
 

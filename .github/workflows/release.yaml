@@ -555,36 +555,8 @@ jobs:
         with:
           packages-dir: dist/pypi/
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "22.19.0"
-          registry-url: https://registry.npmjs.org
-
-      - name: Publish npm packages
-        if: needs.verify.outputs.package == 'brimp'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          for package in \
-            dist/node/brimp-darwin-arm64-*.tgz \
-            dist/node/brimp-linux-x64-*.tgz \
-            dist/node/brimp-linux-arm64-*.tgz \
-            dist/node/brimp-win32-x64-*.tgz
-          do
-            npm publish "$package" --access public --provenance
-          done
-          npm publish dist/node/brimp-npm-*.tgz --access public --provenance
-
-      - name: Publish companion npm packages
-        if: needs.verify.outputs.package == 'webkit'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          version=$(python scripts/check_versions.py --package webkit)
-          npm publish "dist/webkit/brimp-webkit-darwin-arm64-$version.tgz" --access public --provenance
-          npm publish "dist/webkit/brimp-webkit-linux-x64-$version.tgz" --access public --provenance
-          npm publish "dist/webkit/brimp-webkit-$version.tgz" --access public --provenance
-
+      # npm registry publishing is paused. Keep the tested Node tarballs in
+      # the GitHub release so subsequent Brimp releases can consume them.
       - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
